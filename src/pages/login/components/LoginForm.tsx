@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,12 +15,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+const LoginForm = () => {
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Login to your account</CardTitle>
@@ -66,3 +62,6 @@ export function LoginForm({
     </div>
   )
 }
+
+
+export default LoginForm;

@@ -13,14 +13,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link } from "react-router-dom"
 
-const SignupForm = () => {
+const SetupAdminForm = () => {
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">Create Admin</CardTitle>
           <CardDescription>
             Enter your email below to create your account
           </CardDescription>
@@ -40,10 +39,6 @@ const SignupForm = () => {
                   placeholder="johndoe@example.com"
                   required
                 />
-								<FieldDescription>
-									We&apos;ll use this to contact you. We will not share your email
-									with anyone else.
-								</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -60,10 +55,7 @@ const SignupForm = () => {
                 <FieldDescription>Please confirm your password.</FieldDescription>
 							</Field>
               <Field>
-                <Button type="submit">Create Account</Button>
-                <FieldDescription className="text-center">
-                  Already have an account? <Link to="/">Sign in</Link>
-                </FieldDescription>
+                <Button type="submit">Create Admin</Button>
               </Field>
             </FieldGroup>
           </form>
@@ -73,4 +65,4 @@ const SignupForm = () => {
   )
 }
 
-export default SignupForm;
+export default SetupAdminForm;
