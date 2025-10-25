@@ -1,9 +1,13 @@
 import * as React from "react"
-import type { ColumnDef, SortingState, ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/react-table"
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -16,8 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -25,44 +27,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import { ServiceToolbar, type FilterState } from "./ServiceToolbar"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { ApiToolbar, type FilterState } from "./ApiToolbar"
+import type { Api } from "./ApiColumns"
 
-interface ServiceDataTableProps<TData, TValue> {
+interface ApiDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function ServiceDataTable<TData, TValue>({
+export function ApiDataTable<TData, TValue>({
   columns,
   data,
-}: ServiceDataTableProps<TData, TValue>) {
+}: ApiDataTableProps<TData, TValue>) {
+  const [filter, setFilter] = React.useState("")
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
     status: [],
-    isSystem: "all"
+    serviceId: []
   })
 
-  // Apply advanced filters to data
+  // Apply advanced filters and search to data
   const filteredData = React.useMemo(() => {
     return data.filter((item: any) => {
+      // Search filter
+      if (filter.trim()) {
+        const searchValue = filter.toLowerCase()
+        const searchableFields = [
+          item.name,
+          item.description,
+          item.serviceName,
+          item.id
+        ]
+        const matchesSearch = searchableFields.some(field =>
+          field?.toLowerCase().includes(searchValue)
+        )
+        if (!matchesSearch) return false
+      }
+
       // Status filter
       if (advancedFilters.status.length > 0) {
         if (!advancedFilters.status.includes(item.status)) return false
       }
 
-      // Service type filter (system vs regular)
-      if (advancedFilters.isSystem !== "all") {
-        if (advancedFilters.isSystem === "system" && !item.isSystem) return false
-        if (advancedFilters.isSystem === "regular" && item.isSystem) return false
+      // Service filter
+      if (advancedFilters.serviceId.length > 0) {
+        if (!advancedFilters.serviceId.includes(item.serviceId)) return false
       }
 
       return true
     })
-  }, [data, advancedFilters])
+  }, [data, advancedFilters, filter])
 
   const table = useReactTable({
     data: filteredData,
@@ -72,7 +92,6 @@ export function ServiceDataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
@@ -87,9 +106,22 @@ export function ServiceDataTable<TData, TValue>({
     if (advancedFilters.status.length > 0) {
       filters.push(`Status: ${advancedFilters.status.join(", ")}`)
     }
-    if (advancedFilters.isSystem !== "all") {
-      const typeLabel = advancedFilters.isSystem === "system" ? "System" : "Regular"
-      filters.push(`Type: ${typeLabel}`)
+    if (advancedFilters.serviceId.length > 0) {
+      // Map service IDs to names for display
+      const serviceNames = advancedFilters.serviceId.map(id => {
+        const serviceMap: Record<string, string> = {
+          "core": "Core Service",
+          "auth": "Authentication Service",
+          "sms": "SMS Service",
+          "email": "Email Service",
+          "storage": "Storage Service",
+          "analytics": "Analytics Service",
+          "webhook": "Webhook Service",
+          "legacy-api": "Legacy API Service"
+        }
+        return serviceMap[id] || id
+      })
+      filters.push(`Service: ${serviceNames.join(", ")}`)
     }
     return filters
   }, [advancedFilters])
@@ -97,15 +129,15 @@ export function ServiceDataTable<TData, TValue>({
   const clearAllFilters = () => {
     setAdvancedFilters({
       status: [],
-      isSystem: "all"
+      serviceId: []
     })
   }
 
   return (
     <div className="space-y-4">
-      <ServiceToolbar
-        filter={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-        setFilter={(value) => table.getColumn("name")?.setFilterValue(value)}
+      <ApiToolbar
+        filter={filter}
+        setFilter={setFilter}
         onFiltersChange={setAdvancedFilters}
       />
 
@@ -128,7 +160,7 @@ export function ServiceDataTable<TData, TValue>({
           </Button>
         </div>
       )}
-
+      
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -253,7 +285,7 @@ export function ServiceDataTable<TData, TValue>({
         {/* Right side - Row count info */}
         <div className="flex items-center justify-center text-sm text-muted-foreground">
           {table.getFilteredRowModel().rows.length} of{" "}
-          {table.getCoreRowModel().rows.length} service(s)
+          {table.getCoreRowModel().rows.length} API(s)
         </div>
       </div>
     </div>

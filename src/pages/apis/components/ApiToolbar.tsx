@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -12,40 +11,37 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
 import {
+  Search,
   Filter,
-  Plus,
   Download,
   Upload,
-  Server,
-  FileText
+  Plus,
+  Key,
+  X
 } from "lucide-react"
 
 export interface FilterState {
   status: string[]
-  isSystem: string
+  serviceId: string[]
 }
 
-interface ServiceToolbarProps {
+interface ApiToolbarProps {
   filter: string
   setFilter: (value: string) => void
   onFiltersChange?: (filters: FilterState) => void
 }
 
-export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceToolbarProps) {
+export function ApiToolbar({ filter, setFilter, onFiltersChange }: ApiToolbarProps) {
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
-    isSystem: "all"
+    serviceId: []
   })
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -57,7 +53,7 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
   const clearAllFilters = () => {
     const clearedFilters: FilterState = {
       status: [],
-      isSystem: "all"
+      serviceId: []
     }
     setFilters(clearedFilters)
     onFiltersChange?.(clearedFilters)
@@ -66,46 +62,40 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
   const activeFilterCount = React.useMemo(() => {
     let count = 0
     if (filters.status.length > 0) count++
-    if (filters.isSystem !== "all") count++
+    if (filters.serviceId.length > 0) count++
     return count
   }, [filters])
 
-  // Action handlers
-  const handleCreateService = () => {
-    console.log("Create new service")
-    // TODO: Implement create service
-  }
-
   const handleExport = () => {
-    console.log("Export services")
+    console.log("Export APIs")
     // TODO: Implement export functionality
   }
 
   const handleImport = () => {
-    console.log("Import services")
+    console.log("Import APIs")
     // TODO: Implement import functionality
   }
 
-  const handleManageAPIs = () => {
-    console.log("Navigate to APIs management")
-    // TODO: Navigate to APIs page
+  const handleManagePermissions = () => {
+    console.log("Manage Permissions")
+    // TODO: Implement manage permissions
   }
 
-  const handleManagePolicies = () => {
-    console.log("Navigate to Policies management")
-    // TODO: Navigate to Policies page
+  const handleNewApi = () => {
+    console.log("Create new API")
+    // TODO: Implement new API creation
   }
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-1 items-center gap-2">
         <Input
-          placeholder="Search services by name, description, or maintainer..."
+          placeholder="Search APIs by name, description, or service..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full sm:w-80"
         />
-        
+
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="relative">
@@ -154,60 +144,66 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
                 </div>
               </div>
 
-
-
-              {/* Service Type Filter */}
+              {/* Service Filter */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Service Type</Label>
-                <Select value={filters.isSystem} onValueChange={(value) => updateFilters({ isSystem: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Services</SelectItem>
-                    <SelectItem value="system">System Services</SelectItem>
-                    <SelectItem value="regular">Regular Services</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-sm font-medium">Service</Label>
+                <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                  {[
+                    { id: "core", name: "Core Service" },
+                    { id: "auth", name: "Authentication Service" },
+                    { id: "sms", name: "SMS Service" },
+                    { id: "email", name: "Email Service" },
+                    { id: "storage", name: "Storage Service" },
+                    { id: "analytics", name: "Analytics Service" },
+                    { id: "webhook", name: "Webhook Service" },
+                    { id: "legacy-api", name: "Legacy API Service" }
+                  ].map((service) => (
+                    <div key={service.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`service-${service.id}`}
+                        checked={filters.serviceId.includes(service.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            updateFilters({ serviceId: [...filters.serviceId, service.id] })
+                          } else {
+                            updateFilters({ serviceId: filters.serviceId.filter(s => s !== service.id) })
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`service-${service.id}`} className="text-sm">
+                        {service.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+
             </div>
           </PopoverContent>
         </Popover>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleManageAPIs}>
-          <Server className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Manage APIs</span>
+      {/* Right side - Action buttons */}
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={handleManagePermissions}>
+          <Key className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Manage Permissions</span>
         </Button>
 
-        <Button variant="outline" size="sm" onClick={handleManagePolicies}>
-          <FileText className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Manage Policies</span>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Export</span>
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <div className="p-2">
-              <p className="text-sm text-muted-foreground">Export functionality coming soon</p>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         <Button variant="outline" size="sm" onClick={handleImport}>
           <Upload className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Import</span>
         </Button>
 
-        <Button size="sm" onClick={handleCreateService}>
+        <Button size="sm" onClick={handleNewApi}>
           <Plus className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">New Service</span>
+          <span className="hidden sm:inline">New API</span>
         </Button>
       </div>
     </div>

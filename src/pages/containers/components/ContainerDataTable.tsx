@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { ContainerToolbar, type FilterState } from "./ContainerToolbar"
 
 interface ContainerDataTableProps<TData, TValue> {
@@ -111,8 +111,8 @@ export function ContainerDataTable<TData, TValue>({
 
       {/* Active Filters Display */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">Active filters:</span>
+        <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
+          <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
           {activeFilters.map((filter, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {filter}
@@ -124,7 +124,6 @@ export function ContainerDataTable<TData, TValue>({
             onClick={clearAllFilters}
             className="h-6 px-2 text-xs"
           >
-            <X className="mr-1 h-3 w-3" />
             Clear all
           </Button>
         </div>

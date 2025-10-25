@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Shield, FileText, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { ServiceActions } from "./ServiceActions"
 
 export type ServiceStatus = "active" | "maintenance" | "deprecated" | "inactive"
 
@@ -189,6 +190,3 @@ export const serviceColumns: ColumnDef<Service>[] = [
     },
   },
 ]
-
-// Import ServiceActions component
-import { ServiceActions } from "./ServiceActions"

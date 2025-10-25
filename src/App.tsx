@@ -9,6 +9,7 @@ import UsersPage from './pages/users'
 import RolesPage from './pages/roles'
 import ContainersPage from './pages/containers'
 import ServicesPage from './pages/services'
+import ApisPage from './pages/apis'
 
 function App() {
   return (
@@ -21,7 +22,6 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="apis" element={<DashboardPage />} />
           <Route path="permissions" element={<DashboardPage />} />
           <Route path="user-management" element={<DashboardPage />} />
           <Route path="providers" element={<DashboardPage />} />
@@ -48,6 +48,7 @@ function App() {
           <Route path="roles" element={<RolesPage />} />
           <Route path="containers" element={<ContainersPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="apis" element={<ApisPage />} />
         </Route>
       </Routes>
     </>
