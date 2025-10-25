@@ -40,10 +40,10 @@ const MaintainedAuthIcon = ({
 			</defs>
 			<rect width="100%" height="100%" fill="transparent" />
 			<g filter="url(#dropShadow)">
-				<g clip-path="url(#left-half)">
+				<g clipPath="url(#left-half)">
 					<use href="#shieldPath" fill="#1E40AF" />
 				</g>
-				<g clip-path="url(#right-half)">
+				<g clipPath="url(#right-half)">
 					<use href="#shieldPath" fill="#2563EB" />
 				</g>
 			</g>

@@ -31,7 +31,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { ApiToolbar, type FilterState } from "./ApiToolbar"
-import type { Api } from "./ApiColumns"
 
 interface ApiDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]

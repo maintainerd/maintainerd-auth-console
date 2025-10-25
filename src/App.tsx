@@ -10,6 +10,8 @@ import RolesPage from './pages/roles'
 import ContainersPage from './pages/containers'
 import ServicesPage from './pages/services'
 import ApisPage from './pages/apis'
+import PermissionsPage from './pages/permissions'
+import IdentityProvidersPage from './pages/identity-providers'
 
 function App() {
   return (
@@ -22,10 +24,6 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="permissions" element={<DashboardPage />} />
-          <Route path="user-management" element={<DashboardPage />} />
-          <Route path="providers" element={<DashboardPage />} />
-          <Route path="providers/identity" element={<DashboardPage />} />
           <Route path="providers/social" element={<DashboardPage />} />
           <Route path="applications" element={<DashboardPage />} />
           <Route path="clients" element={<DashboardPage />} />
@@ -49,6 +47,8 @@ function App() {
           <Route path="containers" element={<ContainersPage />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="apis" element={<ApisPage />} />
+          <Route path="permissions" element={<PermissionsPage />} />
+          <Route path="providers/identity" element={<IdentityProvidersPage />} />
         </Route>
       </Routes>
     </>
