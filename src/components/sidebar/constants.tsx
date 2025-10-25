@@ -1,19 +1,21 @@
 import {
-	IconCamera,
-	IconChartBar,
-	IconDashboard,
-	IconDatabase,
-	IconFileAi,
-	IconFileDescription,
-	IconFileWord,
-	IconFolder,
-	IconHelp,
-	IconListDetails,
-	IconReport,
-	IconSearch,
-	IconSettings,
-	IconUsers,
-} from "@tabler/icons-react"
+	Settings,
+	Shield,
+	Users,
+	Webhook,
+	MessageSquare,
+	LifeBuoy,
+	Zap,
+	Wrench,
+	UserPlus,
+	Palette,
+	Container,
+	Server,
+	Plug,
+	Layers,
+	FileText,
+	TrendingUp,
+} from "lucide-react"
 
 export const data = {
   user: {
@@ -22,113 +24,161 @@ export const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    // 1. Setup & Configuration (Top Priority)
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+      title: "Get Started",
+      route: "/dashboard",
+      icon: Wrench,
 			active: true,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Containers",
+      route: "/containers",
+      icon: Container,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
+      title: "Services",
+      route: "/services",
+      icon: Server,
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Services",
+          route: "/services",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "APIs",
+          route: "/apis",
+        },
+        {
+          title: "Permissions",
+          route: "/permissions",
+        },
+      ],
+    },
+
+    // 2. Core Management (Daily Operations)
+    {
+      title: "User Management",
+      route: "/user-management",
+      icon: Users,
+      items: [
+        {
+          title: "Users",
+          route: "/users",
+        },
+        {
+          title: "Roles",
+          route: "/roles",
         },
       ],
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
+      title: "Providers",
+      route: "/providers",
+      icon: Plug,
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Identity",
+          route: "/providers/identity",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Social",
+          route: "/providers/social",
         },
       ],
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
+      title: "Applications",
+      route: "/applications",
+      icon: Layers,
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
+          title: "Clients",
+          route: "/clients",
         },
       ],
+    },
+
+    // 3. Policies & Security (Technical Configuration)
+    {
+      title: "Policies",
+      route: "/policies",
+      icon: FileText,
+    },
+    {
+      title: "Security",
+      route: "/security",
+      icon: Shield,
+    },
+
+    // 4. Events & Monitoring (Observability)
+    {
+      title: "Events",
+      route: "/events",
+      icon: Zap,
+    },
+    {
+      title: "Webhooks",
+      route: "/webhooks",
+      icon: Webhook,
+    },
+    {
+      title: "Monitoring",
+      route: "/monitoring",
+      icon: TrendingUp,
+      items: [
+        {
+          title: "Analytics",
+          route: "/analytics",
+        },
+        {
+          title: "Logs",
+          route: "/logs",
+        },
+      ],
+    },
+
+    // 5. Customization & Admin (Less Frequent)
+    {
+      title: "Branding",
+      route: "/branding",
+      icon: Palette,
+      items: [
+        {
+          title: "Login",
+          route: "/branding/login",
+        },
+        {
+          title: "Email Templates",
+          route: "/branding/email-templates",
+        },
+        {
+          title: "SMS Templates",
+          route: "/branding/sms-templates",
+        },
+      ],
+    },
+    {
+      title: "Onboarding",
+      route: "/onboarding",
+      icon: UserPlus,
+    },
+    {
+      title: "Settings",
+      route: "/settings",
+      icon: Settings,
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Give Support",
       url: "#",
-      icon: IconSettings,
+      icon: LifeBuoy,
     },
     {
-      title: "Get Help",
+      title: "Give Feedback",
       url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
+      icon: MessageSquare,
     },
   ],
 }

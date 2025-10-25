@@ -4,16 +4,47 @@ import SignupPage from './pages/signup'
 import SetupOrganizationPage from './pages/setup/organization'
 import SetupAdminPage from './pages/setup/admin'
 import DashboardPage from './pages/dashboard'
+import { PrivateLayout } from './components/layout/PrivateLayout'
 
 function App() {
   return (
     <>
       <Routes>
-				<Route path="/setup/organization" element={<SetupOrganizationPage />} />
-				<Route path="/setup/admin" element={<SetupAdminPage />} />
+        {/* Public routes */}
         <Route path="/" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-				<Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/setup/organization" element={<SetupOrganizationPage />} />
+        <Route path="/setup/admin" element={<SetupAdminPage />} />
+
+        {/* Private routes with layout */}
+        <Route element={<PrivateLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/containers" element={<DashboardPage />} />
+          <Route path="/services" element={<DashboardPage />} />
+          <Route path="/apis" element={<DashboardPage />} />
+          <Route path="/permissions" element={<DashboardPage />} />
+          <Route path="/user-management" element={<DashboardPage />} />
+          <Route path="/users" element={<DashboardPage />} />
+          <Route path="/roles" element={<DashboardPage />} />
+          <Route path="/providers" element={<DashboardPage />} />
+          <Route path="/providers/identity" element={<DashboardPage />} />
+          <Route path="/providers/social" element={<DashboardPage />} />
+          <Route path="/applications" element={<DashboardPage />} />
+          <Route path="/clients" element={<DashboardPage />} />
+          <Route path="/policies" element={<DashboardPage />} />
+          <Route path="/security" element={<DashboardPage />} />
+          <Route path="/events" element={<DashboardPage />} />
+          <Route path="/webhooks" element={<DashboardPage />} />
+          <Route path="/monitoring" element={<DashboardPage />} />
+          <Route path="/analytics" element={<DashboardPage />} />
+          <Route path="/logs" element={<DashboardPage />} />
+          <Route path="/branding" element={<DashboardPage />} />
+          <Route path="/branding/login" element={<DashboardPage />} />
+          <Route path="/branding/email-templates" element={<DashboardPage />} />
+          <Route path="/branding/sms-templates" element={<DashboardPage />} />
+          <Route path="/onboarding" element={<DashboardPage />} />
+          <Route path="/settings" element={<DashboardPage />} />
+        </Route>
       </Routes>
     </>
   )
