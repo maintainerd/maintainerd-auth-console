@@ -1,73 +1,115 @@
-# React + TypeScript + Vite
+<div align="center">
+  <img src="https://via.placeholder.com/120x120/1a1a1a/ffffff?text=🛡️" alt="M9d-Auth Logo" width="120" height="120">
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+  # M9d-Auth-Web
+</div>
 
-Currently, two official plugins are available:
+A modern, open-source frontend dashboard for managing authentication, users, roles, and organizations. M9d-Auth-Web provides a clean, responsive interface for your authentication backend services.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![M9d-Auth Dashboard](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=M9d-Auth+Dashboard)
 
-## React Compiler
+## ✨ What You Can Do
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 👥 User & Role Management
+- **Manage Users**: Create, edit, delete, and organize user accounts
+- **Role-Based Access**: Define custom roles with specific permissions
+- **Bulk Operations**: Handle multiple users efficiently
+- **User Analytics**: Track user growth and registration trends
 
-## Expanding the ESLint configuration
+### 🏢 Multi-Container Architecture
+- **Isolated Environments**: Separate users, roles, and settings by container (like Keycloak realms)
+- **Default Container**: Built-in admin and system user space
+- **Custom Containers**: Create containers for different apps or environments
+- **Easy Switching**: Quick container selection from the top navigation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🔗 Application Integration
+- **Connect Apps**: Integrate your applications with M9d-Auth
+- **Quick Setup**: Get started in minutes with guided setup
+- **Client Management**: Configure OAuth clients and application settings
+- **API Access**: Manage API permissions and access tokens
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🛡️ Security & Monitoring
+- **Authentication Providers**: Configure social login (Google, GitHub, etc.) and identity providers
+- **Security Policies**: Set up access control and service-to-service communication
+- **Real-time Monitoring**: Track login attempts, sessions, and security events
+- **Audit Logs**: Complete activity logging for compliance and debugging
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 📊 Dashboard Insights
+- **User Metrics**: See total users, new registrations this month, and daily signups
+- **Growth Tracking**: Monitor user acquisition trends over time
+- **Activity Overview**: Quick glance at system health and usage
+- **Actionable Data**: Make informed decisions with clear analytics
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Getting Started
+
+```bash
+# Clone and install
+git clone https://github.com/your-org/m9d-auth-web.git
+cd m9d-auth-web
+npm install
+
+# Start development
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Set up your environment:
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_APP_NAME=M9d-Auth
 ```
+
+## 🎯 Why M9d-Auth-Web?
+
+### 🚀 **Quick Setup**
+Get your authentication dashboard running in minutes, not hours. Built-in setup wizard guides you through connecting your first application.
+
+### 🏗️ **Container Architecture**
+Organize everything with containers - isolated environments for different apps, teams, or environments. Each container has its own users, roles, and settings.
+
+### 📱 **Modern Interface**
+Clean, responsive design that works on any device. Built with modern React and TypeScript for reliability and performance.
+
+### 🔧 **Developer Friendly**
+RESTful API integration, comprehensive documentation, and extensible architecture. Easy to customize and integrate with your existing systems.
+
+### 🛡️ **Enterprise Ready**
+Role-based access control, audit logging, security monitoring, and compliance features built-in.
+
+## 🎨 Built With Modern Tech
+
+- **React 19** + **TypeScript** for reliability
+- **shadcn/ui** + **Tailwind CSS** for beautiful UI
+- **Vite** for fast development
+- **Responsive design** for all devices
+
+## 📸 Screenshots
+
+### Dashboard Overview
+Track user growth and system health at a glance.
+
+### User Management
+Easily manage users, roles, and permissions with intuitive interfaces.
+
+### Container Management
+Switch between different environments and manage isolated user groups.
+
+### Application Setup
+Quick integration wizard to connect your apps in minutes.
+
+## 🤝 Contributing
+
+Contributions welcome! Fork the repo, make your changes, and submit a pull request.
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## 🆘 Support
+
+- **Issues**: [GitHub Issues](https://github.com/your-org/m9d-auth-web/issues)
+- **Documentation**: [docs.m9d-auth.com](https://docs.m9d-auth.com)
+- **Community**: [Discord](https://discord.gg/m9d-auth)
+
+---
+
+**M9d-Auth-Web** - Simple, beautiful authentication management.

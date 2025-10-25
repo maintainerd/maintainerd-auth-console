@@ -1,6 +1,6 @@
 import { type LucideIcon, ChevronRight } from "lucide-react"
 import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 
 import {
   SidebarGroup,
@@ -29,6 +29,7 @@ export function NavMain({
 }) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
   const location = useLocation()
+  const { containerId } = useParams<{ containerId: string }>()
 
   const toggleItem = (title: string) => {
     const newOpenItems = new Set(openItems)
@@ -40,7 +41,15 @@ export function NavMain({
     setOpenItems(newOpenItems)
   }
 
-  const isActive = (route: string) => location.pathname === route
+  // Helper function to build container-based routes
+  const buildRoute = (route: string) => {
+    if (!containerId) return route
+    // Remove leading slash if present and build container route
+    const cleanRoute = route.startsWith('/') ? route.slice(1) : route
+    return `/c/${containerId}/${cleanRoute}`
+  }
+
+  const isActive = (route: string) => location.pathname === buildRoute(route)
 
   const isParentActive = (item: any) => {
     // Check if current route matches the parent route
@@ -84,7 +93,7 @@ export function NavMain({
                             isActive={isActive(subItem.route)}
                             className={isActive(subItem.route) ? "text-blue-600 hover:text-blue-600" : ""}
                           >
-                            <Link to={subItem.route}>
+                            <Link to={buildRoute(subItem.route)}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -99,7 +108,7 @@ export function NavMain({
                   tooltip={item.title}
                   className={isActive(item.route) ? "font-bold text-blue-600 hover:text-blue-600 text-base" : "text-base"}
                 >
-                  <Link to={item.route}>
+                  <Link to={buildRoute(item.route)}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                   </Link>
