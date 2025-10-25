@@ -6,6 +6,7 @@ import SetupAdminPage from './pages/setup/admin'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
+import RolesPage from './pages/roles'
 
 function App() {
   return (
@@ -23,7 +24,6 @@ function App() {
           <Route path="apis" element={<DashboardPage />} />
           <Route path="permissions" element={<DashboardPage />} />
           <Route path="user-management" element={<DashboardPage />} />
-          <Route path="roles" element={<DashboardPage />} />
           <Route path="providers" element={<DashboardPage />} />
           <Route path="providers/identity" element={<DashboardPage />} />
           <Route path="providers/social" element={<DashboardPage />} />
@@ -45,6 +45,7 @@ function App() {
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
+          <Route path="roles" element={<RolesPage />} />
         </Route>
       </Routes>
     </>

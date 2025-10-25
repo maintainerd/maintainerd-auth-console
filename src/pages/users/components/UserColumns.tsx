@@ -52,17 +52,16 @@ export const userColumns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
         >
           User
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 px-3 py-1">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback className="text-xs">
@@ -84,17 +83,16 @@ export const userColumns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
         >
           Roles
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
       const roles = row.getValue("roles") as string[]
       return (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 px-3 py-1">
           {roles.map((role, index) => (
             <Badge key={index} variant="outline" className="font-medium text-xs">
               {role}
@@ -111,16 +109,19 @@ export const userColumns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
         >
           Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
       const status = row.getValue("status") as UserStatus
-      return getStatusBadge(status)
+      return (
+        <div className="px-3 py-1">
+          {getStatusBadge(status)}
+        </div>
+      )
     },
   },
   {
@@ -131,7 +132,7 @@ export const userColumns: ColumnDef<User>[] = [
       const twoFactorEnabled = row.original.twoFactorEnabled
 
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 px-3 py-1">
           <Badge variant={emailVerified ? "default" : "destructive"} className="text-xs w-fit">
             {emailVerified ? "Verified" : "Unverified"}
           </Badge>
@@ -151,21 +152,24 @@ export const userColumns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
         >
           Last Login
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
       const lastLogin = row.getValue("lastLogin") as string
-      return lastLogin ? (
-        <span className="text-sm">
-          {formatDistanceToNow(new Date(lastLogin), { addSuffix: true })}
-        </span>
-      ) : (
-        <span className="text-sm text-muted-foreground">Never</span>
+      return (
+        <div className="px-3 py-1">
+          {lastLogin ? (
+            <span className="text-sm">
+              {formatDistanceToNow(new Date(lastLogin), { addSuffix: true })}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground">Never</span>
+          )}
+        </div>
       )
     },
   },
@@ -176,19 +180,20 @@ export const userColumns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
         >
           Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string
       return (
-        <span className="text-sm">
-          {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-        </span>
+        <div className="px-3 py-1">
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+          </span>
+        </div>
       )
     },
   },
@@ -197,11 +202,13 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <UserActions user={user}>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </UserActions>
+        <div className="px-3 py-1">
+          <UserActions user={user}>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </UserActions>
+        </div>
       )
     },
   },
