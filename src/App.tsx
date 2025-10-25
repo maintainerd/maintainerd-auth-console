@@ -12,6 +12,7 @@ import ServicesPage from './pages/services'
 import ApisPage from './pages/apis'
 import PermissionsPage from './pages/permissions'
 import IdentityProvidersPage from './pages/identity-providers'
+import SocialProvidersPage from './pages/social-providers'
 
 function App() {
   return (
@@ -24,7 +25,6 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="providers/social" element={<DashboardPage />} />
           <Route path="applications" element={<DashboardPage />} />
           <Route path="clients" element={<DashboardPage />} />
           <Route path="policies" element={<DashboardPage />} />
@@ -49,6 +49,7 @@ function App() {
           <Route path="apis" element={<ApisPage />} />
           <Route path="permissions" element={<PermissionsPage />} />
           <Route path="providers/identity" element={<IdentityProvidersPage />} />
+          <Route path="providers/social" element={<SocialProvidersPage />} />
         </Route>
       </Routes>
     </>

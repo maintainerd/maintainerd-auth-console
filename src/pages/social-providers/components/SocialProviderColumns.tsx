@@ -1,104 +1,75 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Shield, Settings, Cloud, Key } from "lucide-react"
+import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Shield, Settings, Cloud, Key, Github, Facebook, Twitter, Linkedin, Apple, MessageSquare } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { IdentityProviderActions } from "./IdentityProviderActions"
+import { SocialProviderActions } from "./SocialProviderActions"
 
-export type IdentityProviderStatus = "active" | "inactive" | "configuring"
-export type IdentityProviderType = "cognito" | "auth0" | "okta" | "azure_ad" | "keycloak" | "firebase" | "custom"
+export type SocialProviderStatus = "active" | "inactive" | "configuring"
+export type SocialProviderType = "google" | "facebook" | "github" | "twitter" | "linkedin" | "apple" | "microsoft" | "discord" | "custom"
 
-export type IdentityProvider = {
+export interface SocialProvider {
   id: string
   name: string
   description: string
-  type: IdentityProviderType
-  status: IdentityProviderStatus
+  type: SocialProviderType
+  status: SocialProviderStatus
   userCount: number
-  isDefault: boolean
-  region?: string
+  clientId: string
+  scopes: string[]
   endpoint: string
   createdAt: string
   createdBy: string
   updatedAt: string
-  lastSync?: string
+  lastSync: string | null
 }
 
-const getStatusBadge = (status: IdentityProviderStatus) => {
+const getStatusBadge = (status: SocialProviderStatus) => {
   const statusConfig = {
-    active: {
-      label: "Active",
-      variant: "default" as const,
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+    active: { 
+      label: "Active", 
+      icon: CheckCircle, 
+      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
     },
-    inactive: {
-      label: "Inactive",
-      variant: "secondary" as const,
-      icon: AlertTriangle,
-      className: ""
+    inactive: { 
+      label: "Inactive", 
+      icon: AlertTriangle, 
+      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200" 
     },
-    configuring: {
-      label: "Configuring",
-      variant: "default" as const,
-      icon: Wrench,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
+    configuring: { 
+      label: "Configuring", 
+      icon: Wrench, 
+      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200" 
+    }
   }
-
+  
   const config = statusConfig[status]
   const Icon = config.icon
-
+  
   return (
-    <Badge variant={config.variant} className={`${config.className}`}>
+    <Badge variant="outline" className={`text-xs ${config.className}`}>
       <Icon className="h-3 w-3 mr-1" />
       {config.label}
     </Badge>
   )
 }
 
-const getInternalExternalBadge = (isDefault: boolean) => {
-  if (isDefault) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        <Shield className="h-3 w-3 mr-1" />
-        Internal
-      </Badge>
-    )
-  }
-
-  return (
-    <Badge variant="outline" className="text-xs">
-      <Cloud className="h-3 w-3 mr-1" />
-      External
-    </Badge>
-  )
-}
-
-const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
-  // For default provider, show "Built-in" instead of type
-  if (isDefault) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        <Shield className="h-3 w-3 mr-1" />
-        Built-in
-      </Badge>
-    )
-  }
-
+const getProviderBadge = (type: SocialProviderType) => {
   const typeConfig = {
-    cognito: { label: "AWS Cognito", icon: Cloud },
-    auth0: { label: "Auth0", icon: Shield },
-    okta: { label: "Okta", icon: Shield },
-    azure_ad: { label: "Azure AD", icon: Shield },
-    keycloak: { label: "Keycloak", icon: Key },
-    firebase: { label: "Firebase", icon: Cloud },
+    google: { label: "Google", icon: Cloud },
+    facebook: { label: "Facebook", icon: Facebook },
+    github: { label: "GitHub", icon: Github },
+    twitter: { label: "Twitter", icon: Twitter },
+    linkedin: { label: "LinkedIn", icon: Linkedin },
+    apple: { label: "Apple", icon: Apple },
+    microsoft: { label: "Microsoft", icon: Shield },
+    discord: { label: "Discord", icon: MessageSquare },
     custom: { label: "Custom", icon: Settings }
   }
-
+  
   const config = typeConfig[type]
   const Icon = config.icon
-
+  
   return (
     <Badge variant="secondary" className="text-xs">
       <Icon className="h-3 w-3 mr-1" />
@@ -107,20 +78,7 @@ const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
   )
 }
 
-const getSystemBadge = (isDefault: boolean) => {
-  if (!isDefault) return null
-
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
-
-
-
-export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
+export const socialProviderColumns: ColumnDef<SocialProvider>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -129,7 +87,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Identity Provider
+          Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -140,31 +98,9 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
             <span className="font-medium">{provider.name}</span>
-            {getSystemBadge(provider.isDefault)}
           </div>
           <span className="text-sm text-muted-foreground truncate">{provider.description}</span>
           <span className="text-xs text-muted-foreground font-mono">{provider.id}</span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "isDefault",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return (
-        <div className="px-3 py-1">
-          {getInternalExternalBadge(row.original.isDefault)}
         </div>
       )
     },
@@ -185,7 +121,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getProviderBadge(row.original.type, row.original.isDefault)}
+          {getProviderBadge(row.original.type)}
         </div>
       )
     },
@@ -225,13 +161,44 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
       )
     },
     cell: ({ row }) => {
-      const count = row.original.userCount
+      const count = row.getValue("userCount") as number
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <div className="flex items-center gap-1 text-sm">
             <span className="font-medium">{count.toLocaleString()}</span>
             <span className="text-muted-foreground">users</span>
           </div>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "scopes",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Scopes
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const scopes = row.original.scopes
+      return (
+        <div className="flex flex-wrap gap-1 px-3 py-1">
+          {scopes.slice(0, 2).map((scope) => (
+            <Badge key={scope} variant="outline" className="font-medium text-xs">
+              {scope}
+            </Badge>
+          ))}
+          {scopes.length > 2 && (
+            <Badge variant="outline" className="font-medium text-xs">
+              +{scopes.length - 2} more
+            </Badge>
+          )}
         </div>
       )
     },
@@ -267,9 +234,10 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
+      const provider = row.original
       return (
         <div className="px-3 py-1">
-          <IdentityProviderActions provider={row.original} />
+          <SocialProviderActions provider={provider} />
         </div>
       )
     },

@@ -27,17 +27,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import { IdentityProviderToolbar, type FilterState } from "./IdentityProviderToolbar"
+import { SocialProviderToolbar, type FilterState } from "./SocialProviderToolbar"
 
-interface IdentityProviderDataTableProps<TData, TValue> {
+interface SocialProviderDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function IdentityProviderDataTable<TData, TValue>({
+export function SocialProviderDataTable<TData, TValue>({
   columns,
   data,
-}: IdentityProviderDataTableProps<TData, TValue>) {
+}: SocialProviderDataTableProps<TData, TValue>) {
   const [filter, setFilter] = React.useState("")
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -48,26 +48,18 @@ export function IdentityProviderDataTable<TData, TValue>({
     status: []
   })
 
-  // Apply advanced filters to data
   const filteredData = React.useMemo(() => {
     return data.filter((item: any) => {
-      // Search filter
-      if (filter.trim()) {
-        const searchValue = filter.toLowerCase()
-        const searchableFields = [
-          item.name,
-          item.description,
-          item.type,
-          item.endpoint,
-          item.id
-        ]
-        const matchesSearch = searchableFields.some(field => 
-          field?.toLowerCase().includes(searchValue)
-        )
-        if (!matchesSearch) return false
+      // Text search
+      if (filter) {
+        const searchFields = [item.name, item.description, item.type, item.clientId, item.id]
+        const searchText = searchFields.join(" ").toLowerCase()
+        if (!searchText.includes(filter.toLowerCase())) {
+          return false
+        }
       }
 
-      // Type filter
+      // Provider type filter
       if (advancedFilters.type.length > 0) {
         if (!advancedFilters.type.includes(item.type)) return false
       }
@@ -77,11 +69,9 @@ export function IdentityProviderDataTable<TData, TValue>({
         if (!advancedFilters.status.includes(item.status)) return false
       }
 
-
-
       return true
     })
-  }, [data, advancedFilters, filter])
+  }, [data, filter, advancedFilters])
 
   const table = useReactTable({
     data: filteredData,
@@ -100,24 +90,14 @@ export function IdentityProviderDataTable<TData, TValue>({
     },
   })
 
-  // Calculate active filters for display
+  // Generate active filters display
   const activeFilters = React.useMemo(() => {
     const filters: string[] = []
     
     if (advancedFilters.type.length > 0) {
-      // Get type names for display
-      const typeNames = advancedFilters.type.map(id => {
-        const typeMap: Record<string, string> = {
-          "cognito": "AWS Cognito",
-          "auth0": "Auth0",
-          "okta": "Okta",
-          "azure_ad": "Azure AD",
-          "keycloak": "Keycloak",
-          "firebase": "Firebase",
-          "custom": "Custom"
-        }
-        return typeMap[id] || id
-      })
+      const typeNames = advancedFilters.type.map(type => 
+        type.charAt(0).toUpperCase() + type.slice(1)
+      )
       filters.push(...typeNames.map(name => `Type: ${name}`))
     }
     
@@ -128,12 +108,11 @@ export function IdentityProviderDataTable<TData, TValue>({
       filters.push(...statusNames.map(name => `Status: ${name}`))
     }
     
-
-    
     return filters
   }, [advancedFilters])
 
   const clearAllFilters = () => {
+    setFilter("")
     setAdvancedFilters({
       type: [],
       status: []
@@ -142,19 +121,20 @@ export function IdentityProviderDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <IdentityProviderToolbar
-        filter={filter}
-        setFilter={setFilter}
+      <SocialProviderToolbar
+        searchValue={filter}
+        onSearchChange={setFilter}
+        filters={advancedFilters}
         onFiltersChange={setAdvancedFilters}
       />
 
       {/* Active Filters Display */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
-          <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
-          {activeFilters.map((filter, index) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium">Active filters:</span>
+          {activeFilters.map((filterText, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
-              {filter}
+              {filterText}
             </Badge>
           ))}
           <Button
