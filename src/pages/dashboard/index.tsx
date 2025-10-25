@@ -16,12 +16,12 @@ const DashboardPage = () => {
           <p className="text-3xl font-bold text-blue-600">1,234</p>
         </div>
         <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-2">Active Sessions</h3>
-          <p className="text-3xl font-bold text-green-600">567</p>
+          <h3 className="font-semibold mb-2">New Users This Month</h3>
+          <p className="text-3xl font-bold text-green-600">89</p>
         </div>
         <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-2">API Calls Today</h3>
-          <p className="text-3xl font-bold text-purple-600">8,901</p>
+          <h3 className="font-semibold mb-2">New Users Today</h3>
+          <p className="text-3xl font-bold text-purple-600">12</p>
         </div>
       </div>
 
