@@ -11,7 +11,7 @@ export default function UsersPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">User Management</h1>
         <p className="text-muted-foreground">
-          Manage user accounts, roles, and permissions across your organization.
+          Manage user accounts, authentication settings, and security features like 2FA and email verification.
         </p>
       </div>
       <UserDataTable columns={userColumns} data={users} />

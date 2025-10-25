@@ -43,10 +43,10 @@ const getStatusBadge = (status: RoleStatus) => {
 
 const getSystemBadge = (isSystem: boolean) => {
   if (!isSystem) return null
-  
+
   return (
-    <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200">
-      <Shield className="mr-1 h-3 w-3" />
+    <Badge variant="secondary" className="text-xs">
+      <Shield className="h-3 w-3 mr-1" />
       System
     </Badge>
   )

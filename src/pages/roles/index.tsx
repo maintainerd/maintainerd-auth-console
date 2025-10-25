@@ -11,7 +11,7 @@ export default function RolesPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">Role Management</h1>
         <p className="text-muted-foreground">
-          Manage roles, permissions, and access control across your organization.
+          Create and manage roles with specific permissions to control what users can access and do.
         </p>
       </div>
       <RoleDataTable columns={roleColumns} data={roles} />
