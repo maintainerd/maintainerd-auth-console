@@ -25,7 +25,8 @@ import {
   Plus,
   Download,
   Upload,
-  Server
+  Server,
+  FileText
 } from "lucide-react"
 
 export interface FilterState {
@@ -82,6 +83,16 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
   const handleImport = () => {
     console.log("Import services")
     // TODO: Implement import functionality
+  }
+
+  const handleManageAPIs = () => {
+    console.log("Navigate to APIs management")
+    // TODO: Navigate to APIs page
+  }
+
+  const handleManagePolicies = () => {
+    console.log("Navigate to Policies management")
+    // TODO: Navigate to Policies page
   }
 
   return (
@@ -164,6 +175,16 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={handleManageAPIs}>
+          <Server className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Manage APIs</span>
+        </Button>
+
+        <Button variant="outline" size="sm" onClick={handleManagePolicies}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Manage Policies</span>
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">

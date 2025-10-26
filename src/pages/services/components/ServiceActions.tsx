@@ -7,16 +7,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Server, 
-  Key, 
-  Settings, 
-  GitBranch, 
-  ExternalLink, 
-  FileText, 
-  Copy, 
+import {
+  MoreHorizontal,
+  Eye,
+  Server,
+  FileText,
+  Settings,
+  Copy,
   Trash2,
   Play,
   Pause,
@@ -44,22 +41,12 @@ export function ServiceActions({ service }: ServiceActionsProps) {
     // TODO: Navigate to APIs management page
   }
 
-  const handleManagePermissions = () => {
-    console.log("Manage permissions for service:", service.id)
-    // TODO: Navigate to permissions management page
+  const handleManagePolicies = () => {
+    console.log("Manage policies for service:", service.id)
+    // TODO: Navigate to policies management page
   }
 
-  const handleViewRepository = () => {
-    console.log("Open repository:", service.repository)
-    // TODO: Open repository in new tab
-    window.open(service.repository, '_blank')
-  }
 
-  const handleViewDocumentation = () => {
-    console.log("Open documentation:", service.documentation)
-    // TODO: Open documentation in new tab
-    window.open(service.documentation, '_blank')
-  }
 
   const handleActivate = () => {
     console.log("Activate service:", service.id)
@@ -110,25 +97,11 @@ export function ServiceActions({ service }: ServiceActionsProps) {
           Manage APIs
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={handleManagePermissions}>
-          <Key className="mr-2 h-4 w-4" />
-          Manage Permissions
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleViewRepository}>
-          <GitBranch className="mr-2 h-4 w-4" />
-          View Repository
-          <ExternalLink className="ml-auto h-3 w-3" />
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleViewDocumentation}>
+        <DropdownMenuItem onClick={handleManagePolicies}>
           <FileText className="mr-2 h-4 w-4" />
-          Documentation
-          <ExternalLink className="ml-auto h-3 w-3" />
+          Manage Policies
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
         
         {!isActive && !isMaintenance && (

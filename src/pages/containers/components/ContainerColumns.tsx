@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Users, ArrowUpDown, Activity, AlertTriangle, CheckCircle, Shield } from "lucide-react"
+import { Users, ArrowUpDown, AlertTriangle, CheckCircle, Shield, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ContainerActions } from "./ContainerActions"
@@ -14,8 +14,6 @@ export type Container = {
   domain: string
   status: ContainerStatus
   userCount: number
-  adminCount: number
-  lastActivity: string
   createdAt: string
   createdBy: string
   features: string[]
@@ -26,7 +24,7 @@ const getStatusBadge = (status: ContainerStatus) => {
   const statusConfig = {
     active: { label: "Active", variant: "default" as const, icon: CheckCircle, className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" },
     suspended: { label: "Suspended", variant: "default" as const, icon: AlertTriangle, className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" },
-    inactive: { label: "Inactive", variant: "secondary" as const, icon: Activity, className: "" },
+    inactive: { label: "Inactive", variant: "secondary" as const, icon: Pause, className: "" },
   }
 
   const config = statusConfig[status]
@@ -112,43 +110,9 @@ export const containerColumns: ColumnDef<Container>[] = [
     cell: ({ row }) => {
       const container = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-2">
-            <Users className="h-3 w-3 text-muted-foreground" />
-            <span className="text-sm font-medium">{container.userCount.toLocaleString()}</span>
-          </div>
-          <div className="text-sm text-muted-foreground">Admins: {container.adminCount}</div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "lastActivity",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Activity
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const container = row.original
-      const lastActivity = new Date(container.lastActivity)
-      const now = new Date()
-      const diffHours = Math.floor((now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60))
-
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <span className="text-sm font-medium">
-            {diffHours < 1 ? "Active now" : `${diffHours}h ago`}
-          </span>
-          <div className="text-xs text-muted-foreground">
-            {container.features.length} features
-          </div>
+        <div className="flex items-center gap-2 px-3 py-1">
+          <Users className="h-3 w-3 text-muted-foreground" />
+          <span className="text-sm font-medium">{container.userCount.toLocaleString()}</span>
         </div>
       )
     },

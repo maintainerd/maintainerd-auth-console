@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Shield, Server } from "lucide-react"
+import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Shield, FileText, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 export type ServiceStatus = "active" | "maintenance" | "deprecated" | "inactive"
@@ -15,8 +15,6 @@ export type Service = {
   policyCount: number
   createdAt: string
   createdBy: string
-  repository: string
-  documentation: string
   isSystem: boolean
 }
 
@@ -147,7 +145,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
             <span className="text-muted-foreground">APIs</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
-            <Shield className="h-3 w-3 text-muted-foreground" />
+            <FileText className="h-3 w-3 text-muted-foreground" />
             <span className="font-medium">{service.policyCount}</span>
             <span className="text-muted-foreground">Policies</span>
           </div>

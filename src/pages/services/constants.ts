@@ -10,8 +10,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 5,
     createdAt: "2024-01-01T00:00:00Z",
     createdBy: "system",
-    repository: "https://github.com/company/core-service",
-    documentation: "https://docs.company.com/core-service",
     isSystem: true
   },
   {
@@ -23,8 +21,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 12,
     createdAt: "2024-01-01T00:00:00Z",
     createdBy: "system",
-    repository: "https://github.com/company/auth-service",
-    documentation: "https://docs.company.com/auth-service",
     isSystem: true
   },
   {
@@ -36,8 +32,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 2,
     createdAt: "2024-02-15T10:30:00Z",
     createdBy: "platform-team@example.com",
-    repository: "https://github.com/company/sms-service",
-    documentation: "https://docs.company.com/sms-service",
     isSystem: false
   },
   {
@@ -49,8 +43,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 3,
     createdAt: "2024-02-20T14:15:00Z",
     createdBy: "platform-team@example.com",
-    repository: "https://github.com/company/email-service",
-    documentation: "https://docs.company.com/email-service",
     isSystem: false
   },
   {
@@ -62,8 +54,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 4,
     createdAt: "2024-01-25T16:20:00Z",
     createdBy: "infrastructure-team@example.com",
-    repository: "https://github.com/company/storage-service",
-    documentation: "https://docs.company.com/storage-service",
     isSystem: false
   },
   {
@@ -75,8 +65,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 5,
     createdAt: "2024-03-10T09:45:00Z",
     createdBy: "data-team@example.com",
-    repository: "https://github.com/company/analytics-service",
-    documentation: "https://docs.company.com/analytics-service",
     isSystem: false
   },
   {
@@ -88,8 +76,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 3,
     createdAt: "2024-03-20T11:00:00Z",
     createdBy: "integration-team@example.com",
-    repository: "https://github.com/company/webhook-service",
-    documentation: "https://docs.company.com/webhook-service",
     isSystem: false
   },
   {
@@ -101,8 +87,6 @@ export const MOCK_SERVICES: Service[] = [
     policyCount: 1,
     createdAt: "2024-01-10T08:00:00Z",
     createdBy: "legacy-team@example.com",
-    repository: "https://github.com/company/legacy-api-service",
-    documentation: "https://docs.company.com/legacy-api-service",
     isSystem: false
   }
 ]

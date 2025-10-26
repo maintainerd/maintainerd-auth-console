@@ -13,10 +13,8 @@ import {
   Eye,
   Settings,
   FileText,
-  Users,
   Trash2,
-  Copy,
-  Shield
+  Copy
 } from "lucide-react"
 import type { Container } from "./ContainerColumns"
 
@@ -40,10 +38,7 @@ export function ContainerActions({ container }: ContainerActionsProps) {
     // TODO: Implement view details
   }
 
-  const handleViewUsers = () => {
-    console.log("View tenant users:", container.id)
-    // TODO: Implement view users
-  }
+
 
 
 
@@ -57,10 +52,7 @@ export function ContainerActions({ container }: ContainerActionsProps) {
     // TODO: Implement edit settings
   }
 
-  const handleManageFeatures = () => {
-    console.log("Manage tenant features:", container.id)
-    // TODO: Implement manage features
-  }
+
 
   const handleDuplicate = () => {
     console.log("Duplicate tenant:", container.id)
@@ -87,10 +79,7 @@ export function ContainerActions({ container }: ContainerActionsProps) {
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleViewUsers}>
-          <Users className="mr-2 h-4 w-4" />
-          Manage Users
-        </DropdownMenuItem>
+
         <DropdownMenuItem onClick={handleViewAuditLogs}>
           <FileText className="mr-2 h-4 w-4" />
           Audit Logs
@@ -117,10 +106,7 @@ export function ContainerActions({ container }: ContainerActionsProps) {
           <Settings className="mr-2 h-4 w-4" />
           Edit Settings
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleManageFeatures}>
-          <Shield className="mr-2 h-4 w-4" />
-          Manage Features
-        </DropdownMenuItem>
+
         <DropdownMenuItem onClick={handleDuplicate}>
           <Copy className="mr-2 h-4 w-4" />
           Duplicate Container
