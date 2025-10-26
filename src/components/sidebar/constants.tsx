@@ -96,6 +96,10 @@ export const data = {
           title: "Clients",
           route: "/clients",
         },
+        {
+          title: "API Keys",
+          route: "/api-keys",
+        },
       ],
     },
 

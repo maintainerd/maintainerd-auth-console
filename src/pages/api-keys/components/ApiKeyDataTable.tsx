@@ -20,49 +20,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ClientToolbar } from "./ClientToolbar"
-import type { Client, ClientStatus, ClientType } from "../constants"
+import { ApiKeyToolbar } from "./ApiKeyToolbar"
+import type { ApiKey, ApiKeyStatus } from "../constants"
 
 interface FilterState {
-  types: ClientType[]
-  statuses: ClientStatus[]
+  statuses: ApiKeyStatus[]
 }
 
-interface ClientDataTableProps<TData, TValue> {
+interface ApiKeyDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function ClientDataTable<TData, TValue>({
+export function ApiKeyDataTable<TData, TValue>({
   columns,
   data,
-}: ClientDataTableProps<TData, TValue>) {
+}: ApiKeyDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filters, setFilters] = React.useState<FilterState>({
-    types: [],
     statuses: []
   })
 
   const filteredData = React.useMemo(() => {
-    return (data as Client[]).filter((client) => {
+    return (data as ApiKey[]).filter((apiKey) => {
       // Search filter
       const searchLower = searchQuery.toLowerCase()
       const matchesSearch = !searchQuery ||
-        client.name.toLowerCase().includes(searchLower) ||
-        client.description.toLowerCase().includes(searchLower) ||
-        client.clientId.toLowerCase().includes(searchLower)
-
-      // Type filter
-      const matchesType = filters.types.length === 0 || filters.types.includes(client.type)
+        apiKey.name.toLowerCase().includes(searchLower) ||
+        apiKey.description.toLowerCase().includes(searchLower) ||
+        apiKey.keyPrefix.toLowerCase().includes(searchLower) ||
+        apiKey.permissions.some(permission => permission.toLowerCase().includes(searchLower))
 
       // Status filter
-      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(client.status)
+      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(apiKey.status)
 
-      return matchesSearch && matchesType && matchesStatus
+      return matchesSearch && matchesStatus
     })
   }, [data, searchQuery, filters])
 
@@ -93,9 +89,6 @@ export function ClientDataTable<TData, TValue>({
   // Active filters display
   const activeFilters = React.useMemo(() => {
     const filtersList = []
-    if (filters.types.length > 0) {
-      filtersList.push(`Type: ${filters.types.join(", ")}`)
-    }
     if (filters.statuses.length > 0) {
       filtersList.push(`Status: ${filters.statuses.join(", ")}`)
     }
@@ -104,7 +97,7 @@ export function ClientDataTable<TData, TValue>({
 
   return (
     <div className="w-full space-y-4">
-      <ClientToolbar
+      <ApiKeyToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filters={filters}
@@ -125,7 +118,6 @@ export function ClientDataTable<TData, TValue>({
             size="sm"
             className="h-6 px-2 text-xs"
             onClick={() => setFilters({
-              types: [],
               statuses: []
             })}
           >

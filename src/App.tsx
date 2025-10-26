@@ -13,6 +13,8 @@ import ApisPage from './pages/apis'
 import PermissionsPage from './pages/permissions'
 import IdentityProvidersPage from './pages/identity-providers'
 import SocialProvidersPage from './pages/social-providers'
+import ClientsPage from './pages/clients'
+import ApiKeysPage from './pages/api-keys'
 
 function App() {
   return (
@@ -26,7 +28,6 @@ function App() {
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="applications" element={<DashboardPage />} />
-          <Route path="clients" element={<DashboardPage />} />
           <Route path="policies" element={<DashboardPage />} />
           <Route path="security" element={<DashboardPage />} />
           <Route path="events" element={<DashboardPage />} />
@@ -50,6 +51,8 @@ function App() {
           <Route path="permissions" element={<PermissionsPage />} />
           <Route path="providers/identity" element={<IdentityProvidersPage />} />
           <Route path="providers/social" element={<SocialProvidersPage />} />
+          <Route path="clients" element={<ClientsPage />} />
+          <Route path="api-keys" element={<ApiKeysPage />} />
         </Route>
       </Routes>
     </>

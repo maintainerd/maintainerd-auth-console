@@ -130,8 +130,8 @@ export function SocialProviderDataTable<TData, TValue>({
 
       {/* Active Filters Display */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium">Active filters:</span>
+        <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
+          <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
           {activeFilters.map((filterText, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {filterText}
@@ -140,8 +140,8 @@ export function SocialProviderDataTable<TData, TValue>({
           <Button
             variant="ghost"
             size="sm"
-            onClick={clearAllFilters}
             className="h-6 px-2 text-xs"
+            onClick={clearAllFilters}
           >
             Clear all
           </Button>
