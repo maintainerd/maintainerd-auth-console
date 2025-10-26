@@ -27,17 +27,17 @@ export type User = {
 
 const getStatusBadge = (status: UserStatus) => {
   const statusConfig = {
-    active: { label: "Active", variant: "default" as const, icon: CheckCircle },
-    inactive: { label: "Inactive", variant: "secondary" as const, icon: XCircle },
-    pending: { label: "Pending", variant: "outline" as const, icon: Clock },
-    suspended: { label: "Suspended", variant: "destructive" as const, icon: AlertTriangle },
+    active: { label: "Active", variant: "default" as const, icon: CheckCircle, className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" },
+    inactive: { label: "Inactive", variant: "secondary" as const, icon: XCircle, className: "" },
+    pending: { label: "Pending", variant: "outline" as const, icon: Clock, className: "" },
+    suspended: { label: "Suspended", variant: "default" as const, icon: AlertTriangle, className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" },
   }
 
   const config = statusConfig[status]
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className="flex items-center gap-1">
+    <Badge variant={config.variant} className={`flex items-center gap-1 ${config.className}`}>
       <Icon className="h-3 w-3" />
       {config.label}
     </Badge>
@@ -133,7 +133,10 @@ export const userColumns: ColumnDef<User>[] = [
 
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
-          <Badge variant={emailVerified ? "default" : "destructive"} className="text-xs w-fit">
+          <Badge
+            variant="default"
+            className={`text-xs w-fit ${emailVerified ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"}`}
+          >
             {emailVerified ? "Verified" : "Unverified"}
           </Badge>
           {twoFactorEnabled && (

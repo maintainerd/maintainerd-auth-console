@@ -36,8 +36,7 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
 
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
     status: [],
-    isSystem: "all",
-    userCount: "all"
+    isSystem: "all"
   })
 
 
@@ -60,24 +59,7 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
         if (advancedFilters.isSystem === "custom" && item.isSystem) return false
       }
       
-      // User count filter
-      if (advancedFilters.userCount !== "all") {
-        const userCount = item.userCount || 0
-        switch (advancedFilters.userCount) {
-          case "empty":
-            if (userCount !== 0) return false
-            break
-          case "low":
-            if (userCount < 1 || userCount > 5) return false
-            break
-          case "medium":
-            if (userCount < 6 || userCount > 15) return false
-            break
-          case "high":
-            if (userCount < 16) return false
-            break
-        }
-      }
+
       
       return true
     })
@@ -113,23 +95,14 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
     if (advancedFilters.isSystem !== "all") {
       filters.push(`Type: ${advancedFilters.isSystem} roles`)
     }
-    if (advancedFilters.userCount !== "all") {
-      const labels = {
-        empty: "No users",
-        low: "Few users (1-5)",
-        medium: "Some users (6-15)",
-        high: "Many users (16+)"
-      }
-      filters.push(`Users: ${labels[advancedFilters.userCount as keyof typeof labels]}`)
-    }
+
     return filters
   }, [advancedFilters])
 
   const clearAllFilters = () => {
     setAdvancedFilters({
       status: [],
-      isSystem: "all",
-      userCount: "all"
+      isSystem: "all"
     })
   }
 

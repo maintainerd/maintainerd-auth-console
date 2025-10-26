@@ -35,7 +35,6 @@ import {
 export interface FilterState {
   status: string[]
   isSystem: string
-  userCount: string
 }
 
 interface RoleToolbarProps {
@@ -52,8 +51,7 @@ export function RoleToolbar({
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
-    isSystem: "all",
-    userCount: "all"
+    isSystem: "all"
   })
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -65,8 +63,7 @@ export function RoleToolbar({
   const clearAllFilters = () => {
     const clearedFilters: FilterState = {
       status: [],
-      isSystem: "all",
-      userCount: "all"
+      isSystem: "all"
     }
     setFilters(clearedFilters)
     onFiltersChange?.(clearedFilters)
@@ -76,7 +73,6 @@ export function RoleToolbar({
     let count = 0
     if (filters.status.length > 0) count++
     if (filters.isSystem !== "all") count++
-    if (filters.userCount !== "all") count++
     return count
   }, [filters])
 
@@ -173,22 +169,7 @@ export function RoleToolbar({
                 </Select>
               </div>
 
-              {/* User Count Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">User Count</Label>
-                <Select value={filters.userCount} onValueChange={(value) => updateFilters({ userCount: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="empty">No Users (0)</SelectItem>
-                    <SelectItem value="low">Few Users (1-5)</SelectItem>
-                    <SelectItem value="medium">Some Users (6-15)</SelectItem>
-                    <SelectItem value="high">Many Users (16+)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
             </div>
           </PopoverContent>
         </Popover>
