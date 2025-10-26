@@ -5,6 +5,7 @@ import SetupOrganizationPage from './pages/setup/organization'
 import SetupAdminPage from './pages/setup/admin'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
+import UsersPage from './pages/users'
 
 function App() {
   return (
@@ -22,7 +23,6 @@ function App() {
           <Route path="apis" element={<DashboardPage />} />
           <Route path="permissions" element={<DashboardPage />} />
           <Route path="user-management" element={<DashboardPage />} />
-          <Route path="users" element={<DashboardPage />} />
           <Route path="roles" element={<DashboardPage />} />
           <Route path="providers" element={<DashboardPage />} />
           <Route path="providers/identity" element={<DashboardPage />} />
@@ -42,6 +42,9 @@ function App() {
           <Route path="branding/sms-templates" element={<DashboardPage />} />
           <Route path="onboarding" element={<DashboardPage />} />
           <Route path="settings" element={<DashboardPage />} />
+        </Route>
+        <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
+          <Route path="users" element={<UsersPage />} />
         </Route>
       </Routes>
     </>

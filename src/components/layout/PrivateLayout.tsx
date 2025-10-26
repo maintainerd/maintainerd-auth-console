@@ -2,8 +2,13 @@ import { Outlet } from "react-router-dom"
 import { AppSidebar } from "@/components/sidebar/AppSideBar"
 import { TopNav } from "@/components/navigation/TopNav"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
-export function PrivateLayout() {
+interface PrivateLayoutProps {
+  fullWidth?: boolean
+}
+
+export function PrivateLayout({ fullWidth = false }: PrivateLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SidebarProvider>
@@ -11,7 +16,10 @@ export function PrivateLayout() {
         <div className="flex flex-1 pt-14">
           <AppSidebar variant="sidebar" className="top-14" />
           <SidebarInset>
-            <main className="flex-1 pt-10 px-6 pb-6 max-w-6xl mx-auto">
+            <main className={cn(
+              "flex-1 pt-10 px-6 pb-6",
+              !fullWidth && "max-w-6xl mx-auto"
+            )}>
               <Outlet />
             </main>
           </SidebarInset>
