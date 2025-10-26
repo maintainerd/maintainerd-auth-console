@@ -26,17 +26,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import { ContainerToolbar, type FilterState } from "./ContainerToolbar"
+import { ServiceToolbar, type FilterState } from "./ServiceToolbar"
 
-interface ContainerDataTableProps<TData, TValue> {
+interface ServiceDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function ContainerDataTable<TData, TValue>({
+export function ServiceDataTable<TData, TValue>({
   columns,
   data,
-}: ContainerDataTableProps<TData, TValue>) {
+}: ServiceDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -54,7 +54,7 @@ export function ContainerDataTable<TData, TValue>({
         if (!advancedFilters.status.includes(item.status)) return false
       }
 
-      // Container type filter (system vs regular)
+      // Service type filter (system vs regular)
       if (advancedFilters.isSystem !== "all") {
         if (advancedFilters.isSystem === "system" && !item.isSystem) return false
         if (advancedFilters.isSystem === "regular" && item.isSystem) return false
@@ -103,7 +103,7 @@ export function ContainerDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <ContainerToolbar
+      <ServiceToolbar
         filter={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
         setFilter={(value) => table.getColumn("name")?.setFilterValue(value)}
         onFiltersChange={setAdvancedFilters}
@@ -124,7 +124,7 @@ export function ContainerDataTable<TData, TValue>({
             onClick={clearAllFilters}
             className="h-6 px-2 text-xs"
           >
-            <X className="mr-1 h-3 w-3" />
+            <X className="h-3 w-3 mr-1" />
             Clear all
           </Button>
         </div>
@@ -135,16 +135,18 @@ export function ContainerDataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -252,7 +254,7 @@ export function ContainerDataTable<TData, TValue>({
         {/* Right side - Row count info */}
         <div className="flex items-center justify-center text-sm text-muted-foreground">
           {table.getFilteredRowModel().rows.length} of{" "}
-          {table.getCoreRowModel().rows.length} container(s)
+          {table.getCoreRowModel().rows.length} service(s)
         </div>
       </div>
     </div>

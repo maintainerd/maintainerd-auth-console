@@ -8,6 +8,7 @@ import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
 import RolesPage from './pages/roles'
 import ContainersPage from './pages/containers'
+import ServicesPage from './pages/services'
 
 function App() {
   return (
@@ -20,7 +21,6 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="services" element={<DashboardPage />} />
           <Route path="apis" element={<DashboardPage />} />
           <Route path="permissions" element={<DashboardPage />} />
           <Route path="user-management" element={<DashboardPage />} />
@@ -47,6 +47,7 @@ function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="roles" element={<RolesPage />} />
           <Route path="containers" element={<ContainersPage />} />
+          <Route path="services" element={<ServicesPage />} />
         </Route>
       </Routes>
     </>
