@@ -2,116 +2,93 @@
   <img src="https://github.com/user-attachments/assets/4bc6f3d9-761e-477e-90ad-1b305b5b5e23" alt="M9d-Auth Logo" width="120" height="120">
 
   # M9d-Auth-Web
+
+  [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+  [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+  [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF.svg)](https://vitejs.dev/)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+  **Modern, open-source authentication management dashboard**
+  
+  A clean, responsive interface for managing users, roles, permissions, and authentication providers with enterprise-grade security features.
+
 </div>
 
-A modern, open-source frontend dashboard for managing authentication, users, roles, and organizations. M9d-Auth-Web provides a clean, responsive interface for your authentication backend services.
+<div align="center">
+  <img width="1920" height="1040" alt="M9d-Auth Dashboard" src="https://github.com/user-attachments/assets/bbf97581-bc84-4456-a472-9a9c2eb71d40" />
+</div>
 
+## ✨ Features
 
-<img width="1920" height="1040" alt="m9d-auth-dashboard" src="https://github.com/user-attachments/assets/bbf97581-bc84-4456-a472-9a9c2eb71d40" />
+- **👥 User Management** - Complete user lifecycle management with role-based access control
+- **🏢 Multi-Container Architecture** - Isolated environments for different applications and teams
+- **🔗 OAuth Integration** - Support for social providers and custom identity providers
+- **🛡️ Security Policies** - Advanced access control and service-to-service communication
+- **📊 Analytics Dashboard** - Real-time insights and user growth tracking
+- **🔑 API Management** - Comprehensive API access control and token management
 
-
-## ✨ What You Can Do
-
-### 👥 User & Role Management
-- **Manage Users**: Create, edit, delete, and organize user accounts
-- **Role-Based Access**: Define custom roles with specific permissions
-- **Bulk Operations**: Handle multiple users efficiently
-- **User Analytics**: Track user growth and registration trends
-
-### 🏢 Multi-Container Architecture
-- **Isolated Environments**: Separate users, roles, and settings by container (like Keycloak realms)
-- **Default Container**: Built-in admin and system user space
-- **Custom Containers**: Create containers for different apps or environments
-- **Easy Switching**: Quick container selection from the top navigation
-
-### 🔗 Application Integration
-- **Connect Apps**: Integrate your applications with M9d-Auth
-- **Quick Setup**: Get started in minutes with guided setup
-- **Client Management**: Configure OAuth clients and application settings
-- **API Access**: Manage API permissions and access tokens
-
-### 🛡️ Security & Monitoring
-- **Authentication Providers**: Configure social login (Google, GitHub, etc.) and identity providers
-- **Security Policies**: Set up access control and service-to-service communication
-- **Real-time Monitoring**: Track login attempts, sessions, and security events
-- **Audit Logs**: Complete activity logging for compliance and debugging
-
-### 📊 Dashboard Insights
-- **User Metrics**: See total users, new registrations this month, and daily signups
-- **Growth Tracking**: Monitor user acquisition trends over time
-- **Activity Overview**: Quick glance at system health and usage
-- **Actionable Data**: Make informed decisions with clear analytics
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ```bash
-# Clone and install
+# Clone the repository
 git clone https://github.com/your-org/m9d-auth-web.git
 cd m9d-auth-web
+
+# Install dependencies
 npm install
 
-# Start development
+# Set up environment variables
+cp .env.example .env
+
+# Start development server
 npm run dev
 ```
 
-Set up your environment:
+### Environment Configuration
+
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 VITE_APP_NAME=M9d-Auth
 ```
 
-## 🎯 Why M9d-Auth-Web?
+## 🛠️ Tech Stack
 
-### 🚀 **Quick Setup**
-Get your authentication dashboard running in minutes, not hours. Built-in setup wizard guides you through connecting your first application.
+- **Frontend**: React 19, TypeScript, Vite
+- **UI**: shadcn/ui, Tailwind CSS
+- **State Management**: TanStack Query
+- **Routing**: React Router
+- **Authentication**: JWT, OAuth 2.0
 
-### 🏗️ **Container Architecture**
-Organize everything with containers - isolated environments for different apps, teams, or environments. Each container has its own users, roles, and settings.
+## 📖 Documentation
 
-### 📱 **Modern Interface**
-Clean, responsive design that works on any device. Built with modern React and TypeScript for reliability and performance.
-
-### 🔧 **Developer Friendly**
-RESTful API integration, comprehensive documentation, and extensible architecture. Easy to customize and integrate with your existing systems.
-
-### 🛡️ **Enterprise Ready**
-Role-based access control, audit logging, security monitoring, and compliance features built-in.
-
-## 🎨 Built With Modern Tech
-
-- **React 19** + **TypeScript** for reliability
-- **shadcn/ui** + **Tailwind CSS** for beautiful UI
-- **Vite** for fast development
-- **Responsive design** for all devices
-
-## 📸 Screenshots
-
-### Dashboard Overview
-Track user growth and system health at a glance.
-
-### User Management
-Easily manage users, roles, and permissions with intuitive interfaces.
-
-### Container Management
-Switch between different environments and manage isolated user groups.
-
-### Application Setup
-Quick integration wizard to connect your apps in minutes.
+- [Getting Started Guide](docs/getting-started.md)
+- [API Reference](docs/api-reference.md)
+- [Deployment Guide](docs/deployment.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
 
 ## 🤝 Contributing
 
-Contributions welcome! Fork the repo, make your changes, and submit a pull request.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-org/m9d-auth-web/issues)
-- **Documentation**: [docs.m9d-auth.com](https://docs.m9d-auth.com)
-- **Community**: [Discord](https://discord.gg/m9d-auth)
+- 🐛 [Report Issues](https://github.com/your-org/m9d-auth-web/issues)
+- 💬 [Join Discord](https://discord.gg/m9d-auth)
+- 📚 [Documentation](https://docs.m9d-auth.com)
 
 ---
 
-**M9d-Auth-Web** - Simple, beautiful authentication management.
+<div align="center">
+  Made with ❤️ by the M9d-Auth team
+</div>
