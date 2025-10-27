@@ -15,6 +15,7 @@ import IdentityProvidersPage from './pages/identity-providers'
 import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
+import PoliciesPage from './pages/policies'
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="applications" element={<DashboardPage />} />
-          <Route path="policies" element={<DashboardPage />} />
+
           <Route path="security" element={<DashboardPage />} />
           <Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
@@ -53,6 +54,7 @@ function App() {
           <Route path="providers/social" element={<SocialProvidersPage />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
+          <Route path="policies" element={<PoliciesPage />} />
         </Route>
       </Routes>
     </>
