@@ -7,13 +7,13 @@ import {
 	LifeBuoy,
 	Zap,
 	Wrench,
-	UserPlus,
 	Palette,
 	Container,
 	Server,
-	Plug,
+	KeyRound,
 	Layers,
 	TrendingUp,
+	GitBranch,
 } from "lucide-react"
 
 export const data = {
@@ -78,7 +78,7 @@ export const data = {
     {
       title: "Providers",
       route: "/providers",
-      icon: Plug,
+      icon: KeyRound,
       items: [
         {
           title: "Identity",
@@ -102,6 +102,17 @@ export const data = {
         {
           title: "API Keys",
           route: "/api-keys",
+        },
+      ],
+    },
+    {
+      title: "Auth Flows",
+      route: "/auth-flows",
+      icon: GitBranch,
+      items: [
+        {
+          title: "Onboarding",
+          route: "/onboarding",
         },
       ],
     },
@@ -172,11 +183,6 @@ export const data = {
           route: "/branding/sms-templates",
         },
       ],
-    },
-    {
-      title: "Onboarding",
-      route: "/onboarding",
-      icon: UserPlus,
     },
 
     // 6. Events & Monitoring (Coming Soon)
