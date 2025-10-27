@@ -1,12 +1,14 @@
 <div align="center">
-  <img src="https://via.placeholder.com/120x120/1a1a1a/ffffff?text=🛡️" alt="M9d-Auth Logo" width="120" height="120">
+  <img src="https://github.com/user-attachments/assets/4bc6f3d9-761e-477e-90ad-1b305b5b5e23" alt="M9d-Auth Logo" width="120" height="120">
 
   # M9d-Auth-Web
 </div>
 
 A modern, open-source frontend dashboard for managing authentication, users, roles, and organizations. M9d-Auth-Web provides a clean, responsive interface for your authentication backend services.
 
-![M9d-Auth Dashboard](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=M9d-Auth+Dashboard)
+
+<img width="1920" height="1040" alt="m9d-auth-dashboard" src="https://github.com/user-attachments/assets/bbf97581-bc84-4456-a472-9a9c2eb71d40" />
+
 
 ## ✨ What You Can Do
 
