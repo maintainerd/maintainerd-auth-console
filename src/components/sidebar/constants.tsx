@@ -13,7 +13,6 @@ import {
 	Server,
 	Plug,
 	Layers,
-	FileText,
 	TrendingUp,
 } from "lucide-react"
 
@@ -52,6 +51,10 @@ export const data = {
         {
           title: "Permissions",
           route: "/permissions",
+        },
+        {
+          title: "Policies",
+          route: "/policies",
         },
       ],
     },
@@ -103,12 +106,7 @@ export const data = {
       ],
     },
 
-    // 3. Policies & Security (Technical Configuration)
-    {
-      title: "Policies",
-      route: "/policies",
-      icon: FileText,
-    },
+    // 3. Security (Technical Configuration)
     {
       title: "Security",
       route: "/security",
