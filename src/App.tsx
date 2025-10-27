@@ -16,8 +16,8 @@ import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
-import SecurityPage from './pages/security'
 import SecuritySettingsPage from './pages/security/settings'
+import OnboardingPage from './pages/onboarding'
 
 function App() {
   return (
@@ -30,26 +30,6 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="applications" element={<DashboardPage />} />
-
-          <Route path="security" element={<SecurityPage />} />
-          <Route path="security/settings" element={<SecuritySettingsPage />} />
-          <Route path="security/password-policies" element={<DashboardPage />} />
-          <Route path="security/sessions" element={<DashboardPage />} />
-          <Route path="security/threats" element={<DashboardPage />} />
-
-          <Route path="security/ip-restrictions" element={<DashboardPage />} />
-          <Route path="events" element={<DashboardPage />} />
-          <Route path="webhooks" element={<DashboardPage />} />
-          <Route path="monitoring" element={<DashboardPage />} />
-          <Route path="analytics" element={<DashboardPage />} />
-          <Route path="logs" element={<DashboardPage />} />
-          <Route path="branding" element={<DashboardPage />} />
-          <Route path="branding/login" element={<DashboardPage />} />
-          <Route path="branding/email-templates" element={<DashboardPage />} />
-          <Route path="branding/sms-templates" element={<DashboardPage />} />
-          <Route path="onboarding" element={<DashboardPage />} />
-          <Route path="settings" element={<DashboardPage />} />
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
@@ -63,6 +43,22 @@ function App() {
           <Route path="clients" element={<ClientsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="policies" element={<PoliciesPage />} />
+					<Route path="onboarding" element={<OnboardingPage />} />
+					<Route path="security/settings" element={<SecuritySettingsPage />} />
+          <Route path="security/password-policies" element={<DashboardPage />} />
+          <Route path="security/sessions" element={<DashboardPage />} />
+          <Route path="security/threats" element={<DashboardPage />} />
+          <Route path="security/ip-restrictions" element={<DashboardPage />} />
+					<Route path="events" element={<DashboardPage />} />
+          <Route path="webhooks" element={<DashboardPage />} />
+          <Route path="monitoring" element={<DashboardPage />} />
+          <Route path="analytics" element={<DashboardPage />} />
+          <Route path="logs" element={<DashboardPage />} />
+          <Route path="branding" element={<DashboardPage />} />
+          <Route path="branding/login" element={<DashboardPage />} />
+          <Route path="branding/email-templates" element={<DashboardPage />} />
+          <Route path="branding/sms-templates" element={<DashboardPage />} />
+          <Route path="settings" element={<DashboardPage />} />
         </Route>
       </Routes>
     </>

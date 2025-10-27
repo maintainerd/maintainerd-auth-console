@@ -179,8 +179,8 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
 
       {/* Responsive Pagination */}
       <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left side - Rows per page and page info */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-6 lg:space-x-8">
+        {/* Left side - Rows per page and results info */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-2">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Rows per page</p>
             <Select
@@ -201,14 +201,24 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-center text-sm font-medium">
-            <span className="hidden sm:inline">Page </span>
-            {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length > 0 ? (
+              <>
+                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+                {Math.min(
+                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  table.getFilteredRowModel().rows.length
+                )}{" "}
+                of {table.getFilteredRowModel().rows.length} results
+              </>
+            ) : (
+              "No results"
+            )}
           </div>
         </div>
 
-        {/* Center - Navigation buttons */}
-        <div className="flex items-center justify-center space-x-2">
+        {/* Right side - Navigation buttons */}
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
@@ -247,18 +257,7 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
           </Button>
         </div>
 
-        {/* Right side - Selection info */}
-        <div className="flex items-center justify-center sm:justify-end">
-          <p className="text-sm font-medium text-center sm:text-right">
-            <span className="hidden sm:inline">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected
-            </span>
-            <span className="sm:hidden">
-              {table.getFilteredSelectedRowModel().rows.length}/{table.getFilteredRowModel().rows.length} selected
-            </span>
-          </p>
-        </div>
+
       </div>
     </div>
   )
