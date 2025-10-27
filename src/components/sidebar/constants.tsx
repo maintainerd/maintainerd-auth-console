@@ -113,19 +113,32 @@ export const data = {
       title: "Security",
       route: "/security",
       icon: Shield,
+      items: [
+        {
+          title: "Security Settings",
+          route: "/security/settings",
+        },
+        {
+          title: "Password Policies",
+          route: "/security/password-policies",
+        },
+        {
+          title: "Session Management",
+          route: "/security/sessions",
+        },
+        {
+          title: "Threat Detection",
+          route: "/security/threats",
+        },
+
+        {
+          title: "IP Restrictions",
+          route: "/security/ip-restrictions",
+        },
+      ],
     },
 
-    // 4. Events & Monitoring (Observability)
-    {
-      title: "Events",
-      route: "/events",
-      icon: Zap,
-    },
-    {
-      title: "Webhooks",
-      route: "/webhooks",
-      icon: Webhook,
-    },
+    // 4. Monitoring (Observability)
     {
       title: "Monitoring",
       route: "/monitoring",
@@ -166,6 +179,20 @@ export const data = {
       title: "Onboarding",
       route: "/onboarding",
       icon: UserPlus,
+    },
+
+    // 6. Events & Monitoring (Coming Soon)
+    {
+      title: "Events",
+      route: "/events",
+      icon: Zap,
+      comingSoon: true,
+    },
+    {
+      title: "Webhooks",
+      route: "/webhooks",
+      icon: Webhook,
+      comingSoon: true,
     },
     {
       title: "Settings",

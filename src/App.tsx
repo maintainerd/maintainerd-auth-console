@@ -16,6 +16,8 @@ import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
+import SecurityPage from './pages/security'
+import SecuritySettingsPage from './pages/security/settings'
 
 function App() {
   return (
@@ -30,7 +32,13 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="applications" element={<DashboardPage />} />
 
-          <Route path="security" element={<DashboardPage />} />
+          <Route path="security" element={<SecurityPage />} />
+          <Route path="security/settings" element={<SecuritySettingsPage />} />
+          <Route path="security/password-policies" element={<DashboardPage />} />
+          <Route path="security/sessions" element={<DashboardPage />} />
+          <Route path="security/threats" element={<DashboardPage />} />
+
+          <Route path="security/ip-restrictions" element={<DashboardPage />} />
           <Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
           <Route path="monitoring" element={<DashboardPage />} />

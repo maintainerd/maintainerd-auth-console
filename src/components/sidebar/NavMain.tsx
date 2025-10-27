@@ -21,6 +21,7 @@ export function NavMain({
     route: string
     icon?: LucideIcon,
 		active?: boolean,
+		comingSoon?: boolean,
 		items?: {
 			title: string
 			route: string
@@ -104,14 +105,22 @@ export function NavMain({
                 </>
               ) : (
                 <SidebarMenuButton
-                  asChild
+                  asChild={!item.comingSoon}
                   tooltip={item.title}
-                  className={isActive(item.route) ? "font-bold text-blue-600 hover:text-blue-600 text-base" : "text-base"}
+                  className={`${isActive(item.route) ? "font-bold text-blue-600 hover:text-blue-600 text-base" : "text-base"} ${item.comingSoon ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  <Link to={buildRoute(item.route)}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </Link>
+                  {item.comingSoon ? (
+                    <div className="flex items-center gap-2">
+                      {item.icon && <item.icon className="size-4 shrink-0" />}
+                      <span>{item.title}</span>
+                      <span className="text-xs text-muted-foreground">(coming soon)</span>
+                    </div>
+                  ) : (
+                    <Link to={buildRoute(item.route)}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  )}
                 </SidebarMenuButton>
               )}
             </SidebarMenuItem>
