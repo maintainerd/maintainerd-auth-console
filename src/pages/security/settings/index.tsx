@@ -6,15 +6,18 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { 
-  Shield, 
-  Lock, 
-  Smartphone, 
-  Mail, 
-  Clock, 
+import {
+  Shield,
+  Lock,
+  Smartphone,
+  Mail,
+  Clock,
   AlertTriangle,
   CheckCircle,
-  Save
+  Save,
+  Database,
+  FileText,
+  Settings
 } from "lucide-react"
 import * as React from "react"
 
@@ -31,7 +34,19 @@ export default function SecuritySettingsPage() {
     requireEmailVerification: true,
     allowPasswordReset: true,
     securityNotifications: true,
-    suspiciousActivityAlerts: true
+    suspiciousActivityAlerts: true,
+    // Data Protection
+    encryptionAtRest: true,
+    encryptionInTransit: true,
+    dataRetentionDays: 365,
+    automaticBackups: true,
+    backupEncryption: true,
+    // Compliance
+    complianceMode: "standard",
+    // Advanced Security
+    deviceTrustEnabled: false,
+    geoLocationTracking: true,
+    anonymousAnalytics: true
   })
 
   const handleSave = () => {
@@ -286,6 +301,192 @@ export default function SecuritySettingsPage() {
               <div className="text-sm text-muted-foreground">
                 Users will be automatically logged out after this period of inactivity
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+
+        {/* Data Protection */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Data Protection
+            </CardTitle>
+            <CardDescription>
+              Configure encryption and data retention policies
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Encryption at rest</Label>
+                <div className="text-sm text-muted-foreground">
+                  Encrypt stored data using AES-256 encryption
+                </div>
+              </div>
+              <Switch
+                checked={settings.encryptionAtRest}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, encryptionAtRest: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Encryption in transit</Label>
+                <div className="text-sm text-muted-foreground">
+                  Enforce TLS 1.3 for all data transmission
+                </div>
+              </div>
+              <Switch
+                checked={settings.encryptionInTransit}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, encryptionInTransit: checked }))}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="dataRetention" className="text-sm font-medium">
+                Data retention period (days)
+              </Label>
+              <Select
+                value={settings.dataRetentionDays.toString()}
+                onValueChange={(value) => setSettings(prev => ({ ...prev, dataRetentionDays: parseInt(value) }))}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30 days</SelectItem>
+                  <SelectItem value="90">90 days</SelectItem>
+                  <SelectItem value="180">180 days</SelectItem>
+                  <SelectItem value="365">1 year</SelectItem>
+                  <SelectItem value="1095">3 years</SelectItem>
+                  <SelectItem value="2555">7 years</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="text-sm text-muted-foreground">
+                Automatically delete user data and logs after this period
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Automatic backups</Label>
+                <div className="text-sm text-muted-foreground">
+                  Create encrypted backups of critical data daily
+                </div>
+              </div>
+              <Switch
+                checked={settings.automaticBackups}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, automaticBackups: checked }))}
+              />
+            </div>
+
+            {settings.automaticBackups && (
+              <div className="flex items-center justify-between pl-4 border-l-2 border-muted">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Backup encryption</Label>
+                  <div className="text-sm text-muted-foreground">
+                    Encrypt backup files with separate encryption keys
+                  </div>
+                </div>
+                <Switch
+                  checked={settings.backupEncryption}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, backupEncryption: checked }))}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Compliance */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Compliance
+            </CardTitle>
+            <CardDescription>
+              Configure compliance framework and global security standards
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="complianceMode" className="text-sm font-medium">
+                Compliance mode
+              </Label>
+              <Select
+                value={settings.complianceMode}
+                onValueChange={(value) => setSettings(prev => ({ ...prev, complianceMode: value }))}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="gdpr">GDPR Compliant</SelectItem>
+                  <SelectItem value="hipaa">HIPAA Compliant</SelectItem>
+                  <SelectItem value="sox">SOX Compliant</SelectItem>
+                  <SelectItem value="pci">PCI DSS Compliant</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="text-sm text-muted-foreground">
+                Select the compliance framework that applies to your organization
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Advanced Security */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Advanced Security
+            </CardTitle>
+            <CardDescription>
+              Additional security monitoring and tracking capabilities
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Device trust</Label>
+                <div className="text-sm text-muted-foreground">
+                  Track and manage trusted devices for users
+                </div>
+              </div>
+              <Switch
+                checked={settings.deviceTrustEnabled}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, deviceTrustEnabled: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Geo-location tracking</Label>
+                <div className="text-sm text-muted-foreground">
+                  Track login locations for security monitoring
+                </div>
+              </div>
+              <Switch
+                checked={settings.geoLocationTracking}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, geoLocationTracking: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Anonymous analytics</Label>
+                <div className="text-sm text-muted-foreground">
+                  Collect anonymized usage data for security insights
+                </div>
+              </div>
+              <Switch
+                checked={settings.anonymousAnalytics}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, anonymousAnalytics: checked }))}
+              />
             </div>
           </CardContent>
         </Card>

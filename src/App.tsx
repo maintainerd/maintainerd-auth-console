@@ -30,6 +30,11 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
+					<Route path="security/settings" element={<SecuritySettingsPage />} />
+          <Route path="security/password-policies" element={<DashboardPage />} />
+          <Route path="security/sessions" element={<DashboardPage />} />
+          <Route path="security/threats" element={<DashboardPage />} />
+          <Route path="security/ip-restrictions" element={<DashboardPage />} />
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
@@ -44,11 +49,6 @@ function App() {
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="policies" element={<PoliciesPage />} />
 					<Route path="onboarding" element={<OnboardingPage />} />
-					<Route path="security/settings" element={<SecuritySettingsPage />} />
-          <Route path="security/password-policies" element={<DashboardPage />} />
-          <Route path="security/sessions" element={<DashboardPage />} />
-          <Route path="security/threats" element={<DashboardPage />} />
-          <Route path="security/ip-restrictions" element={<DashboardPage />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
           <Route path="monitoring" element={<DashboardPage />} />
