@@ -55,15 +55,16 @@ export default function SecuritySettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Security Settings</h1>
-        <p className="text-muted-foreground">
-          Configure global security settings and authentication requirements for your application.
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">Security Settings</h1>
+          <p className="text-muted-foreground">
+            Configure global security settings and authentication requirements for your application.
+          </p>
+        </div>
 
-      <div className="grid gap-6">
+        <div className="grid gap-6">
         {/* Multi-Factor Authentication */}
         <Card>
           <CardHeader>
@@ -156,43 +157,50 @@ export default function SecuritySettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Enable passwordless login</Label>
-                <div className="text-sm text-muted-foreground">
-                  Allow users to login using magic links or biometrics
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Enable passwordless login</Label>
+                  <div className="text-xs text-muted-foreground">Magic links or biometrics</div>
                 </div>
+                <Switch
+                  checked={settings.passwordlessLogin}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, passwordlessLogin: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.passwordlessLogin}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, passwordlessLogin: checked }))}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Enable social login</Label>
-                <div className="text-sm text-muted-foreground">
-                  Allow login through social providers (Google, GitHub, etc.)
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Enable social login</Label>
+                  <div className="text-xs text-muted-foreground">Google, GitHub, etc.</div>
                 </div>
+                <Switch
+                  checked={settings.socialLoginEnabled}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, socialLoginEnabled: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.socialLoginEnabled}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, socialLoginEnabled: checked }))}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Require email verification</Label>
-                <div className="text-sm text-muted-foreground">
-                  Users must verify their email before accessing the application
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Require email verification</Label>
+                  <div className="text-xs text-muted-foreground">Verify email before access</div>
                 </div>
+                <Switch
+                  checked={settings.requireEmailVerification}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, requireEmailVerification: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.requireEmailVerification}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, requireEmailVerification: checked }))}
-              />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Allow password reset</Label>
+                  <div className="text-xs text-muted-foreground">Reset passwords via email</div>
+                </div>
+                <Switch
+                  checked={settings.allowPasswordReset}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, allowPasswordReset: checked }))}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -224,43 +232,45 @@ export default function SecuritySettingsPage() {
 
             {settings.accountLockoutEnabled && (
               <div className="grid gap-4 pl-4 border-l-2 border-muted">
-                <div className="grid gap-2">
-                  <Label htmlFor="maxAttempts" className="text-sm font-medium">
-                    Maximum login attempts
-                  </Label>
-                  <Select
-                    value={settings.maxLoginAttempts.toString()}
-                    onValueChange={(value) => setSettings(prev => ({ ...prev, maxLoginAttempts: parseInt(value) }))}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3">3 attempts</SelectItem>
-                      <SelectItem value="5">5 attempts</SelectItem>
-                      <SelectItem value="10">10 attempts</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="maxAttempts" className="text-sm font-medium">
+                      Maximum login attempts
+                    </Label>
+                    <Select
+                      value={settings.maxLoginAttempts.toString()}
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, maxLoginAttempts: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 attempts</SelectItem>
+                        <SelectItem value="5">5 attempts</SelectItem>
+                        <SelectItem value="10">10 attempts</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="lockoutDuration" className="text-sm font-medium">
-                    Lockout duration (minutes)
-                  </Label>
-                  <Select
-                    value={settings.lockoutDuration.toString()}
-                    onValueChange={(value) => setSettings(prev => ({ ...prev, lockoutDuration: parseInt(value) }))}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="1440">24 hours</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="grid gap-2">
+                    <Label htmlFor="lockoutDuration" className="text-sm font-medium">
+                      Lockout duration (minutes)
+                    </Label>
+                    <Select
+                      value={settings.lockoutDuration.toString()}
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, lockoutDuration: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="60">1 hour</SelectItem>
+                        <SelectItem value="1440">24 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             )}
@@ -450,43 +460,39 @@ export default function SecuritySettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Device trust</Label>
-                <div className="text-sm text-muted-foreground">
-                  Track and manage trusted devices for users
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Device trust</Label>
+                  <div className="text-xs text-muted-foreground">Track and manage trusted devices</div>
                 </div>
+                <Switch
+                  checked={settings.deviceTrustEnabled}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, deviceTrustEnabled: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.deviceTrustEnabled}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, deviceTrustEnabled: checked }))}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Geo-location tracking</Label>
-                <div className="text-sm text-muted-foreground">
-                  Track login locations for security monitoring
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Geo-location tracking</Label>
+                  <div className="text-xs text-muted-foreground">Track login locations</div>
                 </div>
+                <Switch
+                  checked={settings.geoLocationTracking}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, geoLocationTracking: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.geoLocationTracking}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, geoLocationTracking: checked }))}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Anonymous analytics</Label>
-                <div className="text-sm text-muted-foreground">
-                  Collect anonymized usage data for security insights
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Anonymous analytics</Label>
+                  <div className="text-xs text-muted-foreground">Collect anonymized usage data</div>
                 </div>
+                <Switch
+                  checked={settings.anonymousAnalytics}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, anonymousAnalytics: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.anonymousAnalytics}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, anonymousAnalytics: checked }))}
-              />
             </div>
           </CardContent>
         </Card>
@@ -503,42 +509,41 @@ export default function SecuritySettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Security notifications</Label>
-                <div className="text-sm text-muted-foreground">
-                  Send email notifications for security events
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Security notifications</Label>
+                  <div className="text-xs text-muted-foreground">Email notifications for security events</div>
                 </div>
+                <Switch
+                  checked={settings.securityNotifications}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, securityNotifications: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.securityNotifications}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, securityNotifications: checked }))}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Suspicious activity alerts</Label>
-                <div className="text-sm text-muted-foreground">
-                  Alert administrators about unusual login patterns
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Suspicious activity alerts</Label>
+                  <div className="text-xs text-muted-foreground">Alert about unusual login patterns</div>
                 </div>
+                <Switch
+                  checked={settings.suspiciousActivityAlerts}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, suspiciousActivityAlerts: checked }))}
+                />
               </div>
-              <Switch
-                checked={settings.suspiciousActivityAlerts}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, suspiciousActivityAlerts: checked }))}
-              />
             </div>
           </CardContent>
         </Card>
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} className="w-32">
+          <Button onClick={handleSave} className="min-w-[140px] px-6">
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
         </div>
       </div>
+    </div>
     </div>
   )
 }

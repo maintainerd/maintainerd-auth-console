@@ -17,6 +17,10 @@ import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
 import SecuritySettingsPage from './pages/security/settings'
+import PasswordPoliciesPage from './pages/security/password-policies'
+import SessionManagementPage from './pages/security/session-management'
+import ThreatDetectionPage from './pages/security/threat-detection'
+import IpRestrictionsPage from './pages/security/ip-restrictions'
 import OnboardingPage from './pages/onboarding'
 
 function App() {
@@ -30,11 +34,11 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-					<Route path="security/settings" element={<SecuritySettingsPage />} />
-          <Route path="security/password-policies" element={<DashboardPage />} />
-          <Route path="security/sessions" element={<DashboardPage />} />
-          <Route path="security/threats" element={<DashboardPage />} />
-          <Route path="security/ip-restrictions" element={<DashboardPage />} />
+          <Route path="security/settings" element={<SecuritySettingsPage />} />
+          <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
+          <Route path="security/sessions" element={<SessionManagementPage />} />
+          <Route path="security/threats" element={<ThreatDetectionPage />} />
+          <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
