@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Palette } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { OnboardingFlow } from "../constants"
 import { OnboardingActions } from "./OnboardingActions"
@@ -95,6 +95,31 @@ export const onboardingColumns: ColumnDef<OnboardingFlow>[] = [
           >
             {status}
           </Badge>
+        </div>
+      )
+    },
+  },
+
+  {
+    accessorKey: "loginBrandingName",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="h-auto p-0 font-semibold"
+      >
+        Login Branding
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const onboarding = row.original
+      return (
+        <div className="flex items-center gap-2 px-3 py-1">
+          <Palette className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {onboarding.loginBrandingName || "No branding"}
+          </span>
         </div>
       )
     },

@@ -20,6 +20,9 @@ export type OnboardingFlow = {
   createdBy: string
   updatedAt: string
   isDefault: boolean
+  // Login branding integration
+  loginBrandingId?: string
+  loginBrandingName?: string
 }
 
 export type OnboardingPage = {
@@ -104,7 +107,9 @@ export const mockOnboardingFlows: OnboardingFlow[] = [
     createdAt: "2024-01-15T10:30:00Z",
     createdBy: "admin@example.com",
     updatedAt: "2024-01-20T14:22:00Z",
-    isDefault: true
+    isDefault: true,
+    loginBrandingId: "1",
+    loginBrandingName: "Default Login"
   },
   {
     id: "2", 
@@ -169,7 +174,9 @@ export const mockOnboardingFlows: OnboardingFlow[] = [
     createdAt: "2024-01-10T09:15:00Z",
     createdBy: "admin@example.com",
     updatedAt: "2024-01-18T16:45:00Z",
-    isDefault: false
+    isDefault: false,
+    loginBrandingId: "2",
+    loginBrandingName: "Corporate Theme"
   },
   {
     id: "3",
@@ -202,9 +209,11 @@ export const mockOnboardingFlows: OnboardingFlow[] = [
     completions: 2156,
     conversionRate: 85.3,
     createdAt: "2024-01-12T11:20:00Z",
-    createdBy: "admin@example.com", 
+    createdBy: "admin@example.com",
     updatedAt: "2024-01-19T13:10:00Z",
-    isDefault: false
+    isDefault: false,
+    loginBrandingId: "3",
+    loginBrandingName: "Minimal Design"
   },
   {
     id: "4",
@@ -246,6 +255,8 @@ export const mockOnboardingFlows: OnboardingFlow[] = [
     createdAt: "2024-01-22T15:30:00Z",
     createdBy: "admin@example.com",
     updatedAt: "2024-01-22T15:30:00Z",
-    isDefault: false
+    isDefault: false,
+    loginBrandingId: "1",
+    loginBrandingName: "Default Login"
   }
 ]
