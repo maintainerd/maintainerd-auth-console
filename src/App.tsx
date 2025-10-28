@@ -24,6 +24,7 @@ import IpRestrictionsPage from './pages/security/ip-restrictions'
 import OnboardingPage from './pages/onboarding'
 import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
+import NotificationsPage from './pages/notifications'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="security/sessions" element={<SessionManagementPage />} />
           <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />

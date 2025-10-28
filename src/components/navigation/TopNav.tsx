@@ -12,8 +12,17 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LogOut, Settings, User, Bell, Globe, ChevronDown } from "lucide-react"
 import { data } from "@/components/sidebar/constants"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
+import { useParams, useNavigate } from "react-router-dom"
 
 export function TopNav() {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
+  const handleViewAllNotifications = () => {
+    if (containerId) {
+      navigate(`/c/${containerId}/notifications`)
+    }
+  }
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-primary text-primary-foreground">
       <div className="flex h-14 items-center px-4">
@@ -70,12 +79,53 @@ export function TopNav() {
           {/* Action Items */}
           <div className="flex items-center gap-2">
             {/* Notification Bell */}
-            <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
+                    3
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-72" align="end">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="max-h-80 overflow-y-auto">
+                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">New user registration</p>
+                      <p className="text-xs text-muted-foreground mt-1">John Doe registered for an account</p>
+                      <p className="text-xs text-muted-foreground mt-1">2m</p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
+                    <div className="h-2 w-2 rounded-full bg-orange-500 mt-1 shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">API rate limit warning</p>
+                      <p className="text-xs text-muted-foreground mt-1">User-api approaching limits (85%)</p>
+                      <p className="text-xs text-muted-foreground mt-1">15m</p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
+                    <div className="h-2 w-2 rounded-full bg-gray-400 mt-1 shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">System update completed</p>
+                      <p className="text-xs text-muted-foreground mt-1">Auth service updated to v2.1.0</p>
+                      <p className="text-xs text-muted-foreground mt-1">1h</p>
+                    </div>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-center justify-center text-sm cursor-pointer"
+                  onClick={handleViewAllNotifications}
+                >
+                  View all
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Language Selector */}
             <DropdownMenu>
