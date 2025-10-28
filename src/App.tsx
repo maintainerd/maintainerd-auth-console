@@ -22,6 +22,7 @@ import SessionManagementPage from './pages/security/session-management'
 import ThreatDetectionPage from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
 import OnboardingPage from './pages/onboarding'
+import AnalyticsPage from './pages/analytics'
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/c/:containerId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="monitoring" element={<AnalyticsPage />} />
           <Route path="security/settings" element={<SecuritySettingsPage />} />
           <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
           <Route path="security/sessions" element={<SessionManagementPage />} />
@@ -55,8 +58,6 @@ function App() {
 					<Route path="onboarding" element={<OnboardingPage />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
-          <Route path="monitoring" element={<DashboardPage />} />
-          <Route path="analytics" element={<DashboardPage />} />
           <Route path="logs" element={<DashboardPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/login" element={<DashboardPage />} />
