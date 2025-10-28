@@ -2,7 +2,7 @@ import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart3 } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { loginActivityData, timeRangeOptions } from "../constants"
 
@@ -48,16 +48,14 @@ const LoginActivityChart = () => {
           }}
           className="h-[200px] w-full"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={loginActivityData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="day" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="successful" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="failed" fill="#ef4444" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <BarChart width={400} height={200} data={loginActivityData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="day" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="successful" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="failed" fill="#ef4444" radius={[2, 2, 0, 0]} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

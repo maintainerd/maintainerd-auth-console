@@ -2,7 +2,7 @@ import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Shield } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { authenticationMethodsData, authMethodFilterOptions, timeRangeOptions } from "../constants"
 
@@ -59,15 +59,13 @@ const AuthMethodsChart = () => {
           }}
           className="h-[200px] w-full"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={authenticationMethodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="method" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="count" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <BarChart width={800} height={200} data={authenticationMethodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="method" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="count" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

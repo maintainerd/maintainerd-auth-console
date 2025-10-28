@@ -23,6 +23,7 @@ import ThreatDetectionPage from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
 import OnboardingPage from './pages/onboarding'
 import AnalyticsPage from './pages/analytics'
+import LogMonitoringPage from './pages/log-monitoring'
 
 function App() {
   return (
@@ -58,7 +59,7 @@ function App() {
 					<Route path="onboarding" element={<OnboardingPage />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
-          <Route path="logs" element={<DashboardPage />} />
+          <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/login" element={<DashboardPage />} />
           <Route path="branding/email-templates" element={<DashboardPage />} />
