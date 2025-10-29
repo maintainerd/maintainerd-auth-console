@@ -28,6 +28,7 @@ import NotificationsPage from './pages/notifications'
 import LoginBrandingPage from './pages/branding/login'
 import EmailTemplatesPage from './pages/branding/email-templates'
 import SmsTemplatesPage from './pages/branding/sms-templates'
+import GeneralSettingsPage from './pages/settings'
 
 function App() {
   return (
@@ -69,7 +70,7 @@ function App() {
           <Route path="branding/login" element={<LoginBrandingPage />} />
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
-          <Route path="settings" element={<DashboardPage />} />
+          <Route path="settings" element={<GeneralSettingsPage />} />
         </Route>
       </Routes>
     </>
