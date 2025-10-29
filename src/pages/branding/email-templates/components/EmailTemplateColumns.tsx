@@ -73,15 +73,13 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
     cell: ({ row }) => {
       const template = row.original
       return (
-        <div className="px-3 py-1">
-          <div className="flex flex-col gap-1">
-            <Badge className={getTypeColor(template.type)}>
-              {template.type.replace('_', ' ')}
-            </Badge>
-            <span className="text-xs text-muted-foreground capitalize">
-              {template.category.replace('_', ' ')}
-            </span>
-          </div>
+        <div className="flex flex-col gap-1 px-3 py-1">
+          <Badge className={getTypeColor(template.type)}>
+            {template.type.replace('_', ' ')}
+          </Badge>
+          <span className="text-xs text-muted-foreground capitalize">
+            {template.category.replace('_', ' ')}
+          </span>
         </div>
       )
     },
