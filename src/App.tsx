@@ -26,6 +26,7 @@ import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
 import NotificationsPage from './pages/notifications'
 import LoginBrandingPage from './pages/branding/login'
+import EmailTemplatesPage from './pages/branding/email-templates'
 
 function App() {
   return (
@@ -65,7 +66,7 @@ function App() {
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/login" element={<LoginBrandingPage />} />
-          <Route path="branding/email-templates" element={<DashboardPage />} />
+          <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/sms-templates" element={<DashboardPage />} />
           <Route path="settings" element={<DashboardPage />} />
         </Route>
