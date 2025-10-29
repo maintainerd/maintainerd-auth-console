@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,8 @@ interface ContainerActionsProps {
 }
 
 export function ContainerActions({ container }: ContainerActionsProps) {
+  const navigate = useNavigate()
+  const { containerId } = useParams<{ containerId: string }>()
   const handleActivate = () => {
     console.log("Activate tenant:", container.id)
     // TODO: Implement activate tenant
@@ -34,8 +37,7 @@ export function ContainerActions({ container }: ContainerActionsProps) {
   }
 
   const handleViewDetails = () => {
-    console.log("View tenant details:", container.id)
-    // TODO: Implement view details
+    navigate(`/c/${containerId}/containers/${container.id}`)
   }
 
 
