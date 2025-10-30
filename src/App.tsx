@@ -9,6 +9,7 @@ import UsersPage from './pages/users'
 import RolesPage from './pages/roles'
 import ContainersPage from './pages/containers'
 import ContainerDetailsPage from './pages/containers/details'
+import ContainerAddOrUpdateForm from './pages/containers/add-or-update-form'
 import ServicesPage from './pages/services'
 import ApisPage from './pages/apis'
 import PermissionsPage from './pages/permissions'
@@ -55,7 +56,9 @@ function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="roles" element={<RolesPage />} />
           <Route path="containers" element={<ContainersPage />} />
+          <Route path="containers/create" element={<ContainerAddOrUpdateForm />} />
           <Route path="containers/:targetContainerId" element={<ContainerDetailsPage />} />
+          <Route path="containers/:targetContainerId/edit" element={<ContainerAddOrUpdateForm />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="apis" element={<ApisPage />} />
           <Route path="permissions" element={<PermissionsPage />} />

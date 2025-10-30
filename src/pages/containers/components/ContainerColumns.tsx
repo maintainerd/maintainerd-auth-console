@@ -11,7 +11,6 @@ export type Container = {
   id: string
   name: string
   description: string
-  domain: string
   status: ContainerStatus
   userCount: number
   createdAt: string
@@ -66,7 +65,7 @@ export const containerColumns: ColumnDef<Container>[] = [
             )}
           </div>
           <span className="text-sm text-muted-foreground">{container.description}</span>
-          <span className="text-xs text-muted-foreground font-mono">{container.domain}</span>
+          <span className="text-xs text-muted-foreground font-mono">{container.id}</span>
         </div>
       )
     },

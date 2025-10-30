@@ -12,10 +12,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Eye,
-  Settings,
-  FileText,
-  Trash2,
-  Copy
+  Edit,
+  Trash2
 } from "lucide-react"
 import type { Container } from "./ContainerColumns"
 
@@ -44,22 +42,15 @@ export function ContainerActions({ container }: ContainerActionsProps) {
 
 
 
-  const handleViewAuditLogs = () => {
-    console.log("View audit logs:", container.id)
-    // TODO: Implement view audit logs
-  }
 
-  const handleEditSettings = () => {
-    console.log("Edit tenant settings:", container.id)
-    // TODO: Implement edit settings
+
+  const handleUpdateContainer = () => {
+    navigate(`/c/${containerId}/containers/${container.id}/edit`)
   }
 
 
 
-  const handleDuplicate = () => {
-    console.log("Duplicate tenant:", container.id)
-    // TODO: Implement duplicate tenant
-  }
+
 
   const handleDelete = () => {
     console.log("Delete tenant:", container.id)
@@ -82,12 +73,10 @@ export function ContainerActions({ container }: ContainerActionsProps) {
           View Details
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={handleViewAuditLogs}>
-          <FileText className="mr-2 h-4 w-4" />
-          Audit Logs
+        <DropdownMenuItem onClick={handleUpdateContainer}>
+          <Edit className="mr-2 h-4 w-4" />
+          Update Container
         </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
 
         {isSuspended && (
           <DropdownMenuItem onClick={handleActivate}>
@@ -102,25 +91,14 @@ export function ContainerActions({ container }: ContainerActionsProps) {
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem onClick={handleEditSettings}>
-          <Settings className="mr-2 h-4 w-4" />
-          Edit Settings
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onClick={handleDuplicate}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate Container
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
         {!container.isSystem && (
-          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Container
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Container
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

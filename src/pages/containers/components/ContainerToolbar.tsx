@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,8 @@ export function ContainerToolbar({
   setFilter,
   onFiltersChange
 }: ContainerToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
@@ -76,8 +79,7 @@ export function ContainerToolbar({
 
   // Action handlers
   const handleCreateContainer = () => {
-    console.log("Create new container")
-    // TODO: Implement create container
+    navigate(`/c/${containerId}/containers/create`)
   }
 
   const handleExport = () => {
