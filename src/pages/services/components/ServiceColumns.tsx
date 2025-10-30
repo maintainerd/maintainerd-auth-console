@@ -8,8 +8,10 @@ import { ServiceActions } from "./ServiceActions"
 export type ServiceStatus = "active" | "maintenance" | "deprecated" | "inactive"
 
 export type Service = {
-  id: string
-  name: string
+  id: string // UUID v4 for database record
+  name: string // Short name like "core"
+  displayName: string // Display name like "Core Service"
+  identifier: string // Alphanumeric random identifier for communications
   description: string
   status: ServiceStatus
   apiCount: number
@@ -73,12 +75,13 @@ const getSystemBadge = (isSystem: boolean) => {
 
 export const serviceColumns: ColumnDef<Service>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "displayName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold"
         >
           Service
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -90,12 +93,14 @@ export const serviceColumns: ColumnDef<Service>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{service.name}</span>
+            <span className="font-medium">{service.displayName}</span>
             {getSystemBadge(service.isSystem)}
           </div>
           <span className="text-sm text-muted-foreground truncate">{service.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono">{service.id}</span>
+            <span>Name: <span className="font-mono">{service.name}</span></span>
+            <span>•</span>
+            <span>ID: <span className="font-mono">{service.identifier}</span></span>
           </div>
         </div>
       )

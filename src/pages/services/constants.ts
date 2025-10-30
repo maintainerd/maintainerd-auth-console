@@ -2,8 +2,10 @@ import type { Service } from "./components/ServiceColumns"
 
 export const MOCK_SERVICES: Service[] = [
   {
-    id: "core",
-    name: "Core Service",
+    id: "550e8400-e29b-41d4-a716-446655440001",
+    name: "core",
+    displayName: "Core Service",
+    identifier: "CORE7X9K2M",
     description: "Core system service providing fundamental authentication infrastructure and system operations",
     status: "active",
     apiCount: 8,
@@ -13,8 +15,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: true
   },
   {
-    id: "auth",
-    name: "Authentication Service",
+    id: "550e8400-e29b-41d4-a716-446655440002",
+    name: "auth",
+    displayName: "Authentication Service",
+    identifier: "AUTH4N8L5Q",
     description: "Authentication and authorization service handling user login, token management, session control, and user management",
     status: "active",
     apiCount: 15,
@@ -24,8 +28,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: true
   },
   {
-    id: "sms",
-    name: "SMS Service",
+    id: "550e8400-e29b-41d4-a716-446655440003",
+    name: "sms",
+    displayName: "SMS Service",
+    identifier: "SMS3R7W9K",
     description: "SMS messaging service for sending text notifications, OTP codes, and alerts",
     status: "active",
     apiCount: 4,
@@ -35,8 +41,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: false
   },
   {
-    id: "email",
-    name: "Email Service",
+    id: "550e8400-e29b-41d4-a716-446655440004",
+    name: "email",
+    displayName: "Email Service",
+    identifier: "EMAIL8T6P2",
     description: "Email service for sending transactional emails, notifications, and marketing communications",
     status: "active",
     apiCount: 6,
@@ -46,8 +54,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: false
   },
   {
-    id: "storage",
-    name: "Storage Service",
+    id: "550e8400-e29b-41d4-a716-446655440005",
+    name: "storage",
+    displayName: "Storage Service",
+    identifier: "STOR5H3N8",
     description: "File storage service for managing uploads, downloads, and file operations with multiple backend support",
     status: "active",
     apiCount: 8,
@@ -57,8 +67,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: false
   },
   {
-    id: "analytics",
-    name: "Analytics Service",
+    id: "550e8400-e29b-41d4-a716-446655440006",
+    name: "analytics",
+    displayName: "Analytics Service",
+    identifier: "ANLY9M4K7",
     description: "Analytics service for collecting user behavior data, generating reports, and providing insights",
     status: "maintenance",
     apiCount: 7,
@@ -68,8 +80,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: false
   },
   {
-    id: "webhook",
-    name: "Webhook Service",
+    id: "550e8400-e29b-41d4-a716-446655440007",
+    name: "webhook",
+    displayName: "Webhook Service",
+    identifier: "WEBHK2L9P",
     description: "Webhook service for managing outbound HTTP callbacks and event notifications to external systems",
     status: "deprecated",
     apiCount: 5,
@@ -79,8 +93,10 @@ export const MOCK_SERVICES: Service[] = [
     isSystem: false
   },
   {
-    id: "legacy-api",
-    name: "Legacy API Service",
+    id: "550e8400-e29b-41d4-a716-446655440008",
+    name: "legacy-api",
+    displayName: "Legacy API Service",
+    identifier: "LGCY6T4M1",
     description: "Legacy API service that has been replaced by newer services and is no longer in use",
     status: "inactive",
     apiCount: 3,

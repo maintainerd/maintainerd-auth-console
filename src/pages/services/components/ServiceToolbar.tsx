@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,6 +43,8 @@ interface ServiceToolbarProps {
 }
 
 export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
@@ -72,8 +75,7 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
 
   // Action handlers
   const handleCreateService = () => {
-    console.log("Create new service")
-    // TODO: Implement create service
+    navigate(`/c/${containerId}/services/create`)
   }
 
   const handleExport = () => {

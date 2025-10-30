@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,10 +11,7 @@ import {
 import {
   MoreHorizontal,
   Eye,
-  Server,
-  FileText,
-  Settings,
-  Copy,
+  Edit,
   Trash2,
   Play,
   Pause,
@@ -26,24 +24,20 @@ interface ServiceActionsProps {
 }
 
 export function ServiceActions({ service }: ServiceActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const isActive = service.status === "active"
   const isMaintenance = service.status === "maintenance"
   const isDeprecated = service.status === "deprecated"
 
   // Action handlers
   const handleViewDetails = () => {
-    console.log("View service details:", service.id)
-    // TODO: Navigate to service details page
+    navigate(`/c/${containerId}/services/${service.id}`)
   }
 
-  const handleManageAPIs = () => {
-    console.log("Manage APIs for service:", service.id)
-    // TODO: Navigate to APIs management page
-  }
-
-  const handleManagePolicies = () => {
-    console.log("Manage policies for service:", service.id)
-    // TODO: Navigate to policies management page
+  const handleUpdateService = () => {
+    navigate(`/c/${containerId}/services/${service.id}/edit`)
   }
 
 
@@ -61,16 +55,6 @@ export function ServiceActions({ service }: ServiceActionsProps) {
   const handleDeprecate = () => {
     console.log("Deprecate service:", service.id)
     // TODO: Implement deprecate service
-  }
-
-  const handleEditSettings = () => {
-    console.log("Edit service settings:", service.id)
-    // TODO: Open service settings modal
-  }
-
-  const handleDuplicate = () => {
-    console.log("Duplicate service:", service.id)
-    // TODO: Implement duplicate service
   }
 
   const handleDelete = () => {
@@ -91,59 +75,41 @@ export function ServiceActions({ service }: ServiceActionsProps) {
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleManageAPIs}>
-          <Server className="mr-2 h-4 w-4" />
-          Manage APIs
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleManagePolicies}>
-          <FileText className="mr-2 h-4 w-4" />
-          Manage Policies
+
+        <DropdownMenuItem onClick={handleUpdateService}>
+          <Edit className="mr-2 h-4 w-4" />
+          Update Service
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
-        
         {!isActive && !isMaintenance && (
           <DropdownMenuItem onClick={handleActivate}>
             <Play className="mr-2 h-4 w-4" />
             Activate Service
           </DropdownMenuItem>
         )}
-        
+
         {isActive && (
           <DropdownMenuItem onClick={handleMaintenance}>
             <Pause className="mr-2 h-4 w-4" />
             Set Maintenance
           </DropdownMenuItem>
         )}
-        
+
         {!isDeprecated && (
           <DropdownMenuItem onClick={handleDeprecate}>
             <Archive className="mr-2 h-4 w-4" />
             Deprecate Service
           </DropdownMenuItem>
         )}
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleEditSettings}>
-          <Settings className="mr-2 h-4 w-4" />
-          Edit Settings
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleDuplicate}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate Service
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
+
         {!service.isSystem && (
-          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Service
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Service
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

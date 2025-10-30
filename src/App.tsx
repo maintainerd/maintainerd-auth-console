@@ -11,6 +11,8 @@ import ContainersPage from './pages/containers'
 import ContainerDetailsPage from './pages/containers/details'
 import ContainerAddOrUpdateForm from './pages/containers/add-or-update-form'
 import ServicesPage from './pages/services'
+import ServiceDetailsPage from './pages/services/details'
+import ServiceAddOrUpdateForm from './pages/services/add-or-update-form'
 import ApisPage from './pages/apis'
 import PermissionsPage from './pages/permissions'
 import IdentityProvidersPage from './pages/identity-providers'
@@ -60,6 +62,9 @@ function App() {
           <Route path="containers/:targetContainerId" element={<ContainerDetailsPage />} />
           <Route path="containers/:targetContainerId/edit" element={<ContainerAddOrUpdateForm />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="services/create" element={<ServiceAddOrUpdateForm />} />
+          <Route path="services/:serviceId" element={<ServiceDetailsPage />} />
+          <Route path="services/:serviceId/edit" element={<ServiceAddOrUpdateForm />} />
           <Route path="apis" element={<ApisPage />} />
           <Route path="permissions" element={<PermissionsPage />} />
           <Route path="providers/identity" element={<IdentityProvidersPage />} />
