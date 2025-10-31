@@ -24,6 +24,8 @@ import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
+import PolicyDetailsPage from './pages/policies/details'
+import PolicyAddOrUpdateForm from './pages/policies/add-or-update-form'
 import SecuritySettingsPage from './pages/security/settings'
 import PasswordPoliciesPage from './pages/security/password-policies'
 import SessionManagementPage from './pages/security/session-management'
@@ -81,6 +83,9 @@ function App() {
           <Route path="clients" element={<ClientsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="policies" element={<PoliciesPage />} />
+          <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
+          <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
+          <Route path="policies/:policyId/edit" element={<PolicyAddOrUpdateForm />} />
 					<Route path="onboarding" element={<OnboardingPage />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />

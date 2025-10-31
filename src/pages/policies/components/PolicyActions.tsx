@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,18 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  Copy, 
-  Download, 
-  Play, 
-  Pause, 
-  Trash2, 
-  Server,
-  FileText,
-  History
+import {
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Copy,
+  Download,
+  Play,
+  Pause,
+  Trash2
 } from "lucide-react"
 import type { Policy } from "../constants"
 
@@ -28,12 +26,15 @@ interface PolicyActionsProps {
 }
 
 export function PolicyActions({ policy }: PolicyActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewPolicy = () => {
-    console.log("View policy:", policy.id)
+    navigate(`/c/${containerId}/policies/${policy.id}`)
   }
 
   const handleEditPolicy = () => {
-    console.log("Edit policy:", policy.id)
+    navigate(`/c/${containerId}/policies/${policy.id}/edit`)
   }
 
   const handleDuplicatePolicy = () => {
@@ -52,21 +53,15 @@ export function PolicyActions({ policy }: PolicyActionsProps) {
     console.log("Deactivate policy:", policy.id)
   }
 
-  const handleManageServices = () => {
-    console.log("Manage services for policy:", policy.id)
-  }
 
-  const handleViewStatements = () => {
-    console.log("View statements for policy:", policy.id)
-  }
-
-  const handleViewHistory = () => {
-    console.log("View history for policy:", policy.id)
-  }
 
   const handleDeletePolicy = () => {
     console.log("Delete policy:", policy.id)
   }
+
+  const isActive = policy.status === "active"
+  const isDraft = policy.status === "draft"
+  const isDeprecated = policy.status === "deprecated"
 
   return (
     <DropdownMenu>
@@ -77,69 +72,51 @@ export function PolicyActions({ policy }: PolicyActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Policy Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
         <DropdownMenuItem onClick={handleViewPolicy}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleEditPolicy}>
+
+        <DropdownMenuItem onClick={handleEditPolicy} disabled={policy.isSystem}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Policy
         </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleViewStatements}>
-          <FileText className="mr-2 h-4 w-4" />
-          View Statements
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleManageServices}>
-          <Server className="mr-2 h-4 w-4" />
-          Manage Services
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleDuplicatePolicy}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate Policy
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleDownloadPolicy}>
-          <Download className="mr-2 h-4 w-4" />
-          Export Policy
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        {policy.status === "active" ? (
-          <DropdownMenuItem onClick={handleDeactivatePolicy}>
-            <Pause className="mr-2 h-4 w-4" />
-            Deactivate
-          </DropdownMenuItem>
-        ) : (
+
+        {!isActive && !isDeprecated && (
           <DropdownMenuItem onClick={handleActivatePolicy}>
             <Play className="mr-2 h-4 w-4" />
-            Activate
+            Activate Policy
           </DropdownMenuItem>
         )}
-        
-        <DropdownMenuItem onClick={handleViewHistory}>
-          <History className="mr-2 h-4 w-4" />
-          View History
-        </DropdownMenuItem>
-        
+
+        {isActive && (
+          <DropdownMenuItem onClick={handleDeactivatePolicy}>
+            <Pause className="mr-2 h-4 w-4" />
+            Deactivate Policy
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuSeparator />
-        
+
+        <DropdownMenuItem onClick={handleDuplicatePolicy}>
+          <Copy className="mr-2 h-4 w-4" />
+          Duplicate
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={handleDownloadPolicy}>
+          <Download className="mr-2 h-4 w-4" />
+          Export
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
         <DropdownMenuItem
           onClick={handleDeletePolicy}
           className="text-destructive"
           disabled={policy.isSystem}
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete Policy
+          Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

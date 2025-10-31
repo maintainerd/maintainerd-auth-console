@@ -57,7 +57,7 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["users:read", "profile:read", "roles:read"],
-        resources: ["arn:service:user-management:*:user/*", "arn:service:auth:*:profile/*"]
+        resources: ["user-management", "auth"]
       },
       {
         effect: "deny",
@@ -82,20 +82,26 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["apis:read", "apis:write", "apis:create"],
-        resources: ["arn:service:api-gateway:*:api/*"]
+        resources: ["api-gateway"]
       },
       {
         effect: "allow",
         actions: ["permissions:read"],
-        resources: ["arn:service:auth:*:permission/*"]
+        resources: ["auth"]
       },
       {
         effect: "deny",
         actions: ["apis:delete"],
-        resources: ["arn:service:api-gateway:*:api/core-*"],
+        resources: ["api-gateway"],
         conditions: {
           "StringEquals": {
             "service:type": "system"
+          },
+          "IpAddress": {
+            "aws:SourceIp": ["203.0.113.0/24", "198.51.100.0/24"]
+          },
+          "DateGreaterThan": {
+            "aws:CurrentTime": "2024-01-01T00:00:00Z"
           }
         }
       }
@@ -117,7 +123,7 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["monitoring:read", "logs:read", "analytics:read", "metrics:read"],
-        resources: ["arn:service:*:*:logs/*", "arn:service:*:*:metrics/*"]
+        resources: ["monitoring", "analytics"]
       }
     ],
     appliedToServices: ["monitoring", "analytics", "core"],
@@ -137,12 +143,12 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["webhooks:read", "webhooks:write", "events:read", "events:publish"],
-        resources: ["arn:service:webhook:*:webhook/*", "arn:service:events:*:event/*"]
+        resources: ["webhook", "events"]
       },
       {
         effect: "allow",
         actions: ["users:read"],
-        resources: ["arn:service:user-management:*:user/*"],
+        resources: ["user-management"],
         conditions: {
           "StringLike": {
             "webhook:event_type": "user.*"
@@ -167,17 +173,17 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["clients:read", "clients:write", "clients:create"],
-        resources: ["arn:service:auth:*:client/*"]
+        resources: ["auth"]
       },
       {
         effect: "allow",
         actions: ["api-keys:read", "api-keys:create"],
-        resources: ["arn:service:auth:*:api-key/*"]
+        resources: ["auth"]
       },
       {
         effect: "deny",
         actions: ["clients:delete"],
-        resources: ["arn:service:auth:*:client/system-*"]
+        resources: ["auth"]
       }
     ],
     appliedToServices: ["auth"],
@@ -222,7 +228,7 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["migration:read", "migration:write", "users:migrate", "data:export"],
-        resources: ["arn:service:migration:*:*/*"]
+        resources: ["migration"]
       }
     ],
     appliedToServices: [],
@@ -242,7 +248,7 @@ export const MOCK_POLICIES: Policy[] = [
       {
         effect: "allow",
         actions: ["feature:read", "feature:test"],
-        resources: ["arn:service:feature-flags:*:feature/*"]
+        resources: ["feature-flags"]
       }
     ],
     appliedToServices: [],
@@ -250,6 +256,82 @@ export const MOCK_POLICIES: Policy[] = [
     createdAt: "2024-10-01T14:20:00Z",
     createdBy: "feature-team",
     updatedAt: "2024-10-20T11:15:00Z",
+    isSystem: false
+  },
+  {
+    id: "pol_complex_conditional",
+    name: "Complex Conditional Access Policy",
+    description: "Advanced policy with multiple conditions and resource patterns for enterprise security",
+    status: "active",
+    version: "3.2.1",
+    statements: [
+      {
+        effect: "allow",
+        actions: [
+          "users:read", "users:write", "users:create",
+          "roles:read", "roles:assign", "permissions:read",
+          "audit:read", "logs:read", "metrics:read"
+        ],
+        resources: [
+          "user-management",
+          "auth",
+          "monitoring"
+        ],
+        conditions: {
+          "StringEquals": {
+            "service:environment": ["production", "staging"],
+            "user:department": ["IT", "Security", "Operations"]
+          },
+          "IpAddress": {
+            "aws:SourceIp": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+          },
+          "DateGreaterThan": {
+            "aws:CurrentTime": "2024-01-01T00:00:00Z"
+          },
+          "DateLessThan": {
+            "aws:CurrentTime": "2025-12-31T23:59:59Z"
+          },
+          "NumericLessThan": {
+            "user:session_duration": "28800"
+          },
+          "Bool": {
+            "user:mfa_authenticated": "true",
+            "service:ssl_required": "true"
+          }
+        }
+      },
+      {
+        effect: "deny",
+        actions: ["*"],
+        resources: ["*"],
+        conditions: {
+          "StringNotEquals": {
+            "user:authentication_method": ["saml", "oauth2", "mfa"]
+          },
+          "IpAddressIfExists": {
+            "aws:SourceIp": ["203.0.113.0/24"]
+          }
+        }
+      },
+      {
+        effect: "allow",
+        actions: ["emergency:*"],
+        resources: ["emergency-system"],
+        conditions: {
+          "StringEquals": {
+            "user:role": "emergency_responder"
+          },
+          "Bool": {
+            "emergency:active": "true"
+          }
+        }
+      }
+    ],
+    appliedToServices: ["user-management", "auth", "monitoring", "emergency-system"],
+    serviceCount: 4,
+    createdAt: "2024-01-15T09:00:00Z",
+    createdBy: "security-admin",
+    updatedAt: "2024-10-25T16:30:00Z",
     isSystem: false
   }
 ]

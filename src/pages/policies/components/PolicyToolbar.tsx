@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Filter, X, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +33,8 @@ export function PolicyToolbar({
   filters,
   onFiltersChange,
 }: PolicyToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
   const hasActiveFilters = filters.statuses.length > 0 || filters.isSystem !== null || filters.hasServices !== null
@@ -78,7 +81,7 @@ export function PolicyToolbar({
   }
 
   const handleCreatePolicy = () => {
-    console.log("Create new policy")
+    navigate(`/c/${containerId}/policies/create`)
   }
 
   return (
