@@ -9,13 +9,12 @@ import { formatDistanceToNow } from "date-fns"
 export type UserStatus = "active" | "inactive" | "pending" | "suspended"
 
 export type User = {
-  id: string
-  name: string
+  id: string // UUID identifier
+  username: string
   email: string
+  phone?: string
   roles: string[]
   status: UserStatus
-  avatar?: string
-  phone?: string
   createdAt: string
   lastLogin?: string
   emailVerified: boolean
@@ -23,6 +22,24 @@ export type User = {
   twoFactorEnabled: boolean
   loginAttempts: number
   lastPasswordChange?: string
+}
+
+export type UserProfile = {
+  userId: string
+  firstName?: string
+  lastName?: string
+  displayName?: string
+  avatar?: string
+  bio?: string
+  birthDate?: string
+  gender?: string
+  phoneNumber?: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+  customFields?: Record<string, string>
 }
 
 const getStatusBadge = (status: UserStatus) => {
@@ -63,13 +80,13 @@ export const userColumns: ColumnDef<User>[] = [
       return (
         <div className="flex items-center gap-3 px-3 py-1">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`} alt={user.username} />
             <AvatarFallback className="text-xs">
-              {user.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+              {user.username.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium">{user.name}</span>
+            <span className="font-medium">{user.username}</span>
             <span className="text-sm text-muted-foreground">{user.email}</span>
           </div>
         </div>

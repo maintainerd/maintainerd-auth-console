@@ -6,6 +6,9 @@ import SetupAdminPage from './pages/setup/admin'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
+import UserDetailsPage from './pages/users/details'
+import UserAddOrUpdateForm from './pages/users/add-or-update-form'
+import UserProfileForm from './pages/users/profile-form'
 import RolesPage from './pages/roles'
 import ContainersPage from './pages/containers'
 import ContainerDetailsPage from './pages/containers/details'
@@ -59,6 +62,10 @@ function App() {
           <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="users/create" element={<UserAddOrUpdateForm />} />
+          <Route path="users/:userId" element={<UserDetailsPage />} />
+          <Route path="users/:userId/edit" element={<UserAddOrUpdateForm />} />
+          <Route path="users/:userId/profile" element={<UserProfileForm />} />
         </Route>
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />

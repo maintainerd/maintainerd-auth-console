@@ -1,3 +1,4 @@
+import { useNavigate, useParams } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -54,6 +55,9 @@ interface UserToolbarProps {
 }
 
 export function UserToolbar({ filter, setFilter, selectedCount = 0, onFiltersChange, availableRoles = [] }: UserToolbarProps) {
+  const navigate = useNavigate()
+  const { containerId } = useParams<{ containerId: string }>()
+
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
     roles: [],
@@ -64,8 +68,9 @@ export function UserToolbar({ filter, setFilter, selectedCount = 0, onFiltersCha
   })
 
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
+
   const handleAddUser = () => {
-    console.log("Add new user")
+    navigate(`/c/${containerId}/users/create`)
   }
 
   const handleBulkInvite = () => {

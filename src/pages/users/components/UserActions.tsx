@@ -1,3 +1,4 @@
+import { useNavigate, useParams } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,12 +26,15 @@ interface Props {
 }
 
 export function UserActions({ user, children }: Props) {
+  const navigate = useNavigate()
+  const { containerId } = useParams<{ containerId: string }>()
+
   const handleViewProfile = () => {
-    console.log("View profile:", user)
+    navigate(`/c/${containerId}/users/${user.id}`)
   }
 
   const handleEdit = () => {
-    console.log("Edit user:", user)
+    navigate(`/c/${containerId}/users/${user.id}/edit`)
   }
 
   const handleToggleStatus = () => {
