@@ -88,7 +88,7 @@ export default function PolicyDetailsPage() {
   const getEffectBadge = (effect: PolicyEffect) => {
     return (
       <Badge
-        variant={effect === "allow" ? "default" : "destructive"}
+        variant="outline"
         className={effect === "allow"
           ? "text-xs bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
           : "text-xs bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
@@ -152,15 +152,30 @@ export default function PolicyDetailsPage() {
 
   const getRiskBadge = (riskLevel: string) => {
     const variants = {
-      high: { variant: "destructive" as const, icon: AlertTriangle, text: "High Risk" },
-      medium: { variant: "secondary" as const, icon: Info, text: "Medium Risk" },
-      low: { variant: "outline" as const, icon: CheckCircle, text: "Low Risk" }
+      high: {
+        variant: "outline" as const,
+        icon: AlertTriangle,
+        text: "High Risk",
+        className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+      },
+      medium: {
+        variant: "secondary" as const,
+        icon: Info,
+        text: "Medium Risk",
+        className: ""
+      },
+      low: {
+        variant: "outline" as const,
+        icon: CheckCircle,
+        text: "Low Risk",
+        className: ""
+      }
     }
     const config = variants[riskLevel as keyof typeof variants]
     const Icon = config.icon
 
     return (
-      <Badge variant={config.variant} className="text-xs">
+      <Badge variant={config.variant} className={`text-xs ${config.className}`}>
         <Icon className="mr-1 h-3 w-3" />
         {config.text}
       </Badge>
@@ -198,7 +213,7 @@ export default function PolicyDetailsPage() {
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight">{policy.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{policy.displayName}</h1>
               {policy.isSystem && (
                 <Badge variant="secondary" className="text-xs">
                   <Shield className="h-3 w-3 mr-1" />
@@ -234,7 +249,11 @@ export default function PolicyDetailsPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Policy ID</p>
-                <p className="text-sm font-mono">{policy.id}</p>
+                <p className="text-sm font-mono">{policy.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Identifier</p>
+                <p className="text-sm font-mono">{policy.identifier}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Version</p>

@@ -9,8 +9,10 @@ export type PolicyStatement = {
 }
 
 export type Policy = {
-  id: string
-  name: string
+  id: string // UUID v4 for database record
+  name: string // Short name like "admin-access"
+  displayName: string // Display name like "System Admin Access"
+  identifier: string // Alphanumeric random identifier for communications
   description: string
   status: PolicyStatus
   version: string
@@ -28,8 +30,10 @@ export const POLICY_STATUSES: PolicyStatus[] = ["active", "inactive", "draft"]
 
 export const MOCK_POLICIES: Policy[] = [
   {
-    id: "pol_sys_admin_access",
-    name: "System Admin Access",
+    id: "550e8400-e29b-41d4-a716-446655440001",
+    name: "admin-access",
+    displayName: "System Admin Access",
+    identifier: "ADM7X9K2M",
     description: "Full administrative access to all system resources and operations",
     status: "active",
     version: "1.0.0",
@@ -48,8 +52,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: true
   },
   {
-    id: "pol_user_read_only",
-    name: "User Read-Only Access",
+    id: "550e8400-e29b-41d4-a716-446655440002",
+    name: "user-readonly",
+    displayName: "User Read-Only Access",
+    identifier: "USR4N8L5Q",
     description: "Read-only access to user data and profile information",
     status: "active",
     version: "2.1.0",
@@ -73,8 +79,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_api_management",
-    name: "API Management Policy",
+    id: "550e8400-e29b-41d4-a716-446655440003",
+    name: "api-management",
+    displayName: "API Management Policy",
+    identifier: "API3R7W9K",
     description: "Comprehensive access control for API management operations",
     status: "active",
     version: "1.5.2",
@@ -114,8 +122,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_monitoring_access",
-    name: "Monitoring and Analytics",
+    id: "550e8400-e29b-41d4-a716-446655440004",
+    name: "monitoring-access",
+    displayName: "Monitoring and Analytics",
+    identifier: "MON8T6P2L",
     description: "Access to monitoring data, logs, and analytics across all services",
     status: "active",
     version: "1.2.0",
@@ -134,8 +144,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_webhook_service",
-    name: "Webhook Service Policy",
+    id: "550e8400-e29b-41d4-a716-446655440005",
+    name: "webhook-service",
+    displayName: "Webhook Service Policy",
+    identifier: "WHK5H3N8P",
     description: "Policy for webhook delivery and event processing services",
     status: "active",
     version: "1.0.3",
@@ -164,8 +176,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_client_management",
-    name: "Client Application Management",
+    id: "550e8400-e29b-41d4-a716-446655440006",
+    name: "client-management",
+    displayName: "Client Application Management",
+    identifier: "CLT9M4K7Q",
     description: "Policy for managing OAuth clients and application integrations",
     status: "active",
     version: "2.0.1",
@@ -194,8 +208,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_security_audit",
-    name: "Security Audit Policy",
+    id: "550e8400-e29b-41d4-a716-446655440007",
+    name: "security-audit",
+    displayName: "Security Audit Policy",
+    identifier: "SEC2L9P4R",
     description: "Read-only access for security auditing and compliance monitoring",
     status: "active",
     version: "1.1.0",
@@ -219,8 +235,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_temp_migration",
-    name: "Temporary Migration Policy",
+    id: "550e8400-e29b-41d4-a716-446655440008",
+    name: "temp-migration",
+    displayName: "Temporary Migration Policy",
+    identifier: "MIG6T4M1S",
     description: "Temporary policy for data migration operations",
     status: "inactive",
     version: "1.0.0",
@@ -239,8 +257,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_draft_new_feature",
-    name: "New Feature Access Policy",
+    id: "550e8400-e29b-41d4-a716-446655440009",
+    name: "new-feature-access",
+    displayName: "New Feature Access Policy",
+    identifier: "FTR7Y5U8I",
     description: "Draft policy for upcoming feature access control",
     status: "draft",
     version: "0.1.0",
@@ -259,8 +279,10 @@ export const MOCK_POLICIES: Policy[] = [
     isSystem: false
   },
   {
-    id: "pol_complex_conditional",
-    name: "Complex Conditional Access Policy",
+    id: "550e8400-e29b-41d4-a716-446655440010",
+    name: "complex-conditional",
+    displayName: "Complex Conditional Access Policy",
+    identifier: "CMP3X7Z9B",
     description: "Advanced policy with multiple conditions and resource patterns for enterprise security",
     status: "active",
     version: "3.2.1",

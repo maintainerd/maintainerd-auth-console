@@ -69,12 +69,12 @@ export const policyColumns: ColumnDef<Policy>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{policy.name}</span>
+            <span className="font-medium">{policy.displayName}</span>
             {getSystemBadge(policy.isSystem)}
           </div>
           <span className="text-sm text-muted-foreground truncate">{policy.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono">{policy.id}</span>
+            <span className="font-mono">{policy.identifier}</span>
             <span>•</span>
             <span>v{policy.version}</span>
           </div>
