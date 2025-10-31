@@ -114,6 +114,12 @@ export default function ApiDetailsPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold tracking-tight">{api.displayName}</h1>
+              {api.isSystem && (
+                <Badge variant="secondary" className="text-xs">
+                  <Shield className="h-3 w-3 mr-1" />
+                  System
+                </Badge>
+              )}
               <Badge className={getStatusColor(api.status)}>
                 {getStatusText(api.status)}
               </Badge>

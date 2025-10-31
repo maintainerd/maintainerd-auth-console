@@ -104,8 +104,8 @@ export function ServiceDataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <ServiceToolbar
-        filter={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-        setFilter={(value) => table.getColumn("name")?.setFilterValue(value)}
+        filter={(table.getColumn("displayName")?.getFilterValue() as string) ?? ""}
+        setFilter={(value) => table.getColumn("displayName")?.setFilterValue(value)}
         onFiltersChange={setAdvancedFilters}
       />
 

@@ -1,25 +1,22 @@
+import * as React from "react"
+import { Button } from "@/components/ui/button"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   MoreHorizontal,
-  CheckCircle,
-  AlertTriangle,
   Eye,
-  Settings,
-  Key,
+  Edit,
   Trash2,
-  Copy,
-  Wrench,
+  Play,
+  Pause,
   Archive
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useParams, useNavigate } from "react-router-dom"
 import type { Api } from "./ApiColumns"
 
 interface ApiActionsProps {
@@ -30,15 +27,17 @@ export function ApiActions({ api }: ApiActionsProps) {
   const { containerId } = useParams<{ containerId: string }>()
   const navigate = useNavigate()
 
+  const isActive = api.status === "active"
+  const isMaintenance = api.status === "maintenance"
+  const isDeprecated = api.status === "deprecated"
+
+  // Action handlers
   const handleViewDetails = () => {
     navigate(`/c/${containerId}/apis/${api.id}`)
   }
 
-
-
-  const handleViewAuditLogs = () => {
-    console.log("View API audit logs:", api.id)
-    // TODO: Implement view audit logs
+  const handleUpdateApi = () => {
+    navigate(`/c/${containerId}/apis/${api.id}/edit`)
   }
 
   const handleActivate = () => {
@@ -56,24 +55,10 @@ export function ApiActions({ api }: ApiActionsProps) {
     // TODO: Implement deprecate API
   }
 
-  const handleEditSettings = () => {
-    navigate(`/c/${containerId}/apis/${api.id}/edit`)
-  }
-
-  const handleDuplicate = () => {
-    console.log("Duplicate API:", api.id)
-    // TODO: Implement duplicate API
-  }
-
   const handleDelete = () => {
     console.log("Delete API:", api.id)
-    // TODO: Implement delete API
+    // TODO: Implement delete API with confirmation
   }
-
-  const canActivate = api.status !== "active"
-  const canMaintenance = api.status === "active"
-  const canDeprecate = api.status === "active"
-  const canDelete = !api.isSystem
 
   return (
     <DropdownMenu>
@@ -84,56 +69,45 @@ export function ApiActions({ api }: ApiActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        
         <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleViewAuditLogs}>
-          <Settings className="mr-2 h-4 w-4" />
-          Audit Logs
+
+        <DropdownMenuItem onClick={handleUpdateApi}>
+          <Edit className="mr-2 h-4 w-4" />
+          Update API
         </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        {canActivate && (
+
+        {!isActive && !isMaintenance && (
           <DropdownMenuItem onClick={handleActivate}>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Activate
+            <Play className="mr-2 h-4 w-4" />
+            Activate API
           </DropdownMenuItem>
         )}
-        {canMaintenance && (
+
+        {isActive && (
           <DropdownMenuItem onClick={handleMaintenance}>
-            <Wrench className="mr-2 h-4 w-4" />
+            <Pause className="mr-2 h-4 w-4" />
             Set Maintenance
           </DropdownMenuItem>
         )}
-        {canDeprecate && (
+
+        {!isDeprecated && (
           <DropdownMenuItem onClick={handleDeprecate}>
             <Archive className="mr-2 h-4 w-4" />
-            Deprecate
+            Deprecate API
           </DropdownMenuItem>
         )}
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleEditSettings}>
-          <Settings className="mr-2 h-4 w-4" />
-          Edit Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDuplicate}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate API
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
 
-        {canDelete && (
-          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete API
-          </DropdownMenuItem>
+        {!api.isSystem && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete API
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
