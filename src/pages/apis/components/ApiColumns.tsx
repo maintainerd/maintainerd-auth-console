@@ -1,15 +1,17 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Key, Server, Globe } from "lucide-react"
+import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Key, Server, Globe, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiActions } from "./ApiActions"
 
 export type ApiStatus = "active" | "maintenance" | "deprecated" | "inactive"
 
 export type Api = {
-  id: string
-  name: string
+  id: string // UUID v4 for database record
+  name: string // Short name like "user-management"
+  displayName: string // Display name like "User Management API"
+  identifier: string // Alphanumeric random identifier for communications
   description: string
   serviceId: string
   serviceName: string
@@ -17,6 +19,7 @@ export type Api = {
   permissionCount: number
   version: string
   isPublic: boolean
+  isSystem: boolean // System APIs cannot be deleted
   createdAt: string
   createdBy: string
 }
@@ -40,16 +43,26 @@ const getStatusBadge = (status: ApiStatus) => {
   )
 }
 
+const getSystemBadge = (isSystem: boolean) => {
+  if (!isSystem) return null
 
+  return (
+    <Badge variant="secondary" className="text-xs">
+      <Shield className="h-3 w-3 mr-1" />
+      System
+    </Badge>
+  )
+}
 
 export const apiColumns: ColumnDef<Api>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "displayName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold"
         >
           API
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -61,7 +74,8 @@ export const apiColumns: ColumnDef<Api>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{api.name}</span>
+            <span className="font-medium">{api.displayName}</span>
+            {getSystemBadge(api.isSystem)}
             {api.isPublic && (
               <Badge variant="outline" className="text-xs">
                 <Globe className="mr-1 h-3 w-3" />
@@ -71,7 +85,11 @@ export const apiColumns: ColumnDef<Api>[] = [
           </div>
           <span className="text-sm text-muted-foreground truncate">{api.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono">{api.id}</span>
+            <span>Name: <span className="font-mono">{api.name}</span></span>
+            <span>•</span>
+            <span>ID: <span className="font-mono">{api.identifier}</span></span>
+            <span>•</span>
+            <span>v{api.version}</span>
           </div>
         </div>
       )

@@ -19,6 +19,7 @@ import {
   Archive
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useParams, useNavigate } from "react-router-dom"
 import type { Api } from "./ApiColumns"
 
 interface ApiActionsProps {
@@ -26,15 +27,14 @@ interface ApiActionsProps {
 }
 
 export function ApiActions({ api }: ApiActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewDetails = () => {
-    console.log("View API details:", api.id)
-    // TODO: Implement view details
+    navigate(`/c/${containerId}/apis/${api.id}`)
   }
 
-  const handleManagePermissions = () => {
-    console.log("Manage API permissions:", api.id)
-    // TODO: Implement manage permissions
-  }
+
 
   const handleViewAuditLogs = () => {
     console.log("View API audit logs:", api.id)
@@ -57,8 +57,7 @@ export function ApiActions({ api }: ApiActionsProps) {
   }
 
   const handleEditSettings = () => {
-    console.log("Edit API settings:", api.id)
-    // TODO: Implement edit settings
+    navigate(`/c/${containerId}/apis/${api.id}/edit`)
   }
 
   const handleDuplicate = () => {
@@ -74,6 +73,7 @@ export function ApiActions({ api }: ApiActionsProps) {
   const canActivate = api.status !== "active"
   const canMaintenance = api.status === "active"
   const canDeprecate = api.status === "active"
+  const canDelete = !api.isSystem
 
   return (
     <DropdownMenu>
@@ -89,10 +89,6 @@ export function ApiActions({ api }: ApiActionsProps) {
         <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleManagePermissions}>
-          <Key className="mr-2 h-4 w-4" />
-          Manage Permissions
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleViewAuditLogs}>
           <Settings className="mr-2 h-4 w-4" />
@@ -132,11 +128,13 @@ export function ApiActions({ api }: ApiActionsProps) {
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete API
-        </DropdownMenuItem>
+
+        {canDelete && (
+          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete API
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

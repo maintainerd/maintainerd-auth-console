@@ -14,7 +14,11 @@ import ServicesPage from './pages/services'
 import ServiceDetailsPage from './pages/services/details'
 import ServiceAddOrUpdateForm from './pages/services/add-or-update-form'
 import ApisPage from './pages/apis'
-import PermissionsPage from './pages/permissions'
+import ApiDetailsPage from './pages/apis/details'
+import ApiAddOrUpdateForm from './pages/apis/add-or-update-form'
+import AddOrUpdatePermissionPage from './pages/apis/details/add-or-update-permission'
+import PermissionUsagePage from './pages/apis/details/permission-usage'
+
 import IdentityProvidersPage from './pages/identity-providers'
 import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
@@ -66,7 +70,12 @@ function App() {
           <Route path="services/:serviceId" element={<ServiceDetailsPage />} />
           <Route path="services/:serviceId/edit" element={<ServiceAddOrUpdateForm />} />
           <Route path="apis" element={<ApisPage />} />
-          <Route path="permissions" element={<PermissionsPage />} />
+          <Route path="apis/create" element={<ApiAddOrUpdateForm />} />
+          <Route path="apis/:apiId" element={<ApiDetailsPage />} />
+          <Route path="apis/:apiId/edit" element={<ApiAddOrUpdateForm />} />
+          <Route path="apis/:apiId/permissions/create" element={<AddOrUpdatePermissionPage />} />
+          <Route path="apis/:apiId/permissions/:permissionName/edit" element={<AddOrUpdatePermissionPage />} />
+          <Route path="apis/:apiId/permissions/:permissionName/usage" element={<PermissionUsagePage />} />
           <Route path="providers/identity" element={<IdentityProvidersPage />} />
           <Route path="providers/social" element={<SocialProvidersPage />} />
           <Route path="clients" element={<ClientsPage />} />

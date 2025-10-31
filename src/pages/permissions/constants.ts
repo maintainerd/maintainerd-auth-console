@@ -1,6 +1,154 @@
-import type { Permission } from "./components/PermissionColumns"
+export type Permission = {
+  name: string
+  description: string
+  apiId: string
+  apiName: string
+  isSystem: boolean
+  roleCount: number
+  createdAt: string
+  createdBy: string
+  updatedAt: string
+}
 
 export const MOCK_PERMISSIONS: Permission[] = [
+  // System Management API permissions
+  {
+    name: "system:health:read",
+    description: "View system health status and diagnostics",
+    apiId: "550e8400-e29b-41d4-a716-446655440001",
+    apiName: "System Management API",
+    isSystem: true,
+    roleCount: 5,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "system:config:read",
+    description: "View system configuration settings",
+    apiId: "550e8400-e29b-41d4-a716-446655440001",
+    apiName: "System Management API",
+    isSystem: true,
+    roleCount: 3,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "system:config:write",
+    description: "Modify system configuration settings",
+    apiId: "550e8400-e29b-41d4-a716-446655440001",
+    apiName: "System Management API",
+    isSystem: true,
+    roleCount: 2,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "system:metrics:read",
+    description: "Access system performance metrics",
+    apiId: "550e8400-e29b-41d4-a716-446655440001",
+    apiName: "System Management API",
+    isSystem: true,
+    roleCount: 4,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "system:maintenance:write",
+    description: "Perform system maintenance operations",
+    apiId: "550e8400-e29b-41d4-a716-446655440001",
+    apiName: "System Management API",
+    isSystem: true,
+    roleCount: 1,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+
+  // Monitoring API permissions
+  {
+    name: "monitoring:alerts:read",
+    description: "View system alerts and notifications",
+    apiId: "550e8400-e29b-41d4-a716-446655440002",
+    apiName: "Monitoring API",
+    isSystem: true,
+    roleCount: 6,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "monitoring:alerts:write",
+    description: "Create and manage system alerts",
+    apiId: "550e8400-e29b-41d4-a716-446655440002",
+    apiName: "Monitoring API",
+    isSystem: true,
+    roleCount: 3,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "monitoring:performance:read",
+    description: "Access performance tracking data",
+    apiId: "550e8400-e29b-41d4-a716-446655440002",
+    apiName: "Monitoring API",
+    isSystem: true,
+    roleCount: 5,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+
+  // Session Management API permissions
+  {
+    name: "auth:session:create",
+    description: "Create new user authentication sessions",
+    apiId: "550e8400-e29b-41d4-a716-446655440003",
+    apiName: "Session Management API",
+    isSystem: true,
+    roleCount: 4,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "auth:session:read",
+    description: "View user session information",
+    apiId: "550e8400-e29b-41d4-a716-446655440003",
+    apiName: "Session Management API",
+    isSystem: true,
+    roleCount: 6,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "auth:session:revoke",
+    description: "Revoke user authentication sessions",
+    apiId: "550e8400-e29b-41d4-a716-446655440003",
+    apiName: "Session Management API",
+    isSystem: true,
+    roleCount: 3,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    name: "auth:token:manage",
+    description: "Manage authentication tokens and refresh tokens",
+    apiId: "550e8400-e29b-41d4-a716-446655440003",
+    apiName: "Session Management API",
+    isSystem: true,
+    roleCount: 2,
+    createdAt: "2024-01-01T00:00:00Z",
+    createdBy: "system",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+
   {
     name: "users:write",
     description: "Create, update, and manage user accounts",

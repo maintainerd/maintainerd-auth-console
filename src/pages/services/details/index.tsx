@@ -14,7 +14,7 @@ export default function ServiceDetailsPage() {
   const [activeTab, setActiveTab] = useState("overview")
   
   const service = MOCK_SERVICES.find(s => s.id === serviceId)
-  
+
   if (!service) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -52,28 +52,28 @@ export default function ServiceDetailsPage() {
     }
   }
 
-  // Overview sections for monitoring and system (configuration removed as it's outside auth scope)
+  // Overview sections for service-level monitoring and security
   const overviewSections = [
     {
-      title: "Monitoring",
-      description: "Service metrics, logs, and performance",
+      title: "Usage & Performance",
+      description: "Service-level usage metrics and performance data across all APIs",
       icon: BarChart3,
       stats: [
-        { label: "Uptime", value: "99.9%", route: "monitoring" },
-        { label: "Response Time", value: "45ms", route: "monitoring" },
-        { label: "Error Rate", value: "0.1%", route: "monitoring" },
-        { label: "Requests/min", value: "1.2k", route: "monitoring" },
+        { label: "Requests/min", value: "5.8k", route: "monitoring" },
+        { label: "Avg Response Time", value: "28ms", route: "monitoring" },
+        { label: "Success Rate", value: "99.7%", route: "monitoring" },
+        { label: "Error Rate", value: "0.3%", route: "monitoring" },
       ]
     },
     {
-      title: "System",
-      description: "System information and diagnostics",
-      icon: Database,
+      title: "Security & Access",
+      description: "Service-level security settings and access control",
+      icon: Shield,
       stats: [
-        { label: "Health Status", value: "Healthy", route: "health" },
-        { label: "Last Deploy", value: "2 hours ago", route: "deployments" },
-        { label: "Dependencies", value: "5 services", route: "dependencies" },
-        { label: "Diagnostics", value: "Run", route: "diagnostics" },
+        { label: "Total APIs", value: `${service.apiCount} configured`, route: "apis" },
+        { label: "Active Policies", value: `${service.policyCount} applied`, route: "policies" },
+        { label: "Authentication", value: "Required", route: "security" },
+        { label: "Rate Limiting", value: "Enabled", route: "security" },
       ]
     }
   ]
@@ -153,8 +153,8 @@ export default function ServiceDetailsPage() {
         </Card>
 
         {/* Tabs with Action Buttons */}
-        <div className="flex items-center justify-between">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="overview" className="gap-2">
                 <Activity className="h-4 w-4" />
@@ -169,31 +169,31 @@ export default function ServiceDetailsPage() {
                 Policies ({service.policyCount})
               </TabsTrigger>
             </TabsList>
-          </Tabs>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/apis/create?serviceId=${serviceId}`)}
-            >
-              <Plus className="h-4 w-4" />
-              Add API
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/policies/create?serviceId=${serviceId}`)}
-            >
-              <Plus className="h-4 w-4" />
-              Add Policy
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => navigate(`/c/${containerId}/apis/create?serviceId=${serviceId}`)}
+              >
+                <Plus className="h-4 w-4" />
+                Add API
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => navigate(`/c/${containerId}/policies/create?serviceId=${serviceId}`)}
+              >
+                <Plus className="h-4 w-4" />
+                Add Policy
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Tab Content */}
+          <div className="space-y-6">
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -320,6 +320,7 @@ export default function ServiceDetailsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>

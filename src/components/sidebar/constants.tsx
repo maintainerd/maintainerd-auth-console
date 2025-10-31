@@ -49,10 +49,6 @@ export const data = {
           route: "/apis",
         },
         {
-          title: "Permissions",
-          route: "/permissions",
-        },
-        {
           title: "Policies",
           route: "/policies",
         },
