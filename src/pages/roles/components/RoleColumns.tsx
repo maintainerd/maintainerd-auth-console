@@ -13,6 +13,7 @@ export type RoleStatus = "active" | "inactive"
 export type Role = {
   id: string
   name: string
+  displayName: string
   description: string
   permissions: string[]
   userCount: number
@@ -71,7 +72,7 @@ export const roleColumns: ColumnDef<Role>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{role.name}</span>
+            <span className="font-medium">{role.displayName}</span>
             {getSystemBadge(role.isSystem)}
           </div>
           <span className="text-sm text-muted-foreground">{role.description}</span>

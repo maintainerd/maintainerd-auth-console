@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -48,6 +49,8 @@ export function RoleToolbar({
   setFilter,
   onFiltersChange
 }: RoleToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
@@ -80,8 +83,7 @@ export function RoleToolbar({
 
   // Action handlers
   const handleAddRole = () => {
-    console.log("Add new role")
-    // TODO: Implement add role
+    navigate(`/c/${containerId}/roles/create`)
   }
 
   const handleExport = () => {

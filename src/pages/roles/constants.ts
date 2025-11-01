@@ -2,8 +2,9 @@ import type { Role } from "./components/RoleColumns"
 
 export const MOCK_ROLES: Role[] = [
   {
-    id: "1",
-    name: "Admin",
+    id: "550e8400-e29b-41d4-a716-446655440001",
+    name: "admin",
+    displayName: "Administrator",
     description: "Full system access with all permissions",
     permissions: ["users.read", "users.write", "users.delete", "roles.read", "roles.write", "roles.delete", "system.admin"],
     userCount: 3,
@@ -14,8 +15,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "System"
   },
   {
-    id: "2",
-    name: "User",
+    id: "550e8400-e29b-41d4-a716-446655440002",
+    name: "user",
+    displayName: "Standard User",
     description: "Standard user access with basic permissions",
     permissions: ["users.read", "profile.write"],
     userCount: 15,
@@ -26,8 +28,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "System"
   },
   {
-    id: "3",
-    name: "Manager",
+    id: "550e8400-e29b-41d4-a716-446655440003",
+    name: "manager",
+    displayName: "Team Manager",
     description: "Team management permissions with user oversight",
     permissions: ["users.read", "users.write", "teams.read", "teams.write", "reports.read"],
     userCount: 8,
@@ -38,8 +41,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "admin@example.com"
   },
   {
-    id: "4",
-    name: "Developer",
+    id: "550e8400-e29b-41d4-a716-446655440004",
+    name: "developer",
+    displayName: "Developer",
     description: "Development team access with code and deployment permissions",
     permissions: ["users.read", "code.read", "code.write", "deploy.read", "deploy.write", "logs.read"],
     userCount: 12,
@@ -50,8 +54,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "admin@example.com"
   },
   {
-    id: "5",
-    name: "Security",
+    id: "550e8400-e29b-41d4-a716-446655440005",
+    name: "security",
+    displayName: "Security Analyst",
     description: "Security team with audit and monitoring permissions",
     permissions: ["users.read", "audit.read", "security.read", "security.write", "logs.read", "monitoring.read"],
     userCount: 2,
@@ -62,8 +67,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "admin@example.com"
   },
   {
-    id: "6",
-    name: "Viewer",
+    id: "550e8400-e29b-41d4-a716-446655440006",
+    name: "viewer",
+    displayName: "Read-Only Viewer",
     description: "Read-only access for reporting and monitoring",
     permissions: ["users.read", "reports.read", "monitoring.read"],
     userCount: 5,
@@ -74,8 +80,9 @@ export const MOCK_ROLES: Role[] = [
     createdBy: "admin@example.com"
   },
   {
-    id: "7",
-    name: "Guest",
+    id: "550e8400-e29b-41d4-a716-446655440007",
+    name: "guest",
+    displayName: "Guest User",
     description: "Temporary access role for external users",
     permissions: ["profile.read"],
     userCount: 0,

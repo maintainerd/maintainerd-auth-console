@@ -21,6 +21,8 @@ import ApiDetailsPage from './pages/apis/details'
 import ApiAddOrUpdateForm from './pages/apis/add-or-update-form'
 import AddOrUpdatePermissionPage from './pages/apis/details/add-or-update-permission'
 import PermissionUsagePage from './pages/apis/details/permission-usage'
+import RoleDetailsPage from './pages/roles/details'
+import RoleAddOrUpdateForm from './pages/roles/add-or-update-form'
 
 import IdentityProvidersPage from './pages/identity-providers'
 import SocialProvidersPage from './pages/social-providers'
@@ -70,6 +72,9 @@ function App() {
         <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
           <Route path="roles" element={<RolesPage />} />
+          <Route path="roles/create" element={<RoleAddOrUpdateForm />} />
+          <Route path="roles/:roleId" element={<RoleDetailsPage />} />
+          <Route path="roles/:roleId/edit" element={<RoleAddOrUpdateForm />} />
           <Route path="containers" element={<ContainersPage />} />
           <Route path="containers/create" element={<ContainerAddOrUpdateForm />} />
           <Route path="containers/:targetContainerId" element={<ContainerDetailsPage />} />

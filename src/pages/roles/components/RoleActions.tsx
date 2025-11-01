@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -10,14 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
-  MoreHorizontal, 
-  Edit, 
-  Copy, 
-  Shield, 
-  ShieldOff, 
-  Trash2, 
-  Users, 
+import {
+  MoreHorizontal,
+  Edit,
+  Copy,
+  Shield,
+  ShieldOff,
+  Trash2,
+  Users,
   Eye,
   Settings
 } from "lucide-react"
@@ -28,29 +29,28 @@ interface RoleActionsProps {
 }
 
 export function RoleActions({ role }: RoleActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewRole = () => {
-    console.log("View role:", role.name)
-    // TODO: Implement view role details
+    navigate(`/c/${containerId}/roles/${role.id}`)
   }
 
   const handleEditRole = () => {
-    console.log("Edit role:", role.name)
-    // TODO: Implement edit role
+    navigate(`/c/${containerId}/roles/${role.id}/edit`)
   }
 
   const handleDuplicateRole = () => {
     console.log("Duplicate role:", role.name)
-    // TODO: Implement duplicate role
+    // TODO: Implement duplicate role functionality
   }
 
   const handleManagePermissions = () => {
-    console.log("Manage permissions for role:", role.name)
-    // TODO: Implement permission management
+    navigate(`/c/${containerId}/roles/${role.id}/edit`)
   }
 
   const handleViewUsers = () => {
-    console.log("View users with role:", role.name)
-    // TODO: Implement view users with this role
+    navigate(`/c/${containerId}/roles/${role.id}?tab=users`)
   }
 
   const handleToggleStatus = () => {
