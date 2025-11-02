@@ -7,20 +7,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   MoreHorizontal,
   Edit,
-  Copy,
   Shield,
   ShieldOff,
   Trash2,
-  Users,
-  Eye,
-  Settings
+  Eye
 } from "lucide-react"
 import type { Role } from "./RoleColumns"
 
@@ -32,7 +28,7 @@ export function RoleActions({ role }: RoleActionsProps) {
   const { containerId } = useParams<{ containerId: string }>()
   const navigate = useNavigate()
 
-  const handleViewRole = () => {
+  const handleViewDetails = () => {
     navigate(`/c/${containerId}/roles/${role.id}`)
   }
 
@@ -40,25 +36,12 @@ export function RoleActions({ role }: RoleActionsProps) {
     navigate(`/c/${containerId}/roles/${role.id}/edit`)
   }
 
-  const handleDuplicateRole = () => {
-    console.log("Duplicate role:", role.name)
-    // TODO: Implement duplicate role functionality
-  }
-
-  const handleManagePermissions = () => {
-    navigate(`/c/${containerId}/roles/${role.id}/edit`)
-  }
-
-  const handleViewUsers = () => {
-    navigate(`/c/${containerId}/roles/${role.id}?tab=users`)
-  }
-
   const handleToggleStatus = () => {
     console.log("Toggle status for role:", role.name)
     // TODO: Implement toggle role status
   }
 
-  const handleDeleteRole = () => {
+  const handleDelete = () => {
     console.log("Delete role:", role.name)
     // TODO: Implement delete role with confirmation
   }
@@ -72,37 +55,16 @@ export function RoleActions({ role }: RoleActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        
-        <DropdownMenuItem onClick={handleViewRole}>
+        <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleViewUsers}>
-          <Users className="mr-2 h-4 w-4" />
-          View Users ({role.userCount})
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem onClick={handleEditRole} disabled={role.isSystem}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Role
         </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleDuplicateRole}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate Role
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleManagePermissions} disabled={role.isSystem}>
-          <Settings className="mr-2 h-4 w-4" />
-          Manage Permissions
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem onClick={handleToggleStatus} disabled={role.isSystem}>
           {role.isActive ? (
             <>
@@ -116,17 +78,20 @@ export function RoleActions({ role }: RoleActionsProps) {
             </>
           )}
         </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem 
-          onClick={handleDeleteRole} 
-          className="text-red-600"
-          disabled={role.isSystem || role.userCount > 0}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Role
-        </DropdownMenuItem>
+
+        {!role.isSystem && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className="text-destructive"
+              disabled={role.userCount > 0}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Role
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
