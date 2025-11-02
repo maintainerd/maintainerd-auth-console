@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { MoreHorizontal, Eye, Edit, Settings, RotateCcw, Trash2, Copy, Key } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,28 +17,30 @@ interface ClientActionsProps {
 }
 
 export function ClientActions({ client }: ClientActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewDetails = () => {
-    console.log("View client details:", client.id)
+    navigate(`/c/${containerId}/clients/${client.id}`)
   }
 
   const handleEditClient = () => {
-    console.log("Edit client:", client.id)
-  }
-
-  const handleConfigureClient = () => {
-    console.log("Configure client:", client.id)
+    navigate(`/c/${containerId}/clients/${client.id}/edit`)
   }
 
   const handleRotateSecret = () => {
+    // TODO: Implement client secret rotation
     console.log("Rotate client secret:", client.id)
   }
 
   const handleCopyClientId = () => {
     navigator.clipboard.writeText(client.clientId)
+    // TODO: Add toast notification
     console.log("Copied client ID:", client.clientId)
   }
 
   const handleDeleteClient = () => {
+    // TODO: Implement client deletion with confirmation
     console.log("Delete client:", client.id)
   }
 
@@ -50,25 +53,20 @@ export function ClientActions({ client }: ClientActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleEditClient}>
+        <DropdownMenuItem onClick={handleEditClient} disabled={client.isDefault}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Client
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleConfigureClient}>
-          <Settings className="mr-2 h-4 w-4" />
-          Configure
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleCopyClientId}>
           <Copy className="mr-2 h-4 w-4" />
           Copy Client ID
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleRotateSecret}>
+        <DropdownMenuItem onClick={handleRotateSecret} disabled={client.isDefault}>
           <Key className="mr-2 h-4 w-4" />
           Rotate Secret
         </DropdownMenuItem>
@@ -76,7 +74,7 @@ export function ClientActions({ client }: ClientActionsProps) {
         <DropdownMenuItem
           onClick={handleDeleteClient}
           className="text-destructive"
-          disabled={client.isDefault}
+          disabled={client.isDefault || client.userCount > 0}
         >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete Client

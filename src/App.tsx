@@ -28,9 +28,11 @@ import IdentityProvidersPage from './pages/identity-providers'
 import IdentityProviderDetailsPage from './pages/identity-providers/details'
 import IdentityProviderAddOrUpdateForm from './pages/identity-providers/add-or-update-form'
 import SocialProvidersPage from './pages/social-providers'
-import SocialProviderDetailsPage from './pages/social-providers/details/index'
-import SocialProviderAddOrUpdateForm from './pages/social-providers/add-or-update-form/index'
+import SocialProviderDetailsPage from './pages/social-providers/details'
+import SocialProviderAddOrUpdateForm from './pages/social-providers/add-or-update-form'
 import ClientsPage from './pages/clients'
+import ClientDetailsPage from './pages/clients/details'
+import ClientAddOrUpdateForm from './pages/clients/add-or-update-form'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
 import PolicyDetailsPage from './pages/policies/details'
@@ -103,6 +105,9 @@ function App() {
           <Route path="providers/social/:providerId" element={<SocialProviderDetailsPage />} />
           <Route path="providers/social/:providerId/edit" element={<SocialProviderAddOrUpdateForm />} />
           <Route path="clients" element={<ClientsPage />} />
+          <Route path="clients/create" element={<ClientAddOrUpdateForm />} />
+          <Route path="clients/:clientId" element={<ClientDetailsPage />} />
+          <Route path="clients/:clientId/edit" element={<ClientAddOrUpdateForm />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="policies" element={<PoliciesPage />} />
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />

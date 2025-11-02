@@ -347,33 +347,19 @@ export default function SocialProviderAddOrUpdateForm() {
         Back to Social Providers
       </Button>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             {isEditing ? 'Edit Social Provider' : 'Create Social Provider'}
           </h1>
-          <p className="text-muted-foreground">
-            {isEditing 
-              ? 'Update the social provider configuration and settings.' 
+          <p className="text-muted-foreground mt-1">
+            {isEditing
+              ? 'Update the social provider configuration and settings.'
               : 'Configure a new OAuth 2.0 social authentication provider.'
             }
           </p>
         </div>
-        {isEditing && (
-          <Button 
-            variant="destructive" 
-            onClick={handleDelete}
-            disabled={isLoading}
-            className="gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        )}
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -659,20 +645,40 @@ export default function SocialProviderAddOrUpdateForm() {
           </CardContent>
         </Card>
 
-        {/* Form Actions */}
-        <div className="flex items-center justify-end gap-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate(`/c/${containerId}/providers/social`)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading} className="gap-2">
-            <Save className="h-4 w-4" />
-            {isLoading ? 'Saving...' : (isEditing ? 'Update Provider' : 'Create Provider')}
-          </Button>
+        {/* Actions */}
+        <div className="flex items-center justify-between">
+          <div>
+            {isEditing && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Provider
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(`/c/${containerId}/providers/social`)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isLoading ? "Saving..." : isEditing ? "Update Provider" : "Create Provider"}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
