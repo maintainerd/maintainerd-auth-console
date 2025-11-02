@@ -28,6 +28,8 @@ import IdentityProvidersPage from './pages/identity-providers'
 import IdentityProviderDetailsPage from './pages/identity-providers/details'
 import IdentityProviderAddOrUpdateForm from './pages/identity-providers/add-or-update-form'
 import SocialProvidersPage from './pages/social-providers'
+import SocialProviderDetailsPage from './pages/social-providers/details/index'
+import SocialProviderAddOrUpdateForm from './pages/social-providers/add-or-update-form/index'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
 import PoliciesPage from './pages/policies'
@@ -97,6 +99,9 @@ function App() {
           <Route path="providers/identity/:providerId" element={<IdentityProviderDetailsPage />} />
           <Route path="providers/identity/:providerId/edit" element={<IdentityProviderAddOrUpdateForm />} />
           <Route path="providers/social" element={<SocialProvidersPage />} />
+          <Route path="providers/social/create" element={<SocialProviderAddOrUpdateForm />} />
+          <Route path="providers/social/:providerId" element={<SocialProviderDetailsPage />} />
+          <Route path="providers/social/:providerId/edit" element={<SocialProviderAddOrUpdateForm />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="policies" element={<PoliciesPage />} />

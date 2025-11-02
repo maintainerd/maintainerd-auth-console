@@ -1,13 +1,15 @@
+"use client"
+
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Edit, RefreshCw, Trash2, Settings, Eye } from "lucide-react"
+import { MoreHorizontal, Edit, Trash2, Eye, Play, Pause } from "lucide-react"
 import type { SocialProvider } from "./SocialProviderColumns"
 
 interface SocialProviderActionsProps {
@@ -15,25 +17,28 @@ interface SocialProviderActionsProps {
 }
 
 export function SocialProviderActions({ provider }: SocialProviderActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewDetails = () => {
-    console.log("View details for provider:", provider.id)
+    navigate(`/c/${containerId}/providers/social/${provider.id}`)
   }
 
   const handleEditProvider = () => {
-    console.log("Edit provider:", provider.id)
+    navigate(`/c/${containerId}/providers/social/${provider.id}/edit`)
   }
 
-  const handleConfigureProvider = () => {
-    console.log("Configure provider:", provider.id)
+  const handleToggleStatus = () => {
+    console.log("Toggle status for provider:", provider.name)
+    // TODO: Implement toggle provider status
   }
 
-  const handleSyncUsers = () => {
-    console.log("Sync users for provider:", provider.id)
+  const handleDelete = () => {
+    console.log("Delete provider:", provider.name)
+    // TODO: Implement delete provider with confirmation
   }
 
-  const handleDeleteProvider = () => {
-    console.log("Delete provider:", provider.id)
-  }
+  const isActive = provider.status === "active"
 
   return (
     <DropdownMenu>
@@ -44,28 +49,35 @@ export function SocialProviderActions({ provider }: SocialProviderActionsProps) 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+
         <DropdownMenuItem onClick={handleEditProvider}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Provider
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleConfigureProvider}>
-          <Settings className="mr-2 h-4 w-4" />
-          Configure
+
+        <DropdownMenuItem onClick={handleToggleStatus}>
+          {isActive ? (
+            <>
+              <Pause className="mr-2 h-4 w-4" />
+              Deactivate Provider
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              Activate Provider
+            </>
+          )}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSyncUsers}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Sync Users
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
+        <DropdownMenuItem
+          onClick={handleDelete}
           className="text-destructive"
-          onClick={handleDeleteProvider}
+          disabled={provider.userCount > 0}
         >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete Provider
