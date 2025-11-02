@@ -1,15 +1,15 @@
 "use client"
 
+import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Edit, Settings, Trash2, Users, RefreshCw, Eye } from "lucide-react"
+import { MoreHorizontal, Edit, Trash2, Eye, Play, Pause } from "lucide-react"
 import type { IdentityProvider } from "./IdentityProviderColumns"
 
 interface IdentityProviderActionsProps {
@@ -17,6 +17,29 @@ interface IdentityProviderActionsProps {
 }
 
 export function IdentityProviderActions({ provider }: IdentityProviderActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
+  const handleViewDetails = () => {
+    navigate(`/c/${containerId}/providers/identity/${provider.id}`)
+  }
+
+  const handleEditProvider = () => {
+    navigate(`/c/${containerId}/providers/identity/${provider.id}/edit`)
+  }
+
+  const handleToggleStatus = () => {
+    console.log("Toggle status for provider:", provider.name)
+    // TODO: Implement toggle provider status
+  }
+
+  const handleDelete = () => {
+    console.log("Delete provider:", provider.name)
+    // TODO: Implement delete provider with confirmation
+  }
+
+  const isActive = provider.status === "active"
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,36 +49,43 @@ export function IdentityProviderActions({ provider }: IdentityProviderActionsPro
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem disabled={provider.isDefault}>
+
+        <DropdownMenuItem onClick={handleEditProvider} disabled={provider.isDefault}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Provider
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          Configuration
+
+        <DropdownMenuItem onClick={handleToggleStatus} disabled={provider.isDefault}>
+          {isActive ? (
+            <>
+              <Pause className="mr-2 h-4 w-4" />
+              Deactivate Provider
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              Activate Provider
+            </>
+          )}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Users className="mr-2 h-4 w-4" />
-          Manage Users
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled={provider.isDefault}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Sync Users
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-destructive"
-          disabled={provider.isDefault}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Provider
-        </DropdownMenuItem>
+
+        {!provider.isDefault && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className="text-destructive"
+              disabled={provider.userCount > 0}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Provider
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

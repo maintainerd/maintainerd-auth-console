@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,6 +38,9 @@ export function IdentityProviderToolbar({
   setFilter,
   onFiltersChange,
 }: IdentityProviderToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const [filters, setFilters] = React.useState<FilterState>({
     type: [],
     status: []
@@ -58,7 +62,7 @@ export function IdentityProviderToolbar({
   }
 
   const handleAddProvider = () => {
-    console.log("Add new identity provider")
+    navigate(`/c/${containerId}/providers/identity/create`)
   }
 
   const hasActiveFilters = filters.type.length > 0 ||

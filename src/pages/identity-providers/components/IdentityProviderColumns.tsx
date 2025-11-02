@@ -11,13 +11,16 @@ export type IdentityProviderType = "cognito" | "auth0" | "okta" | "azure_ad" | "
 export type IdentityProvider = {
   id: string
   name: string
+  displayName: string
   description: string
+  identifier: string
   type: IdentityProviderType
   status: IdentityProviderStatus
   userCount: number
   isDefault: boolean
   region?: string
   endpoint: string
+  metadata?: Record<string, string>
   createdAt: string
   createdBy: string
   updatedAt: string
@@ -139,11 +142,11 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{provider.name}</span>
+            <span className="font-medium">{provider.displayName}</span>
             {getSystemBadge(provider.isDefault)}
           </div>
           <span className="text-sm text-muted-foreground truncate">{provider.description}</span>
-          <span className="text-xs text-muted-foreground font-mono">{provider.id}</span>
+          <span className="text-xs text-muted-foreground font-mono">{provider.identifier}</span>
         </div>
       )
     },

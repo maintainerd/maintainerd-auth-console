@@ -25,6 +25,8 @@ import RoleDetailsPage from './pages/roles/details'
 import RoleAddOrUpdateForm from './pages/roles/add-or-update-form'
 
 import IdentityProvidersPage from './pages/identity-providers'
+import IdentityProviderDetailsPage from './pages/identity-providers/details'
+import IdentityProviderAddOrUpdateForm from './pages/identity-providers/add-or-update-form'
 import SocialProvidersPage from './pages/social-providers'
 import ClientsPage from './pages/clients'
 import ApiKeysPage from './pages/api-keys'
@@ -91,6 +93,9 @@ function App() {
           <Route path="apis/:apiId/permissions/:permissionName/edit" element={<AddOrUpdatePermissionPage />} />
           <Route path="apis/:apiId/permissions/:permissionName/usage" element={<PermissionUsagePage />} />
           <Route path="providers/identity" element={<IdentityProvidersPage />} />
+          <Route path="providers/identity/create" element={<IdentityProviderAddOrUpdateForm />} />
+          <Route path="providers/identity/:providerId" element={<IdentityProviderDetailsPage />} />
+          <Route path="providers/identity/:providerId/edit" element={<IdentityProviderAddOrUpdateForm />} />
           <Route path="providers/social" element={<SocialProvidersPage />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
