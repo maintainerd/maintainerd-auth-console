@@ -13,9 +13,10 @@ export const API_KEY_TYPES = [
 export type ApiKeyStatus = typeof API_KEY_STATUSES[number]
 export type ApiKeyType = typeof API_KEY_TYPES[number]
 
-export type ApiKey = {
-  id: string
+export interface ApiKey {
+  id: string // UUID format
   name: string
+  displayName: string
   description: string
   type: ApiKeyType
   status: ApiKeyStatus
@@ -29,10 +30,52 @@ export type ApiKey = {
   updatedAt: string
 }
 
+// Available permissions for API keys (comprehensive list)
+export const AVAILABLE_PERMISSIONS = [
+  // User Management
+  "users:read", "users:write", "users:delete",
+  "profile:read", "profile:write",
+
+  // Role & Permission Management
+  "roles:read", "roles:write", "roles:delete",
+  "permissions:read", "permissions:write",
+
+  // API Management
+  "apis:read", "apis:write", "apis:delete",
+  "api-keys:read", "api-keys:write", "api-keys:delete",
+
+  // Service Management
+  "services:read", "services:write", "services:delete",
+
+  // Analytics & Monitoring
+  "analytics:read", "reports:read", "reports:write",
+  "monitoring:read", "alerts:read", "logs:read",
+
+  // Authentication & Authorization
+  "auth:read", "auth:write",
+  "tokens:read", "tokens:write",
+
+  // Webhooks & Events
+  "webhooks:read", "webhooks:write",
+  "events:read", "events:write",
+
+  // System Administration
+  "system:read", "system:write", "system:admin",
+  "deploy:read", "deploy:write",
+
+  // Development & Testing
+  "test:read", "test:write",
+  "dev:access", "demo:read",
+
+  // Legacy & Migration
+  "legacy:read", "legacy:write"
+] as const
+
 export const MOCK_API_KEYS: ApiKey[] = [
   {
-    id: "k1a2b3c4d5e6",
-    name: "Production API",
+    id: "550e8400-e29b-41d4-a716-446655440001",
+    name: "prod-api-key",
+    displayName: "Production API",
     description: "Main production API key for web application backend services",
     type: "read-write",
     status: "active",
@@ -46,8 +89,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-25T09:15:00Z"
   },
   {
-    id: "k2b3c4d5e6f7",
-    name: "Analytics Service",
+    id: "550e8400-e29b-41d4-a716-446655440002",
+    name: "analytics-service-key",
+    displayName: "Analytics Service",
     description: "Read-only access for analytics and reporting dashboard",
     type: "read-only",
     status: "active",
@@ -61,8 +105,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-20T16:30:00Z"
   },
   {
-    id: "k3c4d5e6f7g8",
-    name: "Mobile App Backend",
+    id: "550e8400-e29b-41d4-a716-446655440003",
+    name: "mobile-backend-key",
+    displayName: "Mobile App Backend",
     description: "API key for mobile application backend integration",
     type: "read-write",
     status: "active",
@@ -76,8 +121,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-15T14:20:00Z"
   },
   {
-    id: "k4d5e6f7g8h9",
-    name: "Webhook Service",
+    id: "550e8400-e29b-41d4-a716-446655440004",
+    name: "webhook-service-key",
+    displayName: "Webhook Service",
     description: "API key for webhook delivery and event processing",
     type: "read-only",
     status: "active",
@@ -91,8 +137,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-10T11:30:00Z"
   },
   {
-    id: "k5e6f7g8h9i0",
-    name: "CI/CD Pipeline",
+    id: "550e8400-e29b-41d4-a716-446655440005",
+    name: "cicd-pipeline-key",
+    displayName: "CI/CD Pipeline",
     description: "Automated deployment and testing pipeline access",
     type: "admin",
     status: "active",
@@ -106,8 +153,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-05T15:45:00Z"
   },
   {
-    id: "k6f7g8h9i0j1",
-    name: "Legacy Integration",
+    id: "550e8400-e29b-41d4-a716-446655440006",
+    name: "legacy-integration-key",
+    displayName: "Legacy Integration",
     description: "Temporary key for legacy system migration",
     type: "read-only",
     status: "inactive",
@@ -121,8 +169,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-20T14:15:00Z"
   },
   {
-    id: "k7g8h9i0j1k2",
-    name: "Test Environment",
+    id: "550e8400-e29b-41d4-a716-446655440007",
+    name: "test-environment-key",
+    displayName: "Test Environment",
     description: "Development and testing environment API access",
     type: "read-write",
     status: "active",
@@ -135,8 +184,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-25T16:40:00Z"
   },
   {
-    id: "k8h9i0j1k2l3",
-    name: "Monitoring Service",
+    id: "550e8400-e29b-41d4-a716-446655440008",
+    name: "monitoring-service-key",
+    displayName: "Monitoring Service",
     description: "System monitoring and alerting service access",
     type: "read-only",
     status: "active",
@@ -150,8 +200,9 @@ export const MOCK_API_KEYS: ApiKey[] = [
     updatedAt: "2024-10-22T10:25:00Z"
   },
   {
-    id: "k9i0j1k2l3m4",
-    name: "Expired Demo Key",
+    id: "550e8400-e29b-41d4-a716-446655440009",
+    name: "expired-demo-key",
+    displayName: "Expired Demo Key",
     description: "Demo API key that has expired",
     type: "read-only",
     status: "expired",

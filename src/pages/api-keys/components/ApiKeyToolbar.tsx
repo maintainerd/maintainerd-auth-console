@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +31,8 @@ export function ApiKeyToolbar({
   filters,
   onFiltersChange,
 }: ApiKeyToolbarProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false)
 
   const hasActiveFilters = filters.statuses.length > 0
@@ -56,7 +59,7 @@ export function ApiKeyToolbar({
   }
 
   const handleCreateApiKey = () => {
-    console.log("Create new API key")
+    navigate(`/c/${containerId}/api-keys/create`)
   }
 
   return (

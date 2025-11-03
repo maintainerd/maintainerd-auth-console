@@ -1,11 +1,20 @@
 import * as React from "react"
-import { MoreHorizontal, Eye, Edit, Settings, RotateCcw, Trash2, Copy, Key, Activity, Pause, Play } from "lucide-react"
+import { useParams, useNavigate } from "react-router-dom"
+import {
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Copy,
+  Key,
+  Play,
+  Pause,
+  Trash2
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -16,20 +25,15 @@ interface ApiKeyActionsProps {
 }
 
 export function ApiKeyActions({ apiKey }: ApiKeyActionsProps) {
+  const { containerId } = useParams<{ containerId: string }>()
+  const navigate = useNavigate()
+
   const handleViewDetails = () => {
-    console.log("View API key details:", apiKey.id)
+    navigate(`/c/${containerId}/api-keys/${apiKey.id}`)
   }
 
   const handleEditApiKey = () => {
-    console.log("Edit API key:", apiKey.id)
-  }
-
-  const handleConfigurePermissions = () => {
-    console.log("Configure API key permissions:", apiKey.id)
-  }
-
-  const handleRegenerateKey = () => {
-    console.log("Regenerate API key:", apiKey.id)
+    navigate(`/c/${containerId}/api-keys/${apiKey.id}/edit`)
   }
 
   const handleCopyKey = () => {
@@ -38,13 +42,16 @@ export function ApiKeyActions({ apiKey }: ApiKeyActionsProps) {
     console.log("Copied API key:", apiKey.keyPrefix)
   }
 
-  const handleToggleStatus = () => {
-    const newStatus = apiKey.status === "active" ? "inactive" : "active"
-    console.log(`${newStatus === "active" ? "Activate" : "Deactivate"} API key:`, apiKey.id)
+  const handleRegenerateKey = () => {
+    console.log("Regenerate API key:", apiKey.id)
   }
 
-  const handleViewUsage = () => {
-    console.log("View API key usage:", apiKey.id)
+  const handleActivate = () => {
+    console.log("Activate API key:", apiKey.id)
+  }
+
+  const handleDeactivate = () => {
+    console.log("Deactivate API key:", apiKey.id)
   }
 
   const handleDeleteApiKey = () => {
@@ -53,6 +60,7 @@ export function ApiKeyActions({ apiKey }: ApiKeyActionsProps) {
 
   const isExpired = apiKey.status === "expired"
   const isActive = apiKey.status === "active"
+  const isInactive = apiKey.status === "inactive"
 
   return (
     <DropdownMenu>
@@ -63,47 +71,40 @@ export function ApiKeyActions({ apiKey }: ApiKeyActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
+
         <DropdownMenuItem onClick={handleEditApiKey}>
           <Edit className="mr-2 h-4 w-4" />
           Edit API Key
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleConfigurePermissions}>
-          <Settings className="mr-2 h-4 w-4" />
-          Configure Permissions
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+
         <DropdownMenuItem onClick={handleCopyKey}>
           <Copy className="mr-2 h-4 w-4" />
           Copy API Key
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleViewUsage}>
-          <Activity className="mr-2 h-4 w-4" />
-          View Usage
-        </DropdownMenuItem>
-        {!isExpired && (
-          <DropdownMenuItem onClick={handleToggleStatus}>
-            {isActive ? (
-              <>
-                <Pause className="mr-2 h-4 w-4" />
-                Deactivate
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Activate
-              </>
-            )}
+
+        {!isExpired && !isActive && (
+          <DropdownMenuItem onClick={handleActivate}>
+            <Play className="mr-2 h-4 w-4" />
+            Activate API Key
           </DropdownMenuItem>
         )}
+
+        {isActive && (
+          <DropdownMenuItem onClick={handleDeactivate}>
+            <Pause className="mr-2 h-4 w-4" />
+            Deactivate API Key
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem onClick={handleRegenerateKey} disabled={isExpired}>
           <Key className="mr-2 h-4 w-4" />
           Regenerate Key
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleDeleteApiKey}

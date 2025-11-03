@@ -51,6 +51,7 @@ export function ApiKeyDataTable<TData, TValue>({
       const searchLower = searchQuery.toLowerCase()
       const matchesSearch = !searchQuery ||
         apiKey.name.toLowerCase().includes(searchLower) ||
+        apiKey.displayName.toLowerCase().includes(searchLower) ||
         apiKey.description.toLowerCase().includes(searchLower) ||
         apiKey.keyPrefix.toLowerCase().includes(searchLower) ||
         apiKey.permissions.some(permission => permission.toLowerCase().includes(searchLower))

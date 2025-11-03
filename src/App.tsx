@@ -34,6 +34,8 @@ import ClientsPage from './pages/clients'
 import ClientDetailsPage from './pages/clients/details'
 import ClientAddOrUpdateForm from './pages/clients/add-or-update-form'
 import ApiKeysPage from './pages/api-keys'
+import ApiKeyDetailsPage from './pages/api-keys/details'
+import ApiKeyAddOrUpdateForm from './pages/api-keys/add-or-update-form'
 import PoliciesPage from './pages/policies'
 import PolicyDetailsPage from './pages/policies/details'
 import PolicyAddOrUpdateForm from './pages/policies/add-or-update-form'
@@ -109,6 +111,9 @@ function App() {
           <Route path="clients/:clientId" element={<ClientDetailsPage />} />
           <Route path="clients/:clientId/edit" element={<ClientAddOrUpdateForm />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
+          <Route path="api-keys/create" element={<ApiKeyAddOrUpdateForm />} />
+          <Route path="api-keys/:id" element={<ApiKeyDetailsPage />} />
+          <Route path="api-keys/:id/edit" element={<ApiKeyAddOrUpdateForm />} />
           <Route path="policies" element={<PoliciesPage />} />
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />

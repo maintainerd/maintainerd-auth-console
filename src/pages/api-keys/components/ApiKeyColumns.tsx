@@ -53,7 +53,7 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
       const apiKey = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <span className="font-medium">{apiKey.name}</span>
+          <span className="font-medium">{apiKey.displayName}</span>
           <span className="text-sm text-muted-foreground truncate">{apiKey.description}</span>
           <span className="text-xs text-muted-foreground font-mono">{apiKey.id}</span>
         </div>
