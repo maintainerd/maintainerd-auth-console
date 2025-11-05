@@ -33,7 +33,7 @@ import { MOCK_POLICIES } from "../constants"
 import type { PolicyEffect, PolicyStatement } from "../constants"
 
 export default function PolicyDetailsPage() {
-  const { containerId, policyId } = useParams<{ containerId: string; policyId: string }>()
+  const { tenantId, policyId } = useParams<{ tenantId: string; policyId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   const [expandedStatements, setExpandedStatements] = useState<Set<number>>(new Set())
@@ -51,7 +51,7 @@ export default function PolicyDetailsPage() {
             The policy you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/policies`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/policies`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Policies
         </Button>
@@ -201,7 +201,7 @@ export default function PolicyDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/policies`)}
+            onClick={() => navigate(`/${tenantId}/policies`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -231,7 +231,7 @@ export default function PolicyDetailsPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/policies/${policyId}/edit`)}
+              onClick={() => navigate(`/${tenantId}/policies/${policyId}/edit`)}
               disabled={policy.isSystem}
             >
               <Edit className="h-4 w-4" />
@@ -437,7 +437,7 @@ export default function PolicyDetailsPage() {
                       <p className="text-sm text-muted-foreground text-center mb-4">
                         {statementSearch ? "No statements match your search criteria." : "This policy doesn't have any statements yet."}
                       </p>
-                      <Button onClick={() => navigate(`/c/${containerId}/policies/${policyId}/edit`)}>
+                      <Button onClick={() => navigate(`/${tenantId}/policies/${policyId}/edit`)}>
                         Add Statement
                       </Button>
                     </div>
@@ -612,7 +612,7 @@ export default function PolicyDetailsPage() {
                     </div>
                     <Button
                       className="gap-2"
-                      onClick={() => navigate(`/c/${containerId}/policies/${policyId}/services/add`)}
+                      onClick={() => navigate(`/${tenantId}/policies/${policyId}/services/add`)}
                     >
                       <Plus className="h-4 w-4" />
                       Add Service
@@ -643,14 +643,14 @@ export default function PolicyDetailsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/c/${containerId}/services`)}
+                              onClick={() => navigate(`/${tenantId}/services`)}
                             >
                               View Service
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/c/${containerId}/policies/${policyId}/services/remove?service=${service}`)}
+                              onClick={() => navigate(`/${tenantId}/policies/${policyId}/services/remove?service=${service}`)}
                             >
                               Remove
                             </Button>
@@ -667,7 +667,7 @@ export default function PolicyDetailsPage() {
                       </p>
                       <Button
                         className="gap-2"
-                        onClick={() => navigate(`/c/${containerId}/policies/${policyId}/services/add`)}
+                        onClick={() => navigate(`/${tenantId}/policies/${policyId}/services/add`)}
                       >
                         <Plus className="h-4 w-4" />
                         Add First Service

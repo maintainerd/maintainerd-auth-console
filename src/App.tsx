@@ -10,9 +10,7 @@ import UserDetailsPage from './pages/users/details'
 import UserAddOrUpdateForm from './pages/users/add-or-update-form'
 import UserProfileForm from './pages/users/profile-form'
 import RolesPage from './pages/roles'
-import ContainersPage from './pages/containers'
-import ContainerDetailsPage from './pages/containers/details'
-import ContainerAddOrUpdateForm from './pages/containers/add-or-update-form'
+
 import ServicesPage from './pages/services'
 import ServiceDetailsPage from './pages/services/details'
 import ServiceAddOrUpdateForm from './pages/services/add-or-update-form'
@@ -52,6 +50,7 @@ import LoginBrandingPage from './pages/branding/login'
 import EmailTemplatesPage from './pages/branding/email-templates'
 import SmsTemplatesPage from './pages/branding/sms-templates'
 import GeneralSettingsPage from './pages/settings'
+import TenantCreatePage from './pages/tenant-create'
 
 function App() {
   return (
@@ -62,7 +61,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/setup/organization" element={<SetupOrganizationPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
-        <Route path="/c/:containerId" element={<PrivateLayout />}>
+        <Route path="/:tenantId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="monitoring" element={<AnalyticsPage />} />
@@ -77,16 +76,13 @@ function App() {
           <Route path="users/:userId/edit" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId/profile" element={<UserProfileForm />} />
         </Route>
-        <Route path="/c/:containerId" element={<PrivateLayout fullWidth />}>
+        <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
           <Route path="roles" element={<RolesPage />} />
           <Route path="roles/create" element={<RoleAddOrUpdateForm />} />
           <Route path="roles/:roleId" element={<RoleDetailsPage />} />
           <Route path="roles/:roleId/edit" element={<RoleAddOrUpdateForm />} />
-          <Route path="containers" element={<ContainersPage />} />
-          <Route path="containers/create" element={<ContainerAddOrUpdateForm />} />
-          <Route path="containers/:targetContainerId" element={<ContainerDetailsPage />} />
-          <Route path="containers/:targetContainerId/edit" element={<ContainerAddOrUpdateForm />} />
+
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/create" element={<ServiceAddOrUpdateForm />} />
           <Route path="services/:serviceId" element={<ServiceDetailsPage />} />
@@ -127,6 +123,7 @@ function App() {
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
           <Route path="settings" element={<GeneralSettingsPage />} />
+          <Route path="tenant/create" element={<TenantCreatePage />} />
         </Route>
       </Routes>
     </>

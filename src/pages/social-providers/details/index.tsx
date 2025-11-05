@@ -13,7 +13,7 @@ import { MOCK_USERS } from "../../users/constants"
 import type { SocialProvider } from "../components/SocialProviderColumns"
 
 export default function SocialProviderDetailsPage() {
-  const { containerId, providerId } = useParams<{ containerId: string; providerId: string }>()
+  const { tenantId, providerId } = useParams<{ tenantId: string; providerId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "overview"
@@ -32,7 +32,7 @@ export default function SocialProviderDetailsPage() {
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <h2 className="text-2xl font-semibold">Social Provider Not Found</h2>
         <p className="text-muted-foreground">The social provider you're looking for doesn't exist.</p>
-        <Button onClick={() => navigate(`/c/${containerId}/providers/social`)}>
+        <Button onClick={() => navigate(`/${tenantId}/providers/social`)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Social Providers
         </Button>
@@ -82,7 +82,7 @@ export default function SocialProviderDetailsPage() {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(`/c/${containerId}/providers/social`)}
+        onClick={() => navigate(`/${tenantId}/providers/social`)}
         className="gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -101,7 +101,7 @@ export default function SocialProviderDetailsPage() {
         <Button 
           variant="outline" 
           className="gap-2" 
-          onClick={() => navigate(`/c/${containerId}/providers/social/${providerId}/edit`)}
+          onClick={() => navigate(`/${tenantId}/providers/social/${providerId}/edit`)}
         >
           <Edit className="h-4 w-4" />
           Edit Provider

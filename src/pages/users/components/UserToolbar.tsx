@@ -56,7 +56,7 @@ interface UserToolbarProps {
 
 export function UserToolbar({ filter, setFilter, selectedCount = 0, onFiltersChange, availableRoles = [] }: UserToolbarProps) {
   const navigate = useNavigate()
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   const [filters, setFilters] = React.useState<FilterState>({
     status: [],
@@ -70,7 +70,7 @@ export function UserToolbar({ filter, setFilter, selectedCount = 0, onFiltersCha
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
   const handleAddUser = () => {
-    navigate(`/c/${containerId}/users/create`)
+    navigate(`/${tenantId}/users/create`)
   }
 
   const handleBulkInvite = () => {

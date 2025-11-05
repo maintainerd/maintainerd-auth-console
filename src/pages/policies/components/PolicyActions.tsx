@@ -26,15 +26,15 @@ interface PolicyActionsProps {
 }
 
 export function PolicyActions({ policy }: PolicyActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewPolicy = () => {
-    navigate(`/c/${containerId}/policies/${policy.id}`)
+    navigate(`/${tenantId}/policies/${policy.id}`)
   }
 
   const handleEditPolicy = () => {
-    navigate(`/c/${containerId}/policies/${policy.id}/edit`)
+    navigate(`/${tenantId}/policies/${policy.id}/edit`)
   }
 
   const handleDuplicatePolicy = () => {

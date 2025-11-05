@@ -17,15 +17,15 @@ interface ClientActionsProps {
 }
 
 export function ClientActions({ client }: ClientActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/clients/${client.id}`)
+    navigate(`/${tenantId}/clients/${client.id}`)
   }
 
   const handleEditClient = () => {
-    navigate(`/c/${containerId}/clients/${client.id}/edit`)
+    navigate(`/${tenantId}/clients/${client.id}/edit`)
   }
 
   const handleRotateSecret = () => {

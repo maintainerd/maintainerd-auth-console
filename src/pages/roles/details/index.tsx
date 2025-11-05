@@ -13,7 +13,7 @@ import { MOCK_USERS } from "../../users/constants"
 import type { Role } from "../components/RoleColumns"
 
 export default function RoleDetailsPage() {
-  const { containerId, roleId } = useParams<{ containerId: string; roleId: string }>()
+  const { tenantId, roleId } = useParams<{ tenantId: string; roleId: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState("overview")
@@ -40,7 +40,7 @@ export default function RoleDetailsPage() {
             The role you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/roles`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/roles`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Roles
         </Button>
@@ -101,7 +101,7 @@ export default function RoleDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/roles`)}
+            onClick={() => navigate(`/${tenantId}/roles`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -122,7 +122,7 @@ export default function RoleDetailsPage() {
           <Button
             variant="outline"
             className="gap-2"
-            onClick={() => navigate(`/c/${containerId}/roles/${roleId}/edit`)}
+            onClick={() => navigate(`/${tenantId}/roles/${roleId}/edit`)}
             disabled={role.isSystem}
           >
             <Edit className="h-4 w-4" />
@@ -285,7 +285,7 @@ export default function RoleDetailsPage() {
                   </div>
                   <Button
                     className="gap-2"
-                    onClick={() => navigate(`/c/${containerId}/roles/${roleId}/edit`)}
+                    onClick={() => navigate(`/${tenantId}/roles/${roleId}/edit`)}
                     disabled={role.isSystem}
                   >
                     <Plus className="h-4 w-4" />
@@ -405,7 +405,7 @@ export default function RoleDetailsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/c/${containerId}/users/${user.id}`)}
+                              onClick={() => navigate(`/${tenantId}/users/${user.id}`)}
                               className="gap-2"
                             >
                               <User className="h-4 w-4" />

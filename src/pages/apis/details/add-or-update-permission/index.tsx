@@ -23,8 +23,8 @@ export type Permission = {
 }
 
 export default function AddOrUpdatePermissionPage() {
-  const { containerId, apiId, permissionName } = useParams<{ 
-    containerId: string
+  const { tenantId, apiId, permissionName } = useParams<{ 
+    tenantId: string
     apiId: string
     permissionName?: string
   }>()
@@ -97,11 +97,11 @@ export default function AddOrUpdatePermissionPage() {
     })
 
     // Navigate back to API details
-    navigate(`/c/${containerId}/apis/${apiId}`)
+    navigate(`/${tenantId}/apis/${apiId}`)
   }
 
   const handleCancel = () => {
-    navigate(`/c/${containerId}/apis/${apiId}`)
+    navigate(`/${tenantId}/apis/${apiId}`)
   }
 
   if (!api) {
@@ -113,7 +113,7 @@ export default function AddOrUpdatePermissionPage() {
             The API you're trying to add a permission to doesn't exist.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/apis`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/apis`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to APIs
         </Button>

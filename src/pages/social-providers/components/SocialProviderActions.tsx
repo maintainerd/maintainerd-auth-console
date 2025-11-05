@@ -17,15 +17,15 @@ interface SocialProviderActionsProps {
 }
 
 export function SocialProviderActions({ provider }: SocialProviderActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/providers/social/${provider.id}`)
+    navigate(`/${tenantId}/providers/social/${provider.id}`)
   }
 
   const handleEditProvider = () => {
-    navigate(`/c/${containerId}/providers/social/${provider.id}/edit`)
+    navigate(`/${tenantId}/providers/social/${provider.id}/edit`)
   }
 
   const handleToggleStatus = () => {

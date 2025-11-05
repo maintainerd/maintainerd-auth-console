@@ -25,15 +25,15 @@ interface RoleActionsProps {
 }
 
 export function RoleActions({ role }: RoleActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/roles/${role.id}`)
+    navigate(`/${tenantId}/roles/${role.id}`)
   }
 
   const handleEditRole = () => {
-    navigate(`/c/${containerId}/roles/${role.id}/edit`)
+    navigate(`/${tenantId}/roles/${role.id}/edit`)
   }
 
   const handleToggleStatus = () => {

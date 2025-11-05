@@ -13,7 +13,7 @@ import { MOCK_SERVICES } from "../constants"
 import type { Service, ServiceStatus } from "../components/ServiceColumns"
 
 export default function ServiceAddOrUpdateForm() {
-  const { containerId, serviceId } = useParams<{ containerId: string; serviceId?: string }>()
+  const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId?: string }>()
   const navigate = useNavigate()
   const isEditing = !!serviceId
   const isCreating = !isEditing
@@ -93,7 +93,7 @@ export default function ServiceAddOrUpdateForm() {
       }
       
       // Navigate back to services list
-      navigate(`/c/${containerId}/services`)
+      navigate(`/${tenantId}/services`)
     } catch (error) {
       console.error("Error saving service:", error)
     } finally {
@@ -116,7 +116,7 @@ export default function ServiceAddOrUpdateForm() {
       console.log("Deleting service:", serviceId)
       
       // Navigate back to services list
-      navigate(`/c/${containerId}/services`)
+      navigate(`/${tenantId}/services`)
     } catch (error) {
       console.error("Error deleting service:", error)
     } finally {
@@ -135,7 +135,7 @@ export default function ServiceAddOrUpdateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/services`)}
+            onClick={() => navigate(`/${tenantId}/services`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -267,7 +267,7 @@ export default function ServiceAddOrUpdateForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/c/${containerId}/services`)}
+                onClick={() => navigate(`/${tenantId}/services`)}
                 disabled={isLoading}
               >
                 Cancel

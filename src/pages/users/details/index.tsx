@@ -11,7 +11,7 @@ import { MOCK_USERS, MOCK_USER_PROFILES } from "../constants"
 import type { User as UserType, UserProfile } from "../components/UserColumns"
 
 export default function UserDetailsPage() {
-  const { containerId, userId } = useParams<{ containerId: string; userId: string }>()
+  const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   
@@ -27,7 +27,7 @@ export default function UserDetailsPage() {
             The user you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/users`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/users`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Users
         </Button>
@@ -95,7 +95,7 @@ export default function UserDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/users`)}
+            onClick={() => navigate(`/${tenantId}/users`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default function UserDetailsPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/users/${userId}/edit`)}
+              onClick={() => navigate(`/${tenantId}/users/${userId}/edit`)}
             >
               <Edit className="h-4 w-4" />
               Edit User
@@ -142,7 +142,7 @@ export default function UserDetailsPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/users/${userId}/profile`)}
+              onClick={() => navigate(`/${tenantId}/users/${userId}/profile`)}
             >
               <Settings className="h-4 w-4" />
               Edit Profile
@@ -330,7 +330,7 @@ export default function UserDetailsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/c/${containerId}/users/${userId}/profile`)}
+                          onClick={() => navigate(`/${tenantId}/users/${userId}/profile`)}
                           className="gap-2 mt-2"
                         >
                           <Settings className="h-4 w-4" />

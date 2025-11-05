@@ -24,7 +24,7 @@ interface ApiActionsProps {
 }
 
 export function ApiActions({ api }: ApiActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const isActive = api.status === "active"
@@ -33,11 +33,11 @@ export function ApiActions({ api }: ApiActionsProps) {
 
   // Action handlers
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/apis/${api.id}`)
+    navigate(`/${tenantId}/apis/${api.id}`)
   }
 
   const handleUpdateApi = () => {
-    navigate(`/c/${containerId}/apis/${api.id}/edit`)
+    navigate(`/${tenantId}/apis/${api.id}/edit`)
   }
 
   const handleActivate = () => {

@@ -13,7 +13,7 @@ import { MOCK_USERS } from "../../users/constants"
 import type { Client } from "../constants"
 
 export default function ClientDetailsPage() {
-  const { containerId, clientId } = useParams<{ containerId: string; clientId: string }>()
+  const { tenantId, clientId } = useParams<{ tenantId: string; clientId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "overview"
@@ -32,7 +32,7 @@ export default function ClientDetailsPage() {
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <h2 className="text-2xl font-semibold">Client Not Found</h2>
         <p className="text-muted-foreground">The client you're looking for doesn't exist.</p>
-        <Button onClick={() => navigate(`/c/${containerId}/clients`)}>
+        <Button onClick={() => navigate(`/${tenantId}/clients`)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Clients
         </Button>
@@ -104,7 +104,7 @@ export default function ClientDetailsPage() {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(`/c/${containerId}/clients`)}
+        onClick={() => navigate(`/${tenantId}/clients`)}
         className="gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default function ClientDetailsPage() {
           <Button 
             variant="outline" 
             className="gap-2" 
-            onClick={() => navigate(`/c/${containerId}/clients/${clientId}/edit`)}
+            onClick={() => navigate(`/${tenantId}/clients/${clientId}/edit`)}
             disabled={client.isDefault}
           >
             <Edit className="h-4 w-4" />

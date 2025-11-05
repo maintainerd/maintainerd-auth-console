@@ -38,7 +38,7 @@ export function IdentityProviderToolbar({
   setFilter,
   onFiltersChange,
 }: IdentityProviderToolbarProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const [filters, setFilters] = React.useState<FilterState>({
@@ -62,7 +62,7 @@ export function IdentityProviderToolbar({
   }
 
   const handleAddProvider = () => {
-    navigate(`/c/${containerId}/providers/identity/create`)
+    navigate(`/${tenantId}/providers/identity/create`)
   }
 
   const hasActiveFilters = filters.type.length > 0 ||

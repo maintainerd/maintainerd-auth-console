@@ -89,8 +89,8 @@ const MOCK_PERMISSION_USAGE = {
 }
 
 export default function PermissionUsagePage() {
-  const { containerId, apiId, permissionName } = useParams<{ 
-    containerId: string
+  const { tenantId, apiId, permissionName } = useParams<{ 
+    tenantId: string
     apiId: string
     permissionName: string
   }>()
@@ -102,7 +102,7 @@ export default function PermissionUsagePage() {
   )
 
   const handleBackToApi = () => {
-    navigate(`/c/${containerId}/apis/${apiId}`)
+    navigate(`/${tenantId}/apis/${apiId}`)
   }
 
   if (!api || !permission) {
@@ -114,7 +114,7 @@ export default function PermissionUsagePage() {
             The permission you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/apis`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/apis`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to APIs
         </Button>

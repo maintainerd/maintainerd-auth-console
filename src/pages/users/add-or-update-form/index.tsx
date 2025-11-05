@@ -24,7 +24,7 @@ import { MOCK_USERS, AVAILABLE_ROLES, USER_STATUSES } from "../constants"
 import type { User as UserType, UserStatus } from "../components/UserColumns"
 
 export default function UserAddOrUpdateForm() {
-  const { containerId, userId } = useParams<{ containerId: string; userId?: string }>()
+  const { tenantId, userId } = useParams<{ tenantId: string; userId?: string }>()
   const navigate = useNavigate()
   const isEditing = !!userId
   const isCreating = !isEditing
@@ -112,7 +112,7 @@ export default function UserAddOrUpdateForm() {
       console.log(isEditing ? "Update user:" : "Create user:", formData)
       
       // Navigate back to users list
-      navigate(`/c/${containerId}/users`)
+      navigate(`/${tenantId}/users`)
     } catch (error) {
       console.error("Error saving user:", error)
     } finally {
@@ -127,7 +127,7 @@ export default function UserAddOrUpdateForm() {
 
     try {
       console.log("Delete user:", existingUser)
-      navigate(`/c/${containerId}/users`)
+      navigate(`/${tenantId}/users`)
     } catch (error) {
       console.error("Error deleting user:", error)
     }
@@ -169,7 +169,7 @@ export default function UserAddOrUpdateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/users`)}
+            onClick={() => navigate(`/${tenantId}/users`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -470,7 +470,7 @@ export default function UserAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/c/${containerId}/users`)}
+              onClick={() => navigate(`/${tenantId}/users`)}
             >
               Cancel
             </Button>

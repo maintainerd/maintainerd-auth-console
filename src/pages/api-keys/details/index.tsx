@@ -11,7 +11,7 @@ import { MOCK_API_KEYS } from "../constants"
 import { MOCK_PERMISSIONS } from "../../permissions/constants"
 
 export default function ApiKeyDetailsPage() {
-  const { containerId, id } = useParams<{ containerId: string; id: string }>()
+  const { tenantId, id } = useParams<{ tenantId: string; id: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview")
@@ -25,7 +25,7 @@ export default function ApiKeyDetailsPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold">API Key Not Found</h1>
           <p className="text-muted-foreground mt-2">The requested API key could not be found.</p>
-          <Button onClick={() => navigate(`/c/${containerId}/api-keys`)} className="mt-4">
+          <Button onClick={() => navigate(`/${tenantId}/api-keys`)} className="mt-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to API Keys
           </Button>
@@ -38,7 +38,7 @@ export default function ApiKeyDetailsPage() {
     setActiveTab(value)
     const newSearchParams = new URLSearchParams(searchParams)
     newSearchParams.set("tab", value)
-    navigate(`/c/${containerId}/api-keys/${id}?${newSearchParams.toString()}`, { replace: true })
+    navigate(`/${tenantId}/api-keys/${id}?${newSearchParams.toString()}`, { replace: true })
   }
 
   const getStatusIcon = (status: string) => {
@@ -109,7 +109,7 @@ export default function ApiKeyDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/api-keys`)}
+            onClick={() => navigate(`/${tenantId}/api-keys`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -137,7 +137,7 @@ export default function ApiKeyDetailsPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => navigate(`/c/${containerId}/api-keys/${apiKey.id}/edit`)}
+              onClick={() => navigate(`/${tenantId}/api-keys/${apiKey.id}/edit`)}
             >
               <Edit className="h-4 w-4" />
               Edit API Key
@@ -331,7 +331,7 @@ export default function ApiKeyDetailsPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         This API key doesn't have any permissions assigned yet.
                       </p>
-                      <Button onClick={() => navigate(`/c/${containerId}/api-keys/${apiKey.id}/edit`)}>
+                      <Button onClick={() => navigate(`/${tenantId}/api-keys/${apiKey.id}/edit`)}>
                         Configure Permissions
                       </Button>
                     </div>

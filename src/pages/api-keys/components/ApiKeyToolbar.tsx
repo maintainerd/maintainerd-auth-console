@@ -31,7 +31,7 @@ export function ApiKeyToolbar({
   filters,
   onFiltersChange,
 }: ApiKeyToolbarProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false)
 
@@ -59,7 +59,7 @@ export function ApiKeyToolbar({
   }
 
   const handleCreateApiKey = () => {
-    navigate(`/c/${containerId}/api-keys/create`)
+    navigate(`/${tenantId}/api-keys/create`)
   }
 
   return (

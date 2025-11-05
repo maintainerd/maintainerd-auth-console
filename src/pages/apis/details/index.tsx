@@ -10,7 +10,7 @@ import { MOCK_APIS } from "../constants"
 import { MOCK_PERMISSIONS } from "../../permissions/constants"
 
 export default function ApiDetailsPage() {
-  const { containerId, apiId } = useParams<{ containerId: string; apiId: string }>()
+  const { tenantId, apiId } = useParams<{ tenantId: string; apiId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -28,7 +28,7 @@ export default function ApiDetailsPage() {
             The API you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/apis`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/apis`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to APIs
         </Button>
@@ -101,7 +101,7 @@ export default function ApiDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/apis`)}
+            onClick={() => navigate(`/${tenantId}/apis`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -135,7 +135,7 @@ export default function ApiDetailsPage() {
           <Button 
             variant="outline" 
             className="gap-2" 
-            onClick={() => navigate(`/c/${containerId}/apis/${apiId}/edit`)}
+            onClick={() => navigate(`/${tenantId}/apis/${apiId}/edit`)}
           >
             <Edit className="h-4 w-4" />
             Edit API
@@ -250,7 +250,7 @@ export default function ApiDetailsPage() {
                     </div>
                     <Button
                       className="gap-2"
-                      onClick={() => navigate(`/c/${containerId}/apis/${apiId}/permissions/create`)}
+                      onClick={() => navigate(`/${tenantId}/apis/${apiId}/permissions/create`)}
                     >
                       <Plus className="h-4 w-4" />
                       Add Permission
@@ -284,14 +284,14 @@ export default function ApiDetailsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/c/${containerId}/apis/${apiId}/permissions/${encodeURIComponent(permission.name)}/edit`)}
+                              onClick={() => navigate(`/${tenantId}/apis/${apiId}/permissions/${encodeURIComponent(permission.name)}/edit`)}
                             >
                               Edit
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/c/${containerId}/apis/${apiId}/permissions/${encodeURIComponent(permission.name)}/usage`)}
+                              onClick={() => navigate(`/${tenantId}/apis/${apiId}/permissions/${encodeURIComponent(permission.name)}/usage`)}
                             >
                               View Usage
                             </Button>
@@ -308,7 +308,7 @@ export default function ApiDetailsPage() {
                       </p>
                       <Button
                         className="gap-2"
-                        onClick={() => navigate(`/c/${containerId}/apis/${apiId}/permissions/create`)}
+                        onClick={() => navigate(`/${tenantId}/apis/${apiId}/permissions/create`)}
                       >
                         <Plus className="h-4 w-4" />
                         Add First Permission

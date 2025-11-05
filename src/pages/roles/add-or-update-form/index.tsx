@@ -16,7 +16,7 @@ import { MOCK_ROLES, AVAILABLE_PERMISSIONS, PERMISSION_CATEGORIES } from "../con
 import type { Role } from "../components/RoleColumns"
 
 export default function RoleAddOrUpdateForm() {
-  const { containerId, roleId } = useParams<{ containerId: string; roleId?: string }>()
+  const { tenantId, roleId } = useParams<{ tenantId: string; roleId?: string }>()
   const navigate = useNavigate()
   const isEditing = !!roleId
   const isCreating = !isEditing
@@ -124,7 +124,7 @@ export default function RoleAddOrUpdateForm() {
       }
       
       // Navigate back to roles list
-      navigate(`/c/${containerId}/roles`)
+      navigate(`/${tenantId}/roles`)
     } catch (error) {
       console.error("Error saving role:", error)
     } finally {
@@ -141,7 +141,7 @@ export default function RoleAddOrUpdateForm() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
       console.log("Deleting role:", roleId)
-      navigate(`/c/${containerId}/roles`)
+      navigate(`/${tenantId}/roles`)
     } catch (error) {
       console.error("Error deleting role:", error)
     } finally {
@@ -174,7 +174,7 @@ export default function RoleAddOrUpdateForm() {
             The role you're trying to edit doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/roles`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/roles`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Roles
         </Button>
@@ -190,7 +190,7 @@ export default function RoleAddOrUpdateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/roles`)}
+            onClick={() => navigate(`/${tenantId}/roles`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -420,7 +420,7 @@ export default function RoleAddOrUpdateForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/c/${containerId}/roles`)}
+                onClick={() => navigate(`/${tenantId}/roles`)}
                 disabled={isLoading}
               >
                 Cancel

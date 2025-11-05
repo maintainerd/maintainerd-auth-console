@@ -25,7 +25,7 @@ const PROVIDER_TYPES: { value: SocialProviderType; label: string; description: s
 ]
 
 export default function SocialProviderAddOrUpdateForm() {
-  const { containerId, providerId } = useParams<{ containerId: string; providerId?: string }>()
+  const { tenantId, providerId } = useParams<{ tenantId: string; providerId?: string }>()
   const navigate = useNavigate()
   
   const isEditing = Boolean(providerId)
@@ -225,7 +225,7 @@ export default function SocialProviderAddOrUpdateForm() {
       console.log(isEditing ? 'Updating provider:' : 'Creating provider:', providerData)
       
       // Navigate back to providers list
-      navigate(`/c/${containerId}/providers/social`)
+      navigate(`/${tenantId}/providers/social`)
     } catch (error) {
       console.error('Error saving provider:', error)
     } finally {
@@ -247,7 +247,7 @@ export default function SocialProviderAddOrUpdateForm() {
       console.log('Deleting provider:', providerId)
       
       // Navigate back to providers list
-      navigate(`/c/${containerId}/providers/social`)
+      navigate(`/${tenantId}/providers/social`)
     } catch (error) {
       console.error('Error deleting provider:', error)
     } finally {
@@ -340,7 +340,7 @@ export default function SocialProviderAddOrUpdateForm() {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(`/c/${containerId}/providers/social`)}
+        onClick={() => navigate(`/${tenantId}/providers/social`)}
         className="gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -665,7 +665,7 @@ export default function SocialProviderAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/c/${containerId}/providers/social`)}
+              onClick={() => navigate(`/${tenantId}/providers/social`)}
               disabled={isLoading}
             >
               Cancel

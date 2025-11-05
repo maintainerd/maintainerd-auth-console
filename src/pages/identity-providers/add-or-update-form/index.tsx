@@ -23,7 +23,7 @@ const PROVIDER_TYPES: { value: IdentityProviderType; label: string; description:
 ]
 
 export default function IdentityProviderAddOrUpdateForm() {
-  const { containerId, providerId } = useParams<{ containerId: string; providerId?: string }>()
+  const { tenantId, providerId } = useParams<{ tenantId: string; providerId?: string }>()
   const navigate = useNavigate()
   
   const isEditing = Boolean(providerId)
@@ -257,7 +257,7 @@ export default function IdentityProviderAddOrUpdateForm() {
       }
       
       // Navigate back to providers list
-      navigate(`/c/${containerId}/providers/identity`)
+      navigate(`/${tenantId}/providers/identity`)
     } catch (error) {
       console.error("Error saving identity provider:", error)
       setErrors({ submit: "Failed to save identity provider. Please try again." })
@@ -284,7 +284,7 @@ export default function IdentityProviderAddOrUpdateForm() {
       console.log("Deleting identity provider:", existingProvider.id)
       
       // Navigate back to providers list
-      navigate(`/c/${containerId}/providers/identity`)
+      navigate(`/${tenantId}/providers/identity`)
     } catch (error) {
       console.error("Error deleting identity provider:", error)
       setErrors({ submit: "Failed to delete identity provider. Please try again." })
@@ -300,7 +300,7 @@ export default function IdentityProviderAddOrUpdateForm() {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(`/c/${containerId}/providers/identity`)}
+        onClick={() => navigate(`/${tenantId}/providers/identity`)}
         className="gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -696,7 +696,7 @@ export default function IdentityProviderAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/c/${containerId}/providers/identity`)}
+              onClick={() => navigate(`/${tenantId}/providers/identity`)}
               disabled={isLoading}
             >
               Cancel

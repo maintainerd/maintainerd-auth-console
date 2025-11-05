@@ -35,7 +35,7 @@ type FormErrors = {
 }
 
 export default function ApiKeyAddOrUpdateFormPage() {
-  const { containerId, id } = useParams<{ containerId: string; id: string }>()
+  const { tenantId, id } = useParams<{ tenantId: string; id: string }>()
   const navigate = useNavigate()
   const isEditing = Boolean(id)
   
@@ -144,7 +144,7 @@ export default function ApiKeyAddOrUpdateFormPage() {
       console.log("Form submitted:", formData)
       
       // Navigate back to API keys list
-      navigate(`/c/${containerId}/api-keys`)
+      navigate(`/${tenantId}/api-keys`)
     } catch (error) {
       console.error("Error saving API key:", error)
     } finally {
@@ -181,7 +181,7 @@ export default function ApiKeyAddOrUpdateFormPage() {
       {/* Back Button */}
       <Button
         variant="ghost"
-        onClick={() => navigate(`/c/${containerId}/api-keys`)}
+        onClick={() => navigate(`/${tenantId}/api-keys`)}
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -385,7 +385,7 @@ export default function ApiKeyAddOrUpdateFormPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(`/c/${containerId}/api-keys`)}
+                  onClick={() => navigate(`/${tenantId}/api-keys`)}
                   disabled={isLoading}
                 >
                   Cancel

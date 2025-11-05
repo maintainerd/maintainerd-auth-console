@@ -43,7 +43,7 @@ interface ServiceToolbarProps {
 }
 
 export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceToolbarProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
@@ -75,7 +75,7 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
 
   // Action handlers
   const handleCreateService = () => {
-    navigate(`/c/${containerId}/services/create`)
+    navigate(`/${tenantId}/services/create`)
   }
 
   const handleExport = () => {

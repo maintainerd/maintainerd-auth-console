@@ -13,7 +13,7 @@ import { MOCK_USERS } from "../../users/constants"
 import type { IdentityProvider } from "../components/IdentityProviderColumns"
 
 export default function IdentityProviderDetailsPage() {
-  const { containerId, providerId } = useParams<{ containerId: string; providerId: string }>()
+  const { tenantId, providerId } = useParams<{ tenantId: string; providerId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "overview"
@@ -33,7 +33,7 @@ export default function IdentityProviderDetailsPage() {
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <h2 className="text-2xl font-semibold">Identity Provider Not Found</h2>
         <p className="text-muted-foreground">The identity provider you're looking for doesn't exist.</p>
-        <Button onClick={() => navigate(`/c/${containerId}/providers/identity`)}>
+        <Button onClick={() => navigate(`/${tenantId}/providers/identity`)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Identity Providers
         </Button>
@@ -107,7 +107,7 @@ export default function IdentityProviderDetailsPage() {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(`/c/${containerId}/providers/identity`)}
+        onClick={() => navigate(`/${tenantId}/providers/identity`)}
         className="gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -127,7 +127,7 @@ export default function IdentityProviderDetailsPage() {
         <Button 
           variant="outline" 
           className="gap-2" 
-          onClick={() => navigate(`/c/${containerId}/providers/identity/${providerId}/edit`)}
+          onClick={() => navigate(`/${tenantId}/providers/identity/${providerId}/edit`)}
           disabled={provider.isDefault}
         >
           <Edit className="h-4 w-4" />

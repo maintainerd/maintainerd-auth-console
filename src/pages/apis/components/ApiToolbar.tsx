@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ApiToolbar() {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleCreateApi = () => {
-    navigate(`/c/${containerId}/apis/create`)
+    navigate(`/${tenantId}/apis/create`)
   }
 
   const handleImportApis = () => {

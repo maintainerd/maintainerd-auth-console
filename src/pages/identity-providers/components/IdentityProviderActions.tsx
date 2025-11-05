@@ -17,15 +17,15 @@ interface IdentityProviderActionsProps {
 }
 
 export function IdentityProviderActions({ provider }: IdentityProviderActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/providers/identity/${provider.id}`)
+    navigate(`/${tenantId}/providers/identity/${provider.id}`)
   }
 
   const handleEditProvider = () => {
-    navigate(`/c/${containerId}/providers/identity/${provider.id}/edit`)
+    navigate(`/${tenantId}/providers/identity/${provider.id}/edit`)
   }
 
   const handleToggleStatus = () => {

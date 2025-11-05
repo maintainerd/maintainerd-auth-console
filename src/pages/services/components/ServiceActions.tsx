@@ -24,7 +24,7 @@ interface ServiceActionsProps {
 }
 
 export function ServiceActions({ service }: ServiceActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const isActive = service.status === "active"
@@ -33,11 +33,11 @@ export function ServiceActions({ service }: ServiceActionsProps) {
 
   // Action handlers
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/services/${service.id}`)
+    navigate(`/${tenantId}/services/${service.id}`)
   }
 
   const handleUpdateService = () => {
-    navigate(`/c/${containerId}/services/${service.id}/edit`)
+    navigate(`/${tenantId}/services/${service.id}/edit`)
   }
 
 

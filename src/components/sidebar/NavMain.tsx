@@ -30,7 +30,7 @@ export function NavMain({
 }) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
   const location = useLocation()
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   const toggleItem = (title: string) => {
     const newOpenItems = new Set(openItems)
@@ -42,12 +42,12 @@ export function NavMain({
     setOpenItems(newOpenItems)
   }
 
-  // Helper function to build container-based routes
+  // Helper function to build tenant-based routes
   const buildRoute = (route: string) => {
-    if (!containerId) return route
-    // Remove leading slash if present and build container route
+    if (!tenantId) return route
+    // Remove leading slash if present and build tenant route
     const cleanRoute = route.startsWith('/') ? route.slice(1) : route
-    return `/c/${containerId}/${cleanRoute}`
+    return `/${tenantId}/${cleanRoute}`
   }
 
   const isActive = (route: string) => location.pathname === buildRoute(route)

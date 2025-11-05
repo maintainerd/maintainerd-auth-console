@@ -25,15 +25,15 @@ interface ApiKeyActionsProps {
 }
 
 export function ApiKeyActions({ apiKey }: ApiKeyActionsProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const handleViewDetails = () => {
-    navigate(`/c/${containerId}/api-keys/${apiKey.id}`)
+    navigate(`/${tenantId}/api-keys/${apiKey.id}`)
   }
 
   const handleEditApiKey = () => {
-    navigate(`/c/${containerId}/api-keys/${apiKey.id}/edit`)
+    navigate(`/${tenantId}/api-keys/${apiKey.id}/edit`)
   }
 
   const handleCopyKey = () => {

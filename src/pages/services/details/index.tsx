@@ -9,7 +9,7 @@ import { format } from "date-fns"
 import { MOCK_SERVICES } from "../constants"
 
 export default function ServiceDetailsPage() {
-  const { containerId, serviceId } = useParams<{ containerId: string; serviceId: string }>()
+  const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   
@@ -24,7 +24,7 @@ export default function ServiceDetailsPage() {
             The service you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${containerId}/services`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/services`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Services
         </Button>
@@ -86,7 +86,7 @@ export default function ServiceDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/services`)}
+            onClick={() => navigate(`/${tenantId}/services`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -114,7 +114,7 @@ export default function ServiceDetailsPage() {
           <Button 
             variant="outline" 
             className="gap-2" 
-            onClick={() => navigate(`/c/${containerId}/services/${serviceId}/edit`)}
+            onClick={() => navigate(`/${tenantId}/services/${serviceId}/edit`)}
           >
             <Edit className="h-4 w-4" />
             Edit Service
@@ -175,7 +175,7 @@ export default function ServiceDetailsPage() {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => navigate(`/c/${containerId}/apis/create?serviceId=${serviceId}`)}
+                onClick={() => navigate(`/${tenantId}/apis/create?serviceId=${serviceId}`)}
               >
                 <Plus className="h-4 w-4" />
                 Add API
@@ -184,7 +184,7 @@ export default function ServiceDetailsPage() {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => navigate(`/c/${containerId}/policies/create?serviceId=${serviceId}`)}
+                onClick={() => navigate(`/${tenantId}/policies/create?serviceId=${serviceId}`)}
               >
                 <Plus className="h-4 w-4" />
                 Add Policy
@@ -264,7 +264,7 @@ export default function ServiceDetailsPage() {
                   <div className="flex justify-center pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => navigate(`/c/${containerId}/apis`)}
+                      onClick={() => navigate(`/${tenantId}/apis`)}
                     >
                       View All APIs
                     </Button>
@@ -311,7 +311,7 @@ export default function ServiceDetailsPage() {
                   <div className="flex justify-center pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => navigate(`/c/${containerId}/policies`)}
+                      onClick={() => navigate(`/${tenantId}/policies`)}
                     >
                       View All Policies
                     </Button>

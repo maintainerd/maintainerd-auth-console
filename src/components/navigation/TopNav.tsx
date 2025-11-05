@@ -9,18 +9,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { LogOut, Settings, User, Bell, Globe, ChevronDown } from "lucide-react"
+import { LogOut, Settings, User, Bell, Globe, ChevronDown, Plus, Shield } from "lucide-react"
 import { data } from "@/components/sidebar/constants"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
 import { useParams, useNavigate } from "react-router-dom"
+import { MOCK_TENANTS, findTenantByIdentifier } from "@/constants/tenants"
+import { Badge } from "@/components/ui/badge"
 
 export function TopNav() {
-  const { containerId } = useParams<{ containerId: string }>()
+  // Note: tenantId parameter actually contains the tenant identifier (random alphanumeric)
+  // URL structure: /{tenantIdentifier}/subpages
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
+  // Find current tenant by identifier (tenantId parameter contains the tenant identifier)
+  const currentTenant = findTenantByIdentifier(tenantId || '') || MOCK_TENANTS[0]
+
   const handleViewAllNotifications = () => {
-    if (containerId) {
-      navigate(`/c/${containerId}/notifications`)
+    if (tenantId) {
+      navigate(`/${tenantId}/notifications`)
+    }
+  }
+
+  const handleTenantSwitch = (tenantIdentifier: string) => {
+    navigate(`/${tenantIdentifier}/dashboard`)
+  }
+
+  const handleCreateTenant = () => {
+    if (tenantId) {
+      navigate(`/${tenantId}/tenant/create`)
     }
   }
   return (
@@ -35,27 +52,46 @@ export function TopNav() {
           <span className="text-lg font-semibold">M9d-Auth</span>
         </div>
 
-        {/* Container Selector */}
+        {/* Tenant Selector */}
         <div className="ml-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                <span className="text-sm">Default Container</span>
+                <span className="text-sm">{currentTenant.name}</span>
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48" align="start">
-              <DropdownMenuLabel>Select Container</DropdownMenuLabel>
+            <DropdownMenuContent className="w-64" align="start">
+              <DropdownMenuLabel>Switch Tenant</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <div className="flex flex-col">
-                  <span className="font-medium">Default</span>
-                  <span className="text-xs text-muted-foreground">Admin & system users</span>
-                </div>
-              </DropdownMenuItem>
+              <div className="max-h-60 overflow-y-auto">
+                {MOCK_TENANTS.map((tenant) => (
+                  <DropdownMenuItem
+                    key={tenant.id}
+                    onClick={() => handleTenantSwitch(tenant.identifier)}
+                    className={`cursor-pointer ${tenant.identifier === tenantId ? 'bg-accent' : ''}`}
+                  >
+                    <div className="flex flex-col w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{tenant.name}</span>
+                        {tenant.isSystem && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Shield className="h-2 w-2 mr-1" />
+                            System
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground truncate">
+                        {tenant.description}
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-blue-600">
-                <span>+ Create New Container</span>
+              <DropdownMenuItem onClick={handleCreateTenant} className="text-blue-600 cursor-pointer">
+                <Plus className="h-4 w-4 mr-2" />
+                <span>Create New Tenant</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

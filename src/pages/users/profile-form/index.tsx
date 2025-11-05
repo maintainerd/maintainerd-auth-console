@@ -12,7 +12,7 @@ import { MOCK_USER_PROFILES, MOCK_USERS } from "../constants"
 import type { UserProfile } from "../components/UserColumns"
 
 export default function UserProfileForm() {
-  const { containerId, userId } = useParams<{ containerId: string; userId: string }>()
+  const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()
   const navigate = useNavigate()
 
   // Find existing user and profile
@@ -182,7 +182,7 @@ export default function UserProfileForm() {
       console.log("Save profile:", profileData)
       
       // Navigate back to user details
-      navigate(`/c/${containerId}/users/${userId}`)
+      navigate(`/${tenantId}/users/${userId}`)
     } catch (error) {
       console.error("Error saving profile:", error)
     } finally {
@@ -196,7 +196,7 @@ export default function UserProfileForm() {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 500))
         console.log("Delete profile for user:", userId)
-        navigate(`/c/${containerId}/users/${userId}`)
+        navigate(`/${tenantId}/users/${userId}`)
       } catch (error) {
         console.error("Error deleting profile:", error)
       }
@@ -211,7 +211,7 @@ export default function UserProfileForm() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/c/${containerId}/users`)}
+              onClick={() => navigate(`/${tenantId}/users`)}
               className="gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -235,7 +235,7 @@ export default function UserProfileForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/users/${userId}`)}
+            onClick={() => navigate(`/${tenantId}/users/${userId}`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -575,7 +575,7 @@ export default function UserProfileForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/c/${containerId}/users/${userId}`)}
+              onClick={() => navigate(`/${tenantId}/users/${userId}`)}
             >
               Cancel
             </Button>

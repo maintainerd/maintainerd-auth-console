@@ -128,7 +128,7 @@ const DEFAULT_SCOPES_BY_TYPE = {
 }
 
 export default function ClientAddOrUpdateForm() {
-  const { containerId, clientId } = useParams<{ containerId: string; clientId?: string }>()
+  const { tenantId, clientId } = useParams<{ tenantId: string; clientId?: string }>()
   const navigate = useNavigate()
   
   const isEditing = Boolean(clientId)
@@ -236,9 +236,9 @@ export default function ClientAddOrUpdateForm() {
       
       // Navigate back to clients list or client details
       if (isCreating) {
-        navigate(`/c/${containerId}/clients`)
+        navigate(`/${tenantId}/clients`)
       } else {
-        navigate(`/c/${containerId}/clients/${clientId}`)
+        navigate(`/${tenantId}/clients/${clientId}`)
       }
     } catch (error) {
       console.error("Error saving client:", error)
@@ -249,9 +249,9 @@ export default function ClientAddOrUpdateForm() {
 
   const handleCancel = () => {
     if (isEditing) {
-      navigate(`/c/${containerId}/clients/${clientId}`)
+      navigate(`/${tenantId}/clients/${clientId}`)
     } else {
-      navigate(`/c/${containerId}/clients`)
+      navigate(`/${tenantId}/clients`)
     }
   }
 

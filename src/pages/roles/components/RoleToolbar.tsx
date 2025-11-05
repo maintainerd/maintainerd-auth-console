@@ -49,7 +49,7 @@ export function RoleToolbar({
   setFilter,
   onFiltersChange
 }: RoleToolbarProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const [filters, setFilters] = React.useState<FilterState>({
@@ -83,7 +83,7 @@ export function RoleToolbar({
 
   // Action handlers
   const handleAddRole = () => {
-    navigate(`/c/${containerId}/roles/create`)
+    navigate(`/${tenantId}/roles/create`)
   }
 
   const handleExport = () => {

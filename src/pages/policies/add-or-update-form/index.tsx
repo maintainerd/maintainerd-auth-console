@@ -12,7 +12,7 @@ import { MOCK_POLICIES, POLICY_STATUSES } from "../constants"
 import type { PolicyStatus, PolicyStatement, PolicyEffect } from "../constants"
 
 export default function PolicyAddOrUpdateForm() {
-  const { containerId, policyId } = useParams<{ containerId: string; policyId?: string }>()
+  const { tenantId, policyId } = useParams<{ tenantId: string; policyId?: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isEditing = !!policyId
@@ -113,7 +113,7 @@ export default function PolicyAddOrUpdateForm() {
       }
       
       // Navigate back to policies list
-      navigate(`/c/${containerId}/policies`)
+      navigate(`/${tenantId}/policies`)
     } catch (error) {
       console.error("Error saving policy:", error)
     } finally {
@@ -130,7 +130,7 @@ export default function PolicyAddOrUpdateForm() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
       console.log("Deleting policy:", policyId)
-      navigate(`/c/${containerId}/policies`)
+      navigate(`/${tenantId}/policies`)
     } catch (error) {
       console.error("Error deleting policy:", error)
     } finally {
@@ -212,7 +212,7 @@ export default function PolicyAddOrUpdateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/policies`)}
+            onClick={() => navigate(`/${tenantId}/policies`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -482,7 +482,7 @@ export default function PolicyAddOrUpdateForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/c/${containerId}/policies`)}
+                onClick={() => navigate(`/${tenantId}/policies`)}
                 disabled={isLoading}
               >
                 Cancel

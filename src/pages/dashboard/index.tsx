@@ -20,7 +20,7 @@ import { useNavigate, useParams } from "react-router-dom"
 
 const DashboardPage = () => {
   const navigate = useNavigate()
-  const { containerId } = useParams()
+  const { tenantId } = useParams()
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -84,7 +84,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate(`/c/${containerId}/users`)}
+                onClick={() => navigate(`/${tenantId}/users`)}
               >
                 <div className="flex items-center gap-3">
                   <Users className="h-5 w-5" />
@@ -98,7 +98,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate(`/c/${containerId}/security/settings`)}
+                onClick={() => navigate(`/${tenantId}/security/settings`)}
               >
                 <div className="flex items-center gap-3">
                   <Shield className="h-5 w-5" />
@@ -112,7 +112,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate(`/c/${containerId}/services`)}
+                onClick={() => navigate(`/${tenantId}/services`)}
               >
                 <div className="flex items-center gap-3">
                   <Server className="h-5 w-5" />
@@ -126,7 +126,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate(`/c/${containerId}/providers/identity`)}
+                onClick={() => navigate(`/${tenantId}/providers/identity`)}
               >
                 <div className="flex items-center gap-3">
                   <Key className="h-5 w-5" />
@@ -171,10 +171,10 @@ const DashboardPage = () => {
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button onClick={() => navigate(`/c/${containerId}/clients`)}>
+              <Button onClick={() => navigate(`/${tenantId}/clients`)}>
                 Create OAuth Client
               </Button>
-              <Button variant="outline" onClick={() => navigate(`/c/${containerId}/api-keys`)}>
+              <Button variant="outline" onClick={() => navigate(`/${tenantId}/api-keys`)}>
                 Generate API Key
               </Button>
               <Button variant="ghost">
@@ -232,7 +232,7 @@ const DashboardPage = () => {
             </div>
 
             <div className="pt-2">
-              <Button onClick={() => navigate(`/c/${containerId}/security/settings`)}>
+              <Button onClick={() => navigate(`/${tenantId}/security/settings`)}>
                 Review Security Settings
               </Button>
             </div>

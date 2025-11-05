@@ -20,7 +20,7 @@ import { MOCK_SERVICES } from "../../services/constants"
 import type { Api, ApiStatus } from "../components/ApiColumns"
 
 export default function ApiAddOrUpdateForm() {
-  const { containerId, apiId } = useParams<{ containerId: string; apiId?: string }>()
+  const { tenantId, apiId } = useParams<{ tenantId: string; apiId?: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isEditing = !!apiId
@@ -123,7 +123,7 @@ export default function ApiAddOrUpdateForm() {
       }
       
       // Navigate back to APIs list
-      navigate(`/c/${containerId}/apis`)
+      navigate(`/${tenantId}/apis`)
     } catch (error) {
       console.error("Error saving API:", error)
     } finally {
@@ -144,7 +144,7 @@ export default function ApiAddOrUpdateForm() {
       console.log("Deleting API:", apiId)
       
       // Navigate back to APIs list
-      navigate(`/c/${containerId}/apis`)
+      navigate(`/${tenantId}/apis`)
     } catch (error) {
       console.error("Error deleting API:", error)
     } finally {
@@ -166,7 +166,7 @@ export default function ApiAddOrUpdateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${containerId}/apis`)}
+            onClick={() => navigate(`/${tenantId}/apis`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -416,7 +416,7 @@ export default function ApiAddOrUpdateForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/c/${containerId}/apis`)}
+                onClick={() => navigate(`/${tenantId}/apis`)}
                 disabled={isLoading}
               >
                 Cancel

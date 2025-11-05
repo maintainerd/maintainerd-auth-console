@@ -18,7 +18,7 @@ import { useNavigate, useParams } from "react-router-dom"
 
 export default function SecurityPage() {
   const navigate = useNavigate()
-  const { containerId } = useParams()
+  const { tenantId } = useParams()
 
   const securityModules = [
     {
@@ -100,7 +100,7 @@ export default function SecurityPage() {
   }
 
   const handleNavigate = (route: string) => {
-    navigate(`/c/${containerId}${route}`)
+    navigate(`/${tenantId}${route}`)
   }
 
   return (

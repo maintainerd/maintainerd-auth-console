@@ -30,11 +30,7 @@ export const data = {
       icon: Wrench,
 			active: true,
     },
-    {
-      title: "Containers",
-      route: "/containers",
-      icon: Container,
-    },
+
     {
       title: "Services",
       route: "/services",

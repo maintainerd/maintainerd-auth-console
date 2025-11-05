@@ -27,14 +27,14 @@ interface Props {
 
 export function UserActions({ user, children }: Props) {
   const navigate = useNavigate()
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   const handleViewProfile = () => {
-    navigate(`/c/${containerId}/users/${user.id}`)
+    navigate(`/${tenantId}/users/${user.id}`)
   }
 
   const handleEdit = () => {
-    navigate(`/c/${containerId}/users/${user.id}/edit`)
+    navigate(`/${tenantId}/users/${user.id}/edit`)
   }
 
   const handleToggleStatus = () => {

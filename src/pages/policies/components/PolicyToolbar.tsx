@@ -33,7 +33,7 @@ export function PolicyToolbar({
   filters,
   onFiltersChange,
 }: PolicyToolbarProps) {
-  const { containerId } = useParams<{ containerId: string }>()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
@@ -81,7 +81,7 @@ export function PolicyToolbar({
   }
 
   const handleCreatePolicy = () => {
-    navigate(`/c/${containerId}/policies/create`)
+    navigate(`/${tenantId}/policies/create`)
   }
 
   return (
