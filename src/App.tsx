@@ -4,6 +4,7 @@ import LoginPage from './pages/login'
 import SignupPage from './pages/signup'
 import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
+import SetupProfilePage from './pages/setup/profile'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
@@ -62,6 +63,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
+        <Route path="/setup/profile" element={<SetupProfilePage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />

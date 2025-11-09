@@ -5,7 +5,7 @@
 
 import { post } from './api/client'
 import { API_ENDPOINTS } from './api/config'
-import type { CreateTenantRequest, CreateTenantResponse } from './api/types/setup'
+import type { CreateTenantRequest, CreateTenantResponse, CreateAdminRequest, CreateAdminResponse, CreateProfileRequest, CreateProfileResponse } from './api/types/setup'
 
 /**
  * Create a new tenant
@@ -62,6 +62,40 @@ export async function isSetupCompleted(): Promise<boolean> {
 }
 
 /**
+ * Create admin user
+ * @param data - Admin creation data
+ * @returns Promise<CreateAdminResponse>
+ */
+export async function createAdmin(data: CreateAdminRequest): Promise<CreateAdminResponse> {
+  try {
+    const response = await post<CreateAdminResponse>(
+      API_ENDPOINTS.SETUP.CREATE_ADMIN,
+      data
+    )
+    return response
+  } catch (error) {
+    throw error
+  }
+}
+
+/**
+ * Create user profile
+ * @param data - Profile creation data
+ * @returns Promise<CreateProfileResponse>
+ */
+export async function createProfile(data: CreateProfileRequest): Promise<CreateProfileResponse> {
+  try {
+    const response = await post<CreateProfileResponse>(
+      API_ENDPOINTS.SETUP.CREATE_PROFILE,
+      data
+    )
+    return response
+  } catch (error) {
+    throw error
+  }
+}
+
+/**
  * Create tenant with default metadata
  * @param name - Tenant name
  * @param description - Tenant description
@@ -80,6 +114,8 @@ export async function createTenantWithDefaults(name: string, description: string
 // Export functions as an object for backward compatibility
 export const setupService = {
   createTenant,
+  createAdmin,
+  createProfile,
   getDefaultTenantMetadata,
   createTenantWithDefaults,
   isSetupCompleted,

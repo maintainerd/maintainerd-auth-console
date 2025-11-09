@@ -45,3 +45,74 @@ export interface CreateTenantResponse {
   data: TenantData
   message: string
 }
+
+export interface CreateAdminRequest {
+  username: string
+  fullname: string
+  password: string
+  email: string
+}
+
+export interface AdminData {
+  admin_uuid: string
+  username: string
+  fullname: string
+  email: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateAdminResponse {
+  success: true
+  data: AdminData
+  message: string
+}
+
+export interface CreateProfileRequest {
+  first_name: string
+  middle_name?: string
+  last_name: string
+  suffix?: string
+  display_name: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
+  email: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+  profile_url?: string
+}
+
+export interface ProfileData {
+  profile_uuid: string
+  first_name: string
+  middle_name?: string
+  last_name: string
+  suffix?: string
+  display_name: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
+  email: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+  profile_url?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateProfileResponse {
+  success: true
+  data: ProfileData
+  message: string
+}

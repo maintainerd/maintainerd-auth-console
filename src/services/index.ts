@@ -12,6 +12,8 @@ export type * from './api/types'
 export {
   setupService,
   createTenant,
+  createAdmin,
+  createProfile,
   getDefaultTenantMetadata,
   createTenantWithDefaults,
   isSetupCompleted

@@ -27,6 +27,8 @@ export const API_CONFIG = {
 export const API_ENDPOINTS = {
   SETUP: {
     CREATE_TENANT: '/setup/create_tenant',
+    CREATE_ADMIN: '/setup/create_admin',
+    CREATE_PROFILE: '/setup/create_profile',
   },
   // Add more endpoints as needed
   // AUTH: {

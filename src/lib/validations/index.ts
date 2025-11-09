@@ -7,8 +7,16 @@
 export {
   setupTenantSchema,
   setupAdminSchema,
+  setupProfilePersonalSchema,
+  setupProfileContactSchema,
+  setupProfileLocationSchema,
+  setupProfileCompleteSchema,
   type SetupTenantFormData,
-  type SetupAdminFormData
+  type SetupAdminFormData,
+  type SetupProfilePersonalFormData,
+  type SetupProfileContactFormData,
+  type SetupProfileLocationFormData,
+  type SetupProfileCompleteFormData
 } from './setup_schema'
 
 // Auth schemas
