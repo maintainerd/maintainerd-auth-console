@@ -1,12 +1,5 @@
 import React from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { FormLoginCard, FormSubmitButton } from "@/components/form"
 import {
   Field,
   FieldDescription,
@@ -112,103 +105,98 @@ const SetupAdminForm = () => {
   }
   return (
     <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create Admin Account</CardTitle>
-          <CardDescription>
-            Create your administrator account to complete the setup
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              {errors.general && (
-                <div className="text-sm text-red-600 mb-4">
-                  {errors.general}
-                </div>
-              )}
+      <FormLoginCard
+        title="Create Admin Account"
+        description="Create your administrator account to complete the setup"
+      >
+        <form onSubmit={handleSubmit}>
+          <FieldGroup>
+            {errors.general && (
+              <div className="text-sm text-red-600 mb-4">
+                {errors.general}
+              </div>
+            )}
 
-              <Field>
-                <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  required
-                />
-                {errors.fullName && (
-                  <FieldDescription className="text-red-600">
-                    {errors.fullName}
-                  </FieldDescription>
-                )}
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="email">Email Address</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@acme.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-                {errors.email && (
-                  <FieldDescription className="text-red-600">
-                    {errors.email}
-                  </FieldDescription>
-                )}
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  required
-                />
-                <FieldDescription>
-                  Must be at least 8 characters long.
+            <Field>
+              <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="John Doe"
+                value={formData.fullName}
+                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                required
+              />
+              {errors.fullName && (
+                <FieldDescription className="text-red-600">
+                  {errors.fullName}
                 </FieldDescription>
-                {errors.password && (
-                  <FieldDescription className="text-red-600">
-                    {errors.password}
-                  </FieldDescription>
-                )}
-              </Field>
+              )}
+            </Field>
 
-              <Field>
-                <FieldLabel htmlFor="confirmPassword">
-                  Confirm Password
-                </FieldLabel>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  required
-                />
-                <FieldDescription>Please confirm your password.</FieldDescription>
-                {errors.confirmPassword && (
-                  <FieldDescription className="text-red-600">
-                    {errors.confirmPassword}
-                  </FieldDescription>
-                )}
-              </Field>
+            <Field>
+              <FieldLabel htmlFor="email">Email Address</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@acme.com"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                required
+              />
+              {errors.email && (
+                <FieldDescription className="text-red-600">
+                  {errors.email}
+                </FieldDescription>
+              )}
+            </Field>
 
-              <Field>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating Admin..." : "Complete Setup"}
-                </Button>
-              </Field>
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
+            <Field>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                required
+              />
+              <FieldDescription>
+                Must be at least 8 characters long.
+              </FieldDescription>
+              {errors.password && (
+                <FieldDescription className="text-red-600">
+                  {errors.password}
+                </FieldDescription>
+              )}
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="confirmPassword">
+                Confirm Password
+              </FieldLabel>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                required
+              />
+              <FieldDescription>Please confirm your password.</FieldDescription>
+              {errors.confirmPassword && (
+                <FieldDescription className="text-red-600">
+                  {errors.confirmPassword}
+                </FieldDescription>
+              )}
+            </Field>
+
+            <FormSubmitButton
+              isSubmitting={isSubmitting}
+              submitText="Complete Setup"
+              submittingText="Creating Admin..."
+            />
+          </FieldGroup>
+        </form>
+      </FormLoginCard>
     </div>
   )
 }
