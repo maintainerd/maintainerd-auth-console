@@ -58,15 +58,15 @@ export const FormSelectField = forwardRef<HTMLButtonElement, FormSelectFieldProp
     const fieldId = id || label.toLowerCase().replace(/\s+/g, '-')
 
     return (
-      <Field className={cn("space-y-2", containerClassName)}>
-        <FieldLabel 
-          htmlFor={fieldId} 
+      <Field className={cn(containerClassName)}>
+        <FieldLabel
+          htmlFor={fieldId}
           className={cn(labelClassName)}
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </FieldLabel>
-        
+
         <Select
           value={value}
           onValueChange={onValueChange}

@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-interface FormLoginCardProps {
+interface FormSetupCardProps {
   title: string
   description: string
   children: React.ReactNode
@@ -15,23 +15,23 @@ interface FormLoginCardProps {
   contentClassName?: string
 }
 
-export default function FormLoginCard({
+export default function FormSetupCard({
   title,
   description,
   children,
   className,
   headerClassName,
   contentClassName
-}: FormLoginCardProps) {
+}: FormSetupCardProps) {
   return (
-    <Card className={`w-full max-w-sm mx-auto ${className || ''}`}>
+    <Card className={`w-full max-w-md mx-auto ${className || ''}`}>
       <CardHeader className={`text-center ${headerClassName || ''}`}>
         <CardTitle className="text-xl">{title}</CardTitle>
         <CardDescription>
           {description}
         </CardDescription>
       </CardHeader>
-      <CardContent className={contentClassName}>
+      <CardContent className={`px-8 ${contentClassName || ''}`}>
         {children}
       </CardContent>
     </Card>

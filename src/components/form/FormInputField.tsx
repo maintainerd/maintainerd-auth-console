@@ -41,14 +41,14 @@ export const FormInputField = forwardRef<HTMLInputElement, FormInputFieldProps>(
 
     return (
       <Field className={cn(containerClassName)}>
-        <FieldLabel 
-          htmlFor={fieldId} 
+        <FieldLabel
+          htmlFor={fieldId}
           className={cn(labelClassName)}
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </FieldLabel>
-        
+
         <Input
           ref={ref}
           id={fieldId}

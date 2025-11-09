@@ -17,7 +17,7 @@ export {
   type SetupProfileContactFormData,
   type SetupProfileLocationFormData,
   type SetupProfileCompleteFormData
-} from './setup_schema'
+} from './setupSchema'
 
 // Auth schemas
 export {
@@ -29,7 +29,7 @@ export {
   type RegisterFormData,
   type ForgotPasswordFormData,
   type ResetPasswordFormData
-} from './auth_schema'
+} from './authSchema'
 
 // Add more schema exports as needed
-// export { userSchema, type UserFormData } from './user_schema'
+// export { userSchema, type UserFormData } from './userSchema'

@@ -71,9 +71,7 @@ export interface CreateAdminResponse {
 
 export interface CreateProfileRequest {
   first_name: string
-  middle_name?: string
   last_name: string
-  suffix?: string
   display_name: string
   bio?: string
   birthdate?: string
@@ -85,15 +83,12 @@ export interface CreateProfileRequest {
   country?: string
   timezone?: string
   language?: string
-  profile_url?: string
 }
 
 export interface ProfileData {
   profile_uuid: string
   first_name: string
-  middle_name?: string
   last_name: string
-  suffix?: string
   display_name: string
   bio?: string
   birthdate?: string
@@ -105,7 +100,6 @@ export interface ProfileData {
   country?: string
   timezone?: string
   language?: string
-  profile_url?: string
   is_active: boolean
   created_at: string
   updated_at: string

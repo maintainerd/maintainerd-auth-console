@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
-import { FormInputField, FormSelectField, FormLoginCard } from "@/components/form"
+import { FormInputField, FormSelectField, FormSetupCard } from "@/components/form"
 import { setupProfileLocationSchema } from "@/lib/validations"
 import { countryOptions, timezoneOptions, languageOptions } from "@/lib/constants"
 import type { CreateProfileRequest } from "@/services/api/types/setup"
@@ -12,8 +12,6 @@ interface LocationPreferencesStepProps {
   onDataChange: (data: Partial<CreateProfileRequest>) => void
   onValidationChange: (isValid: boolean) => void
 }
-
-
 
 const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: LocationPreferencesStepProps) => {
   const {
@@ -80,7 +78,7 @@ const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: Loc
   }
 
   return (
-    <FormLoginCard
+    <FormSetupCard
       title="Location & Preferences"
       description="Help us customize your experience with location and language preferences"
     >
@@ -93,16 +91,13 @@ const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: Loc
             error={errors.address?.message}
             {...register("address")}
           />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormInputField
               label="City"
               placeholder="New York"
-              description="Your city (optional)"
               error={errors.city?.message}
               {...register("city")}
             />
-
             <FormSelectField
               label="Country"
               placeholder="Select country (optional)"
@@ -112,7 +107,6 @@ const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: Loc
               error={errors.country?.message}
             />
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormSelectField
               label="Timezone"
@@ -123,7 +117,6 @@ const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: Loc
               error={errors.timezone?.message}
               description="Used for scheduling and notifications"
             />
-
             <FormSelectField
               label="Language"
               placeholder="Select language (optional)"
@@ -134,11 +127,9 @@ const LocationPreferencesStep = ({ data, onDataChange, onValidationChange }: Loc
               description="Preferred language for the interface"
             />
           </div>
-
-
         </FieldGroup>
       </div>
-    </FormLoginCard>
+    </FormSetupCard>
   )
 }
 

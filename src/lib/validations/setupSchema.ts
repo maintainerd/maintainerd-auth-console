@@ -62,37 +62,13 @@ export const setupProfilePersonalSchema = yup.object().shape({
     .min(2, 'First name must be at least 2 characters')
     .max(50, 'First name must not exceed 50 characters')
     .matches(/^[a-zA-Z\s\-'.]+$/, 'First name can only contain letters, spaces, hyphens, apostrophes, and periods'),
-  middle_name: yup
-    .string()
-    .nullable()
-    .default(undefined)
-    .transform((value) => {
-      if (!value || value.trim() === '') return undefined
-      return value.trim()
-    })
-    .max(50, 'Middle name must not exceed 50 characters')
-    .matches(/^[a-zA-Z\s\-'.]*$/, 'Middle name can only contain letters, spaces, hyphens, apostrophes, and periods'),
+
   last_name: yup
     .string()
     .required('Last name is required')
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must not exceed 50 characters')
     .matches(/^[a-zA-Z\s\-'.]+$/, 'Last name can only contain letters, spaces, hyphens, apostrophes, and periods'),
-  suffix: yup
-    .string()
-    .nullable()
-    .default(undefined)
-    .transform((value) => {
-      if (!value || value.trim() === '') return undefined
-      return value.trim()
-    })
-    .max(10, 'Suffix must not exceed 10 characters')
-    .matches(/^[a-zA-Z.]*$/, 'Suffix can only contain letters and periods'),
-  display_name: yup
-    .string()
-    .required('Display name is required')
-    .min(2, 'Display name must be at least 2 characters')
-    .max(100, 'Display name must not exceed 100 characters'),
   bio: yup
     .string()
     .nullable()
@@ -110,7 +86,22 @@ export const setupProfilePersonalSchema = yup.object().shape({
       if (!value || value.trim() === '') return undefined
       return value.trim()
     })
-    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Please enter a valid date (YYYY-MM-DD)'),
+    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Please enter a valid date (YYYY-MM-DD)')
+    .test('not-future', 'Birth date cannot be in the future', function(value) {
+      if (!value) return true // Allow empty values
+      const birthDate = new Date(value)
+      const today = new Date()
+      today.setHours(23, 59, 59, 999) // Set to end of today to allow today's date
+      return birthDate <= today
+    })
+    .test('reasonable-age', 'Please enter a valid birth date', function(value) {
+      if (!value) return true // Allow empty values
+      const birthDate = new Date(value)
+      const today = new Date()
+      const maxAge = 150 // Maximum reasonable age
+      const minDate = new Date(today.getFullYear() - maxAge, today.getMonth(), today.getDate())
+      return birthDate >= minDate
+    }),
   gender: yup
     .string()
     .nullable()
@@ -191,25 +182,11 @@ export const setupProfileLocationSchema = yup.object().shape({
     .matches(/^[a-z]{2}(-[A-Z]{2})?$/, 'Language must be in format "en" or "en-US"')
 })
 
-// Setup Profile Form Schema - Step 4: Profile Picture
-export const setupProfilePictureSchema = yup.object().shape({
-  profile_url: yup
-    .string()
-    .nullable()
-    .default(undefined)
-    .transform((value) => {
-      if (!value || value.trim() === '') return undefined
-      return value.trim()
-    })
-    .url('Please enter a valid URL')
-})
-
 // Combined schema for complete profile
 export const setupProfileCompleteSchema = yup.object({
   ...setupProfilePersonalSchema.fields,
   ...setupProfileContactSchema.fields,
-  ...setupProfileLocationSchema.fields,
-  ...setupProfilePictureSchema.fields
+  ...setupProfileLocationSchema.fields
 })
 
 // Type inference from schemas
@@ -219,11 +196,10 @@ export type SetupAdminFormData = yup.InferType<typeof setupAdminSchema>
 // Explicit type definitions for profile forms to avoid Yup inference issues
 export type SetupProfilePersonalFormData = {
   first_name: string
-  middle_name?: string
   last_name: string
-  suffix?: string
-  display_name: string
   bio?: string
+  birthdate?: string
+  gender?: string
 }
 
 export type SetupProfileContactFormData = {
@@ -241,11 +217,6 @@ export type SetupProfileLocationFormData = {
   language?: string
 }
 
-export type SetupProfilePictureFormData = {
-  profile_url?: string
-}
-
 export type SetupProfileCompleteFormData = SetupProfilePersonalFormData &
   SetupProfileContactFormData &
-  SetupProfileLocationFormData &
-  SetupProfilePictureFormData
+  SetupProfileLocationFormData

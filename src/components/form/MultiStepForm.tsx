@@ -102,7 +102,7 @@ export default function MultiStepForm({
   }
 
   return (
-    <div className={cn("w-full max-w-2xl mx-auto", className)}>
+    <div className={cn("w-full mx-auto", className)}>
       {/* Progress Bar */}
       {showProgress && (
         <div className="mb-8">
@@ -167,7 +167,7 @@ export default function MultiStepForm({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center max-w-md mx-auto">
         <Button
           type="button"
           variant="outline"

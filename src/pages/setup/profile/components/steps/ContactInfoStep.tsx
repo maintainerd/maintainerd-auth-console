@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
-import { FormInputField, FormLoginCard } from "@/components/form"
+import { FormInputField, FormSetupCard } from "@/components/form"
 import { setupProfileContactSchema } from "@/lib/validations"
 import type { CreateProfileRequest } from "@/services/api/types/setup"
 
@@ -54,10 +54,8 @@ const ContactInfoStep = ({ data, onDataChange, onValidationChange }: ContactInfo
     }
   }, [isValid, onValidationChange])
 
-
-
   return (
-    <FormLoginCard
+    <FormSetupCard
       title="Contact Information"
       description="How can we reach you?"
     >
@@ -72,7 +70,6 @@ const ContactInfoStep = ({ data, onDataChange, onValidationChange }: ContactInfo
             required
             {...register("email")}
           />
-
           <FormInputField
             label="Phone Number"
             type="tel"
@@ -81,11 +78,9 @@ const ContactInfoStep = ({ data, onDataChange, onValidationChange }: ContactInfo
             error={errors.phone?.message}
             {...register("phone")}
           />
-
-
         </FieldGroup>
       </div>
-    </FormLoginCard>
+    </FormSetupCard>
   )
 }
 

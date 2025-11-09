@@ -60,14 +60,24 @@ async function request<T>(
     const data = await response.json()
 
     if (!response.ok) {
-      // Handle API error response format: { success: false, error: "message", details?: "details" }
+      // Handle API error response format: { success: false, error: "message", details?: string | object }
       const errorMessage = data.error || `HTTP ${response.status}: ${response.statusText}`
       const errorDetails = data.details || undefined
 
-      throw new ApiError({
-        message: errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage,
+      // Create enhanced error with original response data
+      const apiError = new ApiError({
+        message: errorMessage,
         status: response.status,
       })
+
+      // Attach the original response data for more detailed error handling
+      ;(apiError as any).responseData = {
+        error: errorMessage,
+        details: errorDetails,
+        success: data.success
+      }
+
+      throw apiError
     }
 
     return data
