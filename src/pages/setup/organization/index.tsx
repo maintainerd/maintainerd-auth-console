@@ -1,12 +1,12 @@
 import LoginLayout from "@/components/layout/LoginLayout"
-import SetupOrganizationForm from "./components/SetupOrganizationForm"
+import SetupTenantForm from "./components/SetupTenantForm"
 
-const SetupOrganizationPage = () => {
+const SetupTenantPage = () => {
   return (
     <LoginLayout>
-			<SetupOrganizationForm />
+			<SetupTenantForm />
 		</LoginLayout>
   )
 }
 
-export default SetupOrganizationPage;
+export default SetupTenantPage;

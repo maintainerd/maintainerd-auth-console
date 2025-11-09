@@ -1,0 +1,27 @@
+/**
+ * Validation Schemas Index
+ * Central export point for all validation schemas
+ */
+
+// Setup schemas
+export {
+  setupTenantSchema,
+  setupAdminSchema,
+  type SetupTenantFormData,
+  type SetupAdminFormData
+} from './setup_schema'
+
+// Auth schemas
+export {
+  loginSchema,
+  registerSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  type LoginFormData,
+  type RegisterFormData,
+  type ForgotPasswordFormData,
+  type ResetPasswordFormData
+} from './auth_schema'
+
+// Add more schema exports as needed
+// export { userSchema, type UserFormData } from './user_schema'

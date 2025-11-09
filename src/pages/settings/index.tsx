@@ -3,62 +3,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import {
   Settings,
   Globe,
-  Bell,
-  Database,
   Shield,
   Save
 } from "lucide-react"
 
-export default function GeneralSettingsPage() {
+export default function TenantSettingsPage() {
   const [settings, setSettings] = React.useState({
-    // Application Settings
-    applicationName: "Acme Auth",
-    applicationDescription: "Secure authentication and identity management platform",
+    // Tenant Information
+    tenantName: "Acme Corp",
+    tenantDescription: "Enterprise authentication tenant for Acme Corporation",
+
+    // Application Branding
     applicationLogo: "",
     faviconUrl: "",
+
+    // Regional Settings
     defaultLanguage: "en",
     defaultTimezone: "UTC",
     dateFormat: "MM/dd/yyyy",
     timeFormat: "12h",
 
-    // User Defaults
-    defaultUserRole: "user",
-    
-    // System Settings
-    maintenanceMode: false,
-    maintenanceMessage: "System is currently under maintenance. Please try again later.",
-    debugMode: false,
-    logLevel: "info",
-    maxFileUploadSize: 10,
-    
-    // Notifications
-    systemNotifications: true,
-    emailNotifications: true,
-    smsNotifications: false,
-    webhookNotifications: false,
-    
     // Legal & Compliance
     privacyPolicyUrl: "https://acme.com/privacy",
-    termsOfServiceUrl: "https://acme.com/terms",
-    cookieConsent: true,
-    
-    // API Settings
-    apiRateLimit: 1000,
-    apiTimeout: 30,
-    corsEnabled: true,
-    allowedOrigins: ["https://acme.com", "https://app.acme.com"]
+    termsOfServiceUrl: "https://acme.com/terms"
   })
 
   const handleSave = () => {
-    console.log("Saving general settings:", settings)
-    // Here you would typically make an API call to save the settings
+    console.log("Saving tenant settings:", settings)
+    // Here you would typically make an API call to save the tenant settings
   }
 
   const languages = [
@@ -92,70 +69,65 @@ export default function GeneralSettingsPage() {
     <div className="max-w-4xl mx-auto">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">General Settings</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Tenant Settings</h1>
           <p className="text-muted-foreground">
-            Configure application branding, regional settings, system preferences, and API configuration.
+            Configure tenant information, application branding, regional settings, and compliance.
           </p>
         </div>
 
         <div className="grid gap-6">
-        {/* Application Settings */}
+        {/* Tenant Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              Application
+              Tenant Information
             </CardTitle>
             <CardDescription>
-              Configure application name, branding, language, and regional settings
+              Configure basic tenant information and identification
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="appName" className="text-sm font-medium">
-                  Application name
-                </Label>
-                <Input
-                  id="appName"
-                  value={settings.applicationName}
-                  onChange={(e) => setSettings(prev => ({ ...prev, applicationName: e.target.value }))}
-                  placeholder="Enter application name"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Default language</Label>
-                <Select
-                  value={settings.defaultLanguage}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, defaultLanguage: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tenantName" className="text-sm font-medium">
+                Tenant name
+              </Label>
+              <Input
+                id="tenantName"
+                value={settings.tenantName}
+                onChange={(e) => setSettings(prev => ({ ...prev, tenantName: e.target.value }))}
+                placeholder="Enter tenant name"
+              />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="appDescription" className="text-sm font-medium">
-                Application description
+              <Label htmlFor="tenantDescription" className="text-sm font-medium">
+                Tenant description
               </Label>
               <Textarea
-                id="appDescription"
-                value={settings.applicationDescription}
-                onChange={(e) => setSettings(prev => ({ ...prev, applicationDescription: e.target.value }))}
-                placeholder="Brief description of your application"
+                id="tenantDescription"
+                value={settings.tenantDescription}
+                onChange={(e) => setSettings(prev => ({ ...prev, tenantDescription: e.target.value }))}
+                placeholder="Brief description of this tenant"
                 rows={2}
               />
             </div>
 
+          </CardContent>
+        </Card>
+
+        {/* Branding & Regional Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Branding & Regional Settings
+            </CardTitle>
+            <CardDescription>
+              Configure application branding, language, and regional preferences
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="appLogo" className="text-sm font-medium">
@@ -189,7 +161,25 @@ export default function GeneralSettingsPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium">Default language</Label>
+                <Select
+                  value={settings.defaultLanguage}
+                  onValueChange={(value) => setSettings(prev => ({ ...prev, defaultLanguage: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid gap-2">
                 <Label className="text-sm font-medium">Timezone</Label>
                 <Select
@@ -244,156 +234,9 @@ export default function GeneralSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* System Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              System
-            </CardTitle>
-            <CardDescription>
-              Configure system-level settings and maintenance options
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Maintenance mode</Label>
-                  <div className="text-xs text-muted-foreground">Temporarily disable access to the application</div>
-                </div>
-                <Switch
-                  checked={settings.maintenanceMode}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, maintenanceMode: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Debug mode</Label>
-                  <div className="text-xs text-muted-foreground">Enable detailed error logging and debugging</div>
-                </div>
-                <Switch
-                  checked={settings.debugMode}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, debugMode: checked }))}
-                />
-              </div>
-            </div>
 
-            {settings.maintenanceMode && (
-              <div className="grid gap-2">
-                <Label htmlFor="maintenanceMessage" className="text-sm font-medium">
-                  Maintenance message
-                </Label>
-                <Textarea
-                  id="maintenanceMessage"
-                  value={settings.maintenanceMessage}
-                  onChange={(e) => setSettings(prev => ({ ...prev, maintenanceMessage: e.target.value }))}
-                  placeholder="Message to display during maintenance"
-                  rows={2}
-                />
-              </div>
-            )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Log level</Label>
-                <Select
-                  value={settings.logLevel}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, logLevel: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="error">Error</SelectItem>
-                    <SelectItem value="warn">Warning</SelectItem>
-                    <SelectItem value="info">Info</SelectItem>
-                    <SelectItem value="debug">Debug</SelectItem>
-                    <SelectItem value="trace">Trace</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Max file upload (MB)</Label>
-                <Select
-                  value={settings.maxFileUploadSize.toString()}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, maxFileUploadSize: parseInt(value) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 MB</SelectItem>
-                    <SelectItem value="5">5 MB</SelectItem>
-                    <SelectItem value="10">10 MB</SelectItem>
-                    <SelectItem value="25">25 MB</SelectItem>
-                    <SelectItem value="50">50 MB</SelectItem>
-                    <SelectItem value="100">100 MB</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notifications
-            </CardTitle>
-            <CardDescription>
-              Configure system notification preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">System notifications</Label>
-                  <div className="text-xs text-muted-foreground">Enable system-wide notifications</div>
-                </div>
-                <Switch
-                  checked={settings.systemNotifications}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, systemNotifications: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Email notifications</Label>
-                  <div className="text-xs text-muted-foreground">Send notifications via email</div>
-                </div>
-                <Switch
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, emailNotifications: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">SMS notifications</Label>
-                  <div className="text-xs text-muted-foreground">Send notifications via SMS</div>
-                </div>
-                <Switch
-                  checked={settings.smsNotifications}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, smsNotifications: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Webhook notifications</Label>
-                  <div className="text-xs text-muted-foreground">Send notifications to webhooks</div>
-                </div>
-                <Switch
-                  checked={settings.webhookNotifications}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, webhookNotifications: checked }))}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Legal URLs */}
+        {/* Legal & Compliance */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -401,7 +244,7 @@ export default function GeneralSettingsPage() {
               Legal & Compliance
             </CardTitle>
             <CardDescription>
-              Configure legal document URLs and cookie consent
+              Configure legal document URLs for this tenant
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -431,141 +274,17 @@ export default function GeneralSettingsPage() {
                 />
               </div>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-sm">Cookie consent banner</Label>
-                <div className="text-xs text-muted-foreground">Show cookie consent banner to users</div>
-              </div>
-              <Switch
-                checked={settings.cookieConsent}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, cookieConsent: checked }))}
-              />
-            </div>
           </CardContent>
         </Card>
 
-        {/* API Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              API Configuration
-            </CardTitle>
-            <CardDescription>
-              Configure API rate limits, timeouts, and CORS settings
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Rate limit (requests/hour)</Label>
-                <Select
-                  value={settings.apiRateLimit.toString()}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, apiRateLimit: parseInt(value) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="100">100</SelectItem>
-                    <SelectItem value="500">500</SelectItem>
-                    <SelectItem value="1000">1,000</SelectItem>
-                    <SelectItem value="5000">5,000</SelectItem>
-                    <SelectItem value="10000">10,000</SelectItem>
-                    <SelectItem value="50000">50,000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Timeout (seconds)</Label>
-                <Select
-                  value={settings.apiTimeout.toString()}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, apiTimeout: parseInt(value) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10 seconds</SelectItem>
-                    <SelectItem value="30">30 seconds</SelectItem>
-                    <SelectItem value="60">1 minute</SelectItem>
-                    <SelectItem value="120">2 minutes</SelectItem>
-                    <SelectItem value="300">5 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">CORS enabled</Label>
-                  <div className="text-xs text-muted-foreground">Enable cross-origin requests</div>
-                </div>
-                <Switch
-                  checked={settings.corsEnabled}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, corsEnabled: checked }))}
-                />
-              </div>
-            </div>
 
-            {settings.corsEnabled && (
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Allowed origins</Label>
-                <div className="flex flex-wrap gap-2">
-                  {settings.allowedOrigins.map((origin, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {origin}
-                      <button
-                        onClick={() => {
-                          const newOrigins = settings.allowedOrigins.filter((_, i) => i !== index)
-                          setSettings(prev => ({ ...prev, allowedOrigins: newOrigins }))
-                        }}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://example.com"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const value = e.currentTarget.value.trim()
-                        if (value && !settings.allowedOrigins.includes(value)) {
-                          setSettings(prev => ({ ...prev, allowedOrigins: [...prev.allowedOrigins, value] }))
-                          e.currentTarget.value = ''
-                        }
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                      const value = input.value.trim()
-                      if (value && !settings.allowedOrigins.includes(value)) {
-                        setSettings(prev => ({ ...prev, allowedOrigins: [...prev.allowedOrigins, value] }))
-                        input.value = ''
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
         </div>
 
         {/* Save Button */}
         <div className="flex justify-end">
           <Button onClick={handleSave} className="flex items-center gap-2">
             <Save className="h-4 w-4" />
-            Save Settings
+            Save Tenant Settings
           </Button>
         </div>
       </div>

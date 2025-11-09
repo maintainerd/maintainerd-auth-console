@@ -1,7 +1,8 @@
 import { Route, Routes, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import LoginPage from './pages/login'
 import SignupPage from './pages/signup'
-import SetupOrganizationPage from './pages/setup/organization'
+import SetupTenantPage from './pages/setup/organization'
 import SetupAdminPage from './pages/setup/admin'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
@@ -59,7 +60,7 @@ function App() {
 				<Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/setup/organization" element={<SetupOrganizationPage />} />
+        <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
@@ -126,6 +127,23 @@ function App() {
           <Route path="tenant/create" element={<TenantCreatePage />} />
         </Route>
       </Routes>
+      <Toaster
+        position="bottom-right"
+        richColors={false}
+        toastOptions={{
+          style: {
+            background: 'hsl(var(--background))',
+            border: '1px solid hsl(var(--border))',
+            color: 'hsl(var(--foreground))',
+          },
+          classNames: {
+            error: 'border-l-4 border-l-red-500 border-border bg-background text-foreground [&>[data-icon]]:text-red-600',
+            success: 'border-l-4 border-l-green-500 border-border bg-background text-foreground [&>[data-icon]]:text-green-600',
+            warning: 'border-l-4 border-l-yellow-500 border-border bg-background text-foreground [&>[data-icon]]:text-yellow-600',
+            info: 'border-l-4 border-l-blue-500 border-border bg-background text-foreground [&>[data-icon]]:text-blue-600',
+          },
+        }}
+      />
     </>
   )
 }
