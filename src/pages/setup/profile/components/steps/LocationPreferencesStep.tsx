@@ -5,7 +5,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormSelectField, FormSetupCard } from "@/components/form"
 import { setupProfileLocationSchema } from "@/lib/validations"
 import { countryOptions, timezoneOptions, languageOptions } from "@/lib/constants"
-import type { CreateProfileRequest } from "@/services/api/types/setup"
+import type { CreateProfileRequest } from "@/services/api/setup/types"
 
 interface LocationPreferencesStepProps {
   data: Partial<CreateProfileRequest>

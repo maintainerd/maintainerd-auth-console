@@ -22,15 +22,11 @@ export type LoginFormData = yup.InferType<typeof loginSchema>
 
 // Register Form Schema
 export const registerSchema = yup.object({
-  fullName: yup
+  fullname: yup
     .string()
     .required('Full name is required')
     .min(2, 'Full name must be at least 2 characters')
-    .max(100, 'Full name must not exceed 100 characters')
-    .matches(
-      /^[a-zA-Z\s\-']+$/,
-      'Full name can only contain letters, spaces, hyphens, and apostrophes'
-    ),
+    .max(100, 'Full name must not exceed 100 characters'),
   email: yup
     .string()
     .required('Email is required')
@@ -40,10 +36,9 @@ export const registerSchema = yup.object({
     .string()
     .required('Password is required')
     .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must not exceed 128 characters')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'Password must contain uppercase, lowercase, number, and special character'
     ),
   confirmPassword: yup
     .string()
@@ -70,15 +65,17 @@ export const resetPasswordSchema = yup.object({
     .string()
     .required('Password is required')
     .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must not exceed 128 characters')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'Password must contain uppercase, lowercase, number, and special character'
     ),
   confirmPassword: yup
     .string()
     .required('Please confirm your password')
-    .oneOf([yup.ref('password')], 'Passwords must match')
+    .oneOf([yup.ref('password')], 'Passwords must match'),
+  token: yup
+    .string()
+    .required('Reset token is required')
 })
 
 export type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>

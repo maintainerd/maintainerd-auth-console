@@ -46,6 +46,7 @@ async function request<T>(
       ...API_CONFIG.HEADERS,
       ...options.headers,
     },
+    credentials: 'include', // Include cookies for authentication
   }
 
   // Add timeout using AbortController

@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormSetupCard } from "@/components/form"
 import { setupProfileContactSchema } from "@/lib/validations"
-import type { CreateProfileRequest } from "@/services/api/types/setup"
+import type { CreateProfileRequest } from "@/services/api/setup/types"
 
 interface ContactInfoStepProps {
   data: Partial<CreateProfileRequest>

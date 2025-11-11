@@ -3,19 +3,16 @@ import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormTextareaField, FormSubmitButton, FormLoginCard } from "@/components/form"
-import { useNavigate } from "react-router-dom"
-import { setupService } from "@/services"
 import { setupTenantSchema, type SetupTenantFormData } from "@/lib/validations"
-import { useToast } from "@/hooks/useToast"
+import { useSetupTenant } from "@/hooks/useSetup"
 
 const SetupTenantForm = () => {
-	const navigate = useNavigate()
-	const { showError, showSuccess } = useToast()
+	const { isLoading, createTenantWithDefaults } = useSetupTenant()
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors, isSubmitting }
+		formState: { errors }
 	} = useForm<SetupTenantFormData>({
 		resolver: yupResolver(setupTenantSchema),
 		defaultValues: {
@@ -25,16 +22,7 @@ const SetupTenantForm = () => {
 	})
 
 	const onSubmit = async (data: SetupTenantFormData) => {
-		try {
-			await setupService.createTenantWithDefaults(
-				data.name,
-				data.description
-			)
-			showSuccess("Tenant created successfully!")
-			navigate(`/setup/admin`)
-		} catch (err) {
-			showError(err, "Failed to create tenant")
-		}
+		await createTenantWithDefaults(data.name, data.description)
 	}
 
   return (
@@ -48,7 +36,7 @@ const SetupTenantForm = () => {
             <FormInputField
               label="Tenant Name"
               placeholder="Enter tenant name"
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.name?.message}
               required
               {...register("name")}
@@ -57,13 +45,13 @@ const SetupTenantForm = () => {
               label="Description"
               placeholder="Brief description of your tenant"
               rows={2}
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.description?.message}
               required
               {...register("description")}
             />
             <FormSubmitButton
-              isSubmitting={isSubmitting}
+              isSubmitting={isLoading}
               submitText="Create Tenant"
               submittingText="Creating Tenant..."
             />

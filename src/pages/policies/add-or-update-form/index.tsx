@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { useToast } from "@/hooks/useToast"
 import { ArrowLeft, Save, Trash2, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +16,7 @@ export default function PolicyAddOrUpdateForm() {
   const { tenantId, policyId } = useParams<{ tenantId: string; policyId?: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { showError, showSuccess } = useToast()
   const isEditing = !!policyId
   const isCreating = !isEditing
 
@@ -107,15 +109,15 @@ export default function PolicyAddOrUpdateForm() {
       }
       
       if (isCreating) {
-        console.log("Creating policy:", policyData)
+        showSuccess("Policy created successfully")
       } else {
-        console.log("Updating policy:", policyId, policyData)
+        showSuccess("Policy updated successfully")
       }
-      
+
       // Navigate back to policies list
       navigate(`/${tenantId}/policies`)
     } catch (error) {
-      console.error("Error saving policy:", error)
+      showError("Failed to save policy")
     } finally {
       setIsLoading(false)
     }
@@ -129,10 +131,10 @@ export default function PolicyAddOrUpdateForm() {
     setIsLoading(true)
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log("Deleting policy:", policyId)
+      showSuccess("Policy deleted successfully")
       navigate(`/${tenantId}/policies`)
     } catch (error) {
-      console.error("Error deleting policy:", error)
+      showError("Failed to delete policy")
     } finally {
       setIsLoading(false)
     }

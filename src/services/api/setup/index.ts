@@ -3,9 +3,9 @@
  * Service layer for setup-related API calls
  */
 
-import { post } from './api/client'
-import { API_ENDPOINTS } from './api/config'
-import type { CreateTenantRequest, CreateTenantResponse, CreateAdminRequest, CreateAdminResponse, CreateProfileRequest, CreateProfileResponse } from './api/types/setup'
+import { post } from '../client'
+import { API_ENDPOINTS } from '../config'
+import type { CreateTenantRequest, CreateTenantResponse, CreateAdminRequest, CreateAdminResponse, CreateProfileRequest, CreateProfileResponse } from './types'
 
 /**
  * Create a new tenant
@@ -25,44 +25,7 @@ export async function createTenant(data: CreateTenantRequest): Promise<CreateTen
 }
 
 /**
- * Get default tenant metadata
- * @returns Default metadata object
- */
-export function getDefaultTenantMetadata() {
-  return {
-    application_logo_url: "https://example.com/logo.png",
-    favicon_url: "https://example.com/favicon.ico",
-    language: "en-US",
-    timezone: "Manila",
-    date_format: "YYYY/MM/DD",
-    time_format: "12h",
-    privacy_policy_url: "https://example.com/privacy",
-    term_of_service_url: "https://example.com/terms"
-  }
-}
-
-/**
- * Check if setup is already completed
- * @returns Promise<boolean>
- */
-export async function isSetupCompleted(): Promise<boolean> {
-  try {
-    // Try to create a test tenant to see if setup is already done
-    // This will fail if tenant already exists
-    await post('/setup/status')
-    return false // Setup not completed
-  } catch (error) {
-    // If we get an error about tenant already existing, setup is completed
-    if (error instanceof Error && error.message.includes('tenant already exists')) {
-      return true
-    }
-    // For other errors, assume setup is not completed
-    return false
-  }
-}
-
-/**
- * Create admin user
+ * Create a new admin user
  * @param data - Admin creation data
  * @returns Promise<CreateAdminResponse>
  */
@@ -79,7 +42,7 @@ export async function createAdmin(data: CreateAdminRequest): Promise<CreateAdmin
 }
 
 /**
- * Create user profile
+ * Create a new profile
  * @param data - Profile creation data
  * @returns Promise<CreateProfileResponse>
  */
@@ -96,19 +59,51 @@ export async function createProfile(data: CreateProfileRequest): Promise<CreateP
 }
 
 /**
+ * Get default tenant metadata for setup
+ * @returns Promise with default tenant metadata
+ */
+export async function getDefaultTenantMetadata() {
+  // This would typically fetch from an API endpoint
+  // For now, return default values
+  return {
+    application_logo_url: '',
+    favicon_url: '',
+    language: 'en',
+    timezone: 'UTC',
+    date_format: 'YYYY-MM-DD',
+    time_format: '24h',
+    privacy_policy_url: '',
+    term_of_service_url: ''
+  }
+}
+
+/**
  * Create tenant with default metadata
  * @param name - Tenant name
  * @param description - Tenant description
  * @returns Promise<CreateTenantResponse>
  */
 export async function createTenantWithDefaults(name: string, description: string): Promise<CreateTenantResponse> {
-  const payload: CreateTenantRequest = {
+  const defaultMetadata = await getDefaultTenantMetadata()
+  
+  const tenantData: CreateTenantRequest = {
     name,
     description,
-    metadata: getDefaultTenantMetadata()
+    metadata: defaultMetadata
   }
+  
+  return createTenant(tenantData)
+}
 
-  return createTenant(payload)
+/**
+ * Check if setup is completed
+ * This would typically check if required setup steps are done
+ * @returns Promise<boolean>
+ */
+export async function isSetupCompleted(): Promise<boolean> {
+  // This would typically make an API call to check setup status
+  // For now, return false to indicate setup is needed
+  return false
 }
 
 // Export functions as an object for backward compatibility
@@ -118,5 +113,5 @@ export const setupService = {
   createProfile,
   getDefaultTenantMetadata,
   createTenantWithDefaults,
-  isSetupCompleted,
+  isSetupCompleted
 }

@@ -3,6 +3,7 @@
  * Provides consistent toast messaging across the application
  */
 
+import { useCallback } from "react"
 import { toast } from "sonner"
 
 export interface UseToastOptions {
@@ -22,7 +23,7 @@ export function useToast(options: UseToastOptions = {}) {
     defaultErrorDescription = "An unexpected error occurred"
   } = options
 
-  const showError = (
+  const showError = useCallback((
     error: unknown,
     title?: string,
     description?: string
@@ -62,36 +63,36 @@ export function useToast(options: UseToastOptions = {}) {
     toast.error(title || defaultErrorTitle, {
       description: errorMessage
     })
-  }
+  }, [defaultErrorTitle, defaultErrorDescription])
 
-  const showSuccess = (
+  const showSuccess = useCallback((
     title: string,
     description?: string
   ) => {
     toast.success(title, {
       description
     })
-  }
+  }, [])
 
-  const showInfo = (
+  const showInfo = useCallback((
     title: string,
     description?: string
   ) => {
     toast.info(title, {
       description
     })
-  }
+  }, [])
 
-  const showWarning = (
+  const showWarning = useCallback((
     title: string,
     description?: string
   ) => {
     toast.warning(title, {
       description
     })
-  }
+  }, [])
 
-  const parseError = (error: unknown): ParsedError => {
+  const parseError = useCallback((error: unknown): ParsedError => {
     let message = defaultErrorDescription
     let fieldErrors: Record<string, string> | undefined
     let isValidationError = false
@@ -129,7 +130,7 @@ export function useToast(options: UseToastOptions = {}) {
       fieldErrors,
       isValidationError
     }
-  }
+  }, [defaultErrorDescription])
 
   return {
     showError,

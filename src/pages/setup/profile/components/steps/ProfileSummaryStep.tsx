@@ -1,8 +1,7 @@
-import { Edit2, User, Mail, MapPin, Globe, Clock, Languages } from "lucide-react"
+import { Edit2, User, Mail, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { FieldGroup } from "@/components/ui/field"
 import { FormSetupCard } from "@/components/form"
-import type { CreateProfileRequest } from "@/services/api/types/setup"
+import type { CreateProfileRequest } from "@/services/api/setup/types"
 
 interface ProfileSummaryStepProps {
   data: Partial<CreateProfileRequest>

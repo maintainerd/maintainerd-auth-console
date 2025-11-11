@@ -15,12 +15,16 @@ import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
 import { useParams, useNavigate } from "react-router-dom"
 import { MOCK_TENANTS, findTenantByIdentifier } from "@/constants/tenants"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
 
 export function TopNav() {
   // Note: tenantId parameter actually contains the tenant identifier (random alphanumeric)
   // URL structure: /{tenantIdentifier}/subpages
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
+  const { logout } = useAuth()
+  const { showSuccess, showError } = useToast()
 
   // Find current tenant by identifier (tenantId parameter contains the tenant identifier)
   const currentTenant = findTenantByIdentifier(tenantId || '') || MOCK_TENANTS[0]
@@ -38,6 +42,18 @@ export function TopNav() {
   const handleCreateTenant = () => {
     if (tenantId) {
       navigate(`/${tenantId}/tenant/create`)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      showSuccess("Logged out successfully")
+      navigate("/login")
+    } catch (error) {
+      showError(error, "Logout failed")
+      // Even if logout fails, navigate to login
+      navigate("/login")
     }
   }
   return (
@@ -219,7 +235,7 @@ export function TopNav() {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

@@ -5,7 +5,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormTextareaField, FormSelectField, FormDateField, FormSetupCard } from "@/components/form"
 import { setupProfilePersonalSchema } from "@/lib/validations"
 import { genderOptions } from "@/lib/constants"
-import type { CreateProfileRequest } from "@/services/api/types/setup"
+import type { CreateProfileRequest } from "@/services/api/setup/types"
 
 interface PersonalInfoStepProps {
   data: Partial<CreateProfileRequest>

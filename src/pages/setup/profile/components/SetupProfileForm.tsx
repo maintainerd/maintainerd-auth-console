@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { MultiStepForm, type MultiStepFormStep } from "@/components/form"
-import { setupService } from "@/services"
-import { useToast } from "@/hooks/useToast"
-import type { CreateProfileRequest } from "@/services/api/types/setup"
+import { useSetupProfile } from "@/hooks/useSetup"
+import type { CreateProfileRequest } from "@/services/api/setup/types"
 import PersonalInfoStep from "./steps/PersonalInfoStep"
 import ContactInfoStep from "./steps/ContactInfoStep"
 import LocationPreferencesStep from "./steps/LocationPreferencesStep"
@@ -11,10 +10,8 @@ import ProfileSummaryStep from "./steps/ProfileSummaryStep"
 import ProfileSetupSuccess from "./ProfileSetupSuccess"
 
 const SetupProfileForm = () => {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { showError, showSuccess, parseError } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading, createUserProfile } = useSetupProfile()
   const [isNavigating, setIsNavigating] = useState(false)
   const [isProfileCreated, setIsProfileCreated] = useState(false)
   const navigationTimeoutRef = useRef<number | null>(null)
@@ -85,56 +82,35 @@ const SetupProfileForm = () => {
   }, [isNavigating, currentStep, stepNames, handleStepChange, navigationTimeoutRef])
 
   const handleComplete = async () => {
-    setIsSubmitting(true)
-    try {
-      if (!formData.first_name || !formData.last_name || !formData.email) {
-        throw new Error('Missing required profile information')
-      }
-      // Generate display name from first and last name
-      const displayName = `${formData.first_name} ${formData.last_name}`
+    if (!formData.first_name || !formData.last_name || !formData.email) {
+      return // Form validation should prevent this
+    }
 
-      const profileData: CreateProfileRequest = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        display_name: displayName,
-        bio: formData.bio || undefined,
-        birthdate: formData.birthdate || undefined,
-        gender: formData.gender || undefined,
-        phone: formData.phone || undefined,
-        email: formData.email,
-        address: formData.address || undefined,
-        city: formData.city || undefined,
-        country: formData.country || undefined,
-        timezone: formData.timezone || undefined,
-        language: formData.language || undefined
-      }
-      await setupService.createProfile(profileData)
+    // Generate display name from first and last name
+    const displayName = `${formData.first_name} ${formData.last_name}`
 
+    const profileData: CreateProfileRequest = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      display_name: displayName,
+      bio: formData.bio || undefined,
+      birthdate: formData.birthdate || undefined,
+      gender: formData.gender || undefined,
+      phone: formData.phone || undefined,
+      email: formData.email,
+      address: formData.address || undefined,
+      city: formData.city || undefined,
+      country: formData.country || undefined,
+      timezone: formData.timezone || undefined,
+      language: formData.language || undefined
+    }
+
+    const result = await createUserProfile(profileData)
+    if (result.success) {
       // Set success state to show the success page
       setIsProfileCreated(true)
-    } catch (err) {
-      // Parse the error to check if it's a validation error with field-specific details
-      const parsedError = parseError(err)
-
-      if (parsedError.isValidationError && parsedError.fieldErrors) {
-        // Handle field-specific validation errors
-        // For now, we'll still show a toast, but you could also:
-        // 1. Set field-specific errors in form state
-        // 2. Navigate to the step containing the invalid field
-        // 3. Highlight the problematic fields
-
-        const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
-          .map(([field, message]) => `${field}: ${message}`)
-          .join('\n')
-
-        showError(`${parsedError.message}\n\nField errors:\n${fieldErrorMessages}`, "Validation Failed")
-      } else {
-        // Handle general errors
-        showError(err, "Failed to create profile")
-      }
-    } finally {
-      setIsSubmitting(false)
     }
+    // Error handling is done in the hook
   }
 
   const steps: MultiStepFormStep[] = [
@@ -208,7 +184,7 @@ const SetupProfileForm = () => {
         onStepChange={handleStepChange}
         onNext={handleNext}
         onComplete={handleComplete}
-        isSubmitting={isSubmitting}
+        isSubmitting={isLoading}
         canGoNext={canGoNext}
         nextButtonText="Continue"
         completeButtonText="Create Profile"

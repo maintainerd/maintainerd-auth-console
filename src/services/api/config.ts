@@ -30,9 +30,11 @@ export const API_ENDPOINTS = {
     CREATE_ADMIN: '/setup/create_admin',
     CREATE_PROFILE: '/setup/create_profile',
   },
-  // Add more endpoints as needed
-  // AUTH: {
-  //   LOGIN: '/auth/login',
-  //   LOGOUT: '/auth/logout',
-  // },
+  AUTH: {
+    LOGIN: '/login',
+    LOGOUT: '/logout',
+    REFRESH: '/refresh',
+    PROFILE: '/profile',
+  },
+  TENANT: '/tenant',
 } as const

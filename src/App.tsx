@@ -1,5 +1,10 @@
 import { Route, Routes, Navigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { useTenant } from '@/hooks/useTenant'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import LoginPage from './pages/login'
 import SignupPage from './pages/signup'
 import SetupTenantPage from './pages/setup/tenant'
@@ -55,6 +60,35 @@ import GeneralSettingsPage from './pages/settings'
 import TenantCreatePage from './pages/tenant-create'
 
 function App() {
+  const location = useLocation()
+  const { showError } = useToast()
+  const { initializeFromLocation } = useTenant()
+  const { fetchProfile } = useAuth()
+  const initializationRef = useRef<string>('')
+
+  // Initialize profile and tenant data based on current URL
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        // Create a unique key for this initialization attempt
+        const initKey = `${location.pathname}${location.search}`
+        // Prevent duplicate initialization for the same location
+        if (initializationRef.current === initKey) {
+          return
+        }
+        initializationRef.current = initKey
+        // Fetch profile first to populate Redux state
+        await fetchProfile()
+        // Then initialize tenant
+        await initializeFromLocation(location.pathname, location.search)
+      } catch (error) {
+        showError('Failed to initialize application')
+        // Don't throw error, let the app continue
+      }
+    }
+    initialize()
+  }, [location.pathname, location.search]) // Only depend on location changes
+
   return (
     <>
       <Routes>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/useToast"
 import { ArrowLeft, Save, X, Plus, Trash2, Monitor, Smartphone, Globe, Cog, Search, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -130,6 +131,7 @@ const DEFAULT_SCOPES_BY_TYPE = {
 export default function ClientAddOrUpdateForm() {
   const { tenantId, clientId } = useParams<{ tenantId: string; clientId?: string }>()
   const navigate = useNavigate()
+  const { showError, showSuccess } = useToast()
   
   const isEditing = Boolean(clientId)
   const isCreating = !isEditing
@@ -232,16 +234,15 @@ export default function ClientAddOrUpdateForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      console.log("Saving client:", formData)
-      
-      // Navigate back to clients list or client details
       if (isCreating) {
+        showSuccess("Client created successfully")
         navigate(`/${tenantId}/clients`)
       } else {
+        showSuccess("Client updated successfully")
         navigate(`/${tenantId}/clients/${clientId}`)
       }
     } catch (error) {
-      console.error("Error saving client:", error)
+      showError("Failed to save client")
     } finally {
       setIsLoading(false)
     }

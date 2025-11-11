@@ -2,19 +2,16 @@ import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormPasswordField, FormSubmitButton, FormLoginCard } from "@/components/form"
-import { useNavigate } from "react-router-dom"
-import { setupService } from "@/services"
 import { setupAdminSchema, type SetupAdminFormData } from "@/lib/validations"
-import { useToast } from "@/hooks/useToast"
+import { useSetupAdmin } from "@/hooks/useSetup"
 
 const SetupAdminForm = () => {
-  const navigate = useNavigate()
-  const { showError, showSuccess } = useToast()
+  const { isLoading, createAdminAccount } = useSetupAdmin()
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: { errors }
   } = useForm<SetupAdminFormData>({
     resolver: yupResolver(setupAdminSchema),
     defaultValues: {
@@ -26,18 +23,11 @@ const SetupAdminForm = () => {
   })
 
   const onSubmit = async (data: SetupAdminFormData) => {
-    try {
-      await setupService.createAdmin({
-        username: data.email,
-        fullname: data.fullname,
-        password: data.password,
-        email: data.email
-      })
-      showSuccess("Admin account created successfully!")
-      navigate("/setup/profile")
-    } catch (err) {
-      showError(err, "Failed to create admin account")
-    }
+    await createAdminAccount({
+      fullname: data.fullname,
+      email: data.email,
+      password: data.password
+    })
   }
 	
   return (
@@ -51,7 +41,7 @@ const SetupAdminForm = () => {
             <FormInputField
               label="Full Name"
               placeholder="John Doe"
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.fullname?.message}
               required
               {...register("fullname")}
@@ -60,7 +50,7 @@ const SetupAdminForm = () => {
               label="Email Address"
               type="email"
               placeholder="admin@acme.com"
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.email?.message}
               description="This will be used as your username"
               required
@@ -69,7 +59,7 @@ const SetupAdminForm = () => {
             <FormPasswordField
               label="Password"
               placeholder="Enter a strong password"
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.password?.message}
               description="Must contain uppercase, lowercase, number, and special character"
               required
@@ -78,14 +68,14 @@ const SetupAdminForm = () => {
             <FormPasswordField
               label="Confirm Password"
               placeholder="Confirm your password"
-              disabled={isSubmitting}
+              disabled={isLoading}
               error={errors.confirmPassword?.message}
               description="Please confirm your password"
               required
               {...register("confirmPassword")}
             />
             <FormSubmitButton
-              isSubmitting={isSubmitting}
+              isSubmitting={isLoading}
               submitText="Complete Setup"
               submittingText="Creating Admin..."
             />
