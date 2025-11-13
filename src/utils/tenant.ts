@@ -9,9 +9,9 @@
  * @returns Tenant identifier or null if not found
  */
 export function getTenantIdentifierFromPath(pathname: string): string | null {
-  // Skip login, signup, and setup routes
-  if (pathname.startsWith('/login') || 
-      pathname.startsWith('/signup') || 
+  // Skip login, register, and setup routes
+  if (pathname.startsWith('/login') ||
+      pathname.startsWith('/register') ||
       pathname.startsWith('/setup')) {
     return null
   }

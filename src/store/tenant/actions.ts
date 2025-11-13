@@ -37,11 +37,24 @@ export const initializeTenantAsync = createAsyncThunk(
   async (identifier?: string) => {
     // First check if we already have a tenant in localStorage
     const currentTenant = getTenant()
+
+    // If we have a tenant, check if it matches the requested identifier
     if (currentTenant) {
-      return currentTenant
+      // If no specific identifier is requested, return current tenant
+      if (!identifier) {
+        return currentTenant
+      }
+
+      // If the current tenant matches the requested identifier, return it
+      if (currentTenant.identifier === identifier) {
+        return currentTenant
+      }
+
+      // If identifiers don't match, we need to fetch the correct tenant
+      // This handles cases where user navigates to a different tenant URL
     }
-    
-    // If not, fetch and store tenant
+
+    // Fetch and store the correct tenant (either no tenant exists or wrong tenant)
     return await fetchAndStoreTenant(identifier)
   }
 )

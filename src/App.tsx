@@ -6,10 +6,11 @@ import { useTenant } from '@/hooks/useTenant'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import LoginPage from './pages/login'
-import SignupPage from './pages/signup'
+import RegisterPage from './pages/register'
 import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
 import SetupProfilePage from './pages/setup/profile'
+import RegisterProfilePage from './pages/register/profile'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
@@ -63,41 +64,60 @@ function App() {
   const location = useLocation()
   const { showError } = useToast()
   const { initializeFromLocation } = useTenant()
-  const { fetchProfile } = useAuth()
-  const initializationRef = useRef<string>('')
+  const { initializeAuth } = useAuth()
+  const authInitializedRef = useRef(false)
+  const tenantInitializationRef = useRef<string>('')
 
-  // Initialize profile and tenant data based on current URL
+  // Initialize auth once on app load
   useEffect(() => {
-    const initialize = async () => {
+    const initializeAuthOnce = async () => {
+      if (authInitializedRef.current) {
+        return
+      }
+      authInitializedRef.current = true
+
       try {
-        // Create a unique key for this initialization attempt
-        const initKey = `${location.pathname}${location.search}`
-        // Prevent duplicate initialization for the same location
-        if (initializationRef.current === initKey) {
-          return
-        }
-        initializationRef.current = initKey
-        // Fetch profile first to populate Redux state
-        await fetchProfile()
-        // Then initialize tenant
-        await initializeFromLocation(location.pathname, location.search)
+        // Initialize auth first (this will fetch profile from backend if authenticated)
+        await initializeAuth()
       } catch (error) {
-        showError('Failed to initialize application')
+        showError('Failed to initialize authentication')
         // Don't throw error, let the app continue
       }
     }
-    initialize()
-  }, [location.pathname, location.search]) // Only depend on location changes
+    initializeAuthOnce()
+  }, []) // Only run once on mount
+
+  // Initialize tenant data based on current URL (separate from auth)
+  useEffect(() => {
+    const initializeTenant = async () => {
+      try {
+        // Create a unique key for this tenant initialization attempt
+        const initKey = `${location.pathname}${location.search}`
+        // Prevent duplicate initialization for the same location
+        if (tenantInitializationRef.current === initKey) {
+          return
+        }
+        tenantInitializationRef.current = initKey
+        // Initialize tenant based on current location
+        await initializeFromLocation(location.pathname, location.search)
+      } catch (error) {
+        showError('Failed to initialize tenant')
+        // Don't throw error, let the app continue
+      }
+    }
+    initializeTenant()
+  }, [location.pathname, location.search]) // Run on location changes for tenant switching
 
   return (
     <>
       <Routes>
 				<Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/setup/profile" element={<SetupProfilePage />} />
+        <Route path="/register/profile" element={<RegisterProfilePage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />

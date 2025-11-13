@@ -4,7 +4,7 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { loginAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync } from './actions'
+import { loginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync } from './actions'
 import type { AuthStateInterface } from './types'
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInterface>) => {
@@ -23,6 +23,21 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInte
     .addCase(loginAsync.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.error.message || 'Login failed'
+    })
+    // Register
+    .addCase(registerAsync.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    .addCase(registerAsync.fulfilled, (state) => {
+      state.isLoading = false
+      state.error = null
+      // Note: Registration doesn't automatically log the user in
+      // They need to login after successful registration
+    })
+    .addCase(registerAsync.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.error.message || 'Registration failed'
     })
     // Logout
     .addCase(logoutAsync.pending, (state) => {

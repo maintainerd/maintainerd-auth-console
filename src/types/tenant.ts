@@ -4,7 +4,7 @@
  */
 
 export interface TenantType {
-  tenant_uuid: string
+  tenant_id: string
   name: string
   description: string
   identifier: string

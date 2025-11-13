@@ -1,0 +1,76 @@
+/**
+ * Profile Hook
+ * Custom hook for profile operations (setup flow and register flow)
+ * - createProfile: For setup/profile (no authentication required, one-time only)
+ * - createProfileForRegister: For register/profile (requires authentication cookies)
+ */
+
+import { useCallback, useState } from 'react'
+import { useToast } from '@/hooks/useToast'
+import { createUserProfile, createRegisterProfile } from '@/services'
+import type { CreateProfileRequest } from '@/services/api/auth/types'
+
+/**
+ * Hook for profile operations (setup flow and register flow)
+ */
+export function useProfile() {
+  const { showError, parseError } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+
+  /**
+   * Create profile for setup flow
+   * Used in setup/profile - does not require authentication and can only be triggered once
+   */
+  const createProfile = useCallback(async (data: CreateProfileRequest) => {
+    setIsLoading(true)
+    try {
+      const response = await createUserProfile(data)
+      return { success: true, data: response }
+    } catch (error: any) {
+      const parsedError = parseError(error)
+      if (parsedError.isValidationError && parsedError.fieldErrors) {
+        const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
+          .map(([field, message]) => `${field}: ${message}`)
+          .join('\n')
+        showError(`${parsedError.message}\n\nField errors:\n${fieldErrorMessages}`, "Validation Failed")
+      } else {
+        showError(error, "Failed to create profile")
+      }
+      return { success: false, message: error.message, fieldErrors: parsedError.fieldErrors }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [showError, parseError])
+
+  /**
+   * Create profile for register flow
+   * Used in register/profile - requires authentication cookies from successful registration
+   */
+  const createProfileForRegister = useCallback(async (data: CreateProfileRequest) => {
+    setIsLoading(true)
+    try {
+      const response = await createRegisterProfile(data)
+      return { success: true, data: response }
+    } catch (error: any) {
+      const parsedError = parseError(error)
+      if (parsedError.isValidationError && parsedError.fieldErrors) {
+        const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
+          .map(([field, message]) => `${field}: ${message}`)
+          .join('\n')
+        showError(`${parsedError.message}\n\nField errors:\n${fieldErrorMessages}`, "Validation Failed")
+      } else {
+        showError(error, "Failed to create profile")
+      }
+
+      return { success: false, message: error.message, fieldErrors: parsedError.fieldErrors }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [showError, parseError])
+
+  return {
+    isLoading,
+    createProfile,
+    createProfileForRegister
+  }
+}

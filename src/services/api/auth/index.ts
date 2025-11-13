@@ -7,7 +7,7 @@ import { post, get } from '../client'
 import { API_ENDPOINTS } from '../config'
 import { authStorage } from '../../storage/auth'
 import type { AuthUserType, ProfileResponseInterface } from '@/types'
-import type { LoginRequest, LoginResponse, LogoutResponse } from './types'
+import type { LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse } from './types'
 
 /**
  * Login user with credentials
@@ -30,9 +30,68 @@ export async function login(username: string, password: string): Promise<LoginRe
 
     if (response.success) {
       // Fetch and store profile after successful login
+      // This may return null if profile doesn't exist (newly registered user)
       await fetchAndStoreProfile()
     }
 
+    return response
+  } catch (error) {
+    throw error
+  }
+}
+
+/**
+ * Register a new user
+ * @param fullname - User's full name
+ * @param email - User's email address (used as username)
+ * @param password - User's password
+ * @param phone - User's phone number (optional)
+ * @param clientId - Optional client ID for specific client registration
+ * @param providerId - Optional provider ID for specific provider registration
+ * @returns Promise<RegisterResponse>
+ */
+export async function register(
+  fullname: string,
+  email: string,
+  password: string,
+  phone?: string,
+  clientId?: string,
+  providerId?: string
+): Promise<RegisterResponse> {
+  try {
+    const registerData: RegisterRequest = {
+      username: email, // Use email as username
+      fullname,
+      email,
+      phone: phone || '', // Keep blank if not provided
+      password
+    }
+
+    // Build endpoint URL with query parameters if provided
+    let endpoint = API_ENDPOINTS.AUTH.REGISTER
+    const queryParams = new URLSearchParams()
+
+    if (clientId) {
+      queryParams.append('client_id', clientId)
+    }
+
+    if (providerId) {
+      queryParams.append('provider_id', providerId)
+    }
+
+    if (queryParams.toString()) {
+      endpoint += `?${queryParams.toString()}`
+    }
+
+    const response = await post<RegisterResponse>(
+      endpoint,
+      registerData,
+      {
+        headers: {
+          'X-Token-Delivery': 'cookie'
+        }
+      }
+    )
     return response
   } catch (error) {
     throw error
@@ -60,9 +119,9 @@ export async function logout(): Promise<LogoutResponse> {
 
 /**
  * Fetch user profile from API and store it
- * @returns Promise<AuthUserType>
+ * @returns Promise<AuthUserType | null> - Returns null if profile doesn't exist (e.g., newly registered user)
  */
-export async function fetchAndStoreProfile(): Promise<AuthUserType> {
+export async function fetchAndStoreProfile(): Promise<AuthUserType | null> {
   try {
     const response = await get<ProfileResponseInterface>(API_ENDPOINTS.AUTH.PROFILE)
 
@@ -72,9 +131,11 @@ export async function fetchAndStoreProfile(): Promise<AuthUserType> {
       return response.data
     }
 
-    throw new Error('Failed to fetch profile')
+    // Profile doesn't exist or is incomplete - this is expected for newly registered users
+    return null
   } catch (error) {
-    throw error
+    // Network error or other issues - return null to indicate no profile
+    return null
   }
 }
 
@@ -94,8 +155,56 @@ export function clearProfile(): void {
 }
 
 /**
+ * Create user profile for authenticated users (requires cookie token)
+ * @param data - Profile creation data
+ * @returns Promise<CreateProfileResponse>
+ */
+export async function createUserProfile(data: CreateProfileRequest): Promise<CreateProfileResponse> {
+  try {
+    const response = await post<CreateProfileResponse>(
+      API_ENDPOINTS.AUTH.PROFILE,
+      data
+    )
+
+    if (response.success && response.data) {
+      // Store the new profile in localStorage
+      authStorage.setProfile(response.data)
+    }
+
+    return response
+  } catch (error) {
+    throw error
+  }
+}
+
+/**
+ * Create profile for registered users (dedicated register flow)
+ * @param data - Profile creation data
+ * @returns Promise<CreateProfileResponse>
+ */
+export async function createRegisterProfile(data: CreateProfileRequest): Promise<CreateProfileResponse> {
+  try {
+    const response = await post<CreateProfileResponse>(
+      API_ENDPOINTS.AUTH.PROFILE,
+      data
+    )
+
+    if (response.success && response.data) {
+      // Store the new profile in localStorage
+      authStorage.setProfile(response.data)
+    }
+
+    return response
+  } catch (error) {
+    throw error
+  }
+}
+
+/**
  * Check if user is authenticated (has profile stored)
- * @returns True if user has valid authentication
+ * Note: This only checks localStorage cache, not backend validity
+ * Use validateAuthentication() for backend validation
+ * @returns True if user has profile cached locally
  */
 export function isAuthenticated(): boolean {
   return authStorage.hasProfile()
@@ -108,16 +217,12 @@ export function isAuthenticated(): boolean {
  */
 export async function validateAuthentication(): Promise<boolean> {
   try {
-    // If no profile stored locally, definitely not authenticated
-    if (!getUserProfile()) {
-      return false
-    }
-
-    // Try to fetch profile from backend to validate cookie
+    // Always try to fetch profile from backend to validate cookie
+    // Don't check localStorage first - the backend is the source of truth
     const response = await get<ProfileResponseInterface>(API_ENDPOINTS.AUTH.PROFILE)
 
     if (response.success && response.data) {
-      // Update stored profile with fresh data
+      // Update stored profile with fresh data from backend
       authStorage.setProfile(response.data)
       return true
     }
@@ -135,10 +240,13 @@ export async function validateAuthentication(): Promise<boolean> {
 // Export functions as an object for backward compatibility
 export const authService = {
   login,
+  register,
   logout,
   fetchAndStoreProfile,
   getUserProfile,
   clearProfile,
+  createUserProfile,
+  createRegisterProfile,
   isAuthenticated,
   validateAuthentication
 }

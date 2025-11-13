@@ -58,12 +58,32 @@ async function request<T>(
     const response = await fetch(url, config)
     clearTimeout(timeoutId)
 
-    const data = await response.json()
+    // Check if response has content and is JSON
+    const contentType = response.headers.get('content-type')
+    const hasJsonContent = contentType && contentType.includes('application/json')
+
+    let data: any = null
+
+    // Only try to parse JSON if we have content and it's JSON
+    if (hasJsonContent) {
+      const text = await response.text()
+      if (text.trim()) {
+        try {
+          data = JSON.parse(text)
+        } catch (parseError) {
+          throw new ApiError({
+            message: 'Invalid JSON response from server',
+            status: response.status,
+            code: 'INVALID_JSON',
+          })
+        }
+      }
+    }
 
     if (!response.ok) {
       // Handle API error response format: { success: false, error: "message", details?: string | object }
-      const errorMessage = data.error || `HTTP ${response.status}: ${response.statusText}`
-      const errorDetails = data.details || undefined
+      const errorMessage = data?.error || `HTTP ${response.status}: ${response.statusText}`
+      const errorDetails = data?.details || undefined
 
       // Create enhanced error with original response data
       const apiError = new ApiError({
@@ -75,13 +95,14 @@ async function request<T>(
       ;(apiError as any).responseData = {
         error: errorMessage,
         details: errorDetails,
-        success: data.success
+        success: data?.success
       }
 
       throw apiError
     }
 
-    return data
+    // Return data or a default success response if no JSON content
+    return data || { success: true, message: 'Request completed successfully' }
   } catch (error) {
     clearTimeout(timeoutId)
 

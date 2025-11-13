@@ -4,20 +4,20 @@
  */
 
 export interface AuthUserType {
-  profile_uuid: string
+  profile_id: string
   first_name: string
   last_name: string
   display_name: string
-  bio: string
-  birthdate: string
-  gender: string
-  phone: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
   email: string
-  address: string
-  city: string
-  country: string
-  timezone: string
-  language: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
   created_at: string
   updated_at: string
 }

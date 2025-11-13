@@ -32,11 +32,16 @@ const LoginForm = () => {
     try {
       const response = await login(data.email, data.password)
       if (response.success) {
-        showSuccess("Login successful!")
-        const currentTenant = getCurrentTenant()
-        const tenantIdentifier = currentTenant?.identifier || 'def4ult'
-        const redirectPath = `/${tenantIdentifier}/dashboard`
-        navigate(redirectPath, { replace: true })
+        if (response.requiresProfileSetup) {
+          showSuccess("Login successful! Please complete your profile setup.")
+          navigate('/register/profile', { replace: true })
+        } else {
+          showSuccess("Login successful!")
+          const currentTenant = getCurrentTenant()
+          const tenantIdentifier = currentTenant?.identifier || 'def4ult'
+          const redirectPath = `/${tenantIdentifier}/dashboard`
+          navigate(redirectPath, { replace: true })
+        }
       } else {
         const errorMessage = response.message || "Invalid email or password"
         setError("root", {
@@ -106,7 +111,7 @@ const LoginForm = () => {
             />
             <div className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="underline-offset-4 hover:underline">
+              <Link to="/register" className="underline-offset-4 hover:underline">
                 Sign up
               </Link>
             </div>

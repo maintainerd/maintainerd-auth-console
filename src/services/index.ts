@@ -28,10 +28,13 @@ export {
 export {
   authService,
   login,
+  register,
   logout,
   fetchAndStoreProfile,
   getUserProfile,
   clearProfile,
+  createUserProfile,
+  createRegisterProfile,
   isAuthenticated,
   validateAuthentication
 } from './api/auth'

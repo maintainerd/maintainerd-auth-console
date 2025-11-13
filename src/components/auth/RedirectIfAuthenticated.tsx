@@ -1,11 +1,12 @@
 /**
  * Redirect If Authenticated Component
- * Redirects authenticated users away from auth pages (login, signup, etc.)
+ * Redirects authenticated users away from auth pages (login, register, etc.)
  */
 
-import { ReactNode, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { getCurrentTenant, getUserProfile, validateAuthentication } from '@/services'
+import { getCurrentTenant } from '@/services'
+import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
 
 interface RedirectIfAuthenticatedProps {
@@ -19,33 +20,11 @@ export function RedirectIfAuthenticated({
   redirectTo,
   fallback
 }: RedirectIfAuthenticatedProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const location = useLocation()
+  const { isAuthenticated, isLoading } = useAuth()
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Check if user profile exists in localStorage
-        const userProfile = getUserProfile()
-        if (!userProfile) {
-          setIsAuthenticated(false)
-          return
-        }
-
-        // Validate with backend
-        const isValid = await validateAuthentication()
-        setIsAuthenticated(isValid)
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
-
-  // Show loading spinner while checking authentication
-  if (isAuthenticated === null) {
+  // Show loading spinner while auth is being initialized
+  if (isLoading) {
     return (
       fallback || (
         <div className="flex min-h-screen items-center justify-center">
@@ -69,7 +48,7 @@ export function RedirectIfAuthenticated({
     return <Navigate to={from} replace />
   }
 
-  // Render auth content (login, signup, etc.)
+  // Render auth content (login, register, etc.)
   return <>{children}</>
 }
 

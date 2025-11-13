@@ -86,7 +86,7 @@ export interface CreateProfileRequest {
 }
 
 export interface ProfileData {
-  profile_uuid: string
+  profile_id: string
   first_name: string
   last_name: string
   display_name: string

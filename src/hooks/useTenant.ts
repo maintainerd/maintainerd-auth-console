@@ -21,26 +21,17 @@ export function useTenant() {
   const { showError } = useToast()
   const { currentTenant, isLoading, error } = useAppSelector((state) => state.tenant)
 
-  // Manual initialization function based on current location
   const initializeFromLocation = useCallback(async (pathname: string, search: string) => {
     try {
-      // Check if we already have tenant data
-      if (currentTenant) {
-        return currentTenant // Already have tenant data
-      }
-
-      // Determine tenant identifier from location
       const searchParams = new URLSearchParams(search)
       const tenantIdentifier = determineTenantIdentifier(pathname, searchParams)
-
-      // Initialize tenant using Redux
       const result = await dispatch(initializeTenantAsync(tenantIdentifier || undefined)).unwrap()
       return result
     } catch (error) {
       showError('Failed to initialize tenant')
       throw error
     }
-  }, [currentTenant, dispatch, showError])
+  }, [dispatch, showError])
 
   const getCurrentTenant = useCallback(() => {
     return currentTenant

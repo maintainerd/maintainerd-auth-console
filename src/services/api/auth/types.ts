@@ -45,8 +45,69 @@ export interface LogoutResponse {
   message: string
 }
 
+export interface RegisterRequest {
+  username: string
+  fullname: string
+  email: string
+  phone?: string
+  password: string
+}
+
+export interface RegisterResponse {
+  success: boolean
+  data?: {
+    user_id: string
+    username: string
+    email: string
+    fullname: string
+    phone?: string
+    created_at: string
+  }
+  message: string
+}
+
 export interface ProfileResponse {
   success: boolean
   data?: any
   message?: string
+}
+
+// Profile creation types for authenticated users (using /profiles endpoint)
+export interface CreateProfileRequest {
+  first_name: string
+  last_name: string
+  display_name: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
+  email: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+}
+
+export interface CreateProfileResponse {
+  success: boolean
+  data?: {
+    profile_id: string
+    first_name: string
+    last_name: string
+    display_name: string
+    bio?: string
+    birthdate?: string
+    gender?: string
+    phone?: string
+    email: string
+    address?: string
+    city?: string
+    country?: string
+    timezone?: string
+    language?: string
+    created_at: string
+    updated_at: string
+  }
+  message: string
 }

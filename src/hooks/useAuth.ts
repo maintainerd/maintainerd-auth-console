@@ -4,15 +4,19 @@
  */
 
 import { useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useToast } from '@/hooks/useToast'
 import type { AuthUserType } from '@/types'
 import {
   loginAsync,
+  registerAsync,
   logoutAsync,
   validateAuthAsync,
   initializeAuthAsync,
-  fetchProfileAsync,
+  fetchProfileAsync
+} from '@/store/auth/actions'
+import {
   clearError,
   setProfile
 } from '@/store/auth/reducers'
@@ -20,17 +24,59 @@ import { clearTenant } from '@/store/tenant/reducers'
 
 export function useAuth() {
   const dispatch = useAppDispatch()
-  const { showError } = useToast()
+  const [searchParams] = useSearchParams()
+  const { showError, showSuccess } = useToast()
   const { profile, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth)
 
   const login = useCallback(async (email: string, password: string) => {
     try {
       const result = await dispatch(loginAsync({ email, password })).unwrap()
-      return { success: true, profile: result.user }
+
+      // Check if profile exists and has required fields
+      const userProfile = result.user
+      if (!userProfile || !userProfile.first_name || !userProfile.last_name) {
+        // Profile is incomplete or doesn't exist, redirect to profile setup
+        return { success: true, profile: userProfile, requiresProfileSetup: true }
+      }
+
+      return { success: true, profile: userProfile, requiresProfileSetup: false }
     } catch (error: any) {
       return { success: false, message: error.message }
     }
   }, [dispatch])
+
+  const register = useCallback(async (
+    fullname: string,
+    email: string,
+    password: string,
+    phone?: string
+  ) => {
+    try {
+      // Get client_id and provider_id from URL query parameters
+      const clientId = searchParams.get('client_id')
+      const providerId = searchParams.get('provider_id')
+
+      const result = await dispatch(registerAsync({
+        fullname,
+        email,
+        password,
+        phone,
+        clientId: clientId || undefined,
+        providerId: providerId || undefined
+      })).unwrap()
+
+      if (result.success) {
+        showSuccess('Account created successfully! Please complete your profile.')
+        return { success: true, data: result.data }
+      } else {
+        return { success: false, message: 'Registration failed' }
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || 'An unexpected error occurred'
+      showError(errorMessage, 'Registration failed')
+      return { success: false, message: errorMessage }
+    }
+  }, [dispatch, searchParams, showError, showSuccess])
 
   const logout = useCallback(async () => {
     try {
@@ -92,6 +138,7 @@ export function useAuth() {
     error,
     // Actions
     login,
+    register,
     logout,
     checkAuth,
     initializeAuth,
