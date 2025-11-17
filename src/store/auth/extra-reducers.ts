@@ -16,7 +16,7 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInte
     })
     .addCase(loginAsync.fulfilled, (state, action) => {
       state.isLoading = false
-      state.profile = action.payload.user
+      state.profile = action.payload.data
       state.isAuthenticated = true
       state.error = null
     })
@@ -70,11 +70,13 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInte
     })
     .addCase(initializeAuthAsync.fulfilled, (state, action) => {
       state.isLoading = false
+      state.isInitialized = true
       state.profile = action.payload
       state.isAuthenticated = !!action.payload
     })
     .addCase(initializeAuthAsync.rejected, (state) => {
       state.isLoading = false
+      state.isInitialized = true
       state.profile = null
       state.isAuthenticated = false
     })

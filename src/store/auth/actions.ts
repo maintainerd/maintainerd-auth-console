@@ -1,54 +1,44 @@
-/**
- * Auth Actions
- * Redux async thunks for auth operations
- */
-
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import {
   login as authLogin,
   register as authRegister,
   logout as authLogout,
-  getUserProfile,
+  fetchProfile,
   validateAuthentication,
-  clearProfile
+	type LoginRequest,
+	type RegisterRequest
 } from '@/services'
-import type { LoginCredentialsInterface } from '@/types'
+
+// Extended register request with optional query parameters
+export interface RegisterAsyncRequest extends Omit<RegisterRequest, 'username'> {
+  clientId?: string
+  providerId?: string
+}
 
 export const loginAsync = createAsyncThunk(
   'auth/login',
-  async ({ email, password }: LoginCredentialsInterface) => {
-    const response = await authLogin(email, password)
-    if (response.success) {
-      const userProfile = getUserProfile()
-      // userProfile may be null if profile doesn't exist (newly registered user)
-      return { success: true, user: userProfile }
-    }
-    throw new Error(response.message || 'Login failed')
+  async (data: LoginRequest, thunkAPI) => {
+		try {
+			const response = await authLogin(data)
+			const userProfile = await fetchProfile()
+			return { data: userProfile, message: response.message }
+		} catch (error: any) {
+			const errorMessage = error?.message || 'Login failed'
+			return thunkAPI.rejectWithValue({ message: errorMessage })
+		}
   }
 )
 
 export const registerAsync = createAsyncThunk(
   'auth/register',
-  async ({
-    fullname,
-    email,
-    password,
-    phone,
-    clientId,
-    providerId
-  }: {
-    fullname: string
-    email: string
-    password: string
-    phone?: string
-    clientId?: string
-    providerId?: string
-  }) => {
-    const response = await authRegister(fullname, email, password, phone, clientId, providerId)
-    if (response.success) {
-      return { success: true, data: response.data }
+  async (data: RegisterAsyncRequest, thunkAPI) => {
+    try {
+      const response = await authRegister(data)
+      return { data: response.data }
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Registration failed'
+      return thunkAPI.rejectWithValue({ message: errorMessage })
     }
-    throw new Error(response.message || 'Registration failed')
   }
 )
 
@@ -56,43 +46,32 @@ export const logoutAsync = createAsyncThunk(
   'auth/logout',
   async () => {
     await authLogout()
-    clearProfile()
   }
 )
 
 export const validateAuthAsync = createAsyncThunk(
   'auth/validate',
-  async () => {
-    const isValid = await validateAuthentication()
-    if (isValid) {
-      // validateAuthentication already stores the profile, so get it
-      const userProfile = getUserProfile()
+  async (_, thunkAPI) => {
+    const userProfile = await validateAuthentication()
+    if (userProfile) {
       return userProfile
     }
-    throw new Error('Authentication validation failed')
+    return thunkAPI.rejectWithValue({ message: 'Authentication validation failed' })
   }
 )
 
 export const initializeAuthAsync = createAsyncThunk(
   'auth/initialize',
   async () => {
-    // Always validate with backend first - don't check localStorage
-    // The backend is the source of truth for authentication
-    const isValid = await validateAuthentication()
-    if (isValid) {
-      // validateAuthentication already stores the profile, so get it
-      return getUserProfile()
-    }
-
-    // Not authenticated - profile already cleared by validateAuthentication
-    return null
+    const userProfile = await validateAuthentication()
+    return userProfile
   }
 )
 
 export const fetchProfileAsync = createAsyncThunk(
   'auth/fetchProfile',
   async () => {
-    const userProfile = getUserProfile()
+    const userProfile = await fetchProfile()
     if (userProfile) {
       return userProfile
     }

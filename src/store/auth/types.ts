@@ -9,6 +9,7 @@ export interface AuthStateInterface {
   profile: AuthUserType | null
   isAuthenticated: boolean
   isLoading: boolean
+  isInitialized: boolean
   error: string | null
 }
 

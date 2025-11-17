@@ -15,10 +15,10 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const location = useLocation()
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isInitialized } = useAuth()
 
   // Show loading spinner while auth is being initialized
-  if (isLoading) {
+  if (!isInitialized) {
     return (
       fallback || (
         <div className="flex min-h-screen items-center justify-center">

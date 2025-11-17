@@ -6,7 +6,6 @@
 // Auth types
 export type {
   AuthUserType,
-  LoginCredentialsInterface,
   LoginResponseInterface,
   AuthValidationResponseInterface,
   ProfileResponseInterface

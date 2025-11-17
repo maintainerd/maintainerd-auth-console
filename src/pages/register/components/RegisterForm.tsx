@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useNavigate } from "react-router-dom"
@@ -10,16 +11,18 @@ import {
 import { Link } from "react-router-dom"
 import { registerSchema, type RegisterFormData } from "@/lib/validations"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
 
 const RegisterForm = () => {
   const navigate = useNavigate()
-  const { register: registerUser, isLoading } = useAuth()
+  const { register: registerUser } = useAuth()
+  const { showSuccess } = useToast()
+  const [registerError, setRegisterError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setError
+    formState: { errors, isSubmitting }
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
     defaultValues: {
@@ -27,33 +30,25 @@ const RegisterForm = () => {
       email: "",
       password: "",
       confirmPassword: ""
-    }
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit'
   })
 
   const onSubmit = async (data: RegisterFormData) => {
+    setRegisterError(null)
     try {
-      const result = await registerUser(
+      await registerUser(
         data.fullname,
         data.email,
         data.password
       )
 
-      if (result.success) {
-        // Success is handled by useAuth (shows toast)
-        // Navigate to register profile page (dedicated for register flow)
-        navigate('/register/profile', { replace: true })
-      } else {
-        // Set form-level error if registration fails
-        setError("root", {
-          type: "manual",
-          message: result.message || "Registration failed"
-        })
-      }
+      showSuccess('Account created successfully! Please complete your profile.')
+      navigate('/register/profile', { replace: true })
     } catch (error: any) {
-      setError("root", {
-        type: "manual",
-        message: error?.message || "An unexpected error occurred"
-      })
+      const errorMessage = error?.message || "Registration failed. Please try again."
+      setRegisterError(errorMessage)
     }
   }
 
@@ -65,10 +60,15 @@ const RegisterForm = () => {
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
+            {registerError && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {registerError}
+              </div>
+            )}
             <FormInputField
               label="Full Name"
               placeholder="John Doe"
-              disabled={isLoading}
+              disabled={isSubmitting}
               error={errors.fullname?.message}
               required
               {...register("fullname")}
@@ -77,7 +77,7 @@ const RegisterForm = () => {
               label="Email"
               type="email"
               placeholder="johndoe@example.com"
-              disabled={isLoading}
+              disabled={isSubmitting}
               error={errors.email?.message}
               description="We'll use this to contact you. We will not share your email with anyone else."
               required
@@ -86,7 +86,7 @@ const RegisterForm = () => {
             <FormPasswordField
               label="Password"
               placeholder="Enter a strong password"
-              disabled={isLoading}
+              disabled={isSubmitting}
               error={errors.password?.message}
               description="Must be at least 8 characters long."
               required
@@ -95,19 +95,14 @@ const RegisterForm = () => {
             <FormPasswordField
               label="Confirm Password"
               placeholder="Confirm your password"
-              disabled={isLoading}
+              disabled={isSubmitting}
               error={errors.confirmPassword?.message}
               description="Please confirm your password."
               required
               {...register("confirmPassword")}
             />
-            {errors.root && (
-              <div className="text-sm text-red-600 text-center">
-                {errors.root.message}
-              </div>
-            )}
             <FormSubmitButton
-              isSubmitting={isLoading}
+              isSubmitting={isSubmitting}
               submitText="Create Account"
               submittingText="Creating Account..."
             />

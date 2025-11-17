@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
@@ -13,50 +14,40 @@ const LoginForm = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
   const { getCurrentTenant } = useTenant()
-  const { showError, showSuccess } = useToast()
+  const { showSuccess } = useToast()
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
-    setError,
     formState: { errors, isSubmitting }
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
     defaultValues: {
       email: "",
       password: ""
-    }
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit'
   })
 
   const onSubmit = async (data: LoginFormData) => {
+    setLoginError(null)
     try {
       const response = await login(data.email, data.password)
-      if (response.success) {
-        if (response.requiresProfileSetup) {
-          showSuccess("Login successful! Please complete your profile setup.")
-          navigate('/register/profile', { replace: true })
-        } else {
-          showSuccess("Login successful!")
-          const currentTenant = getCurrentTenant()
-          const tenantIdentifier = currentTenant?.identifier || 'def4ult'
-          const redirectPath = `/${tenantIdentifier}/dashboard`
-          navigate(redirectPath, { replace: true })
-        }
-      } else {
-        const errorMessage = response.message || "Invalid email or password"
-        setError("root", {
-          type: "manual",
-          message: errorMessage
-        })
-        showError(errorMessage, "Login failed")
-      }
+      if (response.requiresProfileSetup) {
+				showSuccess("Login successful! Please complete your profile setup.")
+				navigate('/register/profile', { replace: true })
+			} else {
+				showSuccess("Login successful!")
+				const currentTenant = getCurrentTenant()
+				const tenantIdentifier = currentTenant?.identifier || 'default'
+				const redirectPath = `/${tenantIdentifier}/dashboard`
+				navigate(redirectPath, { replace: true })
+			}
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || "An unexpected error occurred"
-      setError("root", {
-        type: "manual",
-        message: errorMessage
-      })
-      showError(err, "Login failed")
+      const errorMessage = err?.message || "Invalid email or password"
+      setLoginError(errorMessage)
     }
   }
 
@@ -66,11 +57,14 @@ const LoginForm = () => {
         title="Login to your account"
         description="Enter your email below to login to your account"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => {
+          e.preventDefault()
+          handleSubmit(onSubmit)(e)
+        }}>
           <FieldGroup>
-            {errors.root && (
+            {loginError && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {errors.root.message}
+                {loginError}
               </div>
             )}
             <FormInputField
@@ -84,7 +78,10 @@ const LoginForm = () => {
             />
             <Field>
               <div className="flex items-center">
-                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <FieldLabel htmlFor="password">
+                  Password
+                  <span className="text-red-500 ml-1">*</span>
+                </FieldLabel>
                 <Link
                   to="/forgot-password"
                   className="ml-auto text-sm underline-offset-4 hover:underline"

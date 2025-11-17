@@ -24,37 +24,25 @@ export {
   isSetupCompleted
 } from './api/setup'
 
-// Authentication service functions (API + Storage)
+// Authentication service functions
 export {
   authService,
   login,
   register,
   logout,
-  fetchAndStoreProfile,
-  getUserProfile,
-  clearProfile,
+  fetchProfile,
   createUserProfile,
   createRegisterProfile,
-  isAuthenticated,
   validateAuthentication
 } from './api/auth'
 
-// Tenant service functions (API + Storage)
+// Tenant service functions
 export {
   tenantService,
-  fetchAndStoreDefaultTenant,
-  fetchAndStoreTenantByIdentifier,
-  fetchAndStoreTenant,
-  getCurrentTenant,
-  clearTenant,
-  hasTenant
+  fetchDefaultTenant,
+  fetchTenantByIdentifier,
+  fetchTenant
 } from './api/tenant'
-
-// Storage utilities
-export { authStorage } from './storage/auth'
-export { tenantStorage } from './storage/tenant'
-export { LocalStorageAdapter, localStorageAdapter } from './storage/adapters'
-export type * from './storage/types'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

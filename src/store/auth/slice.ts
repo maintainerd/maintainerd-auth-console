@@ -13,6 +13,7 @@ const initialState: AuthStateInterface = {
   profile: null,
   isAuthenticated: false,
   isLoading: false,
+  isInitialized: false,
   error: null
 }
 

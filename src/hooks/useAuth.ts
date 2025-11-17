@@ -1,8 +1,3 @@
-/**
- * Authentication Hook
- * Custom hook that uses Redux for auth state management
- */
-
 import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -25,24 +20,19 @@ import { clearTenant } from '@/store/tenant/reducers'
 export function useAuth() {
   const dispatch = useAppDispatch()
   const [searchParams] = useSearchParams()
-  const { showError, showSuccess } = useToast()
-  const { profile, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth)
+  const { showError } = useToast()
+  const { profile, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
 
   const login = useCallback(async (email: string, password: string) => {
-    try {
-      const result = await dispatch(loginAsync({ email, password })).unwrap()
+    const result = await dispatch(loginAsync({ username: email, password })).unwrap()
 
-      // Check if profile exists and has required fields
-      const userProfile = result.user
-      if (!userProfile || !userProfile.first_name || !userProfile.last_name) {
-        // Profile is incomplete or doesn't exist, redirect to profile setup
-        return { success: true, profile: userProfile, requiresProfileSetup: true }
-      }
-
-      return { success: true, profile: userProfile, requiresProfileSetup: false }
-    } catch (error: any) {
-      return { success: false, message: error.message }
+    // Check if profile exists
+    const userProfile = result.data
+    if (!userProfile) {
+      return { requiresProfileSetup: true }
     }
+
+    return { requiresProfileSetup: false }
   }, [dispatch])
 
   const register = useCallback(async (
@@ -51,32 +41,21 @@ export function useAuth() {
     password: string,
     phone?: string
   ) => {
-    try {
-      // Get client_id and provider_id from URL query parameters
-      const clientId = searchParams.get('client_id')
-      const providerId = searchParams.get('provider_id')
+    // Get client_id and provider_id from URL query parameters
+    const clientId = searchParams.get('client_id')
+    const providerId = searchParams.get('provider_id')
 
-      const result = await dispatch(registerAsync({
-        fullname,
-        email,
-        password,
-        phone,
-        clientId: clientId || undefined,
-        providerId: providerId || undefined
-      })).unwrap()
+    const result = await dispatch(registerAsync({
+      fullname,
+      email,
+      password,
+      phone,
+      clientId: clientId || undefined,
+      providerId: providerId || undefined
+    })).unwrap()
 
-      if (result.success) {
-        showSuccess('Account created successfully! Please complete your profile.')
-        return { success: true, data: result.data }
-      } else {
-        return { success: false, message: 'Registration failed' }
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'An unexpected error occurred'
-      showError(errorMessage, 'Registration failed')
-      return { success: false, message: errorMessage }
-    }
-  }, [dispatch, searchParams, showError, showSuccess])
+    return { data: result.data }
+  }, [dispatch, searchParams])
 
   const logout = useCallback(async () => {
     try {
@@ -135,6 +114,7 @@ export function useAuth() {
     profile,
     isAuthenticated,
     isLoading,
+    isInitialized,
     error,
     // Actions
     login,

@@ -7,6 +7,8 @@
 
 import { useCallback, useState } from 'react'
 import { useToast } from '@/hooks/useToast'
+import { useAppDispatch } from '@/store/hooks'
+import { setProfile } from '@/store/auth/reducers'
 import { createUserProfile, createRegisterProfile } from '@/services'
 import type { CreateProfileRequest } from '@/services/api/auth/types'
 
@@ -15,6 +17,7 @@ import type { CreateProfileRequest } from '@/services/api/auth/types'
  */
 export function useProfile() {
   const { showError, parseError } = useToast()
+  const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
 
   /**
@@ -25,6 +28,10 @@ export function useProfile() {
     setIsLoading(true)
     try {
       const response = await createUserProfile(data)
+      // Update Redux with the new profile
+      if (response.success && response.data) {
+        dispatch(setProfile(response.data))
+      }
       return { success: true, data: response }
     } catch (error: any) {
       const parsedError = parseError(error)
@@ -40,7 +47,7 @@ export function useProfile() {
     } finally {
       setIsLoading(false)
     }
-  }, [showError, parseError])
+  }, [showError, parseError, dispatch])
 
   /**
    * Create profile for register flow
@@ -50,6 +57,10 @@ export function useProfile() {
     setIsLoading(true)
     try {
       const response = await createRegisterProfile(data)
+      // Update Redux with the new profile
+      if (response.success && response.data) {
+        dispatch(setProfile(response.data))
+      }
       return { success: true, data: response }
     } catch (error: any) {
       const parsedError = parseError(error)
@@ -66,7 +77,7 @@ export function useProfile() {
     } finally {
       setIsLoading(false)
     }
-  }, [showError, parseError])
+  }, [showError, parseError, dispatch])
 
   return {
     isLoading,

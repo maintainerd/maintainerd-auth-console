@@ -6,7 +6,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { tenantExtraReducers } from './extra-reducers'
-import { clearTenant as clearTenantData } from '@/services'
 import type { TenantStateInterface } from './types'
 import type { TenantType } from '@/types'
 
@@ -29,7 +28,6 @@ const tenantSlice = createSlice({
     clearTenant: (state: TenantStateInterface) => {
       state.currentTenant = null
       state.error = null
-      clearTenantData()
     }
   },
   extraReducers: tenantExtraReducers

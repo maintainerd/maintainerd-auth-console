@@ -37,7 +37,7 @@ const RegisterProfileForm = () => {
     personal: false,
     contact: false,
     location: false,
-    summary: true // Summary step is always valid since it's just for review
+    summary: true
   })
 
   const updateFormData = useCallback((stepData: Partial<CreateProfileRequest>) => {

@@ -3,6 +3,8 @@
  * Type definitions for setup-related API requests and responses
  */
 
+import type { ApiResponse } from '../types/common'
+
 export interface CreateTenantRequest {
   name: string
   description: string
@@ -40,11 +42,7 @@ export interface TenantData {
   updated_at: string
 }
 
-export interface CreateTenantResponse {
-  success: true
-  data: TenantData
-  message: string
-}
+export interface CreateTenantResponse extends ApiResponse<TenantData> {}
 
 export interface CreateAdminRequest {
   username: string
@@ -63,11 +61,7 @@ export interface AdminData {
   updated_at: string
 }
 
-export interface CreateAdminResponse {
-  success: true
-  data: AdminData
-  message: string
-}
+export interface CreateAdminResponse extends ApiResponse<AdminData> {}
 
 export interface CreateProfileRequest {
   first_name: string
@@ -105,8 +99,4 @@ export interface ProfileData {
   updated_at: string
 }
 
-export interface CreateProfileResponse {
-  success: true
-  data: ProfileData
-  message: string
-}
+export interface CreateProfileResponse extends ApiResponse<ProfileData> {}

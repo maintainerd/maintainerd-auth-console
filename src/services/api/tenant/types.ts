@@ -3,8 +3,6 @@
  * Type definitions for tenant API operations
  */
 
-export interface TenantResponse {
-  success: boolean
-  data?: any
-  message?: string
-}
+import type { ApiResponse } from '../types/common'
+
+export interface TenantResponse extends ApiResponse<any> {}
