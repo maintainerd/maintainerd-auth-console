@@ -33,7 +33,10 @@ export {
   fetchProfile,
   createUserProfile,
   createRegisterProfile,
-  validateAuthentication
+  validateAuthentication,
+  forgotPassword,
+  resetPassword,
+  type ResetPasswordQueryParams
 } from './api/auth'
 
 // Tenant service functions

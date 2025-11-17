@@ -1,12 +1,16 @@
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Toaster } from 'sonner'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import '@/styles/toast.css'
 import { useTenant } from '@/hooks/useTenant'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
+import ForgotPasswordPage from './pages/forgot-password'
+import ResetPasswordPage from './pages/reset-password'
 import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
 import SetupProfilePage from './pages/setup/profile'
@@ -114,6 +118,8 @@ function App() {
 				<Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/setup/profile" element={<SetupProfilePage />} />
@@ -183,22 +189,17 @@ function App() {
           <Route path="tenant/create" element={<TenantCreatePage />} />
         </Route>
       </Routes>
-      <Toaster
+      <ToastContainer
         position="bottom-right"
-        richColors={false}
-        toastOptions={{
-          style: {
-            background: 'hsl(var(--background))',
-            border: '1px solid hsl(var(--border))',
-            color: 'hsl(var(--foreground))',
-          },
-          classNames: {
-            error: 'border-l-4 border-l-red-500 border-border bg-background text-foreground [&>[data-icon]]:text-red-600',
-            success: 'border-l-4 border-l-green-500 border-border bg-background text-foreground [&>[data-icon]]:text-green-600',
-            warning: 'border-l-4 border-l-yellow-500 border-border bg-background text-foreground [&>[data-icon]]:text-yellow-600',
-            info: 'border-l-4 border-l-blue-500 border-border bg-background text-foreground [&>[data-icon]]:text-blue-600',
-          },
-        }}
+        autoClose={5000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
     </>
   )

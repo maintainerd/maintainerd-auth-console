@@ -5,8 +5,13 @@ import {
   logout as authLogout,
   fetchProfile,
   validateAuthentication,
+  forgotPassword as authForgotPassword,
+  resetPassword as authResetPassword,
 	type LoginRequest,
-	type RegisterRequest
+	type RegisterRequest,
+	type ForgotPasswordRequest,
+	type ResetPasswordRequest,
+	type ResetPasswordQueryParams
 } from '@/services'
 
 // Extended register request with optional query parameters
@@ -76,5 +81,34 @@ export const fetchProfileAsync = createAsyncThunk(
       return userProfile
     }
     throw new Error('No profile found')
+  }
+)
+
+export const forgotPasswordAsync = createAsyncThunk(
+  'auth/forgotPassword',
+  async (data: ForgotPasswordRequest, thunkAPI) => {
+    try {
+      await authForgotPassword(data)
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to send reset email'
+      return thunkAPI.rejectWithValue({ message: errorMessage })
+    }
+  }
+)
+
+export interface ResetPasswordAsyncRequest {
+  password: ResetPasswordRequest
+  queryParams: ResetPasswordQueryParams
+}
+
+export const resetPasswordAsync = createAsyncThunk(
+  'auth/resetPassword',
+  async (data: ResetPasswordAsyncRequest, thunkAPI) => {
+    try {
+      await authResetPassword(data.password, data.queryParams)
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to reset password'
+      return thunkAPI.rejectWithValue({ message: errorMessage })
+    }
   }
 )

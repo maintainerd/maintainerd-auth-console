@@ -4,7 +4,7 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { loginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync } from './actions'
+import { loginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
 import type { AuthStateInterface } from './types'
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInterface>) => {
@@ -88,5 +88,31 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInte
     .addCase(fetchProfileAsync.rejected, (state) => {
       state.profile = null
       state.isAuthenticated = false
+    })
+    // Forgot Password
+    .addCase(forgotPasswordAsync.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    .addCase(forgotPasswordAsync.fulfilled, (state) => {
+      state.isLoading = false
+      state.error = null
+    })
+    .addCase(forgotPasswordAsync.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.error.message || 'Failed to send reset email'
+    })
+    // Reset Password
+    .addCase(resetPasswordAsync.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    .addCase(resetPasswordAsync.fulfilled, (state) => {
+      state.isLoading = false
+      state.error = null
+    })
+    .addCase(resetPasswordAsync.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.error.message || 'Failed to reset password'
     })
 }

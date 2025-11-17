@@ -36,6 +36,8 @@ export const API_ENDPOINTS = {
     LOGOUT: '/logout',
     REFRESH: '/refresh',
     PROFILE: '/profile',
+    FORGOT_PASSWORD: '/forgot-password',
+    RESET_PASSWORD: '/reset-password',
   },
   TENANT: '/tenant',
 } as const

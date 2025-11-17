@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react"
-import { toast } from "sonner"
+import { toast } from "react-toastify"
 
 export interface UseToastOptions {
   defaultErrorTitle?: string
@@ -60,36 +60,31 @@ export function useToast(options: UseToastOptions = {}) {
       errorMessage = String(error.message)
     }
 
-    toast.error(title || defaultErrorTitle, {
-      description: errorMessage
-    })
+    toast.error(errorMessage)
   }, [defaultErrorTitle, defaultErrorDescription])
 
   const showSuccess = useCallback((
     title: string,
     description?: string
   ) => {
-    toast.success(title, {
-      description
-    })
+    const message = description ? `${title}: ${description}` : title
+    toast.success(message)
   }, [])
 
   const showInfo = useCallback((
     title: string,
     description?: string
   ) => {
-    toast.info(title, {
-      description
-    })
+    const message = description ? `${title}: ${description}` : title
+    toast.info(message)
   }, [])
 
   const showWarning = useCallback((
     title: string,
     description?: string
   ) => {
-    toast.warning(title, {
-      description
-    })
+    const message = description ? `${title}: ${description}` : title
+    toast.warning(message)
   }, [])
 
   const parseError = useCallback((error: unknown): ParsedError => {

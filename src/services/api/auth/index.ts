@@ -6,7 +6,7 @@
 import { post, get } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { AuthUserType, ProfileResponseInterface } from '@/types'
-import type { LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse } from './types'
+import type { LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams } from './types'
 
 /**
  * Login user with credentials
@@ -147,6 +147,44 @@ export async function validateAuthentication(): Promise<AuthUserType | null> {
   }
 }
 
+/**
+ * Request password reset
+ * @param data - Email address for password reset
+ * @returns Promise<ForgotPasswordResponse>
+ */
+export async function forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+  const response = await post<ForgotPasswordResponse>(
+    API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+    data
+  )
+  return response
+}
+
+/**
+ * Reset password with token from query params
+ * @param data - New password
+ * @param queryParams - Query parameters from the reset link (client_id, expires, provider_id, sig, token)
+ * @returns Promise<ResetPasswordResponse>
+ */
+export async function resetPassword(
+  data: ResetPasswordRequest,
+  queryParams: ResetPasswordQueryParams
+): Promise<ResetPasswordResponse> {
+  // Build URL with query parameters
+  const params = new URLSearchParams({
+    client_id: queryParams.client_id,
+    expires: queryParams.expires,
+    provider_id: queryParams.provider_id,
+    sig: queryParams.sig,
+    token: queryParams.token
+  })
+
+  const url = `${API_ENDPOINTS.AUTH.RESET_PASSWORD}?${params.toString()}`
+
+  const response = await post<ResetPasswordResponse>(url, data)
+  return response
+}
+
 // Export functions as an object for backward compatibility
 export const authService = {
   login,
@@ -155,5 +193,7 @@ export const authService = {
   fetchProfile,
   createUserProfile,
   createRegisterProfile,
-  validateAuthentication
+  validateAuthentication,
+  forgotPassword,
+  resetPassword
 }

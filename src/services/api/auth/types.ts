@@ -55,6 +55,26 @@ export interface RegisterResponse extends ApiResponse<{
 
 export interface ProfileResponse extends ApiResponse<any> {}
 
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ForgotPasswordResponse extends ApiResponse {}
+
+export interface ResetPasswordRequest {
+  new_password: string
+}
+
+export interface ResetPasswordQueryParams {
+  client_id: string
+  expires: string
+  provider_id: string
+  sig: string
+  token: string
+}
+
+export interface ResetPasswordResponse extends ApiResponse {}
+
 // Profile creation types for authenticated users (using /profiles endpoint)
 export interface CreateProfileRequest {
   first_name: string

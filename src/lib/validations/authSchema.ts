@@ -72,10 +72,7 @@ export const resetPasswordSchema = yup.object({
   confirmPassword: yup
     .string()
     .required('Please confirm your password')
-    .oneOf([yup.ref('password')], 'Passwords must match'),
-  token: yup
-    .string()
-    .required('Reset token is required')
+    .oneOf([yup.ref('password')], 'Passwords must match')
 })
 
 export type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>

@@ -9,7 +9,10 @@ import {
   logoutAsync,
   validateAuthAsync,
   initializeAuthAsync,
-  fetchProfileAsync
+  fetchProfileAsync,
+  forgotPasswordAsync,
+  resetPasswordAsync,
+  type ResetPasswordAsyncRequest
 } from '@/store/auth/actions'
 import {
   clearError,
@@ -109,6 +112,14 @@ export function useAuth() {
     dispatch(setProfile(profileData))
   }, [dispatch])
 
+  const forgotPassword = useCallback(async (email: string) => {
+    await dispatch(forgotPasswordAsync({ email })).unwrap()
+  }, [dispatch])
+
+  const resetPassword = useCallback(async (data: ResetPasswordAsyncRequest) => {
+    await dispatch(resetPasswordAsync(data)).unwrap()
+  }, [dispatch])
+
   return {
     // State
     profile,
@@ -125,6 +136,8 @@ export function useAuth() {
     clearAuthError,
     getProfile,
     fetchProfile,
-    updateProfile
+    updateProfile,
+    forgotPassword,
+    resetPassword
   }
 }
