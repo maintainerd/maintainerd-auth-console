@@ -9,16 +9,18 @@
  * @returns Tenant identifier or null if not found
  */
 export function getTenantIdentifierFromPath(pathname: string): string | null {
-  // Skip login, register, and setup routes
+  // Skip public/auth routes that don't require tenant context
   if (pathname.startsWith('/login') ||
       pathname.startsWith('/register') ||
-      pathname.startsWith('/setup')) {
+      pathname.startsWith('/setup') ||
+      pathname.startsWith('/forgot-password') ||
+      pathname.startsWith('/reset-password')) {
     return null
   }
 
   // Extract tenant identifier from path like "/{tenantId}/dashboard"
   const pathSegments = pathname.split('/').filter(Boolean)
-  
+
   // First segment should be the tenant identifier
   if (pathSegments.length > 0) {
     return pathSegments[0]

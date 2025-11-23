@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import '@/styles/toast.css'
 import { useTenant } from '@/hooks/useTenant'
 import { useAuth } from '@/hooks/useAuth'
-import { useToast } from '@/hooks/useToast'
+import { determineTenantIdentifier } from '@/utils/tenant'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import ForgotPasswordPage from './pages/forgot-password'
@@ -66,11 +66,10 @@ import TenantCreatePage from './pages/tenant-create'
 
 function App() {
   const location = useLocation()
-  const { showError } = useToast()
   const { initializeFromLocation } = useTenant()
   const { initializeAuth } = useAuth()
   const authInitializedRef = useRef(false)
-  const tenantInitializationRef = useRef<string>('')
+  const lastTenantIdentifierRef = useRef<string | null | undefined>(undefined)
 
   // Initialize auth once on app load
   useEffect(() => {
@@ -83,34 +82,38 @@ function App() {
       try {
         // Initialize auth first (this will fetch profile from backend if authenticated)
         await initializeAuth()
-      } catch (error) {
-        showError('Failed to initialize authentication')
-        // Don't throw error, let the app continue
+      } catch {
+        // Error already handled in initializeAuth
       }
     }
     initializeAuthOnce()
-  }, []) // Only run once on mount
+  }, [initializeAuth]) // Only run once on mount
 
   // Initialize tenant data based on current URL (separate from auth)
   useEffect(() => {
     const initializeTenant = async () => {
+      // Determine the tenant identifier from the current location
+      const searchParams = new URLSearchParams(location.search)
+      const tenantIdentifier = determineTenantIdentifier(location.pathname, searchParams)
+
+      // Skip re-initialization if the tenant identifier hasn't changed
+      // This prevents unnecessary API calls when navigating between public routes (login, forgot-password, etc.)
+      if (lastTenantIdentifierRef.current === tenantIdentifier) {
+        return
+      }
+
+      lastTenantIdentifierRef.current = tenantIdentifier
+
+      // Initialize tenant based on current location
+      // Error handling is done in initializeFromLocation, so we don't need to catch here
       try {
-        // Create a unique key for this tenant initialization attempt
-        const initKey = `${location.pathname}${location.search}`
-        // Prevent duplicate initialization for the same location
-        if (tenantInitializationRef.current === initKey) {
-          return
-        }
-        tenantInitializationRef.current = initKey
-        // Initialize tenant based on current location
         await initializeFromLocation(location.pathname, location.search)
-      } catch (error) {
-        showError('Failed to initialize tenant')
-        // Don't throw error, let the app continue
+      } catch {
+        // Error already shown in initializeFromLocation, just continue
       }
     }
     initializeTenant()
-  }, [location.pathname, location.search]) // Run on location changes for tenant switching
+  }, [location.pathname, location.search, initializeFromLocation]) // Run on location changes for tenant switching
 
   return (
     <>
