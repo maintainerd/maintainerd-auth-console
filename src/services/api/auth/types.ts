@@ -5,36 +5,58 @@
 
 import type { ApiResponse } from '../types/common'
 
+/**
+ * Profile entity from API
+ */
+export interface ProfileEntity {
+  profile_id: string
+  first_name: string
+  last_name: string
+  display_name: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
+  email: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+  created_at: string
+  updated_at: string
+}
+
 export interface LoginRequest {
   username: string
   password: string
 }
 
-export interface LoginResponse extends ApiResponse<{
+export type LoginResponse = ApiResponse<{
   access_token: string
   id_token: string
   refresh_token: string
   expires_in: number
   token_type: string
   issued_at: number
-}> {}
+}>
 
 export interface RefreshTokenRequest {
   refresh_token: string
 }
 
-export interface RefreshTokenResponse extends ApiResponse<{
+export type RefreshTokenResponse = ApiResponse<{
   access_token: string
   expires_in: number
   token_type: string
   issued_at: number
-}> {}
+}>
 
 export interface LogoutRequest {
   refresh_token?: string
 }
 
-export interface LogoutResponse extends ApiResponse {}
+export type LogoutResponse = ApiResponse
 
 export interface RegisterRequest {
   username: string
@@ -44,22 +66,22 @@ export interface RegisterRequest {
   password: string
 }
 
-export interface RegisterResponse extends ApiResponse<{
+export type RegisterResponse = ApiResponse<{
   user_id: string
   username: string
   email: string
   fullname: string
   phone?: string
   created_at: string
-}> {}
+}>
 
-export interface ProfileResponse extends ApiResponse<any> {}
+export type ProfileResponse = ApiResponse<ProfileEntity>
 
 export interface ForgotPasswordRequest {
   email: string
 }
 
-export interface ForgotPasswordResponse extends ApiResponse {}
+export type ForgotPasswordResponse = ApiResponse
 
 export interface ResetPasswordRequest {
   new_password: string
@@ -73,7 +95,7 @@ export interface ResetPasswordQueryParams {
   token: string
 }
 
-export interface ResetPasswordResponse extends ApiResponse {}
+export type ResetPasswordResponse = ApiResponse
 
 // Profile creation types for authenticated users (using /profiles endpoint)
 export interface CreateProfileRequest {
@@ -92,21 +114,4 @@ export interface CreateProfileRequest {
   language?: string
 }
 
-export interface CreateProfileResponse extends ApiResponse<{
-  profile_id: string
-  first_name: string
-  last_name: string
-  display_name: string
-  bio?: string
-  birthdate?: string
-  gender?: string
-  phone?: string
-  email: string
-  address?: string
-  city?: string
-  country?: string
-  timezone?: string
-  language?: string
-  created_at: string
-  updated_at: string
-}> {}
+export type CreateProfileResponse = ApiResponse<ProfileEntity>

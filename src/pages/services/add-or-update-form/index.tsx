@@ -9,8 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { MOCK_SERVICES } from "../constants"
-import type { Service, ServiceStatus } from "../components/ServiceColumns"
+import type { ServiceStatusType } from "@/services/api/service/types"
 
 export default function ServiceAddOrUpdateForm() {
   const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId?: string }>()
@@ -18,31 +17,31 @@ export default function ServiceAddOrUpdateForm() {
   const isEditing = !!serviceId
   const isCreating = !isEditing
 
-  // Find existing service if editing
-  const existingService = isEditing ? MOCK_SERVICES.find(s => s.id === serviceId) : null
+  // TODO: Fetch existing service if editing using API
+  // const existingService = isEditing ? MOCK_SERVICES.find(s => s.id === serviceId) : null
 
   // Form state
   const [formData, setFormData] = useState({
     name: "",
     displayName: "",
     description: "",
-    status: "active" as ServiceStatus,
+    status: "active" as ServiceStatusType,
   })
 
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Load existing service data if editing
-  useEffect(() => {
-    if (isEditing && existingService) {
-      setFormData({
-        name: existingService.name,
-        displayName: existingService.displayName,
-        description: existingService.description,
-        status: existingService.status,
-      })
-    }
-  }, [isEditing, existingService])
+  // TODO: Load existing service data if editing using API
+  // useEffect(() => {
+  //   if (isEditing && existingService) {
+  //     setFormData({
+  //       name: existingService.name,
+  //       displayName: existingService.displayName,
+  //       description: existingService.description,
+  //       status: existingService.status,
+  //     })
+  //   }
+  // }, [isEditing, existingService])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -231,7 +230,7 @@ export default function ServiceAddOrUpdateForm() {
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value: ServiceStatus) => setFormData({ ...formData, status: value })}
+                  onValueChange={(value: ServiceStatusType) => setFormData({ ...formData, status: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

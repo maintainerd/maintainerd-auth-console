@@ -3,10 +3,10 @@
  * Redux-specific types for auth state management
  */
 
-import type { AuthUserType } from '@/types'
+import type { ProfileEntity } from '@/services/api/auth/types'
 
 export interface AuthStateInterface {
-  profile: AuthUserType | null
+  profile: ProfileEntity | null
   isAuthenticated: boolean
   isLoading: boolean
   isInitialized: boolean
@@ -15,5 +15,5 @@ export interface AuthStateInterface {
 
 export interface LoginAsyncResponseType {
   success: boolean
-  user: AuthUserType
+  user: ProfileEntity
 }

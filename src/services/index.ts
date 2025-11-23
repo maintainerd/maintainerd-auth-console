@@ -12,6 +12,7 @@ export type * from './api/types'
 export type * from './api/auth/types'
 export type * from './api/setup/types'
 export type * from './api/tenant/types'
+export type * from './api/service/types'
 
 // Setup service functions
 export {
@@ -46,6 +47,12 @@ export {
   fetchTenantByIdentifier,
   fetchTenant
 } from './api/tenant'
+
+// Service service functions
+export {
+  serviceService,
+  fetchServices
+} from './api/service'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

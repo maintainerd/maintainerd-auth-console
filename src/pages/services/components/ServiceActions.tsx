@@ -1,4 +1,3 @@
-import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -17,10 +16,10 @@ import {
   Pause,
   Archive
 } from "lucide-react"
-import type { Service } from "./ServiceColumns"
+import type { ServiceType } from "@/services/api/service/types"
 
 interface ServiceActionsProps {
-  service: Service
+  service: ServiceType
 }
 
 export function ServiceActions({ service }: ServiceActionsProps) {
@@ -33,32 +32,30 @@ export function ServiceActions({ service }: ServiceActionsProps) {
 
   // Action handlers
   const handleViewDetails = () => {
-    navigate(`/${tenantId}/services/${service.id}`)
+    navigate(`/${tenantId}/services/${service.service_id}`)
   }
 
   const handleUpdateService = () => {
-    navigate(`/${tenantId}/services/${service.id}/edit`)
+    navigate(`/${tenantId}/services/${service.service_id}/edit`)
   }
 
-
-
   const handleActivate = () => {
-    console.log("Activate service:", service.id)
+    console.log("Activate service:", service.service_id)
     // TODO: Implement activate service
   }
 
   const handleMaintenance = () => {
-    console.log("Set service to maintenance:", service.id)
+    console.log("Set service to maintenance:", service.service_id)
     // TODO: Implement maintenance mode
   }
 
   const handleDeprecate = () => {
-    console.log("Deprecate service:", service.id)
+    console.log("Deprecate service:", service.service_id)
     // TODO: Implement deprecate service
   }
 
   const handleDelete = () => {
-    console.log("Delete service:", service.id)
+    console.log("Delete service:", service.service_id)
     // TODO: Implement delete service with confirmation
   }
 
@@ -102,7 +99,7 @@ export function ServiceActions({ service }: ServiceActionsProps) {
           </DropdownMenuItem>
         )}
 
-        {!service.isSystem && (
+        {!service.is_system && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleDelete} className="text-destructive">

@@ -13,22 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {
   Filter,
-  Plus,
-  Download,
-  Upload,
-  Server,
-  FileText
+  Plus
 } from "lucide-react"
 
 export interface FilterState {
@@ -36,35 +27,34 @@ export interface FilterState {
   isSystem: string
 }
 
+/**
+ * ServiceToolbar Props
+ * Props for the service toolbar component including search and filters
+ */
 interface ServiceToolbarProps {
   filter: string
   setFilter: (value: string) => void
-  onFiltersChange?: (filters: FilterState) => void
+  filters: FilterState
+  onFiltersChange: (filters: FilterState) => void
 }
 
-export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceToolbarProps) {
+export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange }: ServiceToolbarProps) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
-  const [filters, setFilters] = React.useState<FilterState>({
-    status: [],
-    isSystem: "all"
-  })
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
+  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters }
-    setFilters(updatedFilters)
-    onFiltersChange?.(updatedFilters)
-  }
+    onFiltersChange(updatedFilters)
+  }, [filters, onFiltersChange])
 
-  const clearAllFilters = () => {
+  const clearAllFilters = React.useCallback(() => {
     const clearedFilters: FilterState = {
       status: [],
       isSystem: "all"
     }
-    setFilters(clearedFilters)
-    onFiltersChange?.(clearedFilters)
-  }
+    onFiltersChange(clearedFilters)
+  }, [onFiltersChange])
 
   const activeFilterCount = React.useMemo(() => {
     let count = 0
@@ -74,29 +64,9 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
   }, [filters])
 
   // Action handlers
-  const handleCreateService = () => {
+  const handleCreateService = React.useCallback(() => {
     navigate(`/${tenantId}/services/create`)
-  }
-
-  const handleExport = () => {
-    console.log("Export services")
-    // TODO: Implement export functionality
-  }
-
-  const handleImport = () => {
-    console.log("Import services")
-    // TODO: Implement import functionality
-  }
-
-  const handleManageAPIs = () => {
-    console.log("Navigate to APIs management")
-    // TODO: Navigate to APIs page
-  }
-
-  const handleManagePolicies = () => {
-    console.log("Navigate to Policies management")
-    // TODO: Navigate to Policies page
-  }
+  }, [navigate, tenantId])
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -155,9 +125,6 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
                   ))}
                 </div>
               </div>
-
-
-
               {/* Service Type Filter */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Service Type</Label>
@@ -178,35 +145,6 @@ export function ServiceToolbar({ filter, setFilter, onFiltersChange }: ServiceTo
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleManageAPIs}>
-          <Server className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Manage APIs</span>
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleManagePolicies}>
-          <FileText className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Manage Policies</span>
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <div className="p-2">
-              <p className="text-sm text-muted-foreground">Export functionality coming soon</p>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button variant="outline" size="sm" onClick={handleImport}>
-          <Upload className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Import</span>
-        </Button>
-
         <Button size="sm" onClick={handleCreateService}>
           <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">New Service</span>

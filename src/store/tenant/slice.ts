@@ -7,7 +7,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { tenantExtraReducers } from './extra-reducers'
 import type { TenantStateInterface } from './types'
-import type { TenantType } from '@/types'
+import type { TenantEntity } from '@/services/api/tenant/types'
 
 const initialState: TenantStateInterface = {
   currentTenant: null,
@@ -22,7 +22,7 @@ const tenantSlice = createSlice({
     clearError: (state: TenantStateInterface) => {
       state.error = null
     },
-    setCurrentTenant: (state: TenantStateInterface, action: PayloadAction<TenantType | null>) => {
+    setCurrentTenant: (state: TenantStateInterface, action: PayloadAction<TenantEntity | null>) => {
       state.currentTenant = action.payload
     },
     clearTenant: (state: TenantStateInterface) => {

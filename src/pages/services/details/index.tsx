@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
-import { MOCK_SERVICES } from "../constants"
 
 export default function ServiceDetailsPage() {
   const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
-  
-  const service = MOCK_SERVICES.find(s => s.id === serviceId)
+
+  // TODO: Fetch service from API using serviceId
+  const service = null // MOCK_SERVICES.find(s => s.id === serviceId)
 
   if (!service) {
     return (

@@ -40,4 +40,5 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: '/reset-password',
   },
   TENANT: '/tenant',
+  SERVICE: '/services',
 } as const

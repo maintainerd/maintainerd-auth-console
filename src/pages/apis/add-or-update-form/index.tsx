@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { MOCK_APIS } from "../constants"
-import { MOCK_SERVICES } from "../../services/constants"
 import type { Api, ApiStatus } from "../components/ApiColumns"
 
 export default function ApiAddOrUpdateForm() {
@@ -155,8 +154,8 @@ export default function ApiAddOrUpdateForm() {
   const pageTitle = isCreating ? "Create New API" : "Edit API"
   const submitButtonText = isCreating ? "Create API" : "Update API"
 
-  // Get selected service info
-  const selectedService = MOCK_SERVICES.find(s => s.id === formData.serviceId)
+  // TODO: Get selected service info from API
+  // const selectedService = MOCK_SERVICES.find(s => s.id === formData.serviceId)
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -299,14 +298,15 @@ export default function ApiAddOrUpdateForm() {
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                     <SelectContent>
-                      {MOCK_SERVICES.filter(s => s.status === "active").map((service) => (
+                      {/* TODO: Load services from API */}
+                      {/* {MOCK_SERVICES.filter(s => s.status === "active").map((service) => (
                         <SelectItem key={service.id} value={service.id}>
                           <div className="flex items-center gap-2">
                             <Server className="h-4 w-4" />
                             {service.displayName}
                           </div>
                         </SelectItem>
-                      ))}
+                      ))} */}
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">

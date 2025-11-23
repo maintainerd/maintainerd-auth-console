@@ -13,15 +13,11 @@ import type { CreateTenantRequest, CreateTenantResponse, CreateAdminRequest, Cre
  * @returns Promise<CreateTenantResponse>
  */
 export async function createTenant(data: CreateTenantRequest): Promise<CreateTenantResponse> {
-  try {
-    const response = await post<CreateTenantResponse>(
-      API_ENDPOINTS.SETUP.CREATE_TENANT,
-      data
-    )
-    return response
-  } catch (error) {
-    throw error
-  }
+  const response = await post<CreateTenantResponse>(
+		API_ENDPOINTS.SETUP.CREATE_TENANT,
+		data
+	)
+	return response
 }
 
 /**
@@ -30,15 +26,11 @@ export async function createTenant(data: CreateTenantRequest): Promise<CreateTen
  * @returns Promise<CreateAdminResponse>
  */
 export async function createAdmin(data: CreateAdminRequest): Promise<CreateAdminResponse> {
-  try {
-    const response = await post<CreateAdminResponse>(
-      API_ENDPOINTS.SETUP.CREATE_ADMIN,
-      data
-    )
-    return response
-  } catch (error) {
-    throw error
-  }
+  const response = await post<CreateAdminResponse>(
+		API_ENDPOINTS.SETUP.CREATE_ADMIN,
+		data
+	)
+	return response
 }
 
 /**
@@ -47,15 +39,11 @@ export async function createAdmin(data: CreateAdminRequest): Promise<CreateAdmin
  * @returns Promise<CreateProfileResponse>
  */
 export async function createProfile(data: CreateProfileRequest): Promise<CreateProfileResponse> {
-  try {
-    const response = await post<CreateProfileResponse>(
-      API_ENDPOINTS.SETUP.CREATE_PROFILE,
-      data
-    )
-    return response
-  } catch (error) {
-    throw error
-  }
+  const response = await post<CreateProfileResponse>(
+		API_ENDPOINTS.SETUP.CREATE_PROFILE,
+		data
+	)
+	return response
 }
 
 /**

@@ -4,24 +4,9 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Shield, FileText, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ServiceActions } from "./ServiceActions"
+import type { ServiceType, ServiceStatusType } from "@/services/api/service/types"
 
-export type ServiceStatus = "active" | "maintenance" | "deprecated" | "inactive"
-
-export type Service = {
-  id: string // UUID v4 for database record
-  name: string // Short name like "core"
-  displayName: string // Display name like "Core Service"
-  identifier: string // Alphanumeric random identifier for communications
-  description: string
-  status: ServiceStatus
-  apiCount: number
-  policyCount: number
-  createdAt: string
-  createdBy: string
-  isSystem: boolean
-}
-
-const getStatusBadge = (status: ServiceStatus) => {
+const getStatusBadge = (status: ServiceStatusType) => {
   const statusConfig = {
     active: { 
       label: "Active", 
@@ -60,8 +45,6 @@ const getStatusBadge = (status: ServiceStatus) => {
   )
 }
 
-
-
 const getSystemBadge = (isSystem: boolean) => {
   if (!isSystem) return null
   
@@ -73,9 +56,9 @@ const getSystemBadge = (isSystem: boolean) => {
   )
 }
 
-export const serviceColumns: ColumnDef<Service>[] = [
+export const serviceColumns: ColumnDef<ServiceType>[] = [
   {
-    accessorKey: "displayName",
+    accessorKey: "display_name",
     header: ({ column }) => {
       return (
         <Button
@@ -93,14 +76,14 @@ export const serviceColumns: ColumnDef<Service>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{service.displayName}</span>
-            {getSystemBadge(service.isSystem)}
+            <span className="font-medium">{service.display_name}</span>
+            {getSystemBadge(service.is_system)}
           </div>
           <span className="text-sm text-muted-foreground truncate">{service.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Name: <span className="font-mono">{service.name}</span></span>
             <span>•</span>
-            <span>ID: <span className="font-mono">{service.identifier}</span></span>
+            <span>Version: <span className="font-mono">{service.version}</span></span>
           </div>
         </div>
       )
@@ -129,30 +112,20 @@ export const serviceColumns: ColumnDef<Service>[] = [
     },
   },
   {
-    accessorKey: "apiCount",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          APIs & Policies
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    accessorKey: "api_count",
+    header: "APIs & Policies",
     cell: ({ row }) => {
       const service = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <div className="flex items-center gap-1 text-sm">
             <Server className="h-3 w-3 text-muted-foreground" />
-            <span className="font-medium">{service.apiCount}</span>
+            <span className="font-medium">{service.api_count}</span>
             <span className="text-muted-foreground">APIs</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
             <FileText className="h-3 w-3 text-muted-foreground" />
-            <span className="font-medium">{service.policyCount}</span>
+            <span className="font-medium">{service.policy_count}</span>
             <span className="text-muted-foreground">Policies</span>
           </div>
         </div>
@@ -161,7 +134,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
   },
 
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -178,10 +151,10 @@ export const serviceColumns: ColumnDef<Service>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(service.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(service.created_at), { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(service.createdAt).toLocaleDateString()}
+            {new Date(service.created_at).toLocaleDateString()}
           </span>
         </div>
       )

@@ -5,8 +5,7 @@
 
 import { post, get } from '../client'
 import { API_ENDPOINTS } from '../config'
-import type { AuthUserType, ProfileResponseInterface } from '@/types'
-import type { LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams } from './types'
+import type { ProfileEntity, LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
 
 /**
  * Login user with credentials
@@ -86,11 +85,11 @@ export async function logout(): Promise<LogoutResponse> {
 
 /**
  * Fetch user profile from API
- * @returns Promise<AuthUserType | null> - Returns null if profile doesn't exist (e.g., newly registered user)
+ * @returns Promise<ProfileEntity | null> - Returns null if profile doesn't exist (e.g., newly registered user)
  */
-export async function fetchProfile(): Promise<AuthUserType | null> {
+export async function fetchProfile(): Promise<ProfileEntity | null> {
   try {
-    const response = await get<ProfileResponseInterface>(API_ENDPOINTS.AUTH.PROFILE)
+    const response = await get<ProfileResponse>(API_ENDPOINTS.AUTH.PROFILE)
 
     if (response.success && response.data) {
       return response.data
@@ -131,11 +130,11 @@ export async function createRegisterProfile(data: CreateProfileRequest): Promise
 /**
  * Validate if the user is still authenticated with the backend
  * This checks if the backend cookie is still valid by calling the profile endpoint
- * @returns Promise<AuthUserType | null> - Returns profile if authenticated, null otherwise
+ * @returns Promise<ProfileEntity | null> - Returns profile if authenticated, null otherwise
  */
-export async function validateAuthentication(): Promise<AuthUserType | null> {
+export async function validateAuthentication(): Promise<ProfileEntity | null> {
   try {
-    const response = await get<ProfileResponseInterface>(API_ENDPOINTS.AUTH.PROFILE)
+    const response = await get<ProfileResponse>(API_ENDPOINTS.AUTH.PROFILE)
 
     if (response.success && response.data) {
       return response.data

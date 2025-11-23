@@ -42,7 +42,7 @@ export interface TenantData {
   updated_at: string
 }
 
-export interface CreateTenantResponse extends ApiResponse<TenantData> {}
+export type CreateTenantResponse = ApiResponse<TenantData>
 
 export interface CreateAdminRequest {
   username: string
@@ -61,7 +61,7 @@ export interface AdminData {
   updated_at: string
 }
 
-export interface CreateAdminResponse extends ApiResponse<AdminData> {}
+export type CreateAdminResponse = ApiResponse<AdminData>
 
 export interface CreateProfileRequest {
   first_name: string
@@ -99,4 +99,4 @@ export interface ProfileData {
   updated_at: string
 }
 
-export interface CreateProfileResponse extends ApiResponse<ProfileData> {}
+export type CreateProfileResponse = ApiResponse<ProfileData>

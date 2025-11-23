@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useToast } from '@/hooks/useToast'
-import type { AuthUserType } from '@/types'
+import type { ProfileEntity } from '@/services/api/auth/types'
 import {
   loginAsync,
   registerAsync,
@@ -108,7 +108,7 @@ export function useAuth() {
     }
   }, [dispatch])
 
-  const updateProfile = useCallback((profileData: AuthUserType | null) => {
+  const updateProfile = useCallback((profileData: ProfileEntity | null) => {
     dispatch(setProfile(profileData))
   }, [dispatch])
 

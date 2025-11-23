@@ -5,14 +5,14 @@
 
 import { get } from '../client'
 import { API_ENDPOINTS } from '../config'
-import type { TenantType, TenantResponseInterface } from '@/types'
+import type { TenantEntity, TenantResponse } from './types'
 
 /**
  * Fetch default tenant
- * @returns Promise<TenantType>
+ * @returns Promise<TenantEntity>
  */
-export async function fetchDefaultTenant(): Promise<TenantType> {
-  const response = await get<TenantResponseInterface>(API_ENDPOINTS.TENANT)
+export async function fetchDefaultTenant(): Promise<TenantEntity> {
+  const response = await get<TenantResponse>(API_ENDPOINTS.TENANT)
 
   if (response.success && response.data) {
     return response.data
@@ -24,10 +24,10 @@ export async function fetchDefaultTenant(): Promise<TenantType> {
 /**
  * Fetch tenant by identifier
  * @param identifier - Tenant identifier
- * @returns Promise<TenantType>
+ * @returns Promise<TenantEntity>
  */
-export async function fetchTenantByIdentifier(identifier: string): Promise<TenantType> {
-  const response = await get<TenantResponseInterface>(`${API_ENDPOINTS.TENANT}/${identifier}`)
+export async function fetchTenantByIdentifier(identifier: string): Promise<TenantEntity> {
+  const response = await get<TenantResponse>(`${API_ENDPOINTS.TENANT}/${identifier}`)
 
   if (response.success && response.data) {
     return response.data
@@ -39,9 +39,9 @@ export async function fetchTenantByIdentifier(identifier: string): Promise<Tenan
 /**
  * Fetch tenant based on identifier (or default if no identifier)
  * @param identifier - Optional tenant identifier
- * @returns Promise<TenantType>
+ * @returns Promise<TenantEntity>
  */
-export async function fetchTenant(identifier?: string): Promise<TenantType> {
+export async function fetchTenant(identifier?: string): Promise<TenantEntity> {
   if (identifier) {
     return await fetchTenantByIdentifier(identifier)
   } else {

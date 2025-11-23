@@ -5,4 +5,22 @@
 
 import type { ApiResponse } from '../types/common'
 
-export interface TenantResponse extends ApiResponse<any> {}
+/**
+ * Tenant entity from API
+ */
+export interface TenantEntity {
+  tenant_id: string
+  name: string
+  description: string
+  identifier: string
+  is_active: boolean
+  is_public: boolean
+  is_default: boolean
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Tenant API response
+ */
+export type TenantResponse = ApiResponse<TenantEntity>
