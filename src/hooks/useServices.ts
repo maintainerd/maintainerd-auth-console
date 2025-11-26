@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchServices } from '@/services/api/service'
+import { fetchServices, fetchServiceById } from '@/services/api/service'
 import type { ServiceQueryParamsInterface } from '@/services/api/service/types'
 
 /**
@@ -14,6 +14,8 @@ export const serviceKeys = {
   all: ['services'] as const,
   lists: () => [...serviceKeys.all, 'list'] as const,
   list: (params?: ServiceQueryParamsInterface) => [...serviceKeys.lists(), params] as const,
+  details: () => [...serviceKeys.all, 'detail'] as const,
+  detail: (id: string) => [...serviceKeys.details(), id] as const,
 }
 
 /**
@@ -23,6 +25,17 @@ export function useServices(params?: ServiceQueryParamsInterface) {
   return useQuery({
     queryKey: serviceKeys.list(params),
     queryFn: () => fetchServices(params),
+  })
+}
+
+/**
+ * Hook to fetch a single service by ID
+ */
+export function useService(serviceId: string) {
+  return useQuery({
+    queryKey: serviceKeys.detail(serviceId),
+    queryFn: () => fetchServiceById(serviceId),
+    enabled: !!serviceId,
   })
 }
 

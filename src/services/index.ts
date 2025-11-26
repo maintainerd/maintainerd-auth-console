@@ -51,7 +51,8 @@ export {
 // Service service functions
 export {
   serviceService,
-  fetchServices
+  fetchServices,
+  fetchServiceById
 } from './api/service'
 
 // Add more services as they are created

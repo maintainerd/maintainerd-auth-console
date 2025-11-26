@@ -56,3 +56,22 @@ export interface ServiceListResponseInterface {
   total_pages: number
 }
 
+/**
+ * Single service response interface
+ */
+export interface ServiceResponseInterface {
+  service_id: string
+  name: string
+  display_name: string
+  description: string
+  version: string
+  status: ServiceStatusType
+  is_public: boolean
+  is_default: boolean
+  is_system: boolean
+  api_count: number
+  policy_count: number
+  created_at: string
+  updated_at: string
+}
+

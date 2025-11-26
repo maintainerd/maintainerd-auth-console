@@ -1,0 +1,2 @@
+export { InformationCard } from './InformationCard'
+
