@@ -1,11 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Archive, Key, Server, Globe, Shield } from "lucide-react"
+import { ArrowUpDown, Key, Server, Globe } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiActions } from "./ApiActions"
+import { SystemBadge, StatusBadge } from "@/components/badges"
+import type { StatusType } from "@/types/status"
 
-export type ApiStatus = "active" | "maintenance" | "deprecated" | "inactive"
+export type ApiStatus = Extract<StatusType, "active" | "maintenance" | "deprecated" | "inactive">
 
 export type Api = {
   id: string // UUID v4 for database record
@@ -24,35 +26,7 @@ export type Api = {
   createdBy: string
 }
 
-const getStatusBadge = (status: ApiStatus) => {
-  const statusConfig = {
-    active: { label: "Active", variant: "default" as const, icon: CheckCircle, className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" },
-    maintenance: { label: "Maintenance", variant: "default" as const, icon: Wrench, className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200" },
-    deprecated: { label: "Deprecated", variant: "default" as const, icon: Archive, className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" },
-    inactive: { label: "Inactive", variant: "secondary" as const, icon: AlertTriangle, className: "" },
-  }
 
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant={config.variant} className={config.className}>
-      <Icon className="mr-1 h-3 w-3" />
-      {config.label}
-    </Badge>
-  )
-}
-
-const getSystemBadge = (isSystem: boolean) => {
-  if (!isSystem) return null
-
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
 
 export const apiColumns: ColumnDef<Api>[] = [
   {
@@ -75,7 +49,7 @@ export const apiColumns: ColumnDef<Api>[] = [
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
             <span className="font-medium">{api.displayName}</span>
-            {getSystemBadge(api.isSystem)}
+            <SystemBadge isSystem={api.isSystem} />
             {api.isPublic && (
               <Badge variant="outline" className="text-xs">
                 <Globe className="mr-1 h-3 w-3" />
@@ -159,7 +133,7 @@ export const apiColumns: ColumnDef<Api>[] = [
       const api = row.original
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(api.status)}
+          <StatusBadge status={api.status} />
         </div>
       )
     },

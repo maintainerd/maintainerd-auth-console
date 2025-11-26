@@ -11,7 +11,7 @@ import { serviceColumns } from "./ServiceColumns"
 import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
 import { useServiceQuery } from "../hooks/useServiceQuery"
 
-export function ServiceDataTable() {
+export function ServiceListing() {
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
@@ -80,6 +80,7 @@ export function ServiceDataTable() {
         setFilter={setSearchQuery}
         filters={filters}
         onFiltersChange={setFilters}
+        table={table}
       />
       <DataTableActiveFilters
         activeFilters={activeFilters}
@@ -95,3 +96,4 @@ export function ServiceDataTable() {
     </div>
   )
 }
+

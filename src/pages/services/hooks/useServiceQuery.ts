@@ -1,21 +1,36 @@
 import * as React from "react"
+import { useSearchParams } from "react-router-dom"
 import type { SortingState, PaginationState } from "@tanstack/react-table"
 import type { FilterState } from "../components/ServiceToolbar"
 import { useServices } from "@/hooks/useServices"
 
 export function useServiceQuery() {
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [filters, setFilters] = React.useState<FilterState>({
-    status: [],
-    isSystem: "all"
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Initialize state from URL params
+  const [searchQuery, setSearchQuery] = React.useState(() => searchParams.get("search") || "")
+  
+	// Filters
+	const [filters, setFilters] = React.useState<FilterState>(() => ({
+    status: searchParams.get("status")?.split(",").filter(Boolean) || [],
+    isSystem: (searchParams.get("isSystem") as "all" | "system" | "regular") || "all"
+  }))
+
+	// Sorting
+  const [sorting, setSorting] = React.useState<SortingState>(() => {
+    const sortBy = searchParams.get("sortBy")
+    const sortOrder = searchParams.get("sortOrder")
+    if (sortBy) {
+      return [{ id: sortBy, desc: sortOrder === "desc" }]
+    }
+    return [{ id: "display_name", desc: false }]
   })
-  const [sorting, setSorting] = React.useState<SortingState>([
-    { id: "display_name", desc: false }
-  ])
-  const [pagination, setPagination] = React.useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  
+	// Pagination
+	const [pagination, setPagination] = React.useState<PaginationState>(() => ({
+    pageIndex: parseInt(searchParams.get("page") || "1") - 1,
+    pageSize: parseInt(searchParams.get("limit") || "10"),
+  }))
 
   // Build query params based on filters, sorting, and pagination
   const queryParams = React.useMemo(() => {
@@ -68,6 +83,38 @@ export function useServiceQuery() {
   // Use API data directly - no mapping needed
   const services = data?.rows ?? []
   const rowCount = data?.total ?? 0
+
+  // Sync state to URL params
+  React.useEffect(() => {
+    const params = new URLSearchParams()
+
+    // Add search query
+    if (searchQuery) {
+      params.set("search", searchQuery)
+    }
+
+    // Add status filter
+    if (filters.status.length > 0) {
+      params.set("status", filters.status.join(","))
+    }
+
+    // Add isSystem filter
+    if (filters.isSystem !== "all") {
+      params.set("isSystem", filters.isSystem)
+    }
+
+    // Add sorting
+    if (sorting.length > 0) {
+      params.set("sortBy", sorting[0].id)
+      params.set("sortOrder", sorting[0].desc ? "desc" : "asc")
+    }
+
+    // Add pagination
+    params.set("page", String(pagination.pageIndex + 1))
+    params.set("limit", String(pagination.pageSize))
+
+    setSearchParams(params, { replace: true })
+  }, [searchQuery, filters, sorting, pagination, setSearchParams])
 
   return {
     services,

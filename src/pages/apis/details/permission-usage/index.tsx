@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Users, Key, Bot, Shield, ExternalLink } from "lucide-react"
+import { ArrowLeft, Users, Key, Bot, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SystemBadge } from "@/components/badges"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MOCK_PERMISSIONS } from "../../../permissions/constants"
@@ -153,12 +154,7 @@ export default function PermissionUsagePage() {
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-lg">{permission.name}</span>
-              {permission.isSystem && (
-                <Badge variant="secondary" className="text-xs">
-                  <Shield className="h-3 w-3 mr-1" />
-                  System
-                </Badge>
-              )}
+              <SystemBadge isSystem={permission.isSystem} />
             </div>
             <p className="text-muted-foreground">{permission.description}</p>
             <p className="text-sm text-muted-foreground">
@@ -206,12 +202,7 @@ export default function PermissionUsagePage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-medium">{role.name}</span>
-                            {role.isSystem && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Shield className="h-3 w-3 mr-1" />
-                                System
-                              </Badge>
-                            )}
+                            <SystemBadge isSystem={role.isSystem} />
                           </div>
                           <p className="text-sm text-muted-foreground">{role.description}</p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">

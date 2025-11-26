@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Edit, Server, Shield, FileText, BarChart3, Activity, Plus, Key } from "lucide-react"
+import { ArrowLeft, Edit, Server, FileText, BarChart3, Activity, Plus, Key } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SystemBadge } from "@/components/badges"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { MOCK_APIS } from "../constants"
@@ -266,12 +267,7 @@ export default function ApiDetailsPage() {
                             <div className="flex items-center gap-2 mb-1">
                               <Key className="h-4 w-4 text-muted-foreground" />
                               <span className="font-mono font-medium">{permission.name}</span>
-                              {permission.isSystem && (
-                                <Badge variant="secondary" className="text-xs">
-                                  <Shield className="h-3 w-3 mr-1" />
-                                  System
-                                </Badge>
-                              )}
+                              <SystemBadge isSystem={permission.isSystem} />
                             </div>
                             <p className="text-sm text-muted-foreground">{permission.description}</p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">

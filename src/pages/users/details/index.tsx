@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { format } from "date-fns"
-import { ArrowLeft, Edit, Shield, User, Key, Mail, Phone, Calendar, Clock, AlertTriangle, CheckCircle, XCircle, Activity, Settings, Eye, Plus } from "lucide-react"
+import { ArrowLeft, Edit, Shield, User, Key, Mail, Phone, Calendar, CheckCircle, XCircle, Activity, Settings, Eye, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MOCK_USERS, MOCK_USER_PROFILES } from "../constants"
 import type { User as UserType, UserProfile } from "../components/UserColumns"
+import { StatusBadge } from "@/components/badges"
 
 export default function UserDetailsPage() {
   const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()
@@ -35,23 +36,7 @@ export default function UserDetailsPage() {
     )
   }
 
-  const getStatusBadge = (status: UserType["status"]) => {
-    const statusConfig = {
-      active: { label: "Active", className: "bg-green-100 text-green-800 border-green-200", icon: CheckCircle },
-      inactive: { label: "Inactive", className: "bg-gray-100 text-gray-800 border-gray-200", icon: XCircle },
-      pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: Clock },
-      suspended: { label: "Suspended", className: "bg-red-100 text-red-800 border-red-200", icon: AlertTriangle },
-    }
-    
-    const config = statusConfig[status]
-    const Icon = config.icon
-    return (
-      <Badge className={`${config.className} text-xs`}>
-        <Icon className="h-3 w-3 mr-1" />
-        {config.label}
-      </Badge>
-    )
-  }
+
 
   const getVerificationBadge = (verified: boolean) => {
     return (
@@ -117,7 +102,7 @@ export default function UserDetailsPage() {
                 <h1 className="text-2xl font-semibold tracking-tight">
                   {userProfile?.displayName || user.username}
                 </h1>
-                {getStatusBadge(user.status)}
+                <StatusBadge status={user.status} />
               </div>
               <p className="text-muted-foreground">@{user.username}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -176,7 +161,7 @@ export default function UserDetailsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Status</p>
                 <div className="flex items-center gap-2">
-                  {getStatusBadge(user.status)}
+                  <StatusBadge status={user.status} />
                 </div>
               </div>
               <div>

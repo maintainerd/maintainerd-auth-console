@@ -1,54 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, FileEdit, Shield, Server } from "lucide-react"
+import { ArrowUpDown, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PolicyActions } from "./PolicyActions"
+import { SystemBadge, StatusBadge } from "@/components/badges"
 import type { Policy, PolicyStatus } from "../constants"
 
-const getStatusBadge = (status: PolicyStatus) => {
-  const statusConfig = {
-    active: { 
-      label: "Active", 
-      variant: "default" as const, 
-      icon: CheckCircle, 
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
-    },
-    inactive: { 
-      label: "Inactive", 
-      variant: "secondary" as const, 
-      icon: AlertTriangle, 
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200" 
-    },
-    draft: { 
-      label: "Draft", 
-      variant: "outline" as const, 
-      icon: FileEdit, 
-      className: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" 
-    }
-  }
 
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant={config.variant} className={`${config.className} text-xs`}>
-      <Icon className="h-3 w-3 mr-1" />
-      {config.label}
-    </Badge>
-  )
-}
-
-const getSystemBadge = (isSystem: boolean) => {
-  if (!isSystem) return null
-
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
 
 export const policyColumns: ColumnDef<Policy>[] = [
   {
@@ -70,7 +29,7 @@ export const policyColumns: ColumnDef<Policy>[] = [
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
             <span className="font-medium">{policy.displayName}</span>
-            {getSystemBadge(policy.isSystem)}
+            <SystemBadge isSystem={policy.isSystem} />
           </div>
           <span className="text-sm text-muted-foreground truncate">{policy.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -99,7 +58,7 @@ export const policyColumns: ColumnDef<Policy>[] = [
       const policy = row.original
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(policy.status)}
+          <StatusBadge status={policy.status} />
         </div>
       )
     },

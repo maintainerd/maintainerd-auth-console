@@ -1,11 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Shield, Settings, Cloud, Key, Github, Facebook, Twitter, Linkedin, Apple, MessageSquare } from "lucide-react"
+import { ArrowUpDown, Shield, Settings, Cloud, Key, Github, Facebook, Twitter, Linkedin, Apple, MessageSquare } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { SocialProviderActions } from "./SocialProviderActions"
+import { StatusBadge } from "@/components/badges"
+import type { StatusType } from "@/types/status"
 
-export type SocialProviderStatus = "active" | "inactive" | "configuring"
+export type SocialProviderStatus = Extract<StatusType, "active" | "inactive" | "configuring">
 export type SocialProviderType = "google" | "facebook" | "github" | "twitter" | "linkedin" | "apple" | "microsoft" | "discord" | "custom"
 
 export interface SocialProvider {
@@ -28,35 +30,7 @@ export interface SocialProvider {
   lastSync: string | null
 }
 
-const getStatusBadge = (status: SocialProviderStatus) => {
-  const statusConfig = {
-    active: { 
-      label: "Active", 
-      icon: CheckCircle, 
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
-    },
-    inactive: { 
-      label: "Inactive", 
-      icon: AlertTriangle, 
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200" 
-    },
-    configuring: { 
-      label: "Configuring", 
-      icon: Wrench, 
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200" 
-    }
-  }
-  
-  const config = statusConfig[status]
-  const Icon = config.icon
-  
-  return (
-    <Badge variant="outline" className={`text-xs ${config.className}`}>
-      <Icon className="h-3 w-3 mr-1" />
-      {config.label}
-    </Badge>
-  )
-}
+
 
 const getProviderBadge = (type: SocialProviderType) => {
   const typeConfig = {
@@ -146,7 +120,7 @@ export const socialProviderColumns: ColumnDef<SocialProvider>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(row.original.status)}
+          <StatusBadge status={row.original.status} />
         </div>
       )
     },

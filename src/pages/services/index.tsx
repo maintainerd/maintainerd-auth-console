@@ -1,4 +1,4 @@
-import { ServiceDataTable } from "./components/ServiceDataTable"
+import { ServiceListing } from "./components/ServiceListing"
 import { PageContainer, PageHeader } from "@/components/layout"
 
 export default function ServicesPage() {
@@ -8,7 +8,7 @@ export default function ServicesPage() {
         title="Service Management"
         description="Manage microservices, their APIs, and permissions within your authentication system."
       />
-      <ServiceDataTable />
+      <ServiceListing />
     </PageContainer>
   )
 }

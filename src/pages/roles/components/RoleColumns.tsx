@@ -4,9 +4,10 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-import { ArrowUpDown, Shield, User } from "lucide-react"
+import { ArrowUpDown, User } from "lucide-react"
 import { format } from "date-fns"
 import { RoleActions } from "./RoleActions"
+import { SystemBadge } from "@/components/badges"
 
 export type RoleStatus = "active" | "inactive"
 
@@ -42,16 +43,7 @@ const getStatusBadge = (status: RoleStatus) => {
   )
 }
 
-const getSystemBadge = (isSystem: boolean) => {
-  if (!isSystem) return null
 
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
 
 export const roleColumns: ColumnDef<Role>[] = [
   {
@@ -73,7 +65,7 @@ export const roleColumns: ColumnDef<Role>[] = [
         <div className="flex flex-col gap-1 px-3 py-1">
           <div className="flex items-center gap-2">
             <span className="font-medium">{role.displayName}</span>
-            {getSystemBadge(role.isSystem)}
+            <SystemBadge isSystem={role.isSystem} />
           </div>
           <span className="text-sm text-muted-foreground">{role.description}</span>
         </div>

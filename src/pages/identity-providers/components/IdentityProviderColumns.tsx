@@ -1,11 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Wrench, Shield, Settings, Cloud, Key } from "lucide-react"
+import { ArrowUpDown, Settings, Cloud, Key, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
+import { SystemBadge, StatusBadge } from "@/components/badges"
+import type { StatusType } from "@/types/status"
 
-export type IdentityProviderStatus = "active" | "inactive" | "configuring"
+export type IdentityProviderStatus = Extract<StatusType, "active" | "inactive" | "configuring">
 export type IdentityProviderType = "cognito" | "auth0" | "okta" | "azure_ad" | "keycloak" | "firebase" | "custom"
 
 export type IdentityProvider = {
@@ -27,38 +29,7 @@ export type IdentityProvider = {
   lastSync?: string
 }
 
-const getStatusBadge = (status: IdentityProviderStatus) => {
-  const statusConfig = {
-    active: {
-      label: "Active",
-      variant: "default" as const,
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-    },
-    inactive: {
-      label: "Inactive",
-      variant: "secondary" as const,
-      icon: AlertTriangle,
-      className: ""
-    },
-    configuring: {
-      label: "Configuring",
-      variant: "default" as const,
-      icon: Wrench,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
-  }
 
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant={config.variant} className={`${config.className}`}>
-      <Icon className="h-3 w-3 mr-1" />
-      {config.label}
-    </Badge>
-  )
-}
 
 const getInternalExternalBadge = (isDefault: boolean) => {
   if (isDefault) {
@@ -110,16 +81,7 @@ const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
   )
 }
 
-const getSystemBadge = (isDefault: boolean) => {
-  if (!isDefault) return null
 
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
 
 
 
@@ -143,7 +105,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
             <span className="font-medium">{provider.displayName}</span>
-            {getSystemBadge(provider.isDefault)}
+            <SystemBadge isSystem={provider.isDefault} />
           </div>
           <span className="text-sm text-muted-foreground truncate">{provider.description}</span>
           <span className="text-xs text-muted-foreground font-mono">{provider.identifier}</span>
@@ -209,7 +171,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(row.original.status)}
+          <StatusBadge status={row.original.status} />
         </div>
       )
     },

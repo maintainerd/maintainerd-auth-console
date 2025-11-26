@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { format } from "date-fns"
-import { ArrowLeft, Edit, Shield, Users, Key, Activity, Settings, CheckCircle, XCircle, Clock, AlertTriangle, Plus, User } from "lucide-react"
+import { ArrowLeft, Edit, Users, Key, Activity, Settings, CheckCircle, XCircle, Clock, AlertTriangle, Plus, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SystemBadge } from "@/components/badges"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -66,16 +67,7 @@ export default function RoleDetailsPage() {
     }
   }
 
-  const getSystemBadge = (isSystem: boolean) => {
-    if (!isSystem) return null
 
-    return (
-      <Badge variant="secondary" className="text-xs">
-        <Shield className="h-3 w-3 mr-1" />
-        System
-      </Badge>
-    )
-  }
 
   // Group permissions by category
   const groupedPermissions = Object.entries(PERMISSION_CATEGORIES).reduce((acc, [category, categoryPermissions]) => {
@@ -115,7 +107,7 @@ export default function RoleDetailsPage() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold tracking-tight">{role.displayName}</h1>
               {getStatusBadge(role.isActive)}
-              {getSystemBadge(role.isSystem)}
+              <SystemBadge isSystem={role.isSystem} />
             </div>
             <p className="text-muted-foreground">{role.description}</p>
           </div>

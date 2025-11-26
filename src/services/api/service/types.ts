@@ -2,10 +2,12 @@
  * Service API Types
  */
 
+import type { StatusType } from '@/types/status'
+
 /**
- * Service status type
+ * Service status type - defines valid statuses for services only
  */
-export type ServiceStatusType = 'active' | 'maintenance' | 'deprecated' | 'inactive'
+export type ServiceStatusType = Extract<StatusType, 'active' | 'maintenance' | 'deprecated' | 'inactive'>
 
 /**
  * Service type

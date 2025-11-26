@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import type { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +22,9 @@ import {
   Filter,
   Plus
 } from "lucide-react"
+import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
+import { DataTableViewOptions } from "@/components/data-table"
+import type { ServiceType } from "@/services/api/service/types"
 
 export interface FilterState {
   status: string[]
@@ -36,12 +40,20 @@ interface ServiceToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
+  table: Table<ServiceType>
 }
 
-export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange }: ServiceToolbarProps) {
+export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange, table }: ServiceToolbarProps) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
+
+  // Debounced search with Enter key support
+  const { searchInput, handleSearchChange, handleKeyDown } = useDebouncedSearch({
+    initialValue: filter,
+    delay: 500,
+    onDebouncedChange: setFilter
+  })
 
   const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters }
@@ -73,8 +85,9 @@ export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange }: 
       <div className="flex flex-1 items-center gap-2">
         <Input
           placeholder="Search services by name, description, or maintainer..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full sm:w-80"
         />
         
@@ -145,6 +158,7 @@ export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange }: 
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <DataTableViewOptions table={table} />
         <Button size="sm" onClick={handleCreateService}>
           <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">New Service</span>

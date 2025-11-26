@@ -1,9 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Cog, Clock, Shield } from "lucide-react"
+import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Cog, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ClientActions } from "./ClientActions"
+import { SystemBadge } from "@/components/badges"
 import type { Client, ClientStatus, ClientType } from "../constants"
 
 const getStatusBadge = (status: ClientStatus) => {
@@ -29,16 +30,7 @@ const getStatusBadge = (status: ClientStatus) => {
   )
 }
 
-const getSystemBadge = (isDefault: boolean) => {
-  if (!isDefault) return null
 
-  return (
-    <Badge variant="secondary" className="text-xs">
-      <Shield className="h-3 w-3 mr-1" />
-      System
-    </Badge>
-  )
-}
 
 const getTypeBadge = (type: ClientType) => {
   const typeConfig = {
@@ -103,7 +95,7 @@ export const clientColumns: ColumnDef<Client>[] = [
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
             <span className="font-medium">{client.name}</span>
-            {getSystemBadge(client.isDefault)}
+            <SystemBadge isSystem={client.isDefault} />
           </div>
           <span className="text-sm text-muted-foreground truncate">{client.description}</span>
           <span className="text-xs text-muted-foreground font-mono">{client.id}</span>

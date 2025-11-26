@@ -1,12 +1,14 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, CheckCircle, XCircle, Clock, AlertTriangle, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserActions } from "./UserActions"
 import { formatDistanceToNow } from "date-fns"
+import { StatusBadge } from "@/components/badges"
+import type { StatusType } from "@/types/status"
 
-export type UserStatus = "active" | "inactive" | "pending" | "suspended"
+export type UserStatus = Extract<StatusType, "active" | "inactive" | "pending" | "suspended">
 
 export type User = {
   id: string // UUID identifier
@@ -42,24 +44,7 @@ export type UserProfile = {
   customFields?: Record<string, string>
 }
 
-const getStatusBadge = (status: UserStatus) => {
-  const statusConfig = {
-    active: { label: "Active", variant: "default" as const, icon: CheckCircle, className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" },
-    inactive: { label: "Inactive", variant: "secondary" as const, icon: XCircle, className: "" },
-    pending: { label: "Pending", variant: "outline" as const, icon: Clock, className: "" },
-    suspended: { label: "Suspended", variant: "default" as const, icon: AlertTriangle, className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" },
-  }
 
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant={config.variant} className={`flex items-center gap-1 ${config.className}`}>
-      <Icon className="h-3 w-3" />
-      {config.label}
-    </Badge>
-  )
-}
 
 export const userColumns: ColumnDef<User>[] = [
   {
@@ -136,7 +121,7 @@ export const userColumns: ColumnDef<User>[] = [
       const status = row.getValue("status") as UserStatus
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(status)}
+          <StatusBadge status={status} />
         </div>
       )
     },
