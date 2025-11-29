@@ -31,5 +31,11 @@ export {
   type ResetPasswordFormData
 } from './authSchema'
 
+// Service schemas
+export {
+  serviceSchema,
+  type ServiceFormData
+} from './serviceSchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'

@@ -3,10 +3,17 @@
  * Handles service-related API calls
  */
 
-import { get } from '../client'
+import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
-import type { ServiceListResponseInterface, ServiceQueryParamsInterface, ServiceResponseInterface } from './types'
+import type {
+  ServiceListResponseInterface,
+  ServiceQueryParamsInterface,
+  ServiceResponseInterface,
+  CreateServiceRequestInterface,
+  UpdateServiceRequestInterface,
+  UpdateServiceStatusRequestInterface
+} from './types'
 
 /**
  * Fetch services with optional filters and pagination
@@ -46,9 +53,66 @@ export async function fetchServiceById(serviceId: string): Promise<ServiceRespon
   throw new Error(response.message || 'Failed to fetch service')
 }
 
+/**
+ * Create a new service
+ */
+export async function createService(data: CreateServiceRequestInterface): Promise<ServiceResponseInterface> {
+  const endpoint = API_ENDPOINTS.SERVICE
+  const response = await post<ApiResponse<ServiceResponseInterface>>(endpoint, data)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to create service')
+}
+
+/**
+ * Update an existing service
+ */
+export async function updateService(serviceId: string, data: UpdateServiceRequestInterface): Promise<ServiceResponseInterface> {
+  const endpoint = `${API_ENDPOINTS.SERVICE}/${serviceId}`
+  const response = await put<ApiResponse<ServiceResponseInterface>>(endpoint, data)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to update service')
+}
+
+/**
+ * Delete a service
+ */
+export async function deleteService(serviceId: string): Promise<void> {
+  const endpoint = `${API_ENDPOINTS.SERVICE}/${serviceId}`
+  const response = await deleteRequest<ApiResponse<void>>(endpoint)
+
+  if (!response.success) {
+    throw new Error(response.message || 'Failed to delete service')
+  }
+}
+
+/**
+ * Update service status
+ */
+export async function updateServiceStatus(serviceId: string, data: UpdateServiceStatusRequestInterface): Promise<ServiceResponseInterface> {
+  const endpoint = `${API_ENDPOINTS.SERVICE}/${serviceId}/status`
+  const response = await put<ApiResponse<ServiceResponseInterface>>(endpoint, data)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to update service status')
+}
+
 // Export as service object
 export const serviceService = {
   fetchServices,
   fetchServiceById,
+  createService,
+  updateService,
+  deleteService,
+  updateServiceStatus,
 }
-

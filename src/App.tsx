@@ -27,7 +27,7 @@ import RolesPage from './pages/roles'
 
 import ServicesPage from './pages/services'
 import ServiceDetailsPage from './pages/services/details'
-import ServiceAddOrUpdateForm from './pages/services/add-or-update-form'
+import ServiceAddOrUpdateForm from './pages/services/form'
 import ApisPage from './pages/apis'
 import ApiDetailsPage from './pages/apis/details'
 import ApiAddOrUpdateForm from './pages/apis/add-or-update-form'

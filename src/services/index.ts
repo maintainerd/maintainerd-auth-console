@@ -52,7 +52,11 @@ export {
 export {
   serviceService,
   fetchServices,
-  fetchServiceById
+  fetchServiceById,
+  createService,
+  updateService,
+  deleteService,
+  updateServiceStatus
 } from './api/service'
 
 // Add more services as they are created

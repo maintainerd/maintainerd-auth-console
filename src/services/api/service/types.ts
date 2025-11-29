@@ -75,3 +75,33 @@ export interface ServiceResponseInterface {
   updated_at: string
 }
 
+/**
+ * Create service request interface
+ */
+export interface CreateServiceRequestInterface {
+  name: string
+  display_name: string
+  description: string
+  version: string
+  status: ServiceStatusType
+  is_public: boolean
+}
+
+/**
+ * Update service request interface
+ */
+export interface UpdateServiceRequestInterface {
+  name: string
+  display_name: string
+  description: string
+  version: string
+  status: ServiceStatusType
+  is_public: boolean
+}
+
+/**
+ * Update service status request interface
+ */
+export interface UpdateServiceStatusRequestInterface {
+  status: ServiceStatusType
+}

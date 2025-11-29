@@ -3,9 +3,14 @@
  * Custom hook for fetching services using TanStack Query
  */
 
-import { useQuery } from '@tanstack/react-query'
-import { fetchServices, fetchServiceById } from '@/services/api/service'
-import type { ServiceQueryParamsInterface } from '@/services/api/service/types'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { fetchServices, fetchServiceById, createService, updateService, deleteService, updateServiceStatus } from '@/services/api/service'
+import type {
+  ServiceQueryParamsInterface,
+  CreateServiceRequestInterface,
+  UpdateServiceRequestInterface,
+  UpdateServiceStatusRequestInterface
+} from '@/services/api/service/types'
 
 /**
  * Query key factory for services
@@ -39,3 +44,66 @@ export function useService(serviceId: string) {
   })
 }
 
+/**
+ * Hook to create a new service
+ */
+export function useCreateService() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: CreateServiceRequestInterface) => createService(data),
+    onSuccess: () => {
+      // Invalidate services list to refetch
+      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to update an existing service
+ */
+export function useUpdateService() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceRequestInterface }) =>
+      updateService(serviceId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate both the specific service and the services list
+      queryClient.invalidateQueries({ queryKey: serviceKeys.detail(variables.serviceId) })
+      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to delete a service
+ */
+export function useDeleteService() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (serviceId: string) => deleteService(serviceId),
+    onSuccess: () => {
+      // Invalidate services list to refetch
+      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to update service status
+ */
+export function useUpdateServiceStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceStatusRequestInterface }) =>
+      updateServiceStatus(serviceId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate both the specific service and the services list
+      queryClient.invalidateQueries({ queryKey: serviceKeys.detail(variables.serviceId) })
+      queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
+    },
+  })
+}
