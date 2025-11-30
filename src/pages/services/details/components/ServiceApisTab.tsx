@@ -1,11 +1,17 @@
+import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Server } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Server, Search } from "lucide-react"
 import { TabsContent } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
 import { InformationCard } from "@/components/card"
-import { SystemBadge } from "@/components/badges"
+import { DataTablePagination } from "@/components/data-table"
+import { ApiItem } from "./ApiItem"
 import { useServiceApis } from "../hooks/useServiceApis"
+import {
+  getCoreRowModel,
+  useReactTable,
+  type PaginationState,
+} from "@tanstack/react-table"
 
 interface ServiceApisTabProps {
   tenantId: string
@@ -14,7 +20,36 @@ interface ServiceApisTabProps {
 
 export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
   const navigate = useNavigate()
-  const { data, isLoading, error } = useServiceApis({ serviceId, limit: 5 })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  const { data, isLoading, error } = useServiceApis({
+    serviceId,
+    limit: pagination.pageSize,
+    page: pagination.pageIndex + 1,
+    name: searchQuery || undefined,
+    displayName: searchQuery || undefined,
+    description: searchQuery || undefined,
+  })
+
+  // Create a simple table instance for pagination
+  const columns = useMemo(() => [], [])
+  const tableData = data?.rows || []
+
+  const table = useReactTable({
+    data: tableData,
+    columns,
+    pageCount: data?.total_pages || 0,
+    state: {
+      pagination,
+    },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+  })
 
   return (
     <TabsContent value="apis" className="space-y-6">
@@ -24,62 +59,61 @@ export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
         icon={Server}
       >
         <div className="space-y-4">
-          {isLoading && (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading APIs...
-            </div>
-          )}
+          {/* Search filter */}
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search APIs..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setPagination({ pageIndex: 0, pageSize: 10 }) // Reset to first page on search
+              }}
+              className="pl-8"
+            />
+          </div>
 
-          {error && (
-            <div className="text-center py-8 text-destructive">
-              Failed to load APIs
-            </div>
-          )}
+          {/* Horizontal line */}
+          <div className="border-t" />
 
-          {data && data.rows.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No APIs found for this service
-            </div>
-          )}
+          {/* Scrollable content area */}
+          <div className="max-h-[600px] overflow-y-auto pr-2">
+            {isLoading && (
+              <div className="text-center py-8 text-muted-foreground">
+                Loading APIs...
+              </div>
+            )}
 
-          {data && data.rows.length > 0 && (
-            <>
-              {data.rows.map((api) => (
-                <div
-                  key={api.api_id}
-                  className="flex justify-between items-center p-4 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
-                  onClick={() => navigate(`/c/${tenantId}/apis/${api.api_id}`)}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{api.display_name}</h4>
-                      <SystemBadge isSystem={api.is_default} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{api.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <span>Name: <span className="font-mono">{api.name}</span></span>
-                      <span>•</span>
-                      <span>ID: <span className="font-mono">{api.identifier}</span></span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant={api.status === "active" ? "secondary" : "outline"} className="capitalize">
-                      {api.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              {data.total > 5 && (
-                <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate(`/c/${tenantId}/apis?service_id=${serviceId}`)}
-                  >
-                    View All {data.total} APIs
-                  </Button>
-                </div>
-              )}
-            </>
+            {error && (
+              <div className="text-center py-8 text-destructive">
+                Failed to load APIs
+              </div>
+            )}
+
+            {data && data.rows.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchQuery ? "No APIs found matching your search" : "No APIs found for this service"}
+              </div>
+            )}
+
+            {data && data.rows.length > 0 && (
+              <>
+                {data.rows.map((api) => (
+                  <ApiItem
+                    key={api.api_id}
+                    api={api}
+                    onClick={() => navigate(`/c/${tenantId}/apis/${api.api_id}`)}
+                  />
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* Pagination controls */}
+          {data && data.total > 0 && (
+            <div className="pt-4 border-t">
+              <DataTablePagination table={table} rowCount={data.total} />
+            </div>
           )}
         </div>
       </InformationCard>

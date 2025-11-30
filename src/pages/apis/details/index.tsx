@@ -92,11 +92,10 @@ export default function ApiDetailsPage() {
         {/* API Information */}
         <ApiInformation api={api} />
 
-        {/* Tabs with Action Buttons */}
+        {/* Tabs */}
         <ApiTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          api={api}
           tenantId={tenantId!}
           apiId={apiId!}
         />

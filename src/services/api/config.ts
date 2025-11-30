@@ -42,4 +42,5 @@ export const API_ENDPOINTS = {
   TENANT: '/tenant',
   SERVICE: '/services',
   API: '/apis',
+  PERMISSION: '/permissions',
 } as const

@@ -12,12 +12,17 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
   pageSizeOptions?: number[]
+  rowCount?: number // Optional: for server-side pagination
 }
 
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [10, 20, 30, 40, 50],
+  rowCount,
 }: DataTablePaginationProps<TData>) {
+  // Use rowCount if provided (server-side pagination), otherwise use table's row count (client-side)
+  const totalRows = rowCount ?? table.getFilteredRowModel().rows.length
+
   return (
     <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
       {/* Left side - Rows per page and results info */}
@@ -43,14 +48,14 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length > 0 ? (
+          {totalRows > 0 ? (
             <>
               {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
               {Math.min(
                 (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                table.getFilteredRowModel().rows.length
+                totalRows
               )}{" "}
-              of {table.getFilteredRowModel().rows.length} results
+              of {totalRows} results
             </>
           ) : (
             "No results"
