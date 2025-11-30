@@ -37,5 +37,11 @@ export {
   type ServiceFormData
 } from './serviceSchema'
 
+// API schemas
+export {
+  apiSchema,
+  type ApiFormData
+} from './apiSchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'

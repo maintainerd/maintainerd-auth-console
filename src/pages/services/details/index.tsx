@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DetailsContainer } from "@/components/container"
 import { useService } from "@/hooks/useServices"
 import { ServiceHeader, ServiceInformation, ServiceTabs } from "./components"
 import { getStatusColor, getStatusText } from "./utils"
@@ -67,7 +68,7 @@ export default function ServiceDetailsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <DetailsContainer>
       <div className="flex flex-col gap-6">
         {/* Back Button */}
         <div>
@@ -103,6 +104,6 @@ export default function ServiceDetailsPage() {
           serviceId={serviceId!}
         />
       </div>
-    </div>
+    </DetailsContainer>
   )
 }

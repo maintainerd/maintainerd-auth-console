@@ -2,17 +2,30 @@ import { useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { ArrowLeft, Save, Shield } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { FormInputField, FormTextareaField } from "@/components/form"
+import { DetailsContainer } from "@/components/container"
+import { FormPageHeader } from "@/components/header"
+import {
+  FormInputField,
+  FormTextareaField,
+  FormSelectField,
+  FormCheckboxField,
+  FormSubmitButton,
+  type SelectOption
+} from "@/components/form"
 import { serviceSchema, type ServiceFormData } from "@/lib/validations"
 import { useService, useCreateService, useUpdateService } from "@/hooks/useServices"
 import { useToast } from "@/hooks/useToast"
+
+// Status options for the select field
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: "active", label: "Active" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "deprecated", label: "Deprecated" },
+  { value: "inactive", label: "Inactive" },
+]
 
 export default function ServiceAddOrUpdateForm() {
   const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId?: string }>()
@@ -129,51 +142,21 @@ export default function ServiceAddOrUpdateForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <DetailsContainer>
       <div className="flex flex-col gap-6">
-        {/* Back Button */}
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/${tenantId}/services`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Services
-          </Button>
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight">{pageTitle}</h1>
-              {existingService?.is_system && (
-                <Badge variant="secondary" className="gap-1">
-                  <Shield className="h-3 w-3" />
-                  System
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground">
-              {isCreating
-                ? "Create a new microservice to manage APIs, permissions, and policies"
-                : "Update service settings and configuration"
-              }
-            </p>
-          </div>
-        </div>
-
-        {/* System Service Warning */}
-        {existingService?.is_system && (
-          <Alert>
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              This is a system service. Some settings may be restricted to prevent system instability.
-            </AlertDescription>
-          </Alert>
-        )}
+        <FormPageHeader
+          backUrl={`/${tenantId}/services`}
+          backLabel="Back to Services"
+          title={pageTitle}
+          description={
+            isCreating
+              ? "Create a new microservice to manage APIs, permissions, and policies"
+              : "Update service settings and configuration"
+          }
+          showSystemBadge={existingService?.is_system}
+          showWarning={existingService?.is_system}
+          warningMessage="This is a system service. Some settings may be restricted to prevent system instability."
+        />
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -230,29 +213,17 @@ export default function ServiceAddOrUpdateForm() {
                   name="status"
                   control={control}
                   render={({ field }) => (
-                    <div className="space-y-2">
-                      <label htmlFor="status" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Status <span className="text-red-500 ml-1">*</span>
-                      </label>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                          <SelectItem value="deprecated">Deprecated</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.status?.message && (
-                        <p className="text-sm text-destructive">{errors.status.message}</p>
-                      )}
-                    </div>
+                    <FormSelectField
+                      key={`status-${field.value || 'empty'}`}
+                      label="Status"
+                      placeholder="Select status"
+                      options={STATUS_OPTIONS}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                      error={errors.status?.message}
+                      required
+                    />
                   )}
                 />
               </div>
@@ -261,17 +232,12 @@ export default function ServiceAddOrUpdateForm() {
                 name="isPublic"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isPublic"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isLoading}
-                    />
-                    <label htmlFor="isPublic" className="text-sm font-normal cursor-pointer">
-                      Make this service publicly accessible
-                    </label>
-                  </div>
+                  <FormCheckboxField
+                    label="Make this service publicly accessible"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
                 )}
               />
             </CardContent>
@@ -287,17 +253,14 @@ export default function ServiceAddOrUpdateForm() {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || (existingService?.is_system && isEditing)}
-              className="gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isLoading ? "Saving..." : submitButtonText}
-            </Button>
+            <FormSubmitButton
+              isSubmitting={isLoading}
+              submitText={submitButtonText}
+              disabled={existingService?.is_system && isEditing}
+            />
           </div>
         </form>
       </div>
-    </div>
+    </DetailsContainer>
   )
 }

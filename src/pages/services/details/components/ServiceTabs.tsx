@@ -57,7 +57,7 @@ export function ServiceTabs({ activeTab, setActiveTab, service, tenantId, servic
 
       {/* Tab Content */}
       <div className="space-y-6">
-        <ServiceApisTab tenantId={tenantId} />
+        <ServiceApisTab tenantId={tenantId} serviceId={serviceId} />
         <ServicePoliciesTab tenantId={tenantId} />
       </div>
     </Tabs>

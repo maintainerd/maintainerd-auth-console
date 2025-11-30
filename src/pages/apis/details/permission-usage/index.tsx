@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { SystemBadge } from "@/components/badges"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useApi } from "@/hooks/useApis"
 import { MOCK_PERMISSIONS } from "../../../permissions/constants"
-import { MOCK_APIS } from "../../constants"
 
 
 // Mock data for roles, API keys, and clients using permissions
@@ -97,8 +97,8 @@ export default function PermissionUsagePage() {
   }>()
   const navigate = useNavigate()
 
-  const api = MOCK_APIS.find(a => a.id === apiId)
-  const permission = MOCK_PERMISSIONS.find(p => 
+  const { data: apiData } = useApi(apiId || '')
+  const permission = MOCK_PERMISSIONS.find(p =>
     p.name === decodeURIComponent(permissionName || '') && p.apiId === apiId
   )
 
@@ -106,7 +106,7 @@ export default function PermissionUsagePage() {
     navigate(`/${tenantId}/apis/${apiId}`)
   }
 
-  if (!api || !permission) {
+  if (!apiData || !permission) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="text-center">
@@ -141,7 +141,7 @@ export default function PermissionUsagePage() {
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to {api.displayName}
+            Back to {apiData.display_name}
           </Button>
         </div>
 

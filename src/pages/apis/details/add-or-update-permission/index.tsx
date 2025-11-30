@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { useApi } from "@/hooks/useApis"
 import { MOCK_PERMISSIONS } from "../../../permissions/constants"
-import { MOCK_APIS } from "../../constants"
 
 export type Permission = {
   name: string
@@ -30,10 +30,10 @@ export default function AddOrUpdatePermissionPage() {
   }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  
+
   const isEditing = !!permissionName
-  const api = MOCK_APIS.find(a => a.id === apiId)
-  const existingPermission = isEditing 
+  const { data: apiData } = useApi(apiId || '')
+  const existingPermission = isEditing
     ? MOCK_PERMISSIONS.find(p => p.name === permissionName && p.apiId === apiId)
     : null
 
@@ -93,7 +93,7 @@ export default function AddOrUpdatePermissionPage() {
     console.log(isEditing ? "Updating permission:" : "Creating permission:", {
       ...formData,
       apiId,
-      apiName: api?.displayName,
+      apiName: apiData?.display_name,
     })
 
     // Navigate back to API details
@@ -104,7 +104,7 @@ export default function AddOrUpdatePermissionPage() {
     navigate(`/${tenantId}/apis/${apiId}`)
   }
 
-  if (!api) {
+  if (!apiData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="text-center">
@@ -133,7 +133,7 @@ export default function AddOrUpdatePermissionPage() {
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to {api.displayName}
+            Back to {apiData.display_name}
           </Button>
         </div>
 
@@ -143,9 +143,9 @@ export default function AddOrUpdatePermissionPage() {
             {isEditing ? "Edit Permission" : "Add Permission"}
           </h1>
           <p className="text-muted-foreground">
-            {isEditing 
-              ? `Update the permission "${existingPermission?.name}" for ${api.displayName}`
-              : `Create a new permission for ${api.displayName}`
+            {isEditing
+              ? `Update the permission "${existingPermission?.name}" for ${apiData.display_name}`
+              : `Create a new permission for ${apiData.display_name}`
             }
           </p>
         </div>

@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { TabsContent } from "@/components/ui/tabs"
 import { InformationCard } from "@/components/card"
+import { SystemBadge } from "@/components/badges"
+import { useServiceApis } from "../hooks/useServiceApis"
 
 interface ServiceApisTabProps {
   tenantId: string
+  serviceId: string
 }
 
-export function ServiceApisTab({ tenantId }: ServiceApisTabProps) {
+export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
   const navigate = useNavigate()
+  const { data, isLoading, error } = useServiceApis({ serviceId, limit: 5 })
 
   return (
     <TabsContent value="apis" className="space-y-6">
@@ -20,34 +24,63 @@ export function ServiceApisTab({ tenantId }: ServiceApisTabProps) {
         icon={Server}
       >
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 border rounded-lg">
-            <div>
-              <h4 className="font-medium">User Management API</h4>
-              <p className="text-sm text-muted-foreground">CRUD operations for user management</p>
+          {isLoading && (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading APIs...
             </div>
-            <div className="flex gap-2">
-              <Badge variant="secondary">12 endpoints</Badge>
-              <Badge variant="outline">8 permissions</Badge>
+          )}
+
+          {error && (
+            <div className="text-center py-8 text-destructive">
+              Failed to load APIs
             </div>
-          </div>
-          <div className="flex justify-between items-center p-4 border rounded-lg">
-            <div>
-              <h4 className="font-medium">Authentication API</h4>
-              <p className="text-sm text-muted-foreground">Login, logout, and token management</p>
+          )}
+
+          {data && data.rows.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No APIs found for this service
             </div>
-            <div className="flex gap-2">
-              <Badge variant="secondary">8 endpoints</Badge>
-              <Badge variant="outline">5 permissions</Badge>
-            </div>
-          </div>
-          <div className="flex justify-center pt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/c/${tenantId}/apis`)}
-            >
-              View All APIs
-            </Button>
-          </div>
+          )}
+
+          {data && data.rows.length > 0 && (
+            <>
+              {data.rows.map((api) => (
+                <div
+                  key={api.api_id}
+                  className="flex justify-between items-center p-4 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => navigate(`/c/${tenantId}/apis/${api.api_id}`)}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">{api.display_name}</h4>
+                      <SystemBadge isSystem={api.is_default} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{api.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                      <span>Name: <span className="font-mono">{api.name}</span></span>
+                      <span>•</span>
+                      <span>ID: <span className="font-mono">{api.identifier}</span></span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant={api.status === "active" ? "secondary" : "outline"} className="capitalize">
+                      {api.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              {data.total > 5 && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/c/${tenantId}/apis?service_id=${serviceId}`)}
+                  >
+                    View All {data.total} APIs
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </InformationCard>
     </TabsContent>

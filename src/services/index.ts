@@ -13,6 +13,7 @@ export type * from './api/auth/types'
 export type * from './api/setup/types'
 export type * from './api/tenant/types'
 export type * from './api/service/types'
+export type * from './api/api/types'
 
 // Setup service functions
 export {
@@ -58,6 +59,17 @@ export {
   deleteService,
   updateServiceStatus
 } from './api/service'
+
+// API service functions
+export {
+  apiService,
+  fetchApis,
+  fetchApiById,
+  createApi,
+  updateApi,
+  deleteApi,
+  updateApiStatus
+} from './api/api'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { Field } from '@/components/ui/field'
 import { Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface FormSubmitButtonProps {
   isSubmitting: boolean
@@ -21,15 +21,13 @@ export default function FormSubmitButton({
   const displaySubmittingText = submittingText || defaultSubmittingText
 
   return (
-    <Field>
-      <Button 
-        type="submit" 
-        disabled={isSubmitting || disabled}
-        className={className}
-      >
-        {isSubmitting && <Loader2 className="animate-spin" />}
-        {isSubmitting ? displaySubmittingText : submitText}
-      </Button>
-    </Field>
+    <Button
+      type="submit"
+      disabled={isSubmitting || disabled}
+      className={cn("gap-2", className)}
+    >
+      {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+      {isSubmitting ? displaySubmittingText : submitText}
+    </Button>
   )
 }
