@@ -102,7 +102,7 @@ export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
                   <ApiItem
                     key={api.api_id}
                     api={api}
-                    onClick={() => navigate(`/c/${tenantId}/apis/${api.api_id}`)}
+                    onView={() => navigate(`/${tenantId}/apis/${api.api_id}`)}
                   />
                 ))}
               </>

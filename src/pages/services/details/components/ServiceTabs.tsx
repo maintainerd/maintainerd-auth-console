@@ -33,26 +33,15 @@ export function ServiceTabs({ activeTab, setActiveTab, service, tenantId, servic
           </TabsTrigger>
         </TabsList>
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => navigate(`/c/${tenantId}/apis/create?serviceId=${serviceId}`)}
-          >
-            <Plus className="h-4 w-4" />
-            Add API
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => navigate(`/c/${tenantId}/policies/create?serviceId=${serviceId}`)}
-          >
-            <Plus className="h-4 w-4" />
-            Add Policy
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => navigate(`/c/${tenantId}/policies/create?serviceId=${serviceId}`)}
+        >
+          <Plus className="h-4 w-4" />
+          Add Policy
+        </Button>
       </div>
 
       {/* Tab Content */}
