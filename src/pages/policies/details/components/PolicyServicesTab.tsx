@@ -4,27 +4,35 @@ import { TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { InformationCard } from "@/components/card"
 import { DataTablePagination } from "@/components/data-table"
+import { ServiceItem } from "./ServiceItem"
+import { useServicesByPolicy } from "../hooks/useServicesByPolicy"
 import {
   getCoreRowModel,
   useReactTable,
   type PaginationState,
 } from "@tanstack/react-table"
 
-export function PolicyServicesTab() {
+interface PolicyServicesTabProps {
+  policyId: string
+}
+
+export function PolicyServicesTab({ policyId }: PolicyServicesTabProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
 
-  // TODO: Replace with actual API call when endpoint is available
-  const data = { rows: [], total: 0, total_pages: 0 }
-  const isLoading = false
-  const error = null
+  const { data, isLoading, error } = useServicesByPolicy({
+    policyId,
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize,
+    name: searchQuery || undefined,
+  })
 
   // Create a simple table instance for pagination
   const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
+  const tableData = useMemo(() => data?.rows || [], [data])
 
   const table = useReactTable({
     data: tableData,
@@ -41,7 +49,7 @@ export function PolicyServicesTab() {
   return (
     <TabsContent value="services" className="space-y-6">
       <InformationCard
-        title="Applied Services"
+        title="Services"
         description="Services where this policy is applied"
         icon={Server}
       >
@@ -77,13 +85,19 @@ export function PolicyServicesTab() {
               </div>
             )}
 
-            {data && data.rows.length === 0 && (
+            {!isLoading && !error && data && data.rows && data.rows.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 {searchQuery ? "No services found matching your search" : "This policy is not applied to any services"}
               </div>
             )}
 
-            {/* TODO: Add service items when API is available */}
+            {!isLoading && !error && data && data.rows && data.rows.length > 0 && (
+              <>
+                {data.rows.map((service) => (
+                  <ServiceItem key={service.service_id} service={service} policyId={policyId} />
+                ))}
+              </>
+            )}
           </div>
 
           {/* Pagination controls */}

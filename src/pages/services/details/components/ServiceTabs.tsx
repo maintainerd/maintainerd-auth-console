@@ -1,6 +1,4 @@
-import { useNavigate } from "react-router-dom"
-import { Server, FileText, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Server, FileText } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ServiceApisTab } from "./ServiceApisTab"
 import { ServicePoliciesTab } from "./ServicePoliciesTab"
@@ -17,37 +15,23 @@ interface ServiceTabsProps {
 }
 
 export function ServiceTabs({ activeTab, setActiveTab, service, tenantId, serviceId }: ServiceTabsProps) {
-  const navigate = useNavigate()
-
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex items-center justify-between">
-        <TabsList>
-          <TabsTrigger value="apis" className="gap-2">
-            <Server className="h-4 w-4" />
-            APIs ({service.apiCount})
-          </TabsTrigger>
-          <TabsTrigger value="policies" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Policies ({service.policyCount})
-          </TabsTrigger>
-        </TabsList>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          onClick={() => navigate(`/c/${tenantId}/policies/create?serviceId=${serviceId}`)}
-        >
-          <Plus className="h-4 w-4" />
-          Add Policy
-        </Button>
-      </div>
+      <TabsList>
+        <TabsTrigger value="apis" className="gap-2">
+          <Server className="h-4 w-4" />
+          APIs ({service.apiCount})
+        </TabsTrigger>
+        <TabsTrigger value="policies" className="gap-2">
+          <FileText className="h-4 w-4" />
+          Policies ({service.policyCount})
+        </TabsTrigger>
+      </TabsList>
 
       {/* Tab Content */}
       <div className="space-y-6">
         <ServiceApisTab tenantId={tenantId} serviceId={serviceId} />
-        <ServicePoliciesTab tenantId={tenantId} />
+        <ServicePoliciesTab serviceId={serviceId} />
       </div>
     </Tabs>
   )

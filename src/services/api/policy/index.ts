@@ -15,6 +15,7 @@ import type {
   UpdatePolicyRequestInterface,
   UpdatePolicyStatusRequestInterface
 } from './types'
+import type { ServiceListResponseInterface, ServiceQueryParamsInterface } from '../service/types'
 
 /**
  * Fetch policies with optional filters and pagination
@@ -108,6 +109,30 @@ export async function updatePolicyStatus(policyId: string, data: UpdatePolicySta
   throw new Error(response.message || 'Failed to update policy status')
 }
 
+/**
+ * Fetch services that use a specific policy
+ */
+export async function fetchServicesByPolicy(policyId: string, params?: ServiceQueryParamsInterface): Promise<ServiceListResponseInterface> {
+  const queryParams = new URLSearchParams()
+
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value))
+      }
+    })
+  }
+
+  const endpoint = `${API_ENDPOINTS.POLICY}/${policyId}/services${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await get<ApiResponse<ServiceListResponseInterface>>(endpoint)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to fetch services')
+}
+
 // Export as policy object
 export const policyService = {
   fetchPolicies,
@@ -116,5 +141,6 @@ export const policyService = {
   updatePolicy,
   deletePolicy,
   updatePolicyStatus,
+  fetchServicesByPolicy,
 }
 

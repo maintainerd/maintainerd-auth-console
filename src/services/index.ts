@@ -58,7 +58,9 @@ export {
   createService,
   updateService,
   deleteService,
-  updateServiceStatus
+  updateServiceStatus,
+  assignPolicyToService,
+  removePolicyFromService
 } from './api/service'
 
 // API service functions
@@ -80,7 +82,8 @@ export {
   createPolicy,
   updatePolicy,
   deletePolicy,
-  updatePolicyStatus
+  updatePolicyStatus,
+  fetchServicesByPolicy
 } from './api/policy'
 
 // Add more services as they are created

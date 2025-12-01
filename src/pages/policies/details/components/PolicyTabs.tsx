@@ -10,9 +10,10 @@ interface PolicyTabsProps {
   statements: PolicyStatementType[]
   tenantId: string
   policyId: string
+  serviceCount: number
 }
 
-export function PolicyTabs({ activeTab, setActiveTab, statements }: PolicyTabsProps) {
+export function PolicyTabs({ activeTab, setActiveTab, statements, policyId, serviceCount }: PolicyTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <div className="flex items-center justify-between">
@@ -23,7 +24,7 @@ export function PolicyTabs({ activeTab, setActiveTab, statements }: PolicyTabsPr
           </TabsTrigger>
           <TabsTrigger value="services" className="gap-2">
             <Server className="h-4 w-4" />
-            Applied Services
+            Services ({serviceCount})
           </TabsTrigger>
         </TabsList>
       </div>
@@ -33,7 +34,7 @@ export function PolicyTabs({ activeTab, setActiveTab, statements }: PolicyTabsPr
         <TabsContent value="statements">
           <PolicyStatementsTab statements={statements} />
         </TabsContent>
-        <PolicyServicesTab />
+        <PolicyServicesTab policyId={policyId} />
       </div>
     </Tabs>
   )

@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DetailsContainer } from "@/components/container"
 import { usePolicy } from "@/hooks/usePolicies"
+import { useServicesByPolicy } from "./hooks/useServicesByPolicy"
 import { PolicyHeader, PolicyInformation, PolicyTabs } from "./components"
 import { getStatusColor, getStatusText } from "./utils"
 
@@ -14,6 +15,13 @@ export default function PolicyDetailsPage() {
 
   // Fetch policy from API
   const { data: policyData, isLoading, isError } = usePolicy(policyId || '')
+
+  // Fetch services count for the tab
+  const { data: servicesData } = useServicesByPolicy({
+    policyId: policyId || '',
+    page: 1,
+    limit: 1, // We only need the total count
+  })
 
   // Loading state
   if (isLoading) {
@@ -96,6 +104,7 @@ export default function PolicyDetailsPage() {
           statements={policy.document.statement}
           tenantId={tenantId!}
           policyId={policyId!}
+          serviceCount={servicesData?.total || 0}
         />
       </div>
     </DetailsContainer>

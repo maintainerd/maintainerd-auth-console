@@ -39,7 +39,7 @@ export default function ServiceDetailsPage() {
             The service you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/c/${tenantId}/services`)} className="gap-2">
+        <Button onClick={() => navigate(`/${tenantId}/services`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Services
         </Button>
@@ -75,7 +75,7 @@ export default function ServiceDetailsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/c/${tenantId}/services`)}
+            onClick={() => navigate(`/${tenantId}/services`)}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />

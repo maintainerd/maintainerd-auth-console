@@ -107,6 +107,30 @@ export async function updateServiceStatus(serviceId: string, data: UpdateService
   throw new Error(response.message || 'Failed to update service status')
 }
 
+/**
+ * Assign a policy to a service
+ */
+export async function assignPolicyToService(serviceId: string, policyId: string): Promise<void> {
+  const endpoint = `${API_ENDPOINTS.SERVICE}/${serviceId}/policies/${policyId}`
+  const response = await post<ApiResponse>(endpoint)
+
+  if (!response.success) {
+    throw new Error(response.message || 'Failed to assign policy to service')
+  }
+}
+
+/**
+ * Remove a policy from a service
+ */
+export async function removePolicyFromService(serviceId: string, policyId: string): Promise<void> {
+  const endpoint = `${API_ENDPOINTS.SERVICE}/${serviceId}/policies/${policyId}`
+  const response = await deleteRequest<ApiResponse>(endpoint)
+
+  if (!response.success) {
+    throw new Error(response.message || 'Failed to remove policy from service')
+  }
+}
+
 // Export as service object
 export const serviceService = {
   fetchServices,
@@ -115,4 +139,6 @@ export const serviceService = {
   updateService,
   deleteService,
   updateServiceStatus,
+  assignPolicyToService,
+  removePolicyFromService,
 }
