@@ -14,6 +14,7 @@ export type * from './api/setup/types'
 export type * from './api/tenant/types'
 export type * from './api/service/types'
 export type * from './api/api/types'
+export type * from './api/policy/types'
 
 // Setup service functions
 export {
@@ -70,6 +71,17 @@ export {
   deleteApi,
   updateApiStatus
 } from './api/api'
+
+// Policy service functions
+export {
+  policyService,
+  fetchPolicies,
+  fetchPolicyById,
+  createPolicy,
+  updatePolicy,
+  deletePolicy,
+  updatePolicyStatus
+} from './api/policy'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

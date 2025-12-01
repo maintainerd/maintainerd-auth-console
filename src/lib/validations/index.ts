@@ -43,5 +43,15 @@ export {
   type ApiFormData
 } from './apiSchema'
 
+// Policy schemas
+export {
+  policySchema,
+  policyStatementSchema,
+  policyDocumentSchema,
+  type PolicyFormData,
+  type PolicyStatementFormData,
+  type PolicyDocumentFormData
+} from './policySchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'

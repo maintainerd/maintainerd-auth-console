@@ -43,4 +43,5 @@ export const API_ENDPOINTS = {
   SERVICE: '/services',
   API: '/apis',
   PERMISSION: '/permissions',
+  POLICY: '/policies',
 } as const

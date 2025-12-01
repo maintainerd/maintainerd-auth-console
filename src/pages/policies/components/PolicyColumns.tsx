@@ -1,15 +1,12 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Server } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PolicyActions } from "./PolicyActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { Policy, PolicyStatus } from "../constants"
+import type { PolicyType } from "@/services/api/policy/types"
 
-
-
-export const policyColumns: ColumnDef<Policy>[] = [
+export const policyColumns: ColumnDef<PolicyType>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -28,14 +25,12 @@ export const policyColumns: ColumnDef<Policy>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{policy.displayName}</span>
-            <SystemBadge isSystem={policy.isSystem} />
+            <span className="font-medium">{policy.name}</span>
+            <SystemBadge isSystem={policy.is_system} />
           </div>
           <span className="text-sm text-muted-foreground truncate">{policy.description}</span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono">{policy.identifier}</span>
-            <span>•</span>
-            <span>v{policy.version}</span>
+            <span>Version: <span className="font-mono">{policy.version}</span></span>
           </div>
         </div>
       )
@@ -64,86 +59,14 @@ export const policyColumns: ColumnDef<Policy>[] = [
     },
   },
   {
-    accessorKey: "serviceCount",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Applied To
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const policy = row.original
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-1 text-sm">
-            <Server className="h-3 w-3 text-muted-foreground" />
-            <span className="font-medium">{policy.serviceCount}</span>
-            <span className="text-muted-foreground">
-              {policy.serviceCount === 1 ? "Service" : "Services"}
-            </span>
-          </div>
-          {policy.appliedToServices.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {policy.appliedToServices.slice(0, 2).map((service) => (
-                <Badge key={service} variant="outline" className="text-xs">
-                  {service}
-                </Badge>
-              ))}
-              {policy.appliedToServices.length > 2 && (
-                <Badge variant="outline" className="text-xs">
-                  +{policy.appliedToServices.length - 2} more
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "statements",
-    header: "Statements",
-    cell: ({ row }) => {
-      const policy = row.original
-      const allowStatements = policy.statements.filter(s => s.effect === "allow").length
-      const denyStatements = policy.statements.filter(s => s.effect === "deny").length
-      
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium">{policy.statements.length}</span>
-            <span className="text-muted-foreground">Total</span>
-          </div>
-          <div className="flex gap-2 text-xs">
-            {allowStatements > 0 && (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                {allowStatements} Allow
-              </Badge>
-            )}
-            {denyStatements > 0 && (
-              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                {denyStatements} Deny
-              </Badge>
-            )}
-          </div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "updatedAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Last Updated
+          Created
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -153,10 +76,10 @@ export const policyColumns: ColumnDef<Policy>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(policy.updatedAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(policy.created_at), { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(policy.updatedAt).toLocaleDateString()}
+            {new Date(policy.created_at).toLocaleDateString()}
           </span>
         </div>
       )
