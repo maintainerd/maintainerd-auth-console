@@ -1,17 +1,11 @@
-"use client"
-
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Input } from "@/components/ui/input"
+import type { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -19,79 +13,92 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Filter, X, Plus, Shield } from "lucide-react"
-import { IDENTITY_PROVIDER_STATUSES } from "../constants"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Filter,
+  Plus
+} from "lucide-react"
+import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
+import { DataTableViewOptions } from "@/components/data-table"
+import type { IdentityProviderType } from "@/services/api/identity-provider/types"
 
 export interface FilterState {
-  type: string[]
   status: string[]
+  provider: string[]
+  isSystem: string
 }
 
+/**
+ * IdentityProviderToolbar Props
+ * Props for the identity provider toolbar component including search and filters
+ */
 interface IdentityProviderToolbarProps {
   filter: string
   setFilter: (value: string) => void
+  filters: FilterState
   onFiltersChange: (filters: FilterState) => void
+  table: Table<IdentityProviderType>
 }
 
-export function IdentityProviderToolbar({
-  filter,
-  setFilter,
-  onFiltersChange,
-}: IdentityProviderToolbarProps) {
+export function IdentityProviderToolbar({ filter, setFilter, filters, onFiltersChange, table }: IdentityProviderToolbarProps) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
-  const [filters, setFilters] = React.useState<FilterState>({
-    type: [],
-    status: []
+  // Debounced search with Enter key support
+  const { searchInput, handleSearchChange, handleKeyDown } = useDebouncedSearch({
+    initialValue: filter,
+    delay: 500,
+    onDebouncedChange: setFilter
   })
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
+  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters }
-    setFilters(updatedFilters)
     onFiltersChange(updatedFilters)
-  }
+  }, [filters, onFiltersChange])
 
-  const clearAllFilters = () => {
-    const clearedFilters = {
-      type: [],
-      status: []
+  const clearAllFilters = React.useCallback(() => {
+    const clearedFilters: FilterState = {
+      status: [],
+      provider: [],
+      isSystem: "all"
     }
-    setFilters(clearedFilters)
     onFiltersChange(clearedFilters)
-  }
-
-  const handleAddProvider = () => {
-    navigate(`/${tenantId}/providers/identity/create`)
-  }
-
-  const hasActiveFilters = filters.type.length > 0 ||
-    filters.status.length > 0
+  }, [onFiltersChange])
 
   const activeFilterCount = React.useMemo(() => {
     let count = 0
-    if (filters.type.length > 0) count += filters.type.length
-    if (filters.status.length > 0) count += filters.status.length
+    if (filters.status.length > 0) count++
+    if (filters.provider.length > 0) count++
+    if (filters.isSystem !== "all") count++
     return count
   }, [filters])
 
+  // Action handlers
+  const handleCreateIdentityProvider = React.useCallback(() => {
+    navigate(`/${tenantId}/providers/identity/create`)
+  }, [navigate, tenantId])
+
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search identity providers..."
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-            className="pl-8 w-[300px]"
-          />
-        </div>
-        <Popover>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-1 items-center gap-2">
+        <Input
+          placeholder="Search identity providers by name, display name, or identifier..."
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full sm:w-80"
+        />
+
+        <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="relative">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
+              <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
                 <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
                   {activeFilterCount}
@@ -102,60 +109,29 @@ export function IdentityProviderToolbar({
           <PopoverContent className="w-80" align="start">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Advanced Filters</h4>
-                {hasActiveFilters && (
+                <h4 className="font-medium">Filters</h4>
+                {activeFilterCount > 0 && (
                   <Button variant="ghost" size="sm" onClick={clearAllFilters}>
                     Clear All
                   </Button>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none">Provider Type</h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {[
-                    { id: "cognito", name: "AWS Cognito" },
-                    { id: "auth0", name: "Auth0" },
-                    { id: "okta", name: "Okta" },
-                    { id: "azure_ad", name: "Azure AD" },
-                    { id: "keycloak", name: "Keycloak" },
-                    { id: "firebase", name: "Firebase" },
-                    { id: "custom", name: "Custom" }
-                  ].map((type) => (
-                    <div key={type.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`type-${type.id}`}
-                        checked={filters.type.includes(type.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            updateFilters({ type: [...filters.type, type.id] })
-                          } else {
-                            updateFilters({ type: filters.type.filter(t => t !== type.id) })
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`type-${type.id}`} className="text-sm">
-                        {type.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Status Filter */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Status</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {IDENTITY_PROVIDER_STATUSES.map((status) => (
+                  {["active", "inactive"].map((status) => (
                     <div key={status} className="flex items-center space-x-2">
                       <Checkbox
                         id={`status-${status}`}
                         checked={filters.status.includes(status)}
                         onCheckedChange={(checked) => {
-                          const newStatus = checked
-                            ? [...filters.status, status]
-                            : filters.status.filter(s => s !== status)
-                          updateFilters({ status: newStatus })
+                          if (checked) {
+                            updateFilters({ status: [...filters.status, status] })
+                          } else {
+                            updateFilters({ status: filters.status.filter(s => s !== status) })
+                          }
                         }}
                       />
                       <Label htmlFor={`status-${status}`} className="text-sm capitalize">
@@ -166,34 +142,61 @@ export function IdentityProviderToolbar({
                 </div>
               </div>
 
-
-
-              {activeFilterCount > 0 && (
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm text-muted-foreground">
-                    {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} applied
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="h-8 px-2 lg:px-3"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Clear
-                  </Button>
+              {/* Provider Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Provider</Label>
+                <div className="space-y-2">
+                  {[
+                    { id: "internal", name: "Internal" },
+                    { id: "cognito", name: "AWS Cognito" },
+                    { id: "auth0", name: "Auth0" }
+                  ].map((provider) => (
+                    <div key={provider.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`provider-${provider.id}`}
+                        checked={filters.provider.includes(provider.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            updateFilters({ provider: [...filters.provider, provider.id] })
+                          } else {
+                            updateFilters({ provider: filters.provider.filter(p => p !== provider.id) })
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`provider-${provider.id}`} className="text-sm">
+                        {provider.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* Provider Type Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Provider Type</Label>
+                <Select value={filters.isSystem} onValueChange={(value) => updateFilters({ isSystem: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Providers</SelectItem>
+                    <SelectItem value="system">System Providers</SelectItem>
+                    <SelectItem value="regular">Regular Providers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </PopoverContent>
         </Popover>
       </div>
 
-      <Button onClick={handleAddProvider}>
-        <Plus className="mr-2 h-4 w-4" />
-        <span className="hidden sm:inline">Add Provider</span>
-        <span className="sm:hidden">Add</span>
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <DataTableViewOptions table={table} />
+        <Button size="sm" onClick={handleCreateIdentityProvider}>
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">New Provider</span>
+        </Button>
+      </div>
     </div>
   )
 }

@@ -5,34 +5,10 @@ import { ArrowUpDown, Settings, Cloud, Key, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { StatusType } from "@/types/status"
+import type { IdentityProviderType, ProviderOption } from "@/services/api/identity-provider/types"
 
-export type IdentityProviderStatus = Extract<StatusType, "active" | "inactive" | "configuring">
-export type IdentityProviderType = "cognito" | "auth0" | "okta" | "azure_ad" | "keycloak" | "firebase" | "custom"
-
-export type IdentityProvider = {
-  id: string
-  name: string
-  displayName: string
-  description: string
-  identifier: string
-  type: IdentityProviderType
-  status: IdentityProviderStatus
-  userCount: number
-  isDefault: boolean
-  region?: string
-  endpoint: string
-  metadata?: Record<string, string>
-  createdAt: string
-  createdBy: string
-  updatedAt: string
-  lastSync?: string
-}
-
-
-
-const getInternalExternalBadge = (isDefault: boolean) => {
-  if (isDefault) {
+const getInternalExternalBadge = (isSystem: boolean) => {
+  if (isSystem) {
     return (
       <Badge variant="secondary" className="text-xs">
         <Shield className="h-3 w-3 mr-1" />
@@ -49,9 +25,9 @@ const getInternalExternalBadge = (isDefault: boolean) => {
   )
 }
 
-const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
-  // For default provider, show "Built-in" instead of type
-  if (isDefault) {
+const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
+  // For system provider, show "Built-in" instead of type
+  if (isSystem) {
     return (
       <Badge variant="secondary" className="text-xs">
         <Shield className="h-3 w-3 mr-1" />
@@ -60,17 +36,16 @@ const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
     )
   }
 
-  const typeConfig = {
+  const typeConfig: Record<ProviderOption, { label: string; icon: typeof Cloud }> = {
+    internal: { label: "Internal", icon: Shield },
     cognito: { label: "AWS Cognito", icon: Cloud },
     auth0: { label: "Auth0", icon: Shield },
-    okta: { label: "Okta", icon: Shield },
-    azure_ad: { label: "Azure AD", icon: Shield },
-    keycloak: { label: "Keycloak", icon: Key },
-    firebase: { label: "Firebase", icon: Cloud },
-    custom: { label: "Custom", icon: Settings }
+    google: { label: "Google", icon: Cloud },
+    facebook: { label: "Facebook", icon: Cloud },
+    github: { label: "GitHub", icon: Key }
   }
 
-  const config = typeConfig[type]
+  const config = typeConfig[provider]
   const Icon = config.icon
 
   return (
@@ -85,9 +60,9 @@ const getProviderBadge = (type: IdentityProviderType, isDefault: boolean) => {
 
 
 
-export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
+export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "display_name",
     header: ({ column }) => {
       return (
         <Button
@@ -104,17 +79,17 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{provider.displayName}</span>
-            <SystemBadge isSystem={provider.isDefault} />
+            <span className="font-medium">{provider.display_name}</span>
+            <SystemBadge isSystem={provider.is_system} />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{provider.description}</span>
+          <span className="text-sm text-muted-foreground truncate">{provider.name}</span>
           <span className="text-xs text-muted-foreground font-mono">{provider.identifier}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "isDefault",
+    accessorKey: "is_system",
     header: ({ column }) => {
       return (
         <Button
@@ -129,13 +104,13 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getInternalExternalBadge(row.original.isDefault)}
+          {getInternalExternalBadge(row.original.is_system)}
         </div>
       )
     },
   },
   {
-    accessorKey: "type",
+    accessorKey: "provider",
     header: ({ column }) => {
       return (
         <Button
@@ -150,7 +125,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getProviderBadge(row.original.type, row.original.isDefault)}
+          {getProviderBadge(row.original.provider, row.original.is_system)}
         </div>
       )
     },
@@ -177,32 +152,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    accessorKey: "userCount",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Users
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const count = row.original.userCount
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-1 text-sm">
-            <span className="font-medium">{count.toLocaleString()}</span>
-            <span className="text-muted-foreground">users</span>
-          </div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -219,10 +169,10 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(provider.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(provider.createdAt).toLocaleDateString()}
+            {new Date(provider.created_at).toLocaleDateString()}
           </span>
         </div>
       )

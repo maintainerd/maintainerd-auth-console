@@ -44,4 +44,5 @@ export const API_ENDPOINTS = {
   API: '/apis',
   PERMISSION: '/permissions',
   POLICY: '/policies',
+  IDENTITY_PROVIDER: '/identity_providers',
 } as const

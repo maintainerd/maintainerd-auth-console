@@ -53,5 +53,17 @@ export {
   type PolicyDocumentFormData
 } from './policySchema'
 
+// Identity Provider schemas
+export {
+  identityProviderSchema,
+  type IdentityProviderFormData
+} from './identityProviderSchema'
+
+// Social Provider schemas
+export {
+  socialProviderSchema,
+  type SocialProviderFormData
+} from './socialProviderSchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'
