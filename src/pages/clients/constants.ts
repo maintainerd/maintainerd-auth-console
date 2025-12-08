@@ -5,7 +5,7 @@ export const CLIENT_STATUSES = [
 
 export const CLIENT_TYPES = [
   "regular",
-  "native",
+  "mobile",
   "spa",
   "m2m"
 ] as const
@@ -114,7 +114,7 @@ export const MOCK_CLIENTS: Client[] = [
     id: "c3d4e5f6-g7h8-9012-cdef-345678901234",
     name: "Mobile App iOS",
     description: "Native iOS application for mobile users with biometric authentication",
-    type: "native",
+    type: "mobile",
     status: "active",
     clientId: "mobile-ios-native-client",
     providerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", // Google OAuth
@@ -202,7 +202,7 @@ export const MOCK_CLIENTS: Client[] = [
     id: "f6g7h8i9-j0k1-2345-fgh6-678901234567",
     name: "Mobile App Android",
     description: "Native Android application with push notifications and offline capabilities",
-    type: "native",
+    type: "mobile",
     status: "active",
     clientId: "mobile-android-native-client",
     providerId: "h9j4l8n1-p5q2-r3s4-t5u6-v7w8x9y0z1a2",

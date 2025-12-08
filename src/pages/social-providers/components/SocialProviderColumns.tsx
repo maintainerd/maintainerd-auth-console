@@ -30,6 +30,7 @@ const getProviderBadge = (provider: ProviderOption) => {
 
 export const socialProviderColumns: ColumnDef<IdentityProviderType>[] = [
   {
+    id: "Social Provider",
     accessorKey: "display_name",
     header: ({ column }) => {
       return (
@@ -57,6 +58,7 @@ export const socialProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Provider",
     accessorKey: "provider",
     header: ({ column }) => {
       return (
@@ -78,6 +80,7 @@ export const socialProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -99,6 +102,7 @@ export const socialProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => {
       return (

@@ -65,5 +65,11 @@ export {
   type SocialProviderFormData
 } from './socialProviderSchema'
 
+// Client schemas
+export {
+  clientSchema,
+  type ClientFormData
+} from './clientSchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'

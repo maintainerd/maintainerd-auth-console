@@ -1,4 +1,6 @@
 import * as React from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import type { Table } from "@tanstack/react-table"
 import { Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,90 +8,96 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CLIENT_STATUSES, CLIENT_TYPES } from "../constants"
-import type { ClientStatus, ClientType } from "../constants"
+import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
+import { DataTableViewOptions } from "@/components/data-table"
+import type { ClientType as ClientTypeData } from "@/services/api/auth-client/types"
 
-interface FilterState {
-  types: ClientType[]
-  statuses: ClientStatus[]
+export interface FilterState {
+  status: string[]
+  clientType: string[]
+  isSystem: string
+  identityProviderId: string
 }
 
 interface ClientToolbarProps {
-  searchQuery: string
-  onSearchChange: (query: string) => void
+  filter: string
+  setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
+  table: Table<ClientTypeData>
 }
 
-export function ClientToolbar({
-  searchQuery,
-  onSearchChange,
-  filters,
-  onFiltersChange,
-}: ClientToolbarProps) {
-  const [isFiltersOpen, setIsFiltersOpen] = React.useState(false)
+export function ClientToolbar({ filter, setFilter, filters, onFiltersChange, table }: ClientToolbarProps) {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
-  const hasActiveFilters = filters.types.length > 0 || filters.statuses.length > 0
+  // Debounced search with Enter key support
+  const { searchInput, handleSearchChange, handleKeyDown } = useDebouncedSearch({
+    initialValue: filter,
+    delay: 500,
+    onDebouncedChange: setFilter
+  })
 
-  const clearFilters = () => {
-    onFiltersChange({
-      types: [],
-      statuses: []
-    })
-  }
+  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
+    const updatedFilters = { ...filters, ...newFilters }
+    onFiltersChange(updatedFilters)
+  }, [filters, onFiltersChange])
 
-  const handleTypeChange = (type: ClientType, checked: boolean) => {
-    const newTypes = checked
-      ? [...filters.types, type]
-      : filters.types.filter(t => t !== type)
-    
-    onFiltersChange({
-      ...filters,
-      types: newTypes
-    })
-  }
+  const clearAllFilters = React.useCallback(() => {
+    const clearedFilters: FilterState = {
+      status: [],
+      clientType: [],
+      isSystem: "all",
+      identityProviderId: ""
+    }
+    onFiltersChange(clearedFilters)
+  }, [onFiltersChange])
 
-  const handleStatusChange = (status: ClientStatus, checked: boolean) => {
-    const newStatuses = checked
-      ? [...filters.statuses, status]
-      : filters.statuses.filter(s => s !== status)
-    
-    onFiltersChange({
-      ...filters,
-      statuses: newStatuses
-    })
-  }
+  const activeFilterCount = React.useMemo(() => {
+    let count = 0
+    if (filters.status.length > 0) count++
+    if (filters.clientType.length > 0) count++
+    if (filters.isSystem !== "all") count++
+    if (filters.identityProviderId) count++
+    return count
+  }, [filters])
 
-  const getActiveFilterCount = () => {
-    return filters.types.length + filters.statuses.length
-  }
-
-  const handleCreateClient = () => {
-    console.log("Create new client")
-  }
+  // Action handlers
+  const handleCreateClient = React.useCallback(() => {
+    navigate(`/${tenantId}/clients/create`)
+  }, [navigate, tenantId])
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-1 items-center gap-2">
         <Input
-          placeholder="Search clients..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search clients by name or display name..."
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full sm:w-80"
         />
 
-        <Popover open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+        <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="relative">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
-              {hasActiveFilters && (
+              <span className="hidden sm:inline">Filters</span>
+              {activeFilterCount > 0 && (
                 <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-                  {getActiveFilterCount()}
+                  {activeFilterCount}
                 </Badge>
               )}
             </Button>
@@ -97,35 +105,57 @@ export function ClientToolbar({
           <PopoverContent className="w-80" align="start">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Advanced Filters</h4>
-                {hasActiveFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearFilters}
-                  >
+                <h4 className="font-medium">Filters</h4>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters}>
                     Clear All
                   </Button>
                 )}
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Status</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["active", "inactive"].map((status) => (
+                    <div key={status} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`status-${status}`}
+                        checked={filters.status.includes(status)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            updateFilters({ status: [...filters.status, status] })
+                          } else {
+                            updateFilters({ status: filters.status.filter(s => s !== status) })
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`status-${status}`} className="text-sm capitalize">
+                        {status}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Client Type Filter */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Client Type</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {CLIENT_TYPES.map((type) => (
+                  {["traditional", "spa", "mobile", "m2m"].map((type) => (
                     <div key={type} className="flex items-center space-x-2">
                       <Checkbox
                         id={`type-${type}`}
-                        checked={filters.types.includes(type)}
-                        onCheckedChange={(checked) =>
-                          handleTypeChange(type, checked as boolean)
-                        }
+                        checked={filters.clientType.includes(type)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            updateFilters({ clientType: [...filters.clientType, type] })
+                          } else {
+                            updateFilters({ clientType: filters.clientType.filter(t => t !== type) })
+                          }
+                        }}
                       />
-                      <Label
-                        htmlFor={`type-${type}`}
-                        className="text-sm capitalize"
-                      >
+                      <Label htmlFor={`type-${type}`} className="text-sm capitalize">
                         {type === "spa" ? "SPA" : type === "m2m" ? "M2M" : type}
                       </Label>
                     </div>
@@ -133,38 +163,32 @@ export function ClientToolbar({
                 </div>
               </div>
 
-              {/* Status Filter */}
+              {/* System/Regular Filter */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Status</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {CLIENT_STATUSES.map((status) => (
-                    <div key={status} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`status-${status}`}
-                        checked={filters.statuses.includes(status)}
-                        onCheckedChange={(checked) =>
-                          handleStatusChange(status, checked as boolean)
-                        }
-                      />
-                      <Label
-                        htmlFor={`status-${status}`}
-                        className="text-sm capitalize"
-                      >
-                        {status}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                <Label className="text-sm font-medium">System Type</Label>
+                <Select value={filters.isSystem} onValueChange={(value) => updateFilters({ isSystem: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Clients</SelectItem>
+                    <SelectItem value="system">System Clients</SelectItem>
+                    <SelectItem value="regular">Regular Clients</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </PopoverContent>
         </Popover>
       </div>
 
-      <Button onClick={handleCreateClient}>
-        <Plus className="mr-2 h-4 w-4" />
-        Create Client
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <DataTableViewOptions table={table} />
+        <Button size="sm" onClick={handleCreateClient}>
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">New Client</span>
+        </Button>
+      </div>
     </div>
   )
 }

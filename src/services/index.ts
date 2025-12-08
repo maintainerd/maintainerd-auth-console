@@ -15,6 +15,7 @@ export type * from './api/tenant/types'
 export type * from './api/service/types'
 export type * from './api/api/types'
 export type * from './api/policy/types'
+export type * from './api/auth-client/types'
 
 // Setup service functions
 export {
@@ -85,6 +86,17 @@ export {
   updatePolicyStatus,
   fetchServicesByPolicy
 } from './api/policy'
+
+// Client service functions
+export {
+  clientService,
+  fetchClients,
+  fetchClientById,
+  createClient,
+  updateClient,
+  deleteClient,
+  updateClientStatus
+} from './api/auth-client'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

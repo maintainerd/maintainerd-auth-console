@@ -1,13 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Cog, Clock } from "lucide-react"
+import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Cog } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ClientActions } from "./ClientActions"
 import { SystemBadge } from "@/components/badges"
-import type { Client, ClientStatus, ClientType } from "../constants"
+import type { ClientType, ClientStatusType, ClientTypeEnum } from "@/services/api/auth-client/types"
 
-const getStatusBadge = (status: ClientStatus) => {
+const getStatusBadge = (status: ClientStatusType) => {
   const statusConfig = {
     active: {
       icon: CheckCircle,
@@ -30,33 +30,37 @@ const getStatusBadge = (status: ClientStatus) => {
   )
 }
 
-
-
-const getTypeBadge = (type: ClientType) => {
+const getTypeBadge = (type: ClientTypeEnum) => {
   const typeConfig = {
-    regular: { 
-      icon: Globe, 
-      label: "Regular Web",
-      className: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200" 
+    traditional: {
+      icon: Globe,
+      label: "Traditional Web",
+      className: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200"
     },
-    native: { 
-      icon: Smartphone, 
+    mobile: {
+      icon: Smartphone,
       label: "Native Mobile",
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
+      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
     },
-    spa: { 
-      icon: Monitor, 
+    spa: {
+      icon: Monitor,
       label: "Single Page App",
-      className: "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200" 
+      className: "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200"
     },
-    m2m: { 
-      icon: Cog, 
+    m2m: {
+      icon: Cog,
       label: "Machine to Machine",
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200" 
+      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
     }
   }
 
-  const config = typeConfig[type]
+  // Fallback for unknown types or legacy "native" type
+  const config = typeConfig[type] || typeConfig.mobile || {
+    icon: Monitor,
+    label: type,
+    className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
+  }
+
   const Icon = config.icon
 
   return (
@@ -67,17 +71,10 @@ const getTypeBadge = (type: ClientType) => {
   )
 }
 
-const formatTokenLifetime = (seconds: number) => {
-  if (seconds === 0) return "No expiry"
-  if (seconds < 60) return `${seconds}s`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
-  return `${Math.floor(seconds / 86400)}d`
-}
-
-export const clientColumns: ColumnDef<Client>[] = [
+export const clientColumns: ColumnDef<ClientType>[] = [
   {
-    accessorKey: "name",
+    id: "Client",
+    accessorKey: "display_name",
     header: ({ column }) => {
       return (
         <Button
@@ -94,17 +91,17 @@ export const clientColumns: ColumnDef<Client>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{client.name}</span>
-            <SystemBadge isSystem={client.isDefault} />
+            <span className="font-medium">{client.display_name}</span>
+            <SystemBadge isSystem={client.is_default} />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{client.description}</span>
-          <span className="text-xs text-muted-foreground font-mono">{client.id}</span>
+          <span className="text-sm text-muted-foreground truncate">{client.name}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "type",
+    id: "Type",
+    accessorKey: "client_type",
     header: ({ column }) => {
       return (
         <Button
@@ -119,34 +116,13 @@ export const clientColumns: ColumnDef<Client>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getTypeBadge(row.original.type)}
+          {getTypeBadge(row.original.client_type)}
         </div>
       )
     },
   },
   {
-    accessorKey: "identityProviderName",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Identity Provider
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const client = row.original
-      return (
-        <div className="px-3 py-1">
-          <span className="text-sm">{client.identityProviderName}</span>
-        </div>
-      )
-    },
-  },
-  {
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -167,31 +143,53 @@ export const clientColumns: ColumnDef<Client>[] = [
       )
     },
   },
-
-
-
   {
-    accessorKey: "tokenLifetime",
-    header: "Token Lifetime",
+    id: "Identity Provider",
+    accessorKey: "identity_provider.display_name",
+    enableHiding: true,
+    meta: {
+      defaultHidden: true,
+    },
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Identity Provider
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const client = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-1 text-sm">
-            <Clock className="h-3 w-3 text-muted-foreground" />
-            <span className="font-medium">{formatTokenLifetime(client.tokenLifetime)}</span>
-          </div>
-          {client.refreshTokenLifetime > 0 && (
-            <div className="text-xs text-muted-foreground">
-              Refresh: {formatTokenLifetime(client.refreshTokenLifetime)}
-            </div>
-          )}
+        <div className="px-3 py-1">
+          <span className="text-sm">{client.identity_provider.display_name}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "createdAt",
+    id: "Domain",
+    accessorKey: "domain",
+    enableHiding: true,
+    meta: {
+      defaultHidden: true,
+    },
+    header: "Domain",
+    cell: ({ row }) => {
+      const client = row.original
+      return (
+        <div className="px-3 py-1">
+          <span className="text-sm font-mono text-muted-foreground">{client.domain}</span>
+        </div>
+      )
+    },
+  },
+  {
+    id: "Created",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -208,10 +206,10 @@ export const clientColumns: ColumnDef<Client>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(client.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(client.created_at), { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(client.createdAt).toLocaleDateString()}
+            {new Date(client.created_at).toLocaleDateString()}
           </span>
         </div>
       )

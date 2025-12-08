@@ -62,6 +62,7 @@ const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
 
 export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
   {
+    id: "Identity Provider",
     accessorKey: "display_name",
     header: ({ column }) => {
       return (
@@ -89,6 +90,7 @@ export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Type",
     accessorKey: "is_system",
     header: ({ column }) => {
       return (
@@ -110,6 +112,7 @@ export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Provider",
     accessorKey: "provider",
     header: ({ column }) => {
       return (
@@ -131,6 +134,7 @@ export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -152,6 +156,7 @@ export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
     },
   },
   {
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => {
       return (
