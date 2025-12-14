@@ -16,6 +16,7 @@ export type * from './api/service/types'
 export type * from './api/api/types'
 export type * from './api/policy/types'
 export type * from './api/auth-client/types'
+export type * from './api/api-key/types'
 
 // Setup service functions
 export {
@@ -97,6 +98,17 @@ export {
   deleteClient,
   updateClientStatus
 } from './api/auth-client'
+
+// API Key service functions
+export {
+  fetchApiKeys,
+  fetchApiKeyById,
+  createApiKey,
+  updateApiKey,
+  deleteApiKey,
+  updateApiKeyStatus,
+  fetchApiKeyConfig
+} from './api/api-key'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

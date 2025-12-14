@@ -71,5 +71,11 @@ export {
   type ClientFormData
 } from './clientSchema'
 
+// API Key schemas
+export {
+  apiKeySchema,
+  type ApiKeyFormData
+} from './apiKeySchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'

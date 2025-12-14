@@ -4,21 +4,23 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, CheckCircle, AlertTriangle, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiKeyActions } from "./ApiKeyActions"
-import type { ApiKey, ApiKeyStatus } from "../constants"
+import type { ApiKeyType } from "@/services/api/api-key/types"
 
-const getStatusBadge = (status: ApiKeyStatus) => {
+type ApiKeyStatusType = 'active' | 'inactive' | 'expired'
+
+const getStatusBadge = (status: ApiKeyStatusType) => {
   const statusConfig = {
-    active: { 
-      icon: CheckCircle, 
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
+    active: {
+      icon: CheckCircle,
+      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
     },
-    inactive: { 
-      icon: AlertTriangle, 
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200" 
+    inactive: {
+      icon: AlertTriangle,
+      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
     },
-    expired: { 
-      icon: Clock, 
-      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" 
+    expired: {
+      icon: Clock,
+      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
     }
   }
 
@@ -35,8 +37,9 @@ const getStatusBadge = (status: ApiKeyStatus) => {
 
 
 
-export const apiKeyColumns: ColumnDef<ApiKey>[] = [
+export const apiKeyColumns: ColumnDef<ApiKeyType>[] = [
   {
+    id: "API Key",
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -53,14 +56,15 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
       const apiKey = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <span className="font-medium">{apiKey.displayName}</span>
+          <span className="font-medium">{apiKey.name}</span>
           <span className="text-sm text-muted-foreground truncate">{apiKey.description}</span>
-          <span className="text-xs text-muted-foreground font-mono">{apiKey.id}</span>
+          <span className="text-xs text-muted-foreground font-mono">{apiKey.key_prefix}</span>
         </div>
       )
     },
   },
   {
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -83,7 +87,8 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
     },
   },
   {
-    accessorKey: "expiresAt",
+    id: "Expires",
+    accessorKey: "expires_at",
     header: ({ column }) => {
       return (
         <Button
@@ -97,7 +102,7 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
     },
     cell: ({ row }) => {
       const apiKey = row.original
-      if (!apiKey.expiresAt) {
+      if (!apiKey.expires_at) {
         return (
           <div className="px-3 py-1">
             <span className="text-sm text-muted-foreground">Never</span>
@@ -105,9 +110,9 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
         )
       }
 
-      const expiresAt = new Date(apiKey.expiresAt)
+      const expiresAt = new Date(apiKey.expires_at)
       const isExpired = expiresAt < new Date()
-      
+
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className={`text-sm font-medium ${isExpired ? 'text-red-600' : ''}`}>
@@ -121,7 +126,8 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
+    id: "Created",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -138,10 +144,10 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(apiKey.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(apiKey.created_at), { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(apiKey.createdAt).toLocaleDateString()}
+            {new Date(apiKey.created_at).toLocaleDateString()}
           </span>
         </div>
       )
