@@ -19,7 +19,10 @@ import {
   deleteUserProfile,
   setUserProfileAsDefault,
   assignUserRoles,
-  removeUserRole
+  removeUserRole,
+  verifyUserEmail,
+  verifyUserPhone,
+  completeUserAccount
 } from '@/services/api/user'
 import type {
   UserQueryParamsInterface,
@@ -265,3 +268,52 @@ export function useSetUserProfileAsDefault() {
     },
   })
 }
+
+/**
+ * Hook to verify user email
+ */
+export function useVerifyUserEmail() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => verifyUserEmail(userId),
+    onSuccess: (_, userId) => {
+      // Invalidate the specific user to refetch
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to verify user phone
+ */
+export function useVerifyUserPhone() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => verifyUserPhone(userId),
+    onSuccess: (_, userId) => {
+      // Invalidate the specific user to refetch
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to complete user account
+ */
+export function useCompleteUserAccount() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => completeUserAccount(userId),
+    onSuccess: (_, userId) => {
+      // Invalidate the specific user to refetch
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+    },
+  })
+}
+

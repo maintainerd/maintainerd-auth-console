@@ -3,7 +3,7 @@
  * Service for managing user-related API calls
  */
 
-import { get, post, put, deleteRequest } from '../client'
+import { get, post, put, patch, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
@@ -286,4 +286,46 @@ export async function setUserProfileAsDefault(
   }
 
   throw new Error(response.message || 'Failed to set profile as default')
+}
+
+/**
+ * Mark user email as verified
+ */
+export async function verifyUserEmail(userId: string): Promise<UserType> {
+  const endpoint = `${API_ENDPOINTS.USER}/${userId}/verify-email`
+  const response = await patch<ApiResponse<UserType>>(endpoint)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to verify email')
+}
+
+/**
+ * Mark user phone as verified
+ */
+export async function verifyUserPhone(userId: string): Promise<UserType> {
+  const endpoint = `${API_ENDPOINTS.USER}/${userId}/verify-phone`
+  const response = await patch<ApiResponse<UserType>>(endpoint)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to verify phone')
+}
+
+/**
+ * Mark user account as completed
+ */
+export async function completeUserAccount(userId: string): Promise<UserType> {
+  const endpoint = `${API_ENDPOINTS.USER}/${userId}/complete-account`
+  const response = await patch<ApiResponse<UserType>>(endpoint)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to complete account')
 }

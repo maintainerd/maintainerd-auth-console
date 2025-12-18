@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Edit, Trash2, MoreVertical } from "lucide-react"
+import { Edit, Trash2, MoreVertical, CheckCircle, Phone, UserCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,8 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
-import { useDeleteUser } from "@/hooks/useUsers"
+import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { useDeleteUser, useVerifyUserEmail, useVerifyUserPhone, useCompleteUserAccount } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserType } from "@/services/api/user/types"
 
@@ -26,7 +26,13 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteUserMutation = useDeleteUser()
+  const verifyEmailMutation = useVerifyUserEmail()
+  const verifyPhoneMutation = useVerifyUserPhone()
+  const completeAccountMutation = useCompleteUserAccount()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
+  const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
 
   const handleDelete = async () => {
     try {
@@ -34,6 +40,33 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
       showSuccess("User deleted successfully")
       // Navigate back to Users list
       navigate(`/${tenantId}/users`)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const handleVerifyEmail = async () => {
+    try {
+      await verifyEmailMutation.mutateAsync(userId)
+      showSuccess("Email verified successfully")
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const handleVerifyPhone = async () => {
+    try {
+      await verifyPhoneMutation.mutateAsync(userId)
+      showSuccess("Phone verified successfully")
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const handleCompleteAccount = async () => {
+    try {
+      await completeAccountMutation.mutateAsync(userId)
+      showSuccess("Account completed successfully")
     } catch (error) {
       showError(error)
     }
@@ -95,6 +128,19 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
               Edit User
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setShowVerifyEmailDialog(true)}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Mark Email as Verified
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowVerifyPhoneDialog(true)}>
+              <Phone className="mr-2 h-4 w-4" />
+              Mark Phone as Verified
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowCompleteAccountDialog(true)}>
+              <UserCheck className="mr-2 h-4 w-4" />
+              Mark Account as Completed
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete User
@@ -112,6 +158,33 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         itemName={user.fullname || user.username}
         confirmationText="DELETE"
         isDeleting={deleteUserMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showVerifyEmailDialog}
+        onOpenChange={setShowVerifyEmailDialog}
+        onConfirm={handleVerifyEmail}
+        title="Verify Email"
+        description="Are you sure you want to mark this user's email as verified?"
+        isLoading={verifyEmailMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showVerifyPhoneDialog}
+        onOpenChange={setShowVerifyPhoneDialog}
+        onConfirm={handleVerifyPhone}
+        title="Verify Phone"
+        description="Are you sure you want to mark this user's phone as verified?"
+        isLoading={verifyPhoneMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showCompleteAccountDialog}
+        onOpenChange={setShowCompleteAccountDialog}
+        onConfirm={handleCompleteAccount}
+        title="Complete Account"
+        description="Are you sure you want to mark this user's account as completed?"
+        isLoading={completeAccountMutation.isPending}
       />
     </>
   )
