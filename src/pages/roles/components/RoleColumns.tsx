@@ -3,102 +3,50 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-
-import { ArrowUpDown, User } from "lucide-react"
-import { format } from "date-fns"
+import { ArrowUpDown, Shield } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 import { RoleActions } from "./RoleActions"
 import { SystemBadge } from "@/components/badges"
+import type { RoleType } from "@/services/api/role/types"
 
-export type RoleStatus = "active" | "inactive"
-
-export type Role = {
-  id: string
-  name: string
-  displayName: string
-  description: string
-  permissions: string[]
-  userCount: number
-  isSystem: boolean
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-}
-
-const getStatusBadge = (status: RoleStatus) => {
-  const variants = {
-    active: "default",
-    inactive: "secondary"
-  } as const
-
-  const colors = {
-    active: "text-green-700 bg-green-50 border-green-200",
-    inactive: "text-gray-700 bg-gray-50 border-gray-200"
-  } as const
-
-  return (
-    <Badge variant={variants[status]} className={colors[status]}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
-}
-
-
-
-export const roleColumns: ColumnDef<Role>[] = [
+export const roleColumns: ColumnDef<RoleType>[] = [
   {
     accessorKey: "name",
+    id: "name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold"
         >
-          Role Name
-          <ArrowUpDown />
+          Role
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
       const role = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
+        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{role.displayName}</span>
-            <SystemBadge isSystem={role.isSystem} />
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">{role.name}</span>
+            <SystemBadge isSystem={role.is_system} />
+            {role.is_default && (
+              <Badge variant="outline" className="text-xs">
+                Default
+              </Badge>
+            )}
           </div>
-          <span className="text-sm text-muted-foreground">{role.description}</span>
+          <span className="text-sm text-muted-foreground truncate">{role.description}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "userCount",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Users
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const userCount = row.getValue("userCount") as number
-      return (
-        <div className="flex items-center gap-2 px-3 py-1">
-          <span className="font-medium">{userCount}</span>
-          <span className="text-sm text-muted-foreground">
-            {userCount === 1 ? "user" : "users"}
-          </span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "isActive",
+    accessorKey: "status",
+    id: "status",
     header: ({ column }) => {
       return (
         <Button
@@ -106,21 +54,24 @@ export const roleColumns: ColumnDef<Role>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const isActive = row.getValue("isActive") as boolean
+      const role = row.original
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(isActive ? "active" : "inactive")}
+          <Badge variant={role.status === "active" ? "secondary" : "outline"} className="capitalize">
+            {role.status}
+          </Badge>
         </div>
       )
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
+    id: "created",
     header: ({ column }) => {
       return (
         <Button
@@ -128,22 +79,20 @@ export const roleColumns: ColumnDef<Role>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Created
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const createdAt = row.getValue("createdAt") as string
-      const createdBy = row.original.createdBy
+      const role = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {format(new Date(createdAt), "MMM dd, yyyy")}
+            {formatDistanceToNow(new Date(role.created_at), { addSuffix: true })}
           </span>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <User className="h-3 w-3" />
-            <span>{createdBy}</span>
-          </div>
+          <span className="text-xs text-muted-foreground">
+            {new Date(role.created_at).toLocaleDateString()}
+          </span>
         </div>
       )
     },
@@ -153,11 +102,7 @@ export const roleColumns: ColumnDef<Role>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const role = row.original
-      return (
-        <div className="px-3 py-1">
-          <RoleActions role={role} />
-        </div>
-      )
+      return <RoleActions role={role} />
     },
   },
 ]

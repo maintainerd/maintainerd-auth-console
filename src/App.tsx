@@ -32,7 +32,7 @@ import ApisPage from './pages/apis'
 import ApiDetailsPage from './pages/apis/details'
 import ApiAddOrUpdateForm from './pages/apis/form'
 import RoleDetailsPage from './pages/roles/details'
-import RoleAddOrUpdateForm from './pages/roles/add-or-update-form'
+import RoleAddOrUpdateForm from './pages/roles/form'
 
 import IdentityProvidersPage from './pages/identity-providers'
 import IdentityProviderDetailsPage from './pages/identity-providers/details'

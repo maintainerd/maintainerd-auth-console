@@ -1,9 +1,10 @@
-"use client"
-
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import type { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import {
   Select,
@@ -17,101 +18,87 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Filter,
-  Plus,
-  Download,
-  Upload,
-  Shield
+  Plus
 } from "lucide-react"
+import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
+import { DataTableViewOptions } from "@/components/data-table"
+import type { RoleType } from "@/services/api/role/types"
 
 export interface FilterState {
   status: string[]
   isSystem: string
+  isDefault: string
 }
 
+/**
+ * RoleToolbar Props
+ * Props for the Role toolbar component including search and filters
+ */
 interface RoleToolbarProps {
   filter: string
   setFilter: (value: string) => void
-  onFiltersChange?: (filters: FilterState) => void
+  filters: FilterState
+  onFiltersChange: (filters: FilterState) => void
+  table: Table<RoleType>
 }
 
-export function RoleToolbar({
-  filter,
-  setFilter,
-  onFiltersChange
-}: RoleToolbarProps) {
+export function RoleToolbar({ filter, setFilter, filters, onFiltersChange, table }: RoleToolbarProps) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
-  const [filters, setFilters] = React.useState<FilterState>({
-    status: [],
-    isSystem: "all"
+
+  // Debounced search with Enter key support
+  const { searchInput, handleSearchChange, handleKeyDown } = useDebouncedSearch({
+    initialValue: filter,
+    delay: 500,
+    onDebouncedChange: setFilter
   })
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
+  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters }
-    setFilters(updatedFilters)
-    onFiltersChange?.(updatedFilters)
-  }
+    onFiltersChange(updatedFilters)
+  }, [filters, onFiltersChange])
 
-  const clearAllFilters = () => {
+  const clearAllFilters = React.useCallback(() => {
     const clearedFilters: FilterState = {
       status: [],
-      isSystem: "all"
+      isSystem: "all",
+      isDefault: "all"
     }
-    setFilters(clearedFilters)
-    onFiltersChange?.(clearedFilters)
-  }
+    onFiltersChange(clearedFilters)
+  }, [onFiltersChange])
 
   const activeFilterCount = React.useMemo(() => {
     let count = 0
     if (filters.status.length > 0) count++
     if (filters.isSystem !== "all") count++
+    if (filters.isDefault !== "all") count++
     return count
   }, [filters])
 
-
-
   // Action handlers
-  const handleAddRole = () => {
+  const handleCreateRole = React.useCallback(() => {
     navigate(`/${tenantId}/roles/create`)
-  }
-
-  const handleExport = () => {
-    console.log("Export roles")
-    // TODO: Implement export
-  }
-
-  const handleImport = () => {
-    console.log("Import roles")
-    // TODO: Implement import
-  }
-
-
+  }, [navigate, tenantId])
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-1 items-center gap-2">
         <Input
           placeholder="Search roles by name or description..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full sm:w-80"
         />
+
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="relative">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
+              <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
                 <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
                   {activeFilterCount}
@@ -122,10 +109,12 @@ export function RoleToolbar({
           <PopoverContent className="w-80" align="start">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Advanced Filters</h4>
-                <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                  Clear all
-                </Button>
+                <h4 className="font-medium">Filters</h4>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                    Clear All
+                  </Button>
+                )}
               </div>
 
               {/* Status Filter */}
@@ -153,66 +142,48 @@ export function RoleToolbar({
                 </div>
               </div>
 
-              {/* System Role Filter */}
+              {/* System/Regular Filter */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Role Type</Label>
+                <Label className="text-sm font-medium">System Type</Label>
                 <Select value={filters.isSystem} onValueChange={(value) => updateFilters({ isSystem: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="system">System Roles Only</SelectItem>
-                    <SelectItem value="custom">Custom Roles Only</SelectItem>
+                    <SelectItem value="system">System Roles</SelectItem>
+                    <SelectItem value="regular">Regular Roles</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-
+              {/* Default/Custom Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Default Type</Label>
+                <Select value={filters.isDefault} onValueChange={(value) => updateFilters({ isDefault: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Roles</SelectItem>
+                    <SelectItem value="default">Default Roles</SelectItem>
+                    <SelectItem value="custom">Custom Roles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </PopoverContent>
         </Popover>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleExport}>
-              Export as CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExport}>
-              Export as Excel
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button variant="outline" size="sm" onClick={handleImport}>
-          <Upload className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Import</span>
+        <DataTableViewOptions table={table} />
+        <Button size="sm" onClick={handleCreateRole}>
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">New Role</span>
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Add Role</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleAddRole}>
-              <Shield className="mr-2 h-4 w-4" />
-              Create New Role
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   )
 }
+

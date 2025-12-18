@@ -77,5 +77,11 @@ export {
   type ApiKeyFormData
 } from './apiKeySchema'
 
+// Role schemas
+export {
+  roleSchema,
+  type RoleFormData
+} from './roleSchema'
+
 // Add more schema exports as needed
 // export { userSchema, type UserFormData } from './userSchema'
