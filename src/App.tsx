@@ -21,7 +21,7 @@ import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
 import UserDetailsPage from './pages/users/details'
-import UserAddOrUpdateForm from './pages/users/add-or-update-form'
+import UserAddOrUpdateForm from './pages/users/form'
 import UserProfileForm from './pages/users/profile-form'
 import RolesPage from './pages/roles'
 
@@ -137,13 +137,13 @@ function App() {
           <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="users/create" element={<UserAddOrUpdateForm />} />
-          <Route path="users/:userId" element={<UserDetailsPage />} />
-          <Route path="users/:userId/edit" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId/profile" element={<UserProfileForm />} />
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
           <Route path="users" element={<UsersPage />} />
+          <Route path="users/create" element={<UserAddOrUpdateForm />} />
+          <Route path="users/:userId" element={<UserDetailsPage />} />
+          <Route path="users/:userId/edit" element={<UserAddOrUpdateForm />} />
           <Route path="roles" element={<RolesPage />} />
           <Route path="roles/create" element={<RoleAddOrUpdateForm />} />
           <Route path="roles/:roleId" element={<RoleDetailsPage />} />

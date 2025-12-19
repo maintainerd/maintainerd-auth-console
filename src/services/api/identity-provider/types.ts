@@ -44,7 +44,7 @@ export type TenantType = {
   name: string
   description: string
   identifier: string
-  is_active: boolean
+  status: 'active' | 'inactive' | 'suspended'
   is_public: boolean
   is_default: boolean
   is_system: boolean

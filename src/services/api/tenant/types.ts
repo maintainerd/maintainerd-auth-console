@@ -6,6 +6,11 @@
 import type { ApiResponse } from '../types/common'
 
 /**
+ * Tenant status type
+ */
+export type TenantStatusType = 'active' | 'inactive' | 'suspended'
+
+/**
  * Tenant entity from API
  */
 export interface TenantEntity {
@@ -13,9 +18,10 @@ export interface TenantEntity {
   name: string
   description: string
   identifier: string
-  is_active: boolean
+  status: TenantStatusType
   is_public: boolean
   is_default: boolean
+  is_system: boolean
   created_at: string
   updated_at: string
 }

@@ -13,7 +13,7 @@ interface DetailsContainerProps {
 
 export function DetailsContainer({ children, className }: DetailsContainerProps) {
   return (
-    <div className={cn("max-w-4xl mx-auto", className)}>
+    <div className={cn("max-w-6xl mx-auto", className)}>
       {children}
     </div>
   )

@@ -83,5 +83,14 @@ export {
   type RoleFormData
 } from './roleSchema'
 
-// Add more schema exports as needed
-// export { userSchema, type UserFormData } from './userSchema'
+// User schemas
+export {
+  userSchema,
+  type UserFormData
+} from './userSchema'
+
+// User Profile schemas
+export {
+  userProfileSchema,
+  type UserProfileFormData
+} from './userProfileSchema'

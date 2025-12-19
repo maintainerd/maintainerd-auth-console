@@ -1,54 +1,65 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { UserActions } from "./UserActions"
+import { ArrowUpDown, CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { StatusBadge } from "@/components/badges"
-import type { StatusType } from "@/types/status"
+import { UserActions } from "./UserActions"
+import type { UserType } from "@/services/api/user/types"
 
-export type UserStatus = Extract<StatusType, "active" | "inactive" | "pending" | "suspended">
+type UserStatusType = 'active' | 'inactive' | 'pending' | 'suspended'
 
-export type User = {
-  id: string // UUID identifier
-  username: string
-  email: string
-  phone?: string
-  roles: string[]
-  status: UserStatus
-  createdAt: string
-  lastLogin?: string
-  emailVerified: boolean
-  isActive: boolean
-  twoFactorEnabled: boolean
-  loginAttempts: number
-  lastPasswordChange?: string
+const getStatusBadge = (status: UserStatusType) => {
+  const statusConfig = {
+    active: {
+      icon: CheckCircle,
+      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+    },
+    inactive: {
+      icon: XCircle,
+      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
+    },
+    pending: {
+      icon: AlertTriangle,
+      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+    },
+    suspended: {
+      icon: AlertTriangle,
+      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+    }
+  }
+
+  const config = statusConfig[status]
+  const Icon = config.icon
+
+  return (
+    <Badge variant="outline" className={config.className}>
+      <Icon className="w-3 h-3 mr-1" />
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </Badge>
+  )
 }
 
-export type UserProfile = {
-  userId: string
-  firstName?: string
-  lastName?: string
-  displayName?: string
-  avatar?: string
-  bio?: string
-  birthDate?: string
-  gender?: string
-  phoneNumber?: string
-  address?: string
-  city?: string
-  country?: string
-  timezone?: string
-  language?: string
-  customFields?: Record<string, string>
+const getVerificationBadge = (isVerified: boolean, label: string) => {
+  if (isVerified) {
+    return (
+      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        {label}
+      </Badge>
+    )
+  }
+  return (
+    <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
+      <XCircle className="w-3 h-3 mr-1" />
+      {label}
+    </Badge>
+  )
 }
 
-
-
-export const userColumns: ColumnDef<User>[] = [
+export const userColumns: ColumnDef<UserType>[] = [
   {
-    accessorKey: "name",
+    id: "User",
+    accessorKey: "username",
     header: ({ column }) => {
       return (
         <Button
@@ -56,55 +67,68 @@ export const userColumns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           User
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="flex items-center gap-3 px-3 py-1">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`} alt={user.username} />
-            <AvatarFallback className="text-xs">
-              {user.username.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium">{user.username}</span>
-            <span className="text-sm text-muted-foreground">{user.email}</span>
+        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
+          <span className="font-medium">{user.fullname || user.username}</span>
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Mail className="w-3 h-3" />
+            <span className="truncate">{user.email}</span>
           </div>
+          {user.phone && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Phone className="w-3 h-3" />
+              <span>{user.phone}</span>
+            </div>
+          )}
         </div>
       )
     },
   },
   {
-    accessorKey: "roles",
+    id: "Username",
+    accessorKey: "username",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Roles
-          <ArrowUpDown />
+          Username
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const roles = row.getValue("roles") as string[]
+      const user = row.original
       return (
-        <div className="flex flex-wrap gap-1 px-3 py-1">
-          {roles.map((role, index) => (
-            <Badge key={index} variant="outline" className="font-medium text-xs">
-              {role}
-            </Badge>
-          ))}
+        <div className="px-3 py-1">
+          <span className="font-mono text-sm">{user.username}</span>
         </div>
       )
     },
   },
   {
+    id: "Verification",
+    accessorKey: "is_email_verified",
+    header: () => <div className="px-4">Verification</div>,
+    cell: ({ row }) => {
+      const user = row.original
+      return (
+        <div className="flex flex-col gap-1 px-3 py-1">
+          {getVerificationBadge(user.is_email_verified, "Email")}
+          {getVerificationBadge(user.is_phone_verified, "Phone")}
+        </div>
+      )
+    },
+  },
+  {
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -113,73 +137,50 @@ export const userColumns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const status = row.getValue("status") as UserStatus
+      const user = row.original
       return (
         <div className="px-3 py-1">
-          <StatusBadge status={status} />
+          {getStatusBadge(user.status)}
         </div>
       )
     },
   },
   {
-    accessorKey: "emailVerified",
-    header: "Email Status",
+    id: "Profile Status",
+    accessorKey: "is_profile_completed",
+    header: () => <div className="px-4">Profile Status</div>,
     cell: ({ row }) => {
-      const emailVerified = row.getValue("emailVerified") as boolean
-      const twoFactorEnabled = row.original.twoFactorEnabled
-
+      const user = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
-          <Badge
-            variant="default"
-            className={`text-xs w-fit ${emailVerified ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"}`}
-          >
-            {emailVerified ? "Verified" : "Unverified"}
-          </Badge>
-          {twoFactorEnabled && (
-            <Badge variant="secondary" className="text-xs w-fit">
-              2FA Enabled
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 text-sm">
+            {user.is_profile_completed ? (
+              <CheckCircle className="w-4 h-4 text-green-600" />
+            ) : (
+              <XCircle className="w-4 h-4 text-gray-400" />
+            )}
+            <span className="text-muted-foreground">Profile</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            {user.is_account_completed ? (
+              <CheckCircle className="w-4 h-4 text-green-600" />
+            ) : (
+              <XCircle className="w-4 h-4 text-gray-400" />
+            )}
+            <span className="text-muted-foreground">Account</span>
+          </div>
         </div>
       )
     },
   },
   {
-    accessorKey: "lastLogin",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Last Login
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const lastLogin = row.getValue("lastLogin") as string
-      return (
-        <div className="px-3 py-1">
-          {lastLogin ? (
-            <span className="text-sm">
-              {formatDistanceToNow(new Date(lastLogin), { addSuffix: true })}
-            </span>
-          ) : (
-            <span className="text-sm text-muted-foreground">Never</span>
-          )}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "createdAt",
+    id: "Created",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -187,16 +188,19 @@ export const userColumns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Created
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const createdAt = row.getValue("createdAt") as string
+      const user = row.original
       return (
-        <div className="px-3 py-1">
-          <span className="text-sm">
-            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+        <div className="flex flex-col gap-1 px-3 py-1">
+          <span className="text-sm font-medium">
+            {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(user.created_at).toLocaleDateString()}
           </span>
         </div>
       )
@@ -208,13 +212,10 @@ export const userColumns: ColumnDef<User>[] = [
       const user = row.original
       return (
         <div className="px-3 py-1">
-          <UserActions user={user}>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </UserActions>
+          <UserActions user={user} />
         </div>
       )
     },
   },
-]
+];
+

@@ -48,4 +48,5 @@ export const API_ENDPOINTS = {
   CLIENT: '/clients',
   API_KEY: '/api_keys',
   ROLE: '/roles',
+  USER: '/users',
 } as const
