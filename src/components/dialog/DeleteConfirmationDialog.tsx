@@ -68,7 +68,7 @@ export function DeleteConfirmationDialog({
 
         <div className="space-y-2">
           <Label htmlFor="confirmation-input">
-            Type <span className="font-semibold">{itemName}</span> to confirm
+            Type <span className="font-semibold">"{itemName}"</span> to confirm
           </Label>
           <Input
             id="confirmation-input"

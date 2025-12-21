@@ -54,7 +54,9 @@ import PasswordPoliciesPage from './pages/security/password-policies'
 import SessionManagementPage from './pages/security/session-management'
 import ThreatDetectionPage from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
-import OnboardingPage from './pages/onboarding'
+import SignupFlowsPage from './pages/signup-flows'
+import SignupFlowDetailsPage from './pages/signup-flows/details'
+import SignupFlowAddOrUpdateForm from './pages/signup-flows/form'
 import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
 import NotificationsPage from './pages/notifications'
@@ -177,7 +179,10 @@ function App() {
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
           <Route path="policies/:policyId/edit" element={<PolicyAddOrUpdateForm />} />
-					<Route path="onboarding" element={<OnboardingPage />} />
+					<Route path="signup-flows" element={<SignupFlowsPage />} />
+					<Route path="signup-flows/create" element={<SignupFlowAddOrUpdateForm />} />
+					<Route path="signup-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
+					<Route path="signup-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
           <Route path="logs" element={<LogMonitoringPage />} />

@@ -94,3 +94,9 @@ export {
   userProfileSchema,
   type UserProfileFormData
 } from './userProfileSchema'
+
+// Signup Flow schemas
+export {
+  signupFlowSchema,
+  type SignupFlowFormData
+} from './signupFlowSchema'

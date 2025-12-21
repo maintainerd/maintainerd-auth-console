@@ -103,8 +103,8 @@ export const data = {
       icon: GitBranch,
       items: [
         {
-          title: "Onboarding",
-          route: "/onboarding",
+          title: "Sign Up Flows",
+          route: "/signup-flows",
         },
       ],
     },
