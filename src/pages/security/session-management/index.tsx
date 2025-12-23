@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { DetailsContainer } from "@/components/container"
 import { Clock, Shield, Monitor, Smartphone, Save, AlertTriangle, Users, Globe } from "lucide-react"
 
 export default function SessionManagementPage() {
@@ -48,7 +49,7 @@ export default function SessionManagementPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <DetailsContainer>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Session Management</h1>
@@ -508,6 +509,6 @@ export default function SessionManagementPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DetailsContainer>
   )
 }

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { DetailsContainer } from "@/components/container"
 import {
   Lock,
   Shield,
@@ -92,7 +93,7 @@ export default function PasswordPoliciesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <DetailsContainer>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Password Policies</h1>
@@ -683,8 +684,8 @@ export default function PasswordPoliciesPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
-    </div>
+    </DetailsContainer>
   )
 }

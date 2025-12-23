@@ -5,15 +5,16 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { DetailsContainer } from "@/components/container"
 import { AlertTriangle, Shield, Eye, Bot, Globe, Activity, Save, TrendingUp, Clock, Users } from "lucide-react"
 
 export default function ThreatDetectionPage() {
   const [settings, setSettings] = React.useState({
-    // Brute Force Protection
+    // Brute Force Protection (includes account lockout)
     bruteForceEnabled: true,
     maxFailedAttempts: 5,
     bruteForceWindow: 15,
-    bruteForceBlockDuration: 30,
+    accountLockoutDuration: 30,
     
     // Anomaly Detection
     anomalyDetectionEnabled: true,
@@ -25,7 +26,6 @@ export default function ThreatDetectionPage() {
     // Bot Protection
     botProtectionEnabled: true,
     captchaEnabled: true,
-    rateLimitingEnabled: true,
     userAgentFiltering: true,
     honeypotEnabled: false,
     
@@ -55,7 +55,7 @@ export default function ThreatDetectionPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <DetailsContainer>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Threat Detection</h1>
@@ -132,11 +132,11 @@ export default function ThreatDetectionPage() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="bruteForceBlockDuration" className="text-sm font-medium">
-                      Block duration (minutes)
+                      Account lockout duration (minutes)
                     </Label>
                     <Select
-                      value={settings.bruteForceBlockDuration.toString()}
-                      onValueChange={(value) => setSettings(prev => ({ ...prev, bruteForceBlockDuration: parseInt(value) }))}
+                      value={settings.accountLockoutDuration.toString()}
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, accountLockoutDuration: parseInt(value) }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -261,17 +261,6 @@ export default function ThreatDetectionPage() {
                     <Switch
                       checked={settings.captchaEnabled}
                       onCheckedChange={(checked) => setSettings(prev => ({ ...prev, captchaEnabled: checked }))}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm">Rate limiting</Label>
-                      <div className="text-xs text-muted-foreground">Limit request frequency</div>
-                    </div>
-                    <Switch
-                      checked={settings.rateLimitingEnabled}
-                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, rateLimitingEnabled: checked }))}
                     />
                   </div>
 
@@ -601,6 +590,6 @@ export default function ThreatDetectionPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DetailsContainer>
   )
 }
