@@ -106,3 +106,9 @@ export {
   securitySettingsSchema,
   type SecuritySettingsFormData
 } from './securitySettingsSchema'
+
+// Password Policies schemas
+export {
+  passwordPoliciesSchema,
+  type PasswordPoliciesFormData
+} from './passwordPoliciesSchema'

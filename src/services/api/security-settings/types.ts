@@ -33,9 +33,6 @@ export interface GeneralSecuritySettingsType {
   // Advanced Security
   deviceTrustEnabled?: boolean
   anonymousAnalytics?: boolean
-  
-  // Allow any additional fields (JSONB is dynamic)
-  [key: string]: boolean | string | number | string[] | undefined
 }
 
 /**
@@ -61,11 +58,11 @@ export interface GeneralSecuritySettingsPayload {
 }
 
 /**
- * API Response for general security settings
+ * API Response for general security settings (backend returns snake_case)
  */
 export interface GeneralSecuritySettingsResponseInterface {
   success: boolean
-  data: GeneralSecuritySettingsType
+  data: GeneralSecuritySettingsPayload
   message: string
 }
 

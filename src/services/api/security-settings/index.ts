@@ -18,32 +18,32 @@ const API_ENDPOINTS = {
  * Fetch general security settings
  */
 export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySettingsType> {
-  const response = await get<any>(API_ENDPOINTS.GENERAL_SETTINGS)
+  const response = await get<GeneralSecuritySettingsResponseInterface>(API_ENDPOINTS.GENERAL_SETTINGS)
 
   if (!response.success) {
     throw new Error(response.message || 'Failed to fetch general security settings')
   }
 
   // Transform snake_case response to camelCase
-  const snakeData = response.data
+  const data = response.data
   
-  const transformed = {
-    mfaRequired: snakeData.mfa_required,
-    mfaMethods: snakeData.mfa_methods,
-    passwordlessLogin: snakeData.passwordless_login,
-    socialLoginEnabled: snakeData.social_login_enabled,
-    requireEmailVerification: snakeData.require_email_verification,
-    allowPasswordReset: snakeData.allow_password_reset,
-    securityNotifications: snakeData.security_notifications,
-    suspiciousActivityAlerts: snakeData.suspicious_activity_alerts,
-    encryptionAtRest: snakeData.encryption_at_rest,
-    encryptionInTransit: snakeData.encryption_in_transit,
-    dataRetentionDays: snakeData.data_retention_days,
-    automaticBackups: snakeData.automatic_backups,
-    backupEncryption: snakeData.backup_encryption,
-    complianceMode: snakeData.compliance_mode,
-    deviceTrustEnabled: snakeData.device_trust_enabled,
-    anonymousAnalytics: snakeData.anonymous_analytics
+  const transformed: GeneralSecuritySettingsType = {
+    mfaRequired: data.mfa_required,
+    mfaMethods: data.mfa_methods,
+    passwordlessLogin: data.passwordless_login,
+    socialLoginEnabled: data.social_login_enabled,
+    requireEmailVerification: data.require_email_verification,
+    allowPasswordReset: data.allow_password_reset,
+    securityNotifications: data.security_notifications,
+    suspiciousActivityAlerts: data.suspicious_activity_alerts,
+    encryptionAtRest: data.encryption_at_rest,
+    encryptionInTransit: data.encryption_in_transit,
+    dataRetentionDays: data.data_retention_days,
+    automaticBackups: data.automatic_backups,
+    backupEncryption: data.backup_encryption,
+    complianceMode: data.compliance_mode,
+    deviceTrustEnabled: data.device_trust_enabled,
+    anonymousAnalytics: data.anonymous_analytics
   }
   
   return transformed
