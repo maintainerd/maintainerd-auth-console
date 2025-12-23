@@ -1,60 +1,198 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DetailsContainer } from "@/components/container"
-import {
-  Shield,
-  Lock,
-  Smartphone,
-  Mail,
-  Save,
-  Database,
-  FileText,
-  Settings
-} from "lucide-react"
+import { useGeneralSecuritySettings, useUpdateGeneralSecuritySettings } from "@/hooks/useSecuritySettings"
+import { useToast } from "@/hooks/useToast"
+import { Save } from "lucide-react"
 import * as React from "react"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { securitySettingsSchema, type SecuritySettingsFormData } from "@/lib/validations"
+import type { GeneralSecuritySettingsPayload } from "@/services/api/security-settings/types"
+import {
+  MfaSettings,
+  LoginMethodsSettings,
+  DataProtectionSettings,
+  ComplianceSettings,
+  AdvancedSecuritySettings,
+  NotificationSettings
+} from "./components"
 
 export default function SecuritySettingsPage() {
-  const [settings, setSettings] = React.useState({
-    // Multi-Factor Authentication
-    mfaRequired: true,
-    mfaMethods: ["authenticator", "sms"],
-    
-    // Login Methods
-    passwordlessLogin: false,
-    socialLoginEnabled: true,
-    requireEmailVerification: true,
-    allowPasswordReset: true,
-    
-    // Notifications
-    securityNotifications: true,
-    suspiciousActivityAlerts: true,
-    
-    // Data Protection
-    encryptionAtRest: true,
-    encryptionInTransit: true,
-    dataRetentionDays: 365,
-    automaticBackups: true,
-    backupEncryption: true,
-    
-    // Compliance
-    complianceMode: "standard",
-    
-    // Advanced Security
-    deviceTrustEnabled: false,
-    anonymousAnalytics: true
+  const { showSuccess, showError } = useToast()
+  const { data: savedSettings, isLoading, isError } = useGeneralSecuritySettings()
+  const updateSettingsMutation = useUpdateGeneralSecuritySettings()
+
+  const {
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    control,
+    formState: { errors, isSubmitting }
+  } = useForm<SecuritySettingsFormData>({
+    resolver: yupResolver(securitySettingsSchema),
+    defaultValues: {
+      // Multi-Factor Authentication
+      mfaRequired: true,
+      mfaMethods: ["authenticator", "sms"],
+      
+      // Login Methods
+      passwordlessLogin: false,
+      socialLoginEnabled: true,
+      requireEmailVerification: true,
+      allowPasswordReset: true,
+      
+      // Notifications
+      securityNotifications: true,
+      suspiciousActivityAlerts: true,
+      
+      // Data Protection
+      encryptionAtRest: true,
+      encryptionInTransit: true,
+      dataRetentionDays: 365,
+      automaticBackups: true,
+      backupEncryption: true,
+      
+      // Compliance
+      complianceMode: "standard",
+      
+      // Advanced Security
+      deviceTrustEnabled: false,
+      anonymousAnalytics: true
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit'
   })
 
-  const handleSave = () => {
-    console.log("Saving security settings:", settings)
-    // Here you would typically make an API call to save the settings
+  // Watch all form values
+  const formValues = watch()
+
+  // Load saved settings when data is fetched
+  React.useEffect(() => {
+    if (savedSettings) {
+      console.log('Loading saved settings:', savedSettings)
+      console.log('complianceMode from savedSettings:', savedSettings.complianceMode)
+      
+      const formData = {
+        // Multi-Factor Authentication
+        mfaRequired: savedSettings.mfaRequired ?? true,
+        mfaMethods: savedSettings.mfaMethods ?? ["authenticator", "sms"],
+        
+        // Login Methods
+        passwordlessLogin: savedSettings.passwordlessLogin ?? false,
+        socialLoginEnabled: savedSettings.socialLoginEnabled ?? true,
+        requireEmailVerification: savedSettings.requireEmailVerification ?? true,
+        allowPasswordReset: savedSettings.allowPasswordReset ?? true,
+        
+        // Notifications
+        securityNotifications: savedSettings.securityNotifications ?? true,
+        suspiciousActivityAlerts: savedSettings.suspiciousActivityAlerts ?? true,
+        
+        // Data Protection
+        encryptionAtRest: savedSettings.encryptionAtRest ?? true,
+        encryptionInTransit: savedSettings.encryptionInTransit ?? true,
+        dataRetentionDays: savedSettings.dataRetentionDays ?? 365,
+        automaticBackups: savedSettings.automaticBackups ?? true,
+        backupEncryption: savedSettings.backupEncryption ?? true,
+        
+        // Compliance
+        complianceMode: savedSettings.complianceMode ?? "standard",
+        
+        // Advanced Security
+        deviceTrustEnabled: savedSettings.deviceTrustEnabled ?? false,
+        anonymousAnalytics: savedSettings.anonymousAnalytics ?? true
+      }
+      
+      console.log('Form data to reset:', formData)
+      console.log('complianceMode in formData:', formData.complianceMode)
+      reset(formData)
+    }
+  }, [savedSettings, reset])
+
+  const handleUpdate = (updates: Partial<SecuritySettingsFormData>) => {
+    console.log('handleUpdate called with:', updates)
+    Object.entries(updates).forEach(([key, value]) => {
+      console.log(`Setting ${key} to:`, value)
+      setValue(key as keyof SecuritySettingsFormData, value, { 
+        shouldValidate: false,
+        shouldDirty: true 
+      })
+    })
+  }
+
+  const onSubmit = async (data: SecuritySettingsFormData) => {
+    try {
+      console.log('Form data before submit:', data)
+      console.log('complianceMode before submit:', data.complianceMode)
+      
+      // Explicitly map fields to snake_case for backend
+      const payload: GeneralSecuritySettingsPayload = {
+        mfa_required: data.mfaRequired,
+        mfa_methods: data.mfaMethods,
+        passwordless_login: data.passwordlessLogin,
+        social_login_enabled: data.socialLoginEnabled,
+        require_email_verification: data.requireEmailVerification,
+        allow_password_reset: data.allowPasswordReset,
+        security_notifications: data.securityNotifications,
+        suspicious_activity_alerts: data.suspiciousActivityAlerts,
+        encryption_at_rest: data.encryptionAtRest,
+        encryption_in_transit: data.encryptionInTransit,
+        data_retention_days: data.dataRetentionDays,
+        automatic_backups: data.automaticBackups,
+        backup_encryption: data.backupEncryption,
+        compliance_mode: data.complianceMode,
+        device_trust_enabled: data.deviceTrustEnabled,
+        anonymous_analytics: data.anonymousAnalytics
+      }
+      
+      console.log('Payload to send:', payload)
+      console.log('compliance_mode in payload:', payload.compliance_mode)
+      
+      await updateSettingsMutation.mutateAsync(payload)
+      showSuccess('Security settings saved successfully')
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Loading...</h2>
+            <p className="text-muted-foreground mt-2">
+              Fetching security settings
+            </p>
+          </div>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Error Loading Settings</h2>
+            <p className="text-muted-foreground mt-2">
+              Failed to load security settings. Please try again.
+            </p>
+          </div>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </DetailsContainer>
+    )
   }
 
   return (
     <DetailsContainer>
-      <div className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Security Settings</h1>
           <p className="text-muted-foreground">
@@ -63,362 +201,26 @@ export default function SecuritySettingsPage() {
         </div>
 
         <div className="grid gap-6">
-        {/* Multi-Factor Authentication */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Smartphone className="h-5 w-5" />
-              Multi-Factor Authentication
-            </CardTitle>
-            <CardDescription>
-              Require additional verification methods for enhanced security
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Require MFA for all users</Label>
-                <div className="text-sm text-muted-foreground">
-                  Force all users to set up multi-factor authentication
-                </div>
-              </div>
-              <Switch
-                checked={settings.mfaRequired}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, mfaRequired: checked }))}
-              />
-            </div>
-
-            {settings.mfaRequired && (
-              <div className="space-y-3 pl-4 border-l-2 border-muted">
-                <Label className="text-sm font-medium">Available MFA Methods</Label>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="authenticator"
-                      checked={settings.mfaMethods.includes("authenticator")}
-                      onChange={(e) => {
-                        const methods = e.target.checked
-                          ? [...settings.mfaMethods, "authenticator"]
-                          : settings.mfaMethods.filter(m => m !== "authenticator")
-                        setSettings(prev => ({ ...prev, mfaMethods: methods }))
-                      }}
-                      className="rounded"
-                    />
-                    <Label htmlFor="authenticator" className="text-sm">Authenticator App (TOTP)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="sms"
-                      checked={settings.mfaMethods.includes("sms")}
-                      onChange={(e) => {
-                        const methods = e.target.checked
-                          ? [...settings.mfaMethods, "sms"]
-                          : settings.mfaMethods.filter(m => m !== "sms")
-                        setSettings(prev => ({ ...prev, mfaMethods: methods }))
-                      }}
-                      className="rounded"
-                    />
-                    <Label htmlFor="sms" className="text-sm">SMS Text Message</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="email"
-                      checked={settings.mfaMethods.includes("email")}
-                      onChange={(e) => {
-                        const methods = e.target.checked
-                          ? [...settings.mfaMethods, "email"]
-                          : settings.mfaMethods.filter(m => m !== "email")
-                        setSettings(prev => ({ ...prev, mfaMethods: methods }))
-                      }}
-                      className="rounded"
-                    />
-                    <Label htmlFor="email" className="text-sm">Email Verification</Label>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Login Methods */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Login Methods
-            </CardTitle>
-            <CardDescription>
-              Configure available authentication methods for users
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Enable passwordless login</Label>
-                  <div className="text-xs text-muted-foreground">Magic links or biometrics</div>
-                </div>
-                <Switch
-                  checked={settings.passwordlessLogin}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, passwordlessLogin: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Enable social login</Label>
-                  <div className="text-xs text-muted-foreground">Google, GitHub, etc.</div>
-                </div>
-                <Switch
-                  checked={settings.socialLoginEnabled}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, socialLoginEnabled: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Require email verification</Label>
-                  <div className="text-xs text-muted-foreground">Verify email before access</div>
-                </div>
-                <Switch
-                  checked={settings.requireEmailVerification}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, requireEmailVerification: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Allow password reset</Label>
-                  <div className="text-xs text-muted-foreground">Reset passwords via email</div>
-                </div>
-                <Switch
-                  checked={settings.allowPasswordReset}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, allowPasswordReset: checked }))}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Data Protection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              Data Protection
-            </CardTitle>
-            <CardDescription>
-              Configure encryption and data retention policies
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Encryption at rest</Label>
-                <div className="text-sm text-muted-foreground">
-                  Encrypt stored data using AES-256 encryption
-                </div>
-              </div>
-              <Switch
-                checked={settings.encryptionAtRest}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, encryptionAtRest: checked }))}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Encryption in transit</Label>
-                <div className="text-sm text-muted-foreground">
-                  Enforce TLS 1.3 for all data transmission
-                </div>
-              </div>
-              <Switch
-                checked={settings.encryptionInTransit}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, encryptionInTransit: checked }))}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="dataRetention" className="text-sm font-medium">
-                Data retention period (days)
-              </Label>
-              <Select
-                value={settings.dataRetentionDays.toString()}
-                onValueChange={(value) => setSettings(prev => ({ ...prev, dataRetentionDays: parseInt(value) }))}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 days</SelectItem>
-                  <SelectItem value="90">90 days</SelectItem>
-                  <SelectItem value="180">180 days</SelectItem>
-                  <SelectItem value="365">1 year</SelectItem>
-                  <SelectItem value="1095">3 years</SelectItem>
-                  <SelectItem value="2555">7 years</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="text-sm text-muted-foreground">
-                Automatically delete user data and logs after this period
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Automatic backups</Label>
-                <div className="text-sm text-muted-foreground">
-                  Create encrypted backups of critical data daily
-                </div>
-              </div>
-              <Switch
-                checked={settings.automaticBackups}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, automaticBackups: checked }))}
-              />
-            </div>
-
-            {settings.automaticBackups && (
-              <div className="flex items-center justify-between pl-4 border-l-2 border-muted">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Backup encryption</Label>
-                  <div className="text-sm text-muted-foreground">
-                    Encrypt backup files with separate encryption keys
-                  </div>
-                </div>
-                <Switch
-                  checked={settings.backupEncryption}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, backupEncryption: checked }))}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Compliance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Compliance
-            </CardTitle>
-            <CardDescription>
-              Configure compliance framework and global security standards
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="complianceMode" className="text-sm font-medium">
-                Compliance mode
-              </Label>
-              <Select
-                value={settings.complianceMode}
-                onValueChange={(value) => setSettings(prev => ({ ...prev, complianceMode: value }))}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="gdpr">GDPR Compliant</SelectItem>
-                  <SelectItem value="hipaa">HIPAA Compliant</SelectItem>
-                  <SelectItem value="sox">SOX Compliant</SelectItem>
-                  <SelectItem value="pci">PCI DSS Compliant</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="text-sm text-muted-foreground">
-                Select the compliance framework that applies to your organization
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Advanced Security */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Advanced Security
-            </CardTitle>
-            <CardDescription>
-              Additional security monitoring and tracking capabilities
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Device trust</Label>
-                  <div className="text-xs text-muted-foreground">Track and manage trusted devices</div>
-                </div>
-                <Switch
-                  checked={settings.deviceTrustEnabled}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, deviceTrustEnabled: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Anonymous analytics</Label>
-                  <div className="text-xs text-muted-foreground">Collect anonymized usage data</div>
-                </div>
-                <Switch
-                  checked={settings.anonymousAnalytics}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, anonymousAnalytics: checked }))}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Security Notifications
-            </CardTitle>
-            <CardDescription>
-              Configure when to send security-related notifications
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Security notifications</Label>
-                  <div className="text-xs text-muted-foreground">Email notifications for security events</div>
-                </div>
-                <Switch
-                  checked={settings.securityNotifications}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, securityNotifications: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">Suspicious activity alerts</Label>
-                  <div className="text-xs text-muted-foreground">Alert about unusual login patterns</div>
-                </div>
-                <Switch
-                  checked={settings.suspiciousActivityAlerts}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, suspiciousActivityAlerts: checked }))}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <MfaSettings settings={formValues} onUpdate={handleUpdate} errors={errors} />
+          <LoginMethodsSettings settings={formValues} onUpdate={handleUpdate} errors={errors} />
+          <DataProtectionSettings settings={formValues} control={control} onUpdate={handleUpdate} errors={errors} />
+          <ComplianceSettings settings={formValues} control={control} onUpdate={handleUpdate} errors={errors} />
+          <AdvancedSecuritySettings settings={formValues} onUpdate={handleUpdate} errors={errors} />
+          <NotificationSettings settings={formValues} onUpdate={handleUpdate} errors={errors} />
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} className="min-w-[140px] px-6">
+          <Button 
+            type="submit"
+            className="min-w-[140px] px-6"
+            disabled={updateSettingsMutation.isPending || isSubmitting}
+          >
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {updateSettingsMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
         </div>
-      </div>
+      </form>
     </DetailsContainer>
   )
 }

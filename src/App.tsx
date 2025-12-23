@@ -133,7 +133,6 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="monitoring" element={<AnalyticsPage />} />
-          <Route path="security/settings" element={<SecuritySettingsPage />} />
           <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
           <Route path="security/sessions" element={<SessionManagementPage />} />
           <Route path="security/threats" element={<ThreatDetectionPage />} />
@@ -142,6 +141,7 @@ function App() {
           <Route path="users/:userId/profile" element={<UserProfileForm />} />
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
+          <Route path="security/settings" element={<SecuritySettingsPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/create" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId" element={<UserDetailsPage />} />

@@ -100,3 +100,9 @@ export {
   signupFlowSchema,
   type SignupFlowFormData
 } from './signupFlowSchema'
+
+// Security Settings schemas
+export {
+  securitySettingsSchema,
+  type SecuritySettingsFormData
+} from './securitySettingsSchema'

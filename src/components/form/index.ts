@@ -8,6 +8,7 @@ export { FormTextareaField, type FormTextareaFieldProps } from './FormTextareaFi
 export { FormPasswordField, type FormPasswordFieldProps } from './FormPasswordField'
 export { FormSelectField, type FormSelectFieldProps, type SelectOption } from './FormSelectField'
 export { FormCheckboxField, type FormCheckboxFieldProps } from './FormCheckboxField'
+export { FormSwitchField, type FormSwitchFieldProps } from './FormSwitchField'
 export { FormDateField, type FormDateFieldProps } from './FormDateField'
 export { FormFileUploadField, type FormFileUploadFieldProps } from './FormFileUploadField'
 export { default as FormSubmitButton } from './FormSubmitButton'
