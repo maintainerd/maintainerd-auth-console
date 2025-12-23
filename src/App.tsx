@@ -133,7 +133,6 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="monitoring" element={<AnalyticsPage />} />
-          <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="users/:userId/profile" element={<UserProfileForm />} />
@@ -142,6 +141,7 @@ function App() {
           <Route path="security/settings" element={<SecuritySettingsPage />} />
           <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
           <Route path="security/sessions" element={<SessionManagementPage />} />
+          <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/create" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId" element={<UserDetailsPage />} />
