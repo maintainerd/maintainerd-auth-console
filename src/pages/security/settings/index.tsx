@@ -70,9 +70,6 @@ export default function SecuritySettingsPage() {
   // Load saved settings when data is fetched
   React.useEffect(() => {
     if (savedSettings) {
-      console.log('Loading saved settings:', savedSettings)
-      console.log('complianceMode from savedSettings:', savedSettings.complianceMode)
-      
       const formData = {
         // Multi-Factor Authentication
         mfaRequired: savedSettings.mfaRequired ?? true,
@@ -103,16 +100,12 @@ export default function SecuritySettingsPage() {
         anonymousAnalytics: savedSettings.anonymousAnalytics ?? true
       }
       
-      console.log('Form data to reset:', formData)
-      console.log('complianceMode in formData:', formData.complianceMode)
       reset(formData)
     }
   }, [savedSettings, reset])
 
   const handleUpdate = (updates: Partial<SecuritySettingsFormData>) => {
-    console.log('handleUpdate called with:', updates)
     Object.entries(updates).forEach(([key, value]) => {
-      console.log(`Setting ${key} to:`, value)
       setValue(key as keyof SecuritySettingsFormData, value, { 
         shouldValidate: false,
         shouldDirty: true 
@@ -122,9 +115,6 @@ export default function SecuritySettingsPage() {
 
   const onSubmit = async (data: SecuritySettingsFormData) => {
     try {
-      console.log('Form data before submit:', data)
-      console.log('complianceMode before submit:', data.complianceMode)
-      
       // Explicitly map fields to snake_case for backend
       const payload: GeneralSecuritySettingsPayload = {
         mfa_required: data.mfaRequired,
@@ -144,9 +134,6 @@ export default function SecuritySettingsPage() {
         device_trust_enabled: data.deviceTrustEnabled,
         anonymous_analytics: data.anonymousAnalytics
       }
-      
-      console.log('Payload to send:', payload)
-      console.log('compliance_mode in payload:', payload.compliance_mode)
       
       await updateSettingsMutation.mutateAsync(payload)
       showSuccess('Security settings saved successfully')

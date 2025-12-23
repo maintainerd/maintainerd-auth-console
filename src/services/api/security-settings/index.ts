@@ -26,8 +26,6 @@ export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySet
 
   // Transform snake_case response to camelCase
   const snakeData = response.data
-  console.log('API Response (snake_case):', snakeData)
-  console.log('compliance_mode from API:', snakeData.compliance_mode)
   
   const transformed = {
     mfaRequired: snakeData.mfa_required,
@@ -47,9 +45,6 @@ export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySet
     deviceTrustEnabled: snakeData.device_trust_enabled,
     anonymousAnalytics: snakeData.anonymous_analytics
   }
-  
-  console.log('Transformed data (camelCase):', transformed)
-  console.log('complianceMode after transform:', transformed.complianceMode)
   
   return transformed
 }
