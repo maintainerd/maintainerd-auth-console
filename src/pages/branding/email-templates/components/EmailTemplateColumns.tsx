@@ -142,6 +142,7 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
   },
   {
     id: "actions",
+    enableHiding: false,
     cell: ({ row }) => <EmailTemplateActions template={row.original} />,
   },
 ]

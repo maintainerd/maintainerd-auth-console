@@ -71,6 +71,7 @@ export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
   },
   {
     id: 'actions',
+    enableHiding: false,
     cell: ({ row }) => <SmsTemplateActions template={row.original} />,
   },
 ]

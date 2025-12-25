@@ -132,14 +132,15 @@ export function SmsTemplateToolbar({
             </div>
           </PopoverContent>
         </Popover>
-
-        <DataTableViewOptions table={table} />
       </div>
 
-      <Button onClick={handleCreateTemplate}>
-        <Plus className="mr-2 h-4 w-4" />
-        Create Template
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <DataTableViewOptions table={table} />
+        <Button size="sm" onClick={handleCreateTemplate}>
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Create Template</span>
+        </Button>
+      </div>
     </div>
   )
 }
