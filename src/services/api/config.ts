@@ -51,4 +51,5 @@ export const API_ENDPOINTS = {
   USER: '/users',
   SIGNUP_FLOW: '/signup_flows',
   EMAIL_TEMPLATE: '/email_templates',
+  SMS_TEMPLATE: '/sms_templates',
 } as const

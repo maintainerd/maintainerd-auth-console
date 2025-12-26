@@ -1,60 +1,82 @@
-import * as React from "react"
+import { useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { MoreHorizontal, Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Copy,
-  MessageSquare,
-  Download,
-  Trash2,
-  Settings
-} from "lucide-react"
-import type { SmsTemplate } from "../types"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
+import { useUpdateSmsTemplateStatus, useDeleteSmsTemplate } from "@/hooks/useSmsTemplates"
+import { useToast } from "@/hooks/useToast"
+import type { SmsTemplate, SmsTemplateStatusType } from "@/services/api/sms-template/types"
 
 interface SmsTemplateActionsProps {
   template: SmsTemplate
 }
 
+interface PendingStatusAction {
+  status: SmsTemplateStatusType
+  title: string
+  description: string
+}
+
 export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
-  const handlePreview = () => {
-    console.log("Preview SMS template:", template.id)
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
+  const { showError } = useToast()
+  const updateStatusMutation = useUpdateSmsTemplateStatus()
+  const deleteTemplateMutation = useDeleteSmsTemplate()
+
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [pendingStatusAction, setPendingStatusAction] = useState<PendingStatusAction | null>(null)
+
+  const handleViewDetails = () => {
+    navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}`)
   }
 
-  const handleEdit = () => {
-    console.log("Edit SMS template:", template.id)
+  const handleEditTemplate = () => {
+    navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}/edit`)
   }
 
-  const handleDuplicate = () => {
-    console.log("Duplicate SMS template:", template.id)
+  const handleStatusChange = (status: SmsTemplateStatusType, title: string, description: string) => {
+    setPendingStatusAction({ status, title, description })
+    setShowStatusDialog(true)
   }
 
-  const handleSendTest = () => {
-    console.log("Send test SMS:", template.id)
+  const handleConfirmStatusChange = async () => {
+    if (!pendingStatusAction) return
+
+    try {
+      await updateStatusMutation.mutateAsync({
+        id: template.smsTemplateId,
+        data: { status: pendingStatusAction.status }
+      })
+      setShowStatusDialog(false)
+      setPendingStatusAction(null)
+    } catch (error) {
+      showError(error)
+    }
   }
 
-  const handleExport = () => {
-    console.log("Export SMS template:", template.id)
+  const handleDelete = async () => {
+    try {
+      await deleteTemplateMutation.mutateAsync(template.smsTemplateId)
+      setShowDeleteDialog(false)
+    } catch (error) {
+      showError(error)
+    }
   }
 
-  const handleConfigure = () => {
-    console.log("Configure SMS template:", template.id)
-  }
-
-  const handleDelete = () => {
-    console.log("Delete SMS template:", template.id)
-  }
+  const canDelete = !template.isSystem
+  const canEditStatus = !template.isSystem
 
   return (
-    <div className="px-3 py-1">
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -63,44 +85,73 @@ export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={handlePreview}>
+          <DropdownMenuItem onClick={handleViewDetails}>
             <Eye className="mr-2 h-4 w-4" />
-            Preview
+            View Details
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleSendTest}>
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Send Test
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleEdit}>
+
+          <DropdownMenuItem onClick={handleEditTemplate}>
             <Edit className="mr-2 h-4 w-4" />
-            Edit
+            Edit Template
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDuplicate}>
-            <Copy className="mr-2 h-4 w-4" />
-            Duplicate
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleConfigure}>
-            <Settings className="mr-2 h-4 w-4" />
-            Configure
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </DropdownMenuItem>
-          {!template.isSystem && (
+
+          {canEditStatus && (
+            <>
+              {template.status === 'inactive' ? (
+                <DropdownMenuItem
+                  onClick={() => handleStatusChange('active', 'Activate SMS Template', 'Are you sure you want to activate this SMS template? It will be available for use immediately.')}
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Activate Template
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => handleStatusChange('inactive', 'Deactivate SMS Template', 'Are you sure you want to deactivate this SMS template? It will no longer be available for use.')}
+                >
+                  <Pause className="mr-2 h-4 w-4" />
+                  Deactivate Template
+                </DropdownMenuItem>
+              )}
+            </>
+          )}
+
+          {canDelete && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive"
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                Delete Template
               </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
+
+      <ConfirmationDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+        onConfirm={handleConfirmStatusChange}
+        title={pendingStatusAction?.title || "Change Status"}
+        description={pendingStatusAction?.description || "Are you sure you want to change the template status?"}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        variant="default"
+        isLoading={updateStatusMutation.isPending}
+      />
+
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title="Delete SMS Template"
+        description={`Are you sure you want to delete the SMS template "${template.name}"?`}
+        confirmationText="This action cannot be undone. This will permanently delete the SMS template."
+        itemName={template.name}
+        isDeleting={deleteTemplateMutation.isPending}
+      />
+    </>
   )
 }
