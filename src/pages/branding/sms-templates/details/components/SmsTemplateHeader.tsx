@@ -79,8 +79,9 @@ export function SmsTemplateHeader({ template, tenantId, templateId }: SmsTemplat
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" className="gap-2">
               <MoreVertical className="h-4 w-4" />
+              Actions
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
