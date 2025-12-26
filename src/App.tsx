@@ -62,6 +62,8 @@ import LogMonitoringPage from './pages/log-monitoring'
 import NotificationsPage from './pages/notifications'
 import LoginBrandingPage from './pages/branding/login'
 import EmailTemplatesPage from './pages/branding/email-templates'
+import EmailTemplateDetailsPage from './pages/branding/email-templates/details'
+import EmailTemplateForm from './pages/branding/email-templates/form'
 import SmsTemplatesPage from './pages/branding/sms-templates'
 import GeneralSettingsPage from './pages/settings'
 import TenantCreatePage from './pages/tenant-create'
@@ -189,6 +191,9 @@ function App() {
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/login" element={<LoginBrandingPage />} />
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
+          <Route path="branding/email-templates/create" element={<EmailTemplateForm />} />
+          <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />
+          <Route path="branding/email-templates/:templateId/edit" element={<EmailTemplateForm />} />
           <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
           <Route path="settings" element={<GeneralSettingsPage />} />
           <Route path="tenant/create" element={<TenantCreatePage />} />

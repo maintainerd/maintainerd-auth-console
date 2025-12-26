@@ -1,37 +1,37 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { EmailTemplateActions } from "./EmailTemplateActions"
 import { formatDistanceToNow } from "date-fns"
-import type { EmailTemplate } from "../types"
+import type { EmailTemplate } from "@/services/api/email-template/types"
 
-
-const getTypeColor = (type: string) => {
-  switch (type) {
-    case "welcome":
-      return "bg-blue-100 text-blue-800 border-blue-200"
-    case "verification":
-      return "bg-green-100 text-green-800 border-green-200"
-    case "password_reset":
-      return "bg-orange-100 text-orange-800 border-orange-200"
-    case "invitation":
-      return "bg-purple-100 text-purple-800 border-purple-200"
-    case "notification":
-      return "bg-cyan-100 text-cyan-800 border-cyan-200"
-    case "marketing":
-      return "bg-pink-100 text-pink-800 border-pink-200"
-    case "transactional":
-      return "bg-indigo-100 text-indigo-800 border-indigo-200"
-    case "custom":
-      return "bg-gray-100 text-gray-800 border-gray-200"
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+const getStatusBadge = (status: 'active' | 'inactive') => {
+  const statusConfig = {
+    active: {
+      icon: CheckCircle,
+      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+    },
+    inactive: {
+      icon: XCircle,
+      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
+    }
   }
+
+  const config = statusConfig[status]
+  const Icon = config.icon
+
+  return (
+    <Badge variant="outline" className={config.className}>
+      <Icon className="w-3 h-3 mr-1" />
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </Badge>
+  )
 }
 
 export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
   {
+    id: "Name",
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -39,8 +39,8 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Template
-          <ArrowUpDown />
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
@@ -48,53 +48,55 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
       const template = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{template.name}</span>
-            {template.isSystem && (
-              <Badge variant="secondary" className="text-xs">
-                System
-              </Badge>
-            )}
-            {template.isDefault && (
-              <Badge variant="outline" className="text-xs">
-                Default
-              </Badge>
-            )}
-          </div>
-          <span className="text-sm text-muted-foreground">{template.description}</span>
-          <span className="text-xs text-muted-foreground">{template.content.subject}</span>
+          <span className="font-medium">{template.name}</span>
+          <span className="text-sm text-muted-foreground truncate max-w-md">{template.subject}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "type",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="h-auto p-0 font-semibold"
-      >
-        Type
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    id: "Status",
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => getStatusBadge(row.original.status),
+  },
+  {
+    id: "Type",
+    header: "Type",
     cell: ({ row }) => {
       const template = row.original
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <Badge className={getTypeColor(template.type)}>
-            {template.type.replace('_', ' ')}
+      const badges = []
+      
+      if (template.isSystem) {
+        badges.push(
+          <Badge key="system" variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+            System
           </Badge>
-          <span className="text-xs text-muted-foreground capitalize">
-            {template.category.replace('_', ' ')}
-          </span>
-        </div>
-      )
+        )
+      }
+      
+      if (template.isDefault) {
+        badges.push(
+          <Badge key="default" variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+            Default
+          </Badge>
+        )
+      }
+      
+      if (badges.length === 0) {
+        badges.push(
+          <Badge key="custom" variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+            Custom
+          </Badge>
+        )
+      }
+      
+      return <div className="flex gap-1">{badges}</div>
     },
   },
   {
-    accessorKey: "createdAt",
+    id: "Created",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -102,37 +104,45 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Created
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const template = row.original
+      const date = new Date(row.original.createdAt)
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <span className="text-sm">
-            {formatDistanceToNow(new Date(template.createdAt), { addSuffix: true })}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            by {template.createdBy}
-          </span>
+        <div className="text-sm">
+          {formatDistanceToNow(date, { addSuffix: true })}
+        </div>
+      )
+    },
+  },
+  {
+    id: "Updated",
+    accessorKey: "updated_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Updated
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.updatedAt)
+      return (
+        <div className="text-sm">
+          {formatDistanceToNow(date, { addSuffix: true })}
         </div>
       )
     },
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const template = row.original
-      return (
-        <div className="px-3 py-1">
-          <EmailTemplateActions template={template}>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </EmailTemplateActions>
-        </div>
-      )
-    },
+    cell: ({ row }) => <EmailTemplateActions template={row.original} />,
   },
 ]
+
