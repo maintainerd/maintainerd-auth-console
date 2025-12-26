@@ -61,6 +61,8 @@ import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
 import NotificationsPage from './pages/notifications'
 import LoginBrandingPage from './pages/branding/login'
+import LoginTemplateDetailsPage from './pages/branding/login/details'
+import LoginTemplateForm from './pages/branding/login/form'
 import EmailTemplatesPage from './pages/branding/email-templates'
 import EmailTemplateDetailsPage from './pages/branding/email-templates/details'
 import EmailTemplateForm from './pages/branding/email-templates/form'
@@ -192,6 +194,9 @@ function App() {
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/login" element={<LoginBrandingPage />} />
+          <Route path="branding/login/create" element={<LoginTemplateForm />} />
+          <Route path="branding/login/:templateId" element={<LoginTemplateDetailsPage />} />
+          <Route path="branding/login/:templateId/edit" element={<LoginTemplateForm />} />
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/email-templates/create" element={<EmailTemplateForm />} />
           <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />
