@@ -1,293 +1,210 @@
-import React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Settings,
-  Globe,
-  Shield,
-  Save
-} from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AlertTriangle, Save, Users, Settings as SettingsIcon } from "lucide-react"
+import { useTenantById, useUpdateTenant, useDeleteTenant } from "@/hooks/useTenants"
+import { DeleteConfirmationDialog } from "@/components/dialog"
+import { DetailsContainer } from "@/components/container"
+import { useAppSelector } from "@/store/hooks"
+import { useToast } from "@/hooks/useToast"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { tenantSettingsSchema, type TenantSettingsFormData } from "@/lib/validations"
+import type { UpdateTenantRequest } from "@/services/api/tenant/types"
+import { GeneralSettings, MembersSettings, AdvancedSettings } from "./components"
 
 export default function TenantSettingsPage() {
-  const [settings, setSettings] = React.useState({
-    // Tenant Information
-    tenantName: "Acme Corp",
-    tenantDescription: "Enterprise authentication tenant for Acme Corporation",
+  const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
+  
+  const { data: tenant, isLoading, isError } = useTenantById(currentTenant?.tenant_id)
+  const updateTenantMutation = useUpdateTenant()
+  const deleteTenantMutation = useDeleteTenant()
 
-    // Application Branding
-    applicationLogo: "",
-    faviconUrl: "",
-
-    // Regional Settings
-    defaultLanguage: "en",
-    defaultTimezone: "UTC",
-    dateFormat: "MM/dd/yyyy",
-    timeFormat: "12h",
-
-    // Legal & Compliance
-    privacyPolicyUrl: "https://acme.com/privacy",
-    termsOfServiceUrl: "https://acme.com/terms"
+  const {
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm<TenantSettingsFormData>({
+    resolver: yupResolver(tenantSettingsSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      is_public: false,
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit'
   })
 
-  const handleSave = () => {
-    console.log("Saving tenant settings:", settings)
-    // Here you would typically make an API call to save the tenant settings
+  // Watch all form values
+  const formValues = watch()
+
+  // Load saved settings when data is fetched
+  useEffect(() => {
+    if (tenant) {
+      const formData = {
+        name: tenant.name,
+        description: tenant.description,
+        is_public: tenant.is_public,
+      }
+      reset(formData)
+    }
+  }, [tenant, reset])
+
+  const handleUpdate = (updates: Partial<TenantSettingsFormData>) => {
+    Object.entries(updates).forEach(([key, value]) => {
+      setValue(key as keyof TenantSettingsFormData, value, { 
+        shouldValidate: false,
+        shouldDirty: true 
+      })
+    })
   }
 
-  const languages = [
-    { value: "en", label: "English" },
-    { value: "es", label: "Spanish" },
-    { value: "fr", label: "French" },
-    { value: "de", label: "German" },
-    { value: "it", label: "Italian" },
-    { value: "pt", label: "Portuguese" },
-    { value: "ja", label: "Japanese" },
-    { value: "ko", label: "Korean" },
-    { value: "zh", label: "Chinese" }
-  ]
+  const onSubmit = async (data: TenantSettingsFormData) => {
+    if (!currentTenant?.tenant_id) return
 
-  const timezones = [
-    { value: "UTC", label: "UTC" },
-    { value: "America/New_York", label: "Eastern Time (ET)" },
-    { value: "America/Chicago", label: "Central Time (CT)" },
-    { value: "America/Denver", label: "Mountain Time (MT)" },
-    { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
-    { value: "Europe/London", label: "London (GMT)" },
-    { value: "Europe/Paris", label: "Paris (CET)" },
-    { value: "Asia/Tokyo", label: "Tokyo (JST)" },
-    { value: "Asia/Shanghai", label: "Shanghai (CST)" },
-    { value: "Australia/Sydney", label: "Sydney (AEST)" }
-  ]
+    try {
+      const payload: UpdateTenantRequest = {
+        name: data.name,
+        description: data.description,
+        status: 'active',
+        is_public: data.is_public,
+      }
+      
+      await updateTenantMutation.mutateAsync({
+        tenantId: currentTenant.tenant_id,
+        data: payload
+      })
+      showSuccess('Tenant settings saved successfully')
+    } catch (error) {
+      showError(error)
+    }
+  }
 
+  const handleDelete = async () => {
+    if (!currentTenant?.tenant_id) return
+    
+    await deleteTenantMutation.mutateAsync(currentTenant.tenant_id)
+    setDeleteDialogOpen(false)
+    // Navigate to dashboard after deletion
+    navigate(`/${currentTenant.tenant_id}/dashboard`)
+  }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Loading...</h2>
+            <p className="text-muted-foreground mt-2">
+              Fetching tenant settings
+            </p>
+          </div>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  // Error state
+  if (isError || !tenant) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Error Loading Settings</h2>
+            <p className="text-muted-foreground mt-2">
+              Failed to load tenant settings. Please try again.
+            </p>
+          </div>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </DetailsContainer>
+    )
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex flex-col gap-6">
+    <DetailsContainer>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Tenant Settings</h1>
           <p className="text-muted-foreground">
-            Configure tenant information, application branding, regional settings, and compliance.
+            Manage your tenant configuration and preferences
           </p>
         </div>
 
         <div className="grid gap-6">
-        {/* Tenant Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Tenant Information
-            </CardTitle>
-            <CardDescription>
-              Configure basic tenant information and identification
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="tenantName" className="text-sm font-medium">
-                Tenant name
-              </Label>
-              <Input
-                id="tenantName"
-                value={settings.tenantName}
-                onChange={(e) => setSettings(prev => ({ ...prev, tenantName: e.target.value }))}
-                placeholder="Enter tenant name"
+          <Tabs defaultValue="general" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="general" className="gap-2">
+                <SettingsIcon className="h-4 w-4" />
+                General
+              </TabsTrigger>
+              <TabsTrigger value="members" className="gap-2">
+                <Users className="h-4 w-4" />
+                Members
+              </TabsTrigger>
+              <TabsTrigger value="advanced" className="gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Advanced
+              </TabsTrigger>
+            </TabsList>
+
+            {/* General Tab */}
+            <TabsContent value="general" className="space-y-6">
+              <GeneralSettings 
+                tenant={tenant}
+                settings={formValues}
+                onUpdate={handleUpdate}
+                errors={errors}
               />
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="tenantDescription" className="text-sm font-medium">
-                Tenant description
-              </Label>
-              <Textarea
-                id="tenantDescription"
-                value={settings.tenantDescription}
-                onChange={(e) => setSettings(prev => ({ ...prev, tenantDescription: e.target.value }))}
-                placeholder="Brief description of this tenant"
-                rows={2}
+              <div className="flex justify-end">
+                <Button 
+                  type="submit"
+                  disabled={updateTenantMutation.isPending || isSubmitting} 
+                  className="gap-2 min-w-[140px] px-6"
+                >
+                  <Save className="h-4 w-4" />
+                  {updateTenantMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </TabsContent>
+
+            {/* Members Tab */}
+            <TabsContent value="members" className="space-y-6">
+              <MembersSettings />
+            </TabsContent>
+
+            {/* Advanced Tab */}
+            <TabsContent value="advanced" className="space-y-6">
+              <AdvancedSettings 
+                tenant={tenant}
+                onDeleteClick={() => setDeleteDialogOpen(true)}
               />
-            </div>
-
-          </CardContent>
-        </Card>
-
-        {/* Branding & Regional Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Branding & Regional Settings
-            </CardTitle>
-            <CardDescription>
-              Configure application branding, language, and regional preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="appLogo" className="text-sm font-medium">
-                  Application logo URL
-                </Label>
-                <Input
-                  id="appLogo"
-                  type="url"
-                  value={settings.applicationLogo}
-                  onChange={(e) => setSettings(prev => ({ ...prev, applicationLogo: e.target.value }))}
-                  placeholder="https://example.com/logo.png"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Recommended: PNG or SVG, max 200x60px
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="favicon" className="text-sm font-medium">
-                  Favicon URL
-                </Label>
-                <Input
-                  id="favicon"
-                  type="url"
-                  value={settings.faviconUrl}
-                  onChange={(e) => setSettings(prev => ({ ...prev, faviconUrl: e.target.value }))}
-                  placeholder="https://example.com/favicon.ico"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Recommended: ICO or PNG, 32x32px
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Default language</Label>
-                <Select
-                  value={settings.defaultLanguage}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, defaultLanguage: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Timezone</Label>
-                <Select
-                  value={settings.defaultTimezone}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, defaultTimezone: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timezones.map((tz) => (
-                      <SelectItem key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Date format</Label>
-                <Select
-                  value={settings.dateFormat}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, dateFormat: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
-                    <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
-                    <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
-                    <SelectItem value="dd MMM yyyy">dd MMM yyyy</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium">Time format</Label>
-                <Select
-                  value={settings.timeFormat}
-                  onValueChange={(value) => setSettings(prev => ({ ...prev, timeFormat: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="12h">12-hour</SelectItem>
-                    <SelectItem value="24h">24-hour</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-
-
-        {/* Legal & Compliance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Legal & Compliance
-            </CardTitle>
-            <CardDescription>
-              Configure legal document URLs for this tenant
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="privacyUrl" className="text-sm font-medium">
-                  Privacy policy URL
-                </Label>
-                <Input
-                  id="privacyUrl"
-                  type="url"
-                  value={settings.privacyPolicyUrl}
-                  onChange={(e) => setSettings(prev => ({ ...prev, privacyPolicyUrl: e.target.value }))}
-                  placeholder="https://example.com/privacy"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="termsUrl" className="text-sm font-medium">
-                  Terms of service URL
-                </Label>
-                <Input
-                  id="termsUrl"
-                  type="url"
-                  value={settings.termsOfServiceUrl}
-                  onChange={(e) => setSettings(prev => ({ ...prev, termsOfServiceUrl: e.target.value }))}
-                  placeholder="https://example.com/terms"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-
+            </TabsContent>
+          </Tabs>
         </div>
+      </form>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} className="flex items-center gap-2">
-            <Save className="h-4 w-4" />
-            Save Tenant Settings
-          </Button>
-        </div>
-      </div>
-    </div>
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
+        title="Delete Tenant"
+        description={`This will permanently delete the tenant "${tenant.name}" and all associated data.`}
+        confirmationText="This action cannot be undone. All data associated with this tenant will be permanently deleted."
+        itemName={tenant.name}
+        isDeleting={deleteTenantMutation.isPending}
+      />
+    </DetailsContainer>
   )
 }

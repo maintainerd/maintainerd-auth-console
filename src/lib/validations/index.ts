@@ -107,6 +107,12 @@ export {
   type SecuritySettingsFormData
 } from './securitySettingsSchema'
 
+// Tenant Settings schemas
+export {
+  tenantSettingsSchema,
+  type TenantSettingsFormData
+} from './tenantSettingsSchema'
+
 // Password Policies schemas
 export {
   passwordPoliciesSchema,

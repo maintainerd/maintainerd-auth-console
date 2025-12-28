@@ -3,7 +3,7 @@
  * Type definitions for tenant API operations
  */
 
-import type { ApiResponse } from '../types/common'
+import type { ApiResponse, PaginatedResponse } from '../types/common'
 
 /**
  * Tenant status type
@@ -27,6 +27,48 @@ export interface TenantEntity {
 }
 
 /**
+ * Tenant list query parameters
+ */
+export interface TenantListParams {
+  name?: string
+  description?: string
+  identifier?: string
+  status?: TenantStatusType
+  is_public?: boolean
+  is_default?: boolean
+  is_system?: boolean
+  page?: number
+  limit?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+/**
+ * Create tenant request
+ */
+export interface CreateTenantRequest {
+  name: string
+  description: string
+  status: TenantStatusType
+  is_public: boolean
+}
+
+/**
+ * Update tenant request
+ */
+export interface UpdateTenantRequest {
+  name: string
+  description: string
+  status: TenantStatusType
+  is_public: boolean
+}
+
+/**
  * Tenant API response
  */
 export type TenantResponse = ApiResponse<TenantEntity>
+
+/**
+ * Tenant list API response
+ */
+export type TenantListResponse = ApiResponse<PaginatedResponse<TenantEntity>>
