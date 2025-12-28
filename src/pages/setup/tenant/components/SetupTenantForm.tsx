@@ -9,21 +9,22 @@ import { useSetupTenant } from "@/hooks/useSetup"
 const SetupTenantForm = () => {
 	const { isLoading, createTenantWithDefaults } = useSetupTenant()
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors }
-	} = useForm<SetupTenantFormData>({
-		resolver: yupResolver(setupTenantSchema),
-		defaultValues: {
-			name: "",
-			description: ""
-		}
-	})
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<SetupTenantFormData>({
+    resolver: yupResolver(setupTenantSchema),
+    defaultValues: {
+      name: "",
+      display_name: "",
+      description: ""
+    }
+  })
 
-	const onSubmit = async (data: SetupTenantFormData) => {
-		await createTenantWithDefaults(data.name, data.description)
-	}
+  const onSubmit = async (data: SetupTenantFormData) => {
+    await createTenantWithDefaults(data.name, data.display_name, data.description)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,11 +36,19 @@ const SetupTenantForm = () => {
           <FieldGroup>
             <FormInputField
               label="Tenant Name"
-              placeholder="Enter tenant name"
+              placeholder="e.g. org-1"
               disabled={isLoading}
               error={errors.name?.message}
               required
               {...register("name")}
+            />
+            <FormInputField
+              label="Display Name"
+              placeholder="e.g. Organization 1"
+              disabled={isLoading}
+              error={errors.display_name?.message}
+              required
+              {...register("display_name")}
             />
             <FormTextareaField
               label="Description"

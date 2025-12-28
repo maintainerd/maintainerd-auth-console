@@ -7,13 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import type { TenantEntity } from "@/services/api/tenant/types"
 import type { BaseSettingsProps } from "./types"
 
+import type { TenantSettings } from "./types"
+
 interface GeneralSettingsProps extends BaseSettingsProps {
   tenant: TenantEntity
-  settings: {
-    name: string
-    description: string
-    is_public: boolean
-  }
+  settings: TenantSettings
 }
 
 export function GeneralSettings({ tenant, settings, onUpdate, errors }: GeneralSettingsProps) {
@@ -59,6 +57,21 @@ export function GeneralSettings({ tenant, settings, onUpdate, errors }: GeneralS
           />
           {errors?.name && (
             <p className="text-sm text-destructive">{errors.name.message}</p>
+          )}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="display_name">
+            Display Name <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="display_name"
+            value={settings.display_name}
+            onChange={(e) => onUpdate({ display_name: e.target.value })}
+            placeholder="Enter display name"
+          />
+          {errors?.display_name && (
+            <p className="text-sm text-destructive">{errors.display_name.message}</p>
           )}
         </div>
 

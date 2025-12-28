@@ -71,15 +71,14 @@ export async function getDefaultTenantMetadata() {
  * @param description - Tenant description
  * @returns Promise<CreateTenantResponse>
  */
-export async function createTenantWithDefaults(name: string, description: string): Promise<CreateTenantResponse> {
+export async function createTenantWithDefaults(name: string, display_name: string, description: string): Promise<CreateTenantResponse> {
   const defaultMetadata = await getDefaultTenantMetadata()
-  
   const tenantData: CreateTenantRequest = {
     name,
+    display_name,
     description,
     metadata: defaultMetadata
   }
-  
   return createTenant(tenantData)
 }
 

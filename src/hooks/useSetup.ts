@@ -20,16 +20,21 @@ export function useSetupTenant() {
   const { showError, showSuccess } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
-  const createTenantWithDefaultsHook = useCallback(async (name: string, description?: string) => {
+  const createTenantWithDefaultsHook = useCallback(async (name: string, display_name: string, description?: string) => {
     setIsLoading(true)
     try {
-      const response = await createTenantWithDefaults(name, description || '')
+      const response = await createTenantWithDefaults(name, display_name, description || '')
       showSuccess("Tenant created successfully!")
       navigate('/setup/admin')
       return { success: true, data: response }
-    } catch (error: any) {
-      showError(error, "Failed to create tenant")
-      return { success: false, message: error.message }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showError(error, "Failed to create tenant")
+        return { success: false, message: error.message }
+      } else {
+        showError('Unknown error', "Failed to create tenant")
+        return { success: false, message: 'Unknown error' }
+      }
     } finally {
       setIsLoading(false)
     }
@@ -67,9 +72,14 @@ export function useSetupAdmin() {
       showSuccess("Admin account created successfully!")
       navigate('/setup/profile')
       return { success: true, data: response }
-    } catch (error: any) {
-      showError(error, "Failed to create admin account")
-      return { success: false, message: error.message }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showError(error, "Failed to create admin account")
+        return { success: false, message: error.message }
+      } else {
+        showError('Unknown error', "Failed to create admin account")
+        return { success: false, message: 'Unknown error' }
+      }
     } finally {
       setIsLoading(false)
     }
@@ -100,7 +110,7 @@ export function useSetupProfile() {
       // Don't navigate here - let the component handle success state
       // Don't show success toast here - let the success page handle it
       return { success: true, data: response }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Parse the error to check if it's a validation error with field-specific details
       const parsedError = parseError(error)
 
@@ -111,12 +121,14 @@ export function useSetupProfile() {
           .join('\n')
 
         showError(`${parsedError.message}\n\nField errors:\n${fieldErrorMessages}`, "Validation Failed")
-      } else {
+      } else if (error instanceof Error) {
         // Handle general errors
         showError(error, "Failed to create profile")
+      } else {
+        showError('Unknown error', "Failed to create profile")
       }
 
-      return { success: false, message: error.message, fieldErrors: parsedError.fieldErrors }
+      return { success: false, message: (error instanceof Error ? error.message : 'Unknown error'), fieldErrors: parsedError.fieldErrors }
     } finally {
       setIsLoading(false)
     }

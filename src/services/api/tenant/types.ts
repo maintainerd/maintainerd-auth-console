@@ -16,6 +16,7 @@ export type TenantStatusType = 'active' | 'inactive' | 'suspended'
 export interface TenantEntity {
   tenant_id: string
   name: string
+  display_name: string
   description: string
   identifier: string
   status: TenantStatusType
@@ -31,6 +32,7 @@ export interface TenantEntity {
  */
 export interface TenantListParams {
   name?: string
+  display_name?: string
   description?: string
   identifier?: string
   status?: TenantStatusType
@@ -48,6 +50,7 @@ export interface TenantListParams {
  */
 export interface CreateTenantRequest {
   name: string
+  display_name: string
   description: string
   status: TenantStatusType
   is_public: boolean
@@ -58,6 +61,7 @@ export interface CreateTenantRequest {
  */
 export interface UpdateTenantRequest {
   name: string
+  display_name: string
   description: string
   status: TenantStatusType
   is_public: boolean

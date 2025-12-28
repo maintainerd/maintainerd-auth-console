@@ -13,9 +13,14 @@ export const setupTenantSchema = yup.object({
     .min(2, 'Tenant name must be at least 2 characters')
     .max(100, 'Tenant name must not exceed 100 characters')
     .matches(
-      /^[a-zA-Z0-9\s\-_&.()]+$/,
-      'Tenant name can only contain letters, numbers, spaces, and common punctuation'
+      /^[a-z0-9-]+$/,
+      'Tenant name can only contain lowercase letters, numbers, and hyphens'
     ),
+  display_name: yup
+    .string()
+    .required('Display name is required')
+    .min(2, 'Display name must be at least 2 characters')
+    .max(100, 'Display name must not exceed 100 characters'),
   description: yup
     .string()
     .required('Description is required')

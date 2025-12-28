@@ -7,6 +7,7 @@ import type { ApiResponse } from '../types/common'
 
 export interface CreateTenantRequest {
   name: string
+  display_name: string
   description: string
   metadata: {
     application_logo_url: string

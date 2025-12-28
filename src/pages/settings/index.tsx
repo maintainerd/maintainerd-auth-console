@@ -34,6 +34,7 @@ export default function TenantSettingsPage() {
     resolver: yupResolver(tenantSettingsSchema),
     defaultValues: {
       name: "",
+      display_name: "",
       description: "",
       is_public: false,
     },
@@ -49,6 +50,7 @@ export default function TenantSettingsPage() {
     if (tenant) {
       const formData = {
         name: tenant.name,
+        display_name: tenant.display_name,
         description: tenant.description,
         is_public: tenant.is_public,
       }
@@ -71,11 +73,11 @@ export default function TenantSettingsPage() {
     try {
       const payload: UpdateTenantRequest = {
         name: data.name,
+        display_name: data.display_name,
         description: data.description,
         status: 'active',
         is_public: data.is_public,
       }
-      
       await updateTenantMutation.mutateAsync({
         tenantId: currentTenant.tenant_id,
         data: payload
