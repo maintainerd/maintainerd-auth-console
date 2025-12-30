@@ -1,0 +1,249 @@
+import { useState, useEffect } from "react"
+import { Search, Plus, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { useAddTenantMember, useTenantMembers } from "@/hooks/useTenantMembers"
+import { useUsers } from "@/hooks/useUsers"
+import { useToast } from "@/hooks/useToast"
+import { useAppSelector } from '@/store/hooks'
+
+interface AddMemberDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
+  const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
+  const tenantId = currentTenant?.tenant_id || ''
+  const { showSuccess, showError } = useToast()
+  const [selectedUserId, setSelectedUserId] = useState<string>("")
+  const [role, setRole] = useState<'owner' | 'member'>('member')
+  const [userSearchQuery, setUserSearchQuery] = useState("")
+  
+  const addMemberMutation = useAddTenantMember(tenantId)
+  
+  // Fetch users for selection
+  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
+    page: 1,
+    limit: 100,
+    status: 'active',
+    sort_by: 'fullname',
+    sort_order: 'asc'
+  })
+
+  // Fetch existing members to filter them out
+  const { data: membersData } = useTenantMembers(tenantId, {
+    page: 1,
+    limit: 1000 // Get all members to filter
+  })
+
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedUserId("")
+      setRole('member')
+      setUserSearchQuery("")
+    }
+  }, [open])
+
+  const handleSubmit = async () => {
+    if (!selectedUserId) {
+      showError("Please select a user")
+      return
+    }
+
+    try {
+      await addMemberMutation.mutateAsync({
+        user_id: selectedUserId,
+        role
+      })
+      showSuccess("Member added successfully")
+      onOpenChange(false)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const isLoading = addMemberMutation.isPending
+
+  const users = usersData?.rows ?? []
+  const existingMemberUserIds = membersData?.data?.map(m => m.user.user_id) ?? []
+
+  // Filter out users who are already members
+  const availableUsers = users.filter(
+    user => !existingMemberUserIds.includes(user.user_id)
+  )
+
+  // Filter users based on search query
+  const filteredUsers = availableUsers.filter(user =>
+    user.fullname.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+    user.username.toLowerCase().includes(userSearchQuery.toLowerCase())
+  )
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Member to Tenant</DialogTitle>
+          <DialogDescription>
+            Select a user and assign them a role for this tenant.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* Role Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="role">
+              Member Role <span className="text-destructive">*</span>
+            </Label>
+            <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'member')}>
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="owner">Owner</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Owners have full access to manage the tenant
+            </p>
+          </div>
+
+          {/* User Selection */}
+          <div className="space-y-3">
+            <Label>
+              Select User <span className="text-destructive">*</span>
+            </Label>
+
+            {/* Search Users */}
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search users by name or email..."
+                value={userSearchQuery}
+                onChange={(e) => setUserSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+
+            {/* Users List */}
+            <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+              {isLoadingUsers && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  Loading users...
+                </div>
+              )}
+
+              {!isLoadingUsers && availableUsers.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  All active users have already been added as members
+                </div>
+              )}
+
+              {!isLoadingUsers && availableUsers.length > 0 && filteredUsers.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  No users found matching your search
+                </div>
+              )}
+
+              {!isLoadingUsers && filteredUsers.length > 0 && (
+                <div className="divide-y">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.user_id}
+                      className={`flex items-start gap-3 p-3 hover:bg-accent/50 transition-colors cursor-pointer ${
+                        selectedUserId === user.user_id ? 'bg-accent' : ''
+                      }`}
+                      onClick={() => setSelectedUserId(user.user_id)}
+                    >
+                      <Checkbox
+                        id={user.user_id}
+                        checked={selectedUserId === user.user_id}
+                        onCheckedChange={(checked) => {
+                          setSelectedUserId(checked ? user.user_id : "")
+                        }}
+                        disabled={isLoading}
+                      />
+                      <label
+                        htmlFor={user.user_id}
+                        className="flex-1 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{user.fullname}</span>
+                          {user.is_email_verified && (
+                            <Badge variant="outline" className="text-xs">
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">{user.email}</div>
+                        {user.username && user.username !== user.email && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            @{user.username}
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedUserId && (
+              <p className="text-sm text-muted-foreground">
+                1 user selected
+              </p>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!selectedUserId || isLoading}
+            className="gap-2"
+          >
+            {isLoading ? (
+              <>Adding...</>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                Add Member
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

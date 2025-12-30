@@ -134,7 +134,7 @@ export default function TenantSettingsPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Tenant Settings</h1>
           <p className="text-muted-foreground">
@@ -161,23 +161,25 @@ export default function TenantSettingsPage() {
 
             {/* General Tab */}
             <TabsContent value="general" className="space-y-6">
-              <GeneralSettings 
-                tenant={tenant}
-                settings={formValues}
-                onUpdate={handleUpdate}
-                errors={errors}
-              />
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <GeneralSettings 
+                  tenant={tenant}
+                  settings={formValues}
+                  onUpdate={handleUpdate}
+                  errors={errors}
+                />
 
-              <div className="flex justify-end">
-                <Button 
-                  type="submit"
-                  disabled={updateTenantMutation.isPending || isSubmitting} 
-                  className="gap-2 min-w-[140px] px-6"
-                >
-                  <Save className="h-4 w-4" />
-                  {updateTenantMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit"
+                    disabled={updateTenantMutation.isPending || isSubmitting} 
+                    className="gap-2 min-w-[140px] px-6"
+                  >
+                    <Save className="h-4 w-4" />
+                    {updateTenantMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </form>
             </TabsContent>
 
             {/* Members Tab */}
@@ -194,7 +196,7 @@ export default function TenantSettingsPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </form>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

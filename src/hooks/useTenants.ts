@@ -59,7 +59,7 @@ export function useCreateTenant() {
  */
 export function useUpdateTenant() {
   const queryClient = useQueryClient()
-  const { showSuccess, showError } = useToast()
+  const { showError } = useToast()
 
   return useMutation({
     mutationFn: ({ tenantId, data }: { tenantId: string; data: UpdateTenantRequest }) => 
@@ -67,7 +67,7 @@ export function useUpdateTenant() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] })
       queryClient.invalidateQueries({ queryKey: ['tenant', variables.tenantId] })
-      showSuccess('Tenant updated successfully')
+      // Toast handled by component
     },
     onError: (error: Error) => {
       showError(error, 'Failed to update tenant')
