@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/4bc6f3d9-761e-477e-90ad-1b305b5b5e23" alt="M9d-Auth Logo" width="120" height="120">
 
-  # M9d-Auth-Web
+  # M9d-Auth-Console
 
   [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
   [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
@@ -32,8 +32,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/m9d-auth-web.git
-cd m9d-auth-web
+git clone https://github.com/your-org/m9d-auth-console.git
+cd m9d-auth-console
 
 # Install dependencies
 npm install
@@ -83,7 +83,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- 🐛 [Report Issues](https://github.com/your-org/m9d-auth-web/issues)
+- 🐛 [Report Issues](https://github.com/your-org/m9d-auth-console/issues)
 - 💬 [Join Discord](https://discord.gg/m9d-auth)
 - 📚 [Documentation](https://docs.m9d-auth.com)
 
