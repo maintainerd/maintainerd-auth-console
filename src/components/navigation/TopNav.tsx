@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -18,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from "@/store/hooks"
 import type { TenantEntity } from "@/services/api/tenant/types"
+import { CreateTenantDialog } from "@/components/dialog"
 
 export function TopNav() {
   // Note: tenantId parameter actually contains the tenant identifier (random alphanumeric)
@@ -29,6 +31,7 @@ export function TopNav() {
   const { data: tenantsData, isLoading: tenantsLoading } = useTenantsList({ limit: 100 })
   const tenants = tenantsData?.data?.rows as TenantEntity[] || []
   const profile = useAppSelector((state) => state.auth.profile)
+  const [createTenantOpen, setCreateTenantOpen] = useState(false)
 
   // Find current tenant by identifier (tenantId parameter contains the tenant identifier)
   const currentTenant = tenants.find((t: TenantEntity) => t.identifier === tenantId) || tenants[0] || { name: 'Tenant', identifier: '', description: '', is_system: false }
@@ -44,9 +47,7 @@ export function TopNav() {
   }
 
   const handleCreateTenant = () => {
-    if (tenantId) {
-      navigate(`/${tenantId}/tenant/create`)
-    }
+    setCreateTenantOpen(true)
   }
 
   const handleLogout = async () => {
@@ -252,6 +253,12 @@ export function TopNav() {
           </div>
         </div>
       </div>
+
+      {/* Create Tenant Dialog */}
+      <CreateTenantDialog
+        open={createTenantOpen}
+        onOpenChange={setCreateTenantOpen}
+      />
     </nav>
   )
 }

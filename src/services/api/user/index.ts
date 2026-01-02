@@ -107,7 +107,7 @@ export async function deleteUser(userId: string): Promise<void> {
  */
 export async function updateUserStatus(userId: string, data: UpdateUserStatusRequestInterface): Promise<UserType> {
   const endpoint = `${API_ENDPOINTS.USER}/${userId}/status`
-  const response = await put<ApiResponse<UserType>>(endpoint, data)
+  const response = await patch<ApiResponse<UserType>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data

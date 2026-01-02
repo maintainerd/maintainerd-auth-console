@@ -70,7 +70,6 @@ import SmsTemplatesPage from './pages/branding/sms-templates'
 import SmsTemplateDetailsPage from './pages/branding/sms-templates/details'
 import SmsTemplateForm from './pages/branding/sms-templates/form'
 import GeneralSettingsPage from './pages/settings'
-import TenantCreatePage from './pages/tenant-create'
 
 function App() {
   const location = useLocation()
@@ -206,7 +205,6 @@ function App() {
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
           <Route path="settings" element={<GeneralSettingsPage />} />
-          <Route path="tenant/create" element={<TenantCreatePage />} />
         </Route>
       </Routes>
       <ToastContainer

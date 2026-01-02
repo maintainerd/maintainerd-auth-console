@@ -95,6 +95,12 @@ export {
   type UserProfileFormData
 } from './userProfileSchema'
 
+// Tenant schemas
+export {
+  createTenantSchema,
+  type CreateTenantFormData
+} from './tenantSchema'
+
 // Signup Flow schemas
 export {
   signupFlowSchema,
