@@ -5,7 +5,7 @@
 /**
  * Password policies configuration
  */
-export interface PasswordPoliciesType {
+export interface PasswordPolicies {
   // Basic Requirements
   minLength?: number
   maxLength?: number
@@ -74,7 +74,7 @@ export interface PasswordPoliciesPayload {
 /**
  * API Response for password policies (backend returns snake_case)
  */
-export interface PasswordPoliciesResponseInterface {
+export interface PasswordPoliciesResponse {
   success: boolean
   data: PasswordPoliciesPayload
   message: string

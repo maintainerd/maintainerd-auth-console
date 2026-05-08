@@ -5,7 +5,7 @@ import { ArrowUpDown, Settings, Cloud, Key, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { IdentityProviderType, ProviderOption } from "@/services/api/identity-provider/types"
+import type { IdentityProvider, ProviderOption } from "@/services/api/identity-providers/types"
 
 const getInternalExternalBadge = (isSystem: boolean) => {
   if (isSystem) {
@@ -60,7 +60,7 @@ const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
 
 
 
-export const identityProviderColumns: ColumnDef<IdentityProviderType>[] = [
+export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
     id: "Identity Provider",
     accessorKey: "display_name",

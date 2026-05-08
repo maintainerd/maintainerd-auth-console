@@ -4,9 +4,9 @@ import { ArrowUpDown } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PolicyActions } from "./PolicyActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { PolicyType } from "@/services/api/policy/types"
+import type { Policy } from "@/services/api/policies/types"
 
-export const policyColumns: ColumnDef<PolicyType>[] = [
+export const policyColumns: ColumnDef<Policy>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {

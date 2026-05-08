@@ -11,14 +11,14 @@ export const API_KEY_TYPES = [
 ] as const
 
 export type ApiKeyStatus = typeof API_KEY_STATUSES[number]
-export type ApiKeyType = typeof API_KEY_TYPES[number]
+export type ApiKeyCategory = typeof API_KEY_TYPES[number]
 
 export interface ApiKey {
   id: string // UUID format
   name: string
   displayName: string
   description: string
-  type: ApiKeyType
+  type: ApiKeyCategory
   status: ApiKeyStatus
   keyPrefix: string
   permissions: string[]

@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { DataTablePagination } from "@/components/data-table"
 import { useUserIdentities } from "@/hooks/useUsers"
-import type { UserIdentityType } from "@/services/api/user/types"
+import type { UserIdentity } from "@/services/api/users/types"
 import {
   getCoreRowModel,
   useReactTable,
@@ -92,7 +92,7 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
 
           {data && data.rows.length > 0 && (
             <div className="space-y-3">
-              {data.rows.map((identity: UserIdentityType) => (
+              {data.rows.map((identity: UserIdentity) => (
                 <div
                   key={identity.user_identity_id}
                   className="flex items-start justify-between p-4 border rounded-lg"

@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { SignupFlowType, SignupFlowStatusType } from "@/services/api/signup-flow/types"
+import type { SignupFlow, SignupFlowStatus } from "@/services/api/signup-flows/types"
 
-const SIGNUP_FLOW_STATUSES: SignupFlowStatusType[] = ['active', 'inactive', 'draft']
+const SIGNUP_FLOW_STATUSES: SignupFlowStatus[] = ['active', 'inactive', 'draft']
 
 export interface FilterState {
-  status: SignupFlowStatusType[]
+  status: SignupFlowStatus[]
 }
 
 interface SignupFlowToolbarProps {
@@ -27,7 +27,7 @@ interface SignupFlowToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<SignupFlowType>
+  table: Table<SignupFlow>
 }
 
 export function SignupFlowToolbar({ filter, setFilter, filters, onFiltersChange, table }: SignupFlowToolbarProps) {

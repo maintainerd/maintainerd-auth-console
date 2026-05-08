@@ -2,7 +2,7 @@
  * IP Restriction Settings Types
  */
 
-export interface IpRestrictionSettingsType {
+export interface IpRestrictionSettings {
   ipRestrictionsEnabled: boolean
   defaultAction: string
   logBlockedAttempts: boolean
@@ -34,7 +34,7 @@ export interface IpRestrictionSettingsPayload {
   cloud_provider_blocking: boolean
 }
 
-export interface IpRestrictionSettingsResponseInterface {
+export interface IpRestrictionSettingsResponse {
   success: boolean
   data: IpRestrictionSettingsPayload
   message: string

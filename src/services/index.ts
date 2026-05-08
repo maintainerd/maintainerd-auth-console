@@ -11,12 +11,12 @@ export type * from './api/types'
 // Service-specific API types
 export type * from './api/auth/types'
 export type * from './api/setup/types'
-export type * from './api/tenant/types'
-export type * from './api/service/types'
+export type * from './api/tenants/types'
+export type * from './api/services/types'
 export type * from './api/api/types'
-export type * from './api/policy/types'
-export type * from './api/auth-client/types'
-export type * from './api/api-key/types'
+export type * from './api/policies/types'
+export type * from './api/clients/types'
+export type * from './api/api-keys/types'
 
 // Setup service functions
 export {
@@ -50,7 +50,7 @@ export {
   fetchDefaultTenant,
   fetchTenantByIdentifier,
   fetchTenant
-} from './api/tenant'
+} from './api/tenants'
 
 // Service service functions
 export {
@@ -63,7 +63,7 @@ export {
   updateServiceStatus,
   assignPolicyToService,
   removePolicyFromService
-} from './api/service'
+} from './api/services'
 
 // API service functions
 export {
@@ -86,7 +86,7 @@ export {
   deletePolicy,
   updatePolicyStatus,
   fetchServicesByPolicy
-} from './api/policy'
+} from './api/policies'
 
 // Client service functions
 export {
@@ -97,7 +97,7 @@ export {
   updateClient,
   deleteClient,
   updateClientStatus
-} from './api/auth-client'
+} from './api/clients'
 
 // API Key service functions
 export {
@@ -108,7 +108,7 @@ export {
   deleteApiKey,
   updateApiKeyStatus,
   fetchApiKeyConfig
-} from './api/api-key'
+} from './api/api-keys'
 
 // Add more services as they are created
 // export { userService, UserService } from './user_service'

@@ -3,7 +3,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchRolePermissions } from '@/services/api/role'
+import { fetchRolePermissions } from '@/services/api/roles'
 
 interface UseRolePermissionsParams {
   roleId: string

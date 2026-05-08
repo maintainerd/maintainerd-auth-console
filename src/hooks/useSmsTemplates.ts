@@ -11,13 +11,13 @@ import {
   updateSmsTemplate,
   updateSmsTemplateStatus,
   deleteSmsTemplate,
-} from '@/services/api/sms-template'
+} from '@/services/api/sms-templates'
 import type {
   SmsTemplateQueryParams,
   CreateSmsTemplateRequest,
   UpdateSmsTemplateRequest,
   UpdateSmsTemplateStatusRequest,
-} from '@/services/api/sms-template/types'
+} from '@/services/api/sms-templates/types'
 import { useToast } from './useToast'
 
 /**

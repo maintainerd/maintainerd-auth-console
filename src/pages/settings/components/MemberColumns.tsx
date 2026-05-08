@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { MemberActions } from "./MemberActions"
-import type { TenantMember } from "@/services/api/tenant/members"
+import type { TenantMember } from "@/services/api/tenants/members"
 
 export const memberColumns: ColumnDef<TenantMember>[] = [
   {

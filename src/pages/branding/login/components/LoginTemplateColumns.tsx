@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { LoginTemplateActions } from './LoginTemplateActions'
 import { formatDistanceToNow } from 'date-fns'
-import type { LoginTemplate } from '@/services/api/login-template/types'
+import type { LoginTemplate } from '@/services/api/login-templates/types'
 
 const getStatusBadge = (status: 'active' | 'inactive') => {
   const statusConfig = {

@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { IdentityProviderType } from "@/services/api/identity-provider/types"
+import type { IdentityProvider } from "@/services/api/identity-providers/types"
 
 export interface FilterState {
   status: string[]
@@ -41,7 +41,7 @@ interface SocialProviderToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<IdentityProviderType>
+  table: Table<IdentityProvider>
 }
 
 export function SocialProviderToolbar({ filter, setFilter, filters, onFiltersChange, table }: SocialProviderToolbarProps) {

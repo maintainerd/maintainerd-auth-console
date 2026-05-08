@@ -109,7 +109,7 @@ A typical `GET /users` page render flows like this:
 2. `App.tsx` matches the route and renders `UsersPage` inside `PrivateLayout`.
 3. `UsersPage` calls the `useUsers(params)` hook from `src/hooks/useUsers.ts`.
 4. The hook returns a `useQuery` result keyed by `userKeys.list(params)`.
-5. On first render, `queryFn` invokes `fetchUsers(params)` from `src/services/api/user/index.ts`.
+5. On first render, `queryFn` invokes `fetchUsers(params)` from `src/services/api/users/index.ts`.
 6. `fetchUsers` builds the URL with `URLSearchParams` and calls `get<ApiResponse<UserListResponseInterface>>(endpoint)`.
 7. The Axios instance attaches credentials, sends the request, and on success unwraps `response.data`.
 8. The hook returns `{ data, isLoading, error }`; the page renders rows.
@@ -289,7 +289,7 @@ Pages and hooks should narrow on `ApiError` rather than parsing string messages.
 
 ```ts
 import { useAuth } from '@/hooks/useAuth'
-import { fetchUsers } from '@/services/api/user'
+import { fetchUsers } from '@/services/api/users'
 ```
 
 Relative imports (`../../services/...`) are reserved for sibling files inside the same feature folder.

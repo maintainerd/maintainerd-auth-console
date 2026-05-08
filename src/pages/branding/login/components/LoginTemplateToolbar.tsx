@@ -14,13 +14,13 @@ import {
 } from '@/components/ui/popover'
 import { useDebouncedSearch } from '@/hooks/useDebouncedSearch'
 import { DataTableViewOptions } from '@/components/data-table'
-import type { LoginTemplate, LoginTemplateStatusType, TemplateType } from '@/services/api/login-template/types'
+import type { LoginTemplate, LoginTemplateStatus, TemplateType } from '@/services/api/login-templates/types'
 
-const LOGIN_TEMPLATE_STATUSES: LoginTemplateStatusType[] = ['active', 'inactive'] as const
+const LOGIN_TEMPLATE_STATUSES: LoginTemplateStatus[] = ['active', 'inactive'] as const
 const TEMPLATE_TYPES: TemplateType[] = ['classic', 'modern', 'minimal'] as const
 
 export interface FilterState {
-  status: LoginTemplateStatusType[]
+  status: LoginTemplateStatus[]
   template: TemplateType[]
 }
 

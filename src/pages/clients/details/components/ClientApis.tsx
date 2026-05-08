@@ -10,7 +10,7 @@ import { useClientApis, useRemoveClientApi, useRemoveClientApiPermission } from 
 import { useToast } from "@/hooks/useToast"
 import { AddClientApiDialog } from "./AddClientApiDialog"
 import { AddClientApiPermissionsDialog } from "./AddClientApiPermissionsDialog"
-import type { ClientApiAssociationType } from "@/services/api/auth-client/types"
+import type { ClientApiAssociation } from "@/services/api/clients/types"
 
 interface ClientApisProps {
   clientId: string
@@ -31,7 +31,7 @@ export function ClientApis({ clientId }: ClientApisProps) {
     apiName: null,
     existingPermissionIds: []
   })
-  const [deleteApiDialog, setDeleteApiDialog] = useState<{ open: boolean; api: ClientApiAssociationType | null }>({
+  const [deleteApiDialog, setDeleteApiDialog] = useState<{ open: boolean; api: ClientApiAssociation | null }>({
     open: false,
     api: null
   })

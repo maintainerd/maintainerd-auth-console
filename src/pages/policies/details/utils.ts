@@ -1,6 +1,6 @@
-import type { PolicyStatusType } from "@/services/api/policy/types"
+import type { PolicyStatus } from "@/services/api/policies/types"
 
-export function getStatusColor(status: PolicyStatusType): string {
+export function getStatusColor(status: PolicyStatus): string {
   switch (status) {
     case "active":
       return "bg-green-100 text-green-800 hover:bg-green-100"
@@ -11,7 +11,7 @@ export function getStatusColor(status: PolicyStatusType): string {
   }
 }
 
-export function getStatusText(status: PolicyStatusType): string {
+export function getStatusText(status: PolicyStatus): string {
   switch (status) {
     case "active":
       return "Active"

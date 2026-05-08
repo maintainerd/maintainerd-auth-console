@@ -11,7 +11,7 @@ import { UpdateMemberRoleDialog } from "@/pages/settings/components/UpdateMember
 import { useTenantMembers, useDeleteTenantMember } from "@/hooks/useTenantMembers"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from '@/store/hooks'
-import type { TenantMember } from "@/services/api/tenant/members"
+import type { TenantMember } from "@/services/api/tenants/members"
 import {
   getCoreRowModel,
   useReactTable,

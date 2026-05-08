@@ -14,13 +14,13 @@ import {
   updateSignupFlowStatus,
   assignSignupFlowRoles,
   removeSignupFlowRole
-} from '@/services/api/signup-flow'
+} from '@/services/api/signup-flows'
 import type {
-  SignupFlowQueryParamsInterface,
-  CreateSignupFlowRequestInterface,
-  UpdateSignupFlowRequestInterface,
-  UpdateSignupFlowStatusRequestInterface
-} from '@/services/api/signup-flow/types'
+  SignupFlowQueryParams,
+  CreateSignupFlowRequest,
+  UpdateSignupFlowRequest,
+  UpdateSignupFlowStatusRequest
+} from '@/services/api/signup-flows/types'
 
 /**
  * Query key factory for signup flows
@@ -28,17 +28,17 @@ import type {
 export const signupFlowKeys = {
   all: ['signupFlows'] as const,
   lists: () => [...signupFlowKeys.all, 'list'] as const,
-  list: (params?: SignupFlowQueryParamsInterface) => [...signupFlowKeys.lists(), params] as const,
+  list: (params?: SignupFlowQueryParams) => [...signupFlowKeys.lists(), params] as const,
   details: () => [...signupFlowKeys.all, 'detail'] as const,
   detail: (id: string) => [...signupFlowKeys.details(), id] as const,
   rolesList: (id: string) => [...signupFlowKeys.detail(id), 'roles'] as const,
-  roles: (id: string, params?: SignupFlowQueryParamsInterface) => [...signupFlowKeys.rolesList(id), params] as const,
+  roles: (id: string, params?: SignupFlowQueryParams) => [...signupFlowKeys.rolesList(id), params] as const,
 }
 
 /**
  * Hook to fetch signup flows with optional filters and pagination
  */
-export function useSignupFlows(params?: SignupFlowQueryParamsInterface) {
+export function useSignupFlows(params?: SignupFlowQueryParams) {
   return useQuery({
     queryKey: signupFlowKeys.list(params),
     queryFn: () => fetchSignupFlows(params),
@@ -63,7 +63,7 @@ export function useCreateSignupFlow() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateSignupFlowRequestInterface) => createSignupFlow(data),
+    mutationFn: (data: CreateSignupFlowRequest) => createSignupFlow(data),
     onSuccess: () => {
       // Invalidate signup flows list to refetch
       queryClient.invalidateQueries({ queryKey: signupFlowKeys.lists() })
@@ -78,7 +78,7 @@ export function useUpdateSignupFlow() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ signupFlowId, data }: { signupFlowId: string; data: UpdateSignupFlowRequestInterface }) =>
+    mutationFn: ({ signupFlowId, data }: { signupFlowId: string; data: UpdateSignupFlowRequest }) =>
       updateSignupFlow(signupFlowId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific signup flow and the list
@@ -110,7 +110,7 @@ export function useUpdateSignupFlowStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ signupFlowId, data }: { signupFlowId: string; data: UpdateSignupFlowStatusRequestInterface }) =>
+    mutationFn: ({ signupFlowId, data }: { signupFlowId: string; data: UpdateSignupFlowStatusRequest }) =>
       updateSignupFlowStatus(signupFlowId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific signup flow and the list
@@ -123,7 +123,7 @@ export function useUpdateSignupFlowStatus() {
 /**
  * Hook to fetch roles associated with a signup flow
  */
-export function useSignupFlowRoles(signupFlowId: string, params?: SignupFlowQueryParamsInterface) {
+export function useSignupFlowRoles(signupFlowId: string, params?: SignupFlowQueryParams) {
   return useQuery({
     queryKey: signupFlowKeys.roles(signupFlowId, params),
     queryFn: () => fetchSignupFlowRoles(signupFlowId, params),

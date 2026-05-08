@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/badges'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
-import type { LoginTemplate } from '@/services/api/login-template/types'
+import type { LoginTemplate } from '@/services/api/login-templates/types'
 
 interface LoginTemplateInformationProps {
   template: LoginTemplate

@@ -11,13 +11,13 @@ import {
   updatePermission, 
   deletePermission, 
   updatePermissionStatus 
-} from '@/services/api/permission'
+} from '@/services/api/permissions'
 import type {
-  PermissionQueryParamsInterface,
-  CreatePermissionRequestInterface,
-  UpdatePermissionRequestInterface,
-  UpdatePermissionStatusRequestInterface
-} from '@/services/api/permission/types'
+  PermissionQueryParams,
+  CreatePermissionRequest,
+  UpdatePermissionRequest,
+  UpdatePermissionStatusRequest
+} from '@/services/api/permissions/types'
 
 /**
  * Query key factory for permissions
@@ -25,7 +25,7 @@ import type {
 export const permissionKeys = {
   all: ['permissions'] as const,
   lists: () => [...permissionKeys.all, 'list'] as const,
-  list: (params?: PermissionQueryParamsInterface) => [...permissionKeys.lists(), params] as const,
+  list: (params?: PermissionQueryParams) => [...permissionKeys.lists(), params] as const,
   details: () => [...permissionKeys.all, 'detail'] as const,
   detail: (id: string) => [...permissionKeys.details(), id] as const,
 }
@@ -33,7 +33,7 @@ export const permissionKeys = {
 /**
  * Hook to fetch permissions with optional filters
  */
-export function usePermissions(params?: PermissionQueryParamsInterface) {
+export function usePermissions(params?: PermissionQueryParams) {
   return useQuery({
     queryKey: permissionKeys.list(params),
     queryFn: () => fetchPermissions(params),
@@ -58,7 +58,7 @@ export function useCreatePermission() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreatePermissionRequestInterface) => createPermission(data),
+    mutationFn: (data: CreatePermissionRequest) => createPermission(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: permissionKeys.lists() })
     },
@@ -72,7 +72,7 @@ export function useUpdatePermission() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ permissionId, data }: { permissionId: string; data: UpdatePermissionRequestInterface }) =>
+    mutationFn: ({ permissionId, data }: { permissionId: string; data: UpdatePermissionRequest }) =>
       updatePermission(permissionId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: permissionKeys.detail(variables.permissionId) })
@@ -102,7 +102,7 @@ export function useUpdatePermissionStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ permissionId, data }: { permissionId: string; data: UpdatePermissionStatusRequestInterface }) =>
+    mutationFn: ({ permissionId, data }: { permissionId: string; data: UpdatePermissionStatusRequest }) =>
       updatePermissionStatus(permissionId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: permissionKeys.detail(variables.permissionId) })

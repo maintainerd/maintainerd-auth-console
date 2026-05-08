@@ -1,6 +1,6 @@
-import type { ClientStatusType } from "@/services/api/auth-client/types"
+import type { ClientStatus } from "@/services/api/clients/types"
 
-export function getStatusColor(status: ClientStatusType): string {
+export function getStatusColor(status: ClientStatus): string {
   const colors = {
     active: "bg-green-100 text-green-800 border-green-200",
     inactive: "bg-gray-100 text-gray-800 border-gray-200",
@@ -8,7 +8,7 @@ export function getStatusColor(status: ClientStatusType): string {
   return colors[status] || colors.inactive
 }
 
-export function getStatusText(status: ClientStatusType): string {
+export function getStatusText(status: ClientStatus): string {
   const texts = {
     active: "Active",
     inactive: "Inactive",

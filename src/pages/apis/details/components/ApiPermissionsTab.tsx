@@ -8,7 +8,7 @@ import { DataTablePagination } from "@/components/data-table"
 import { PermissionItem } from "./PermissionItem"
 import { PermissionFormDialog } from "./PermissionFormDialog"
 import { useApiPermissions } from "../hooks/useApiPermissions"
-import type { PermissionEntity } from "@/services/api/permission/types"
+import type { PermissionEntity } from "@/services/api/permissions/types"
 import {
   getCoreRowModel,
   useReactTable,

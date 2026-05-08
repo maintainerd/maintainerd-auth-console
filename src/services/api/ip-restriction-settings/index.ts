@@ -4,13 +4,13 @@
 
 import { get, put } from '@/services'
 import type {
-  IpRestrictionSettingsType,
+  IpRestrictionSettings,
   IpRestrictionSettingsPayload,
-  IpRestrictionSettingsResponseInterface,
+  IpRestrictionSettingsResponse,
 } from './types'
 
-export async function fetchIpRestrictionSettings(): Promise<IpRestrictionSettingsType> {
-  const response = await get<IpRestrictionSettingsResponseInterface>(
+export async function fetchIpRestrictionSettings(): Promise<IpRestrictionSettings> {
+  const response = await get<IpRestrictionSettingsResponse>(
     '/security-settings/ip'
   )
 

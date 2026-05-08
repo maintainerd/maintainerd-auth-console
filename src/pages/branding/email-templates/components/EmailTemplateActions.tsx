@@ -12,14 +12,14 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUpdateEmailTemplateStatus, useDeleteEmailTemplate } from "@/hooks/useEmailTemplates"
 import { useToast } from "@/hooks/useToast"
-import type { EmailTemplate, EmailTemplateStatusType } from "@/services/api/email-template/types"
+import type { EmailTemplate, EmailTemplateStatus } from "@/services/api/email-templates/types"
 
 interface EmailTemplateActionsProps {
   template: EmailTemplate
 }
 
 interface PendingStatusAction {
-  status: EmailTemplateStatusType
+  status: EmailTemplateStatus
   title: string
   description: string
 }
@@ -43,7 +43,7 @@ export function EmailTemplateActions({ template }: EmailTemplateActionsProps) {
     navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}/edit`)
   }
 
-  const handleStatusChange = (status: EmailTemplateStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: EmailTemplateStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

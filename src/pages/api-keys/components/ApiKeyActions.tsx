@@ -12,10 +12,10 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUpdateApiKeyStatus, useDeleteApiKey } from "@/hooks/useApiKeys"
 import { useToast } from "@/hooks/useToast"
-import type { ApiKeyType } from "@/services/api/api-key/types"
+import type { ApiKey } from "@/services/api/api-keys/types"
 
 interface ApiKeyActionsProps {
-  apiKey: ApiKeyType
+  apiKey: ApiKey
 }
 
 type ApiKeyUpdatableStatus = 'active' | 'inactive'

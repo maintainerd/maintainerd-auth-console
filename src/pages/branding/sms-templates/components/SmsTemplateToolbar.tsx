@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { SmsTemplate, SmsTemplateStatusType } from "@/services/api/sms-template/types"
+import type { SmsTemplate, SmsTemplateStatus } from "@/services/api/sms-templates/types"
 
-const SMS_TEMPLATE_STATUSES: SmsTemplateStatusType[] = ['active', 'inactive'] as const
+const SMS_TEMPLATE_STATUSES: SmsTemplateStatus[] = ['active', 'inactive'] as const
 
 export interface FilterState {
-  status: SmsTemplateStatusType[]
+  status: SmsTemplateStatus[]
 }
 
 interface SmsTemplateToolbarProps {

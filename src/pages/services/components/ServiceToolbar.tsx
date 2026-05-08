@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { ServiceType } from "@/services/api/service/types"
+import type { Service } from "@/services/api/services/types"
 
 export interface FilterState {
   status: string[]
@@ -40,7 +40,7 @@ interface ServiceToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<ServiceType>
+  table: Table<Service>
 }
 
 export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange, table }: ServiceToolbarProps) {

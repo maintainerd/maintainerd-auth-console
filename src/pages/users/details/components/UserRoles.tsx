@@ -8,7 +8,7 @@ import { DataTablePagination } from "@/components/data-table"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { useUserRoles, useRemoveUserRole } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { UserRoleType } from "@/services/api/user/types"
+import type { UserRole } from "@/services/api/users/types"
 import {
   getCoreRowModel,
   useReactTable,
@@ -28,7 +28,7 @@ export function UserRoles({ userId }: UserRolesProps) {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
-    role: UserRoleType | null
+    role: UserRole | null
   }>({
     open: false,
     role: null
@@ -117,7 +117,7 @@ export function UserRoles({ userId }: UserRolesProps) {
 
           {data && data.rows.length > 0 && (
             <div className="space-y-3">
-              {data.rows.map((role: UserRoleType) => (
+              {data.rows.map((role: UserRole) => (
                 <div
                   key={role.role_id}
                   className="flex items-start justify-between p-4 border rounded-lg"

@@ -3,7 +3,7 @@
  * Type definitions for setup-related API requests and responses
  */
 
-import type { ApiResponse } from '../types/common'
+import type { ApiResponse } from '../types'
 
 export interface CreateTenantRequest {
   name: string

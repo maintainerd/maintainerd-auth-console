@@ -18,7 +18,7 @@ import { DeleteConfirmationDialog } from "@/components/dialog"
 import { useDeleteTenantMember } from "@/hooks/useTenantMembers"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from '@/store/hooks'
-import type { TenantMember } from "@/services/api/tenant/members"
+import type { TenantMember } from "@/services/api/tenants/members"
 import { UpdateMemberRoleDialog } from "@/pages/settings/components/UpdateMemberRoleDialog"
 
 interface MemberActionsProps {

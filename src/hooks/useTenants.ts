@@ -11,8 +11,8 @@ import {
   createTenant, 
   updateTenant, 
   deleteTenant 
-} from '@/services/api/tenant'
-import type { TenantListParams, CreateTenantRequest, UpdateTenantRequest } from '@/services/api/tenant/types'
+} from '@/services/api/tenants'
+import type { TenantListParams, CreateTenantRequest, UpdateTenantRequest } from '@/services/api/tenants/types'
 
 /**
  * Hook to fetch tenants list

@@ -4,13 +4,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchServices, fetchServiceById, createService, updateService, deleteService, updateServiceStatus } from '@/services/api/service'
+import { fetchServices, fetchServiceById, createService, updateService, deleteService, updateServiceStatus } from '@/services/api/services'
 import type {
-  ServiceQueryParamsInterface,
-  CreateServiceRequestInterface,
-  UpdateServiceRequestInterface,
-  UpdateServiceStatusRequestInterface
-} from '@/services/api/service/types'
+  ServiceQueryParams,
+  CreateServiceRequest,
+  UpdateServiceRequest,
+  UpdateServiceStatusRequest
+} from '@/services/api/services/types'
 
 /**
  * Query key factory for services
@@ -18,7 +18,7 @@ import type {
 export const serviceKeys = {
   all: ['services'] as const,
   lists: () => [...serviceKeys.all, 'list'] as const,
-  list: (params?: ServiceQueryParamsInterface) => [...serviceKeys.lists(), params] as const,
+  list: (params?: ServiceQueryParams) => [...serviceKeys.lists(), params] as const,
   details: () => [...serviceKeys.all, 'detail'] as const,
   detail: (id: string) => [...serviceKeys.details(), id] as const,
 }
@@ -26,7 +26,7 @@ export const serviceKeys = {
 /**
  * Hook to fetch services with optional filters and pagination
  */
-export function useServices(params?: ServiceQueryParamsInterface) {
+export function useServices(params?: ServiceQueryParams) {
   return useQuery({
     queryKey: serviceKeys.list(params),
     queryFn: () => fetchServices(params),
@@ -51,7 +51,7 @@ export function useCreateService() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateServiceRequestInterface) => createService(data),
+    mutationFn: (data: CreateServiceRequest) => createService(data),
     onSuccess: () => {
       // Invalidate services list to refetch
       queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
@@ -66,7 +66,7 @@ export function useUpdateService() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceRequestInterface }) =>
+    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceRequest }) =>
       updateService(serviceId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific service and the services list
@@ -98,7 +98,7 @@ export function useUpdateServiceStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceStatusRequestInterface }) =>
+    mutationFn: ({ serviceId, data }: { serviceId: string; data: UpdateServiceStatusRequest }) =>
       updateServiceStatus(serviceId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific service and the services list

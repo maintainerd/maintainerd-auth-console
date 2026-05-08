@@ -19,14 +19,14 @@ import {
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 import { useDeleteApi, useUpdateApiStatus } from "@/hooks/useApis"
 import { useToast } from "@/hooks/useToast"
-import type { ApiType, ApiStatusType } from "@/services/api/api/types"
+import type { Api, ApiStatus } from "@/services/api/api/types"
 
 interface ApiActionsProps {
-  api: ApiType
+  api: Api
 }
 
 type StatusAction = {
-  status: ApiStatusType
+  status: ApiStatus
   title: string
   description: string
 }
@@ -54,7 +54,7 @@ export function ApiActions({ api }: ApiActionsProps) {
     navigate(`/${tenantId}/apis/${api.api_id}/edit`)
   }
 
-  const handleStatusChange = (status: ApiStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: ApiStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

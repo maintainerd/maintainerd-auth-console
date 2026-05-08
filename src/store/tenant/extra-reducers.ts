@@ -10,9 +10,9 @@ import {
   fetchTenantByIdentifierAsync, 
   initializeTenantAsync 
 } from './actions'
-import type { TenantStateInterface } from './types'
+import type { TenantState } from './types'
 
-export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantStateInterface>) => {
+export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantState>) => {
   builder
     // Fetch tenant
     .addCase(fetchTenantAsync.pending, (state) => {

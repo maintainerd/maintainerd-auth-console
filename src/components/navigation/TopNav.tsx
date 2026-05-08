@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from "@/store/hooks"
-import type { TenantEntity } from "@/services/api/tenant/types"
+import type { TenantEntity } from "@/services/api/tenants/types"
 import { CreateTenantDialog } from "@/components/dialog"
 
 export function TopNav() {

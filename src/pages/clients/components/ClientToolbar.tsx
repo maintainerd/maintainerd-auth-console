@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { ClientType as ClientTypeData } from "@/services/api/auth-client/types"
+import type { Client as ClientTypeData } from "@/services/api/clients/types"
 
 export interface FilterState {
   status: string[]

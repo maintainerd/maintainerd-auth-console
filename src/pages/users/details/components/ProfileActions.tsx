@@ -7,13 +7,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { UserProfileType } from "@/services/api/user/types"
+import type { UserProfile } from "@/services/api/users/types"
 
 interface ProfileActionsProps {
-  profile: UserProfileType
-  onEdit: (profile: UserProfileType) => void
-  onDelete: (profile: UserProfileType) => void
-  onSetAsDefault: (profile: UserProfileType) => void
+  profile: UserProfile
+  onEdit: (profile: UserProfile) => void
+  onDelete: (profile: UserProfile) => void
+  onSetAsDefault: (profile: UserProfile) => void
 }
 
 export function ProfileActions({ profile, onEdit, onDelete, onSetAsDefault }: ProfileActionsProps) {

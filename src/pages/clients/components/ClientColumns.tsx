@@ -5,9 +5,9 @@ import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Co
 import { formatDistanceToNow } from "date-fns"
 import { ClientActions } from "./ClientActions"
 import { SystemBadge } from "@/components/badges"
-import type { ClientType, ClientStatusType, ClientTypeEnum } from "@/services/api/auth-client/types"
+import type { Client, ClientStatus, ClientType } from "@/services/api/clients/types"
 
-const getStatusBadge = (status: ClientStatusType) => {
+const getStatusBadge = (status: ClientStatus) => {
   const statusConfig = {
     active: {
       icon: CheckCircle,
@@ -30,7 +30,7 @@ const getStatusBadge = (status: ClientStatusType) => {
   )
 }
 
-const getTypeBadge = (type: ClientTypeEnum) => {
+const getTypeBadge = (type: ClientType) => {
   const typeConfig = {
     traditional: {
       icon: Globe,
@@ -71,7 +71,7 @@ const getTypeBadge = (type: ClientTypeEnum) => {
   )
 }
 
-export const clientColumns: ColumnDef<ClientType>[] = [
+export const clientColumns: ColumnDef<Client>[] = [
   {
     id: "Client",
     accessorKey: "display_name",

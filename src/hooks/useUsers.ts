@@ -23,18 +23,18 @@ import {
   verifyUserEmail,
   verifyUserPhone,
   completeUserAccount
-} from '@/services/api/user'
+} from '@/services/api/users'
 import type {
-  UserQueryParamsInterface,
-  CreateUserRequestInterface,
-  UpdateUserRequestInterface,
-  UpdateUserStatusRequestInterface,
-  UserRolesQueryParamsInterface,
-  UserIdentitiesQueryParamsInterface,
-  UserProfilesQueryParamsInterface,
-  CreateUserProfileRequestInterface,
-  UpdateUserProfileRequestInterface
-} from '@/services/api/user/types'
+  UserQueryParams,
+  CreateUserRequest,
+  UpdateUserRequest,
+  UpdateUserStatusRequest,
+  UserRolesQueryParams,
+  UserIdentitiesQueryParams,
+  UserProfilesQueryParams,
+  CreateUserProfileRequest,
+  UpdateUserProfileRequest
+} from '@/services/api/users/types'
 
 /**
  * Query key factory for users
@@ -42,21 +42,21 @@ import type {
 export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
-  list: (params?: UserQueryParamsInterface) => [...userKeys.lists(), params] as const,
+  list: (params?: UserQueryParams) => [...userKeys.lists(), params] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
   roles: (id: string) => [...userKeys.all, 'roles', id] as const,
-  rolesList: (id: string, params?: UserRolesQueryParamsInterface) => [...userKeys.roles(id), params] as const,
+  rolesList: (id: string, params?: UserRolesQueryParams) => [...userKeys.roles(id), params] as const,
   identities: (id: string) => [...userKeys.all, 'identities', id] as const,
-  identitiesList: (id: string, params?: UserIdentitiesQueryParamsInterface) => [...userKeys.identities(id), params] as const,
+  identitiesList: (id: string, params?: UserIdentitiesQueryParams) => [...userKeys.identities(id), params] as const,
   profiles: (id: string) => [...userKeys.all, 'profiles', id] as const,
-  profilesList: (id: string, params?: UserProfilesQueryParamsInterface) => [...userKeys.profiles(id), params] as const,
+  profilesList: (id: string, params?: UserProfilesQueryParams) => [...userKeys.profiles(id), params] as const,
 }
 
 /**
  * Hook to fetch users with optional filters and pagination
  */
-export function useUsers(params?: UserQueryParamsInterface) {
+export function useUsers(params?: UserQueryParams) {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => fetchUsers(params),
@@ -81,7 +81,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateUserRequestInterface) => createUser(data),
+    mutationFn: (data: CreateUserRequest) => createUser(data),
     onSuccess: () => {
       // Invalidate users list to refetch
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
@@ -96,7 +96,7 @@ export function useUpdateUser() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserRequestInterface }) =>
+    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserRequest }) =>
       updateUser(userId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific user and the list
@@ -128,7 +128,7 @@ export function useUpdateUserStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserStatusRequestInterface }) =>
+    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserStatusRequest }) =>
       updateUserStatus(userId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific user and the list
@@ -141,7 +141,7 @@ export function useUpdateUserStatus() {
 /**
  * Hook to fetch user roles with optional filters and pagination
  */
-export function useUserRoles(userId: string, params?: UserRolesQueryParamsInterface) {
+export function useUserRoles(userId: string, params?: UserRolesQueryParams) {
   return useQuery({
     queryKey: userKeys.rolesList(userId, params),
     queryFn: () => fetchUserRoles(userId, params),
@@ -152,7 +152,7 @@ export function useUserRoles(userId: string, params?: UserRolesQueryParamsInterf
 /**
  * Hook to fetch user identities with optional filters and pagination
  */
-export function useUserIdentities(userId: string, params?: UserIdentitiesQueryParamsInterface) {
+export function useUserIdentities(userId: string, params?: UserIdentitiesQueryParams) {
   return useQuery({
     queryKey: userKeys.identitiesList(userId, params),
     queryFn: () => fetchUserIdentities(userId, params),
@@ -163,7 +163,7 @@ export function useUserIdentities(userId: string, params?: UserIdentitiesQueryPa
 /**
  * Hook to fetch user profiles with optional filters and pagination
  */
-export function useUserProfiles(userId: string, params?: UserProfilesQueryParamsInterface) {
+export function useUserProfiles(userId: string, params?: UserProfilesQueryParams) {
   return useQuery({
     queryKey: userKeys.profilesList(userId, params),
     queryFn: () => fetchUserProfiles(userId, params),
@@ -212,7 +212,7 @@ export function useCreateUserProfile() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: CreateUserProfileRequestInterface }) =>
+    mutationFn: ({ userId, data }: { userId: string; data: CreateUserProfileRequest }) =>
       createUserProfile(userId, data),
     onSuccess: (_, variables) => {
       // Invalidate the profiles list for this user
@@ -228,7 +228,7 @@ export function useUpdateUserProfile() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ userId, profileId, data }: { userId: string; profileId: string; data: UpdateUserProfileRequestInterface }) =>
+    mutationFn: ({ userId, profileId, data }: { userId: string; profileId: string; data: UpdateUserProfileRequest }) =>
       updateUserProfile(userId, profileId, data),
     onSuccess: (_, variables) => {
       // Invalidate the profiles list for this user

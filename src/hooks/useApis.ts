@@ -6,10 +6,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchApis, fetchApiById, createApi, updateApi, deleteApi, updateApiStatus } from '@/services/api/api'
 import type {
-  ApiQueryParamsInterface,
-  CreateApiRequestInterface,
-  UpdateApiRequestInterface,
-  UpdateApiStatusRequestInterface
+  ApiQueryParams,
+  CreateApiRequest,
+  UpdateApiRequest,
+  UpdateApiStatusRequest
 } from '@/services/api/api/types'
 
 /**
@@ -18,7 +18,7 @@ import type {
 export const apiKeys = {
   all: ['apis'] as const,
   lists: () => [...apiKeys.all, 'list'] as const,
-  list: (params?: ApiQueryParamsInterface) => [...apiKeys.lists(), params] as const,
+  list: (params?: ApiQueryParams) => [...apiKeys.lists(), params] as const,
   details: () => [...apiKeys.all, 'detail'] as const,
   detail: (id: string) => [...apiKeys.details(), id] as const,
 }
@@ -26,7 +26,7 @@ export const apiKeys = {
 /**
  * Hook to fetch APIs with optional filters and pagination
  */
-export function useApis(params?: ApiQueryParamsInterface) {
+export function useApis(params?: ApiQueryParams) {
   return useQuery({
     queryKey: apiKeys.list(params),
     queryFn: () => fetchApis(params),
@@ -51,7 +51,7 @@ export function useCreateApi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateApiRequestInterface) => createApi(data),
+    mutationFn: (data: CreateApiRequest) => createApi(data),
     onSuccess: () => {
       // Invalidate APIs list to refetch
       queryClient.invalidateQueries({ queryKey: apiKeys.lists() })
@@ -66,7 +66,7 @@ export function useUpdateApi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiId, data }: { apiId: string; data: UpdateApiRequestInterface }) =>
+    mutationFn: ({ apiId, data }: { apiId: string; data: UpdateApiRequest }) =>
       updateApi(apiId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific API and the APIs list
@@ -98,7 +98,7 @@ export function useUpdateApiStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiId, data }: { apiId: string; data: UpdateApiStatusRequestInterface }) =>
+    mutationFn: ({ apiId, data }: { apiId: string; data: UpdateApiStatusRequest }) =>
       updateApiStatus(apiId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific API and the APIs list

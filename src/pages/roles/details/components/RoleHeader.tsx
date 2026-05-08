@@ -13,20 +13,20 @@ import {
 import { useDeleteRole } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { RoleStatusType } from "@/services/api/role/types"
+import type { RoleStatus } from "@/services/api/roles/types"
 
 interface RoleHeaderProps {
   role: {
     name: string
     description: string
-    status: RoleStatusType
+    status: RoleStatus
     is_system: boolean
     is_default: boolean
   }
   tenantId: string
   roleId: string
-  getStatusColor: (status: RoleStatusType) => string
-  getStatusText: (status: RoleStatusType) => string
+  getStatusColor: (status: RoleStatus) => string
+  getStatusText: (status: RoleStatus) => string
 }
 
 export function RoleHeader({ role, tenantId, roleId, getStatusColor, getStatusText }: RoleHeaderProps) {

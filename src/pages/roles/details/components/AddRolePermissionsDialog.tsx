@@ -29,7 +29,7 @@ import { useApis } from "@/hooks/useApis"
 import { usePermissions } from "@/hooks/usePermissions"
 import { useAddRolePermissions } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
-import type { ApiType } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 interface AddRolePermissionsDialogProps {
   open: boolean
@@ -45,7 +45,7 @@ export function AddRolePermissionsDialog({
   existingPermissionIds
 }: AddRolePermissionsDialogProps) {
   const [apiSearchOpen, setApiSearchOpen] = useState(false)
-  const [selectedApi, setSelectedApi] = useState<ApiType | null>(null)
+  const [selectedApi, setSelectedApi] = useState<Api | null>(null)
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
   const [permissionSearchQuery, setPermissionSearchQuery] = useState("")
 
@@ -78,7 +78,7 @@ export function AddRolePermissionsDialog({
     }
   }, [open])
 
-  const handleApiSelect = (api: ApiType) => {
+  const handleApiSelect = (api: Api) => {
     setSelectedApi(api)
     setSelectedPermissions([])
     setApiSearchOpen(false)

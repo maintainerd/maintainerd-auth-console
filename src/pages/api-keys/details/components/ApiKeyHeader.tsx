@@ -13,14 +13,14 @@ import {
 import { useDeleteApiKey } from "@/hooks/useApiKeys"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ApiKeyType, ApiKeyStatusType } from "@/services/api/api-key/types"
+import type { ApiKey, ApiKeyStatus } from "@/services/api/api-keys/types"
 
 interface ApiKeyHeaderProps {
-  apiKey: ApiKeyType
+  apiKey: ApiKey
   tenantId: string
   apiKeyId: string
-  getStatusColor: (status: ApiKeyStatusType) => string
-  getStatusText: (status: ApiKeyStatusType) => string
+  getStatusColor: (status: ApiKeyStatus) => string
+  getStatusText: (status: ApiKeyStatus) => string
 }
 
 export function ApiKeyHeader({

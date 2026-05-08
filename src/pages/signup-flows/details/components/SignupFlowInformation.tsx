@@ -1,9 +1,9 @@
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import type { SignupFlowType } from "@/services/api/signup-flow/types"
+import type { SignupFlow } from "@/services/api/signup-flows/types"
 
 interface SignupFlowInformationProps {
-  signupFlow: SignupFlowType
+  signupFlow: SignupFlow
 }
 
 export function SignupFlowInformation({ signupFlow }: SignupFlowInformationProps) {

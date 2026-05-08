@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { RoleType } from "@/services/api/role/types"
+import type { Role } from "@/services/api/roles/types"
 
 export interface FilterState {
   status: string[]
@@ -41,7 +41,7 @@ interface RoleToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<RoleType>
+  table: Table<Role>
 }
 
 export function RoleToolbar({ filter, setFilter, filters, onFiltersChange, table }: RoleToolbarProps) {

@@ -1,12 +1,12 @@
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { Globe, Smartphone, Monitor, Cog } from "lucide-react"
-import type { ClientTypeEnum } from "@/services/api/auth-client/types"
+import type { ClientType } from "@/services/api/clients/types"
 
 interface ClientInformationProps {
   client: {
     name: string
-    client_type: ClientTypeEnum
+    client_type: ClientType
     domain: string
     identity_provider: {
       display_name: string
@@ -15,7 +15,7 @@ interface ClientInformationProps {
   }
 }
 
-const getClientTypeConfig = (type: ClientTypeEnum) => {
+const getClientTypeConfig = (type: ClientType) => {
   const config = {
     traditional: { label: "Traditional Web Application", icon: Globe },
     spa: { label: "Single Page Application", icon: Monitor },

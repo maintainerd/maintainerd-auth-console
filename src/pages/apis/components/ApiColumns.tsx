@@ -5,11 +5,11 @@ import { ArrowUpDown, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiActions } from "./ApiActions"
 import { SystemBadge } from "@/components/badges"
-import type { ApiType } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 
 
-export const apiColumns: ColumnDef<ApiType>[] = [
+export const apiColumns: ColumnDef<Api>[] = [
   {
     accessorKey: "display_name",
     id: "api",

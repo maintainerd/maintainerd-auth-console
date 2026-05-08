@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User, Shield, Trash2, MoreHorizontal } from "lucide-react"
 import { format } from "date-fns"
-import type { TenantMember } from "@/services/api/tenant/members"
+import type { TenantMember } from "@/services/api/tenants/members"
 
 interface MemberItemProps {
   member: TenantMember

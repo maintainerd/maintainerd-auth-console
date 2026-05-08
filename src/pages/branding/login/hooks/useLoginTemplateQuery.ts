@@ -6,10 +6,10 @@
 import { useState, useMemo } from 'react'
 import type { SortingState, PaginationState } from '@tanstack/react-table'
 import { useLoginTemplates } from '@/hooks/useLoginTemplates'
-import type { LoginTemplateStatusType, TemplateType } from '@/services/api/login-template/types'
+import type { LoginTemplateStatus, TemplateType } from '@/services/api/login-templates/types'
 
 interface LoginTemplateFilters {
-  status: LoginTemplateStatusType[]
+  status: LoginTemplateStatus[]
   template: TemplateType[]
 }
 

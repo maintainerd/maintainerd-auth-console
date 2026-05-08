@@ -21,14 +21,14 @@ import {
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 import { useDeleteRole, useUpdateRoleStatus } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
-import type { RoleType, RoleStatusType } from "@/services/api/role/types"
+import type { Role, RoleStatus } from "@/services/api/roles/types"
 
 interface RoleActionsProps {
-  role: RoleType
+  role: Role
 }
 
 type StatusAction = {
-  status: RoleStatusType
+  status: RoleStatus
   title: string
   description: string
 }
@@ -56,7 +56,7 @@ export function RoleActions({ role }: RoleActionsProps) {
     navigate(`/${tenantId}/roles/${role.role_id}/edit`)
   }
 
-  const handleStatusChange = (status: RoleStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: RoleStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

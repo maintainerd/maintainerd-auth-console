@@ -4,9 +4,9 @@ import { ArrowUpDown, FileText, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ServiceActions } from "./ServiceActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { ServiceType } from "@/services/api/service/types"
+import type { Service } from "@/services/api/services/types"
 
-export const serviceColumns: ColumnDef<ServiceType>[] = [
+export const serviceColumns: ColumnDef<Service>[] = [
   {
     accessorKey: "display_name",
     id: "service",

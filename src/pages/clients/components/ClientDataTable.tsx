@@ -21,10 +21,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ClientToolbar } from "./ClientToolbar"
-import type { Client, ClientStatus, ClientType } from "../constants"
+import type { Client, ClientStatus, ClientCategory } from "../constants"
 
 interface FilterState {
-  types: ClientType[]
+  types: ClientCategory[]
   statuses: ClientStatus[]
 }
 

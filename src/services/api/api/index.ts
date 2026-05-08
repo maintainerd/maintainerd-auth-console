@@ -7,18 +7,18 @@ import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
-  ApiListResponseInterface,
-  ApiQueryParamsInterface,
-  ApiResponseInterface,
-  CreateApiRequestInterface,
-  UpdateApiRequestInterface,
-  UpdateApiStatusRequestInterface
+  ApiListResponse,
+  ApiQueryParams,
+  ApiResponse,
+  CreateApiRequest,
+  UpdateApiRequest,
+  UpdateApiStatusRequest
 } from './types'
 
 /**
  * Fetch APIs with optional filters and pagination
  */
-export async function fetchApis(params?: ApiQueryParamsInterface): Promise<ApiListResponseInterface> {
+export async function fetchApis(params?: ApiQueryParams): Promise<ApiListResponse> {
   const queryParams = new URLSearchParams()
 
   if (params) {
@@ -30,7 +30,7 @@ export async function fetchApis(params?: ApiQueryParamsInterface): Promise<ApiLi
   }
 
   const endpoint = `${API_ENDPOINTS.API}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await get<ApiResponse<ApiListResponseInterface>>(endpoint)
+  const response = await get<ApiResponse<ApiListResponse>>(endpoint)
 
   if (response.success && response.data) {
     return response.data
@@ -42,9 +42,9 @@ export async function fetchApis(params?: ApiQueryParamsInterface): Promise<ApiLi
 /**
  * Fetch a single API by ID
  */
-export async function fetchApiById(apiId: string): Promise<ApiResponseInterface> {
+export async function fetchApiById(apiId: string): Promise<ApiResponse> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}`
-  const response = await get<ApiResponse<ApiResponseInterface>>(endpoint)
+  const response = await get<ApiResponse<ApiResponse>>(endpoint)
 
   if (response.success && response.data) {
     return response.data
@@ -56,9 +56,9 @@ export async function fetchApiById(apiId: string): Promise<ApiResponseInterface>
 /**
  * Create a new API
  */
-export async function createApi(data: CreateApiRequestInterface): Promise<ApiResponseInterface> {
+export async function createApi(data: CreateApiRequest): Promise<ApiResponse> {
   const endpoint = API_ENDPOINTS.API
-  const response = await post<ApiResponse<ApiResponseInterface>>(endpoint, data)
+  const response = await post<ApiResponse<ApiResponse>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
@@ -70,9 +70,9 @@ export async function createApi(data: CreateApiRequestInterface): Promise<ApiRes
 /**
  * Update an existing API
  */
-export async function updateApi(apiId: string, data: UpdateApiRequestInterface): Promise<ApiResponseInterface> {
+export async function updateApi(apiId: string, data: UpdateApiRequest): Promise<ApiResponse> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}`
-  const response = await put<ApiResponse<ApiResponseInterface>>(endpoint, data)
+  const response = await put<ApiResponse<ApiResponse>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
@@ -96,9 +96,9 @@ export async function deleteApi(apiId: string): Promise<void> {
 /**
  * Update API status
  */
-export async function updateApiStatus(apiId: string, data: UpdateApiStatusRequestInterface): Promise<ApiResponseInterface> {
+export async function updateApiStatus(apiId: string, data: UpdateApiStatusRequest): Promise<ApiResponse> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}/status`
-  const response = await put<ApiResponse<ApiResponseInterface>>(endpoint, data)
+  const response = await put<ApiResponse<ApiResponse>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data

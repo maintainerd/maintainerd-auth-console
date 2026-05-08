@@ -22,7 +22,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { TenantMember } from "@/services/api/tenant/members"
+import type { TenantMember } from "@/services/api/tenants/members"
 
 export interface FilterState {
   role: string

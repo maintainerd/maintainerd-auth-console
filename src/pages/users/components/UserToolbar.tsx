@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { UserType } from "@/services/api/user/types"
+import type { User } from "@/services/api/users/types"
 
 const USER_STATUSES = ['active', 'inactive', 'pending', 'suspended'] as const
 
@@ -27,7 +27,7 @@ interface UserToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<UserType>
+  table: Table<User>
 }
 
 export function UserToolbar({ filter, setFilter, filters, onFiltersChange, table }: UserToolbarProps) {

@@ -11,13 +11,13 @@ import {
   updateEmailTemplate,
   updateEmailTemplateStatus,
   deleteEmailTemplate,
-} from '@/services/api/email-template'
+} from '@/services/api/email-templates'
 import type {
   EmailTemplateQueryParams,
   CreateEmailTemplateRequest,
   UpdateEmailTemplateRequest,
   UpdateEmailTemplateStatusRequest,
-} from '@/services/api/email-template/types'
+} from '@/services/api/email-templates/types'
 import { useToast } from './useToast'
 
 /**

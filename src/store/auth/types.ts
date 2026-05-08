@@ -5,7 +5,7 @@
 
 import type { ProfileEntity } from '@/services/api/auth/types'
 
-export interface AuthStateInterface {
+export interface AuthState {
   profile: ProfileEntity | null
   isAuthenticated: boolean
   isLoading: boolean
@@ -13,7 +13,7 @@ export interface AuthStateInterface {
   error: string | null
 }
 
-export interface LoginAsyncResponseType {
+export interface LoginAsyncResponse {
   success: boolean
   user: ProfileEntity
 }

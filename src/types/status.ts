@@ -6,7 +6,7 @@
 /**
  * Global status type that encompasses all possible statuses from different features
  */
-export type StatusType = 
+export type Status = 
   | 'active'
   | 'inactive'
   | 'pending'

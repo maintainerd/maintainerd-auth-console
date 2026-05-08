@@ -11,7 +11,7 @@ export const CLIENT_TYPES = [
 ] as const
 
 export type ClientStatus = typeof CLIENT_STATUSES[number]
-export type ClientType = typeof CLIENT_TYPES[number]
+export type ClientCategory = typeof CLIENT_TYPES[number]
 
 export type FieldMapping = {
   id?: string           // Unique identifier for React key
@@ -28,7 +28,7 @@ export type Client = {
   id: string
   name: string
   description: string
-  type: ClientType
+  type: ClientCategory
   status: ClientStatus
   clientId: string
   providerId: string           // Associated provider (identity or social)

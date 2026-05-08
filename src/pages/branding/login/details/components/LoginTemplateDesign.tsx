@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import type { LoginTemplateDesignMetadata } from '@/services/api/login-template/types'
+import type { LoginTemplateDesignMetadata } from '@/services/api/login-templates/types'
 
 interface LoginTemplateDesignProps {
   metadata?: LoginTemplateDesignMetadata

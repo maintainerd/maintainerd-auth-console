@@ -4,9 +4,9 @@
 
 import { get, put } from '@/services'
 import type {
-  GeneralSecuritySettingsType,
+  GeneralSecuritySettings,
   GeneralSecuritySettingsPayload,
-  GeneralSecuritySettingsResponseInterface,
+  GeneralSecuritySettingsResponse,
   ApiResponse
 } from './types'
 
@@ -17,8 +17,8 @@ const API_ENDPOINTS = {
 /**
  * Fetch general security settings
  */
-export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySettingsType> {
-  const response = await get<GeneralSecuritySettingsResponseInterface>(API_ENDPOINTS.GENERAL_SETTINGS)
+export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySettings> {
+  const response = await get<GeneralSecuritySettingsResponse>(API_ENDPOINTS.GENERAL_SETTINGS)
 
   if (!response.success) {
     throw new Error(response.message || 'Failed to fetch general security settings')
@@ -27,7 +27,7 @@ export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySet
   // Transform snake_case response to camelCase
   const data = response.data
   
-  const transformed: GeneralSecuritySettingsType = {
+  const transformed: GeneralSecuritySettings = {
     mfaRequired: data.mfa_required,
     mfaMethods: data.mfa_methods,
     passwordlessLogin: data.passwordless_login,
@@ -54,8 +54,8 @@ export async function fetchGeneralSecuritySettings(): Promise<GeneralSecuritySet
  */
 export async function updateGeneralSecuritySettings(
   data: GeneralSecuritySettingsPayload
-): Promise<GeneralSecuritySettingsType> {
-  const response = await put<ApiResponse<GeneralSecuritySettingsType>>(
+): Promise<GeneralSecuritySettings> {
+  const response = await put<ApiResponse<GeneralSecuritySettings>>(
     API_ENDPOINTS.GENERAL_SETTINGS,
     data
   )

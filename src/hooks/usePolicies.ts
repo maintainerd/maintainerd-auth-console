@@ -4,13 +4,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchPolicies, fetchPolicyById, createPolicy, updatePolicy, deletePolicy, updatePolicyStatus } from '@/services/api/policy'
+import { fetchPolicies, fetchPolicyById, createPolicy, updatePolicy, deletePolicy, updatePolicyStatus } from '@/services/api/policies'
 import type {
-  PolicyQueryParamsInterface,
-  CreatePolicyRequestInterface,
-  UpdatePolicyRequestInterface,
-  UpdatePolicyStatusRequestInterface
-} from '@/services/api/policy/types'
+  PolicyQueryParams,
+  CreatePolicyRequest,
+  UpdatePolicyRequest,
+  UpdatePolicyStatusRequest
+} from '@/services/api/policies/types'
 
 /**
  * Query key factory for policies
@@ -18,7 +18,7 @@ import type {
 export const policyKeys = {
   all: ['policies'] as const,
   lists: () => [...policyKeys.all, 'list'] as const,
-  list: (params?: PolicyQueryParamsInterface) => [...policyKeys.lists(), params] as const,
+  list: (params?: PolicyQueryParams) => [...policyKeys.lists(), params] as const,
   details: () => [...policyKeys.all, 'detail'] as const,
   detail: (id: string) => [...policyKeys.details(), id] as const,
 }
@@ -26,7 +26,7 @@ export const policyKeys = {
 /**
  * Hook to fetch policies with optional filters and pagination
  */
-export function usePolicies(params?: PolicyQueryParamsInterface) {
+export function usePolicies(params?: PolicyQueryParams) {
   return useQuery({
     queryKey: policyKeys.list(params),
     queryFn: () => fetchPolicies(params),
@@ -51,7 +51,7 @@ export function useCreatePolicy() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreatePolicyRequestInterface) => createPolicy(data),
+    mutationFn: (data: CreatePolicyRequest) => createPolicy(data),
     onSuccess: () => {
       // Invalidate policies list to refetch
       queryClient.invalidateQueries({ queryKey: policyKeys.lists() })
@@ -66,7 +66,7 @@ export function useUpdatePolicy() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ policyId, data }: { policyId: string; data: UpdatePolicyRequestInterface }) =>
+    mutationFn: ({ policyId, data }: { policyId: string; data: UpdatePolicyRequest }) =>
       updatePolicy(policyId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific policy and the policies list
@@ -98,7 +98,7 @@ export function useUpdatePolicyStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ policyId, data }: { policyId: string; data: UpdatePolicyStatusRequestInterface }) =>
+    mutationFn: ({ policyId, data }: { policyId: string; data: UpdatePolicyStatusRequest }) =>
       updatePolicyStatus(policyId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific policy and the policies list

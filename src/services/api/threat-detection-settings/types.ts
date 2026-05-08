@@ -5,7 +5,7 @@
 /**
  * Threat detection settings configuration
  */
-export interface ThreatDetectionSettingsType {
+export interface ThreatDetectionSettings {
   // Brute Force Protection
   bruteForceEnabled?: boolean
   maxFailedAttempts?: number
@@ -80,7 +80,7 @@ export interface ThreatDetectionSettingsPayload {
 /**
  * API Response for threat detection settings (backend returns snake_case)
  */
-export interface ThreatDetectionSettingsResponseInterface {
+export interface ThreatDetectionSettingsResponse {
   success: boolean
   data: ThreatDetectionSettingsPayload
   message: string

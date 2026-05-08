@@ -13,7 +13,7 @@ import {
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { useDeletePermission } from "@/hooks/usePermissions"
 import { useToast } from "@/hooks/useToast"
-import type { PermissionEntity } from "@/services/api/permission/types"
+import type { PermissionEntity } from "@/services/api/permissions/types"
 
 interface PermissionItemProps {
   permission: PermissionEntity

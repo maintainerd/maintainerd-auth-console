@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import type { TenantEntity } from "@/services/api/tenant/types"
+import type { TenantEntity } from "@/services/api/tenants/types"
 import type { BaseSettingsProps } from "./types"
 
 import type { TenantSettings } from "./types"

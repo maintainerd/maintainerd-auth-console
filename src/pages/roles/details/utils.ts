@@ -1,6 +1,6 @@
-import type { RoleStatusType } from "@/services/api/role/types"
+import type { RoleStatus } from "@/services/api/roles/types"
 
-export function getStatusColor(status: RoleStatusType): string {
+export function getStatusColor(status: RoleStatus): string {
   switch (status) {
     case "active":
       return "bg-green-100 text-green-800 border-green-200"
@@ -11,6 +11,6 @@ export function getStatusColor(status: RoleStatusType): string {
   }
 }
 
-export function getStatusText(status: RoleStatusType): string {
+export function getStatusText(status: RoleStatus): string {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }

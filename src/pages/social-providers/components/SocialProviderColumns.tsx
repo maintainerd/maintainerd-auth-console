@@ -5,7 +5,7 @@ import { ArrowUpDown, Cloud, Github, Facebook } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { SocialProviderActions } from "./SocialProviderActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
-import type { IdentityProviderType, ProviderOption } from "@/services/api/identity-provider/types"
+import type { IdentityProvider, ProviderOption } from "@/services/api/identity-providers/types"
 
 const getProviderBadge = (provider: ProviderOption) => {
   const typeConfig: Record<ProviderOption, { label: string; icon: typeof Cloud }> = {
@@ -28,7 +28,7 @@ const getProviderBadge = (provider: ProviderOption) => {
   )
 }
 
-export const socialProviderColumns: ColumnDef<IdentityProviderType>[] = [
+export const socialProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
     id: "Social Provider",
     accessorKey: "display_name",

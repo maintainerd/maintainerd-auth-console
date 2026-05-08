@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/badges"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
-import type { EmailTemplate } from "@/services/api/email-template/types"
+import type { EmailTemplate } from "@/services/api/email-templates/types"
 
 interface EmailTemplateInformationProps {
   template: EmailTemplate

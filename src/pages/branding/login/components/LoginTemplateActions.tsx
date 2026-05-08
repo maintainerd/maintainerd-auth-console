@@ -15,14 +15,14 @@ import {
   useDeleteLoginTemplate,
 } from '@/hooks/useLoginTemplates'
 import { useToast } from '@/hooks/useToast'
-import type { LoginTemplate, LoginTemplateStatusType } from '@/services/api/login-template/types'
+import type { LoginTemplate, LoginTemplateStatus } from '@/services/api/login-templates/types'
 
 interface LoginTemplateActionsProps {
   template: LoginTemplate
 }
 
 interface PendingStatusAction {
-  status: LoginTemplateStatusType
+  status: LoginTemplateStatus
   title: string
   description: string
 }
@@ -47,7 +47,7 @@ export function LoginTemplateActions({ template }: LoginTemplateActionsProps) {
   }
 
   const handleStatusChange = (
-    status: LoginTemplateStatusType,
+    status: LoginTemplateStatus,
     title: string,
     description: string
   ) => {
