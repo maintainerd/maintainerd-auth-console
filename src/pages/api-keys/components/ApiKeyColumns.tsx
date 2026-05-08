@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, CheckCircle, AlertTriangle, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiKeyActions } from "./ApiKeyActions"
-import type { ApiKeyType } from "@/services/api/api-key/types"
+import type { ApiKey } from "@/services/api/api-keys/types"
 
-type ApiKeyStatusType = 'active' | 'inactive' | 'expired'
+type ApiKeyStatus = 'active' | 'inactive' | 'expired'
 
-const getStatusBadge = (status: ApiKeyStatusType) => {
+const getStatusBadge = (status: ApiKeyStatus) => {
   const statusConfig = {
     active: {
       icon: CheckCircle,
@@ -37,7 +37,7 @@ const getStatusBadge = (status: ApiKeyStatusType) => {
 
 
 
-export const apiKeyColumns: ColumnDef<ApiKeyType>[] = [
+export const apiKeyColumns: ColumnDef<ApiKey>[] = [
   {
     id: "API Key",
     accessorKey: "name",

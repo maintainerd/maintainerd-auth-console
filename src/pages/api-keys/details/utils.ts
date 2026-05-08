@@ -1,6 +1,6 @@
-import type { ApiKeyStatusType } from "@/services/api/api-key/types"
+import type { ApiKeyStatus } from "@/services/api/api-keys/types"
 
-export function getStatusColor(status: ApiKeyStatusType): string {
+export function getStatusColor(status: ApiKeyStatus): string {
   switch (status) {
     case "active":
       return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
@@ -13,7 +13,7 @@ export function getStatusColor(status: ApiKeyStatusType): string {
   }
 }
 
-export function getStatusText(status: ApiKeyStatusType): string {
+export function getStatusText(status: ApiKeyStatus): string {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
 

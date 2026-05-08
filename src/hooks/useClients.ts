@@ -22,17 +22,17 @@ import {
   removeClientApi,
   addClientApiPermissions,
   removeClientApiPermission
-} from '@/services/api/auth-client'
+} from '@/services/api/clients'
 import type {
-  ClientQueryParamsInterface,
-  CreateClientRequestInterface,
-  UpdateClientRequestInterface,
-  UpdateClientStatusRequestInterface,
-  CreateClientUriRequestInterface,
-  UpdateClientUriRequestInterface,
-  AddClientApisRequestInterface,
-  AddClientApiPermissionsRequestInterface
-} from '@/services/api/auth-client/types'
+  ClientQueryParams,
+  CreateClientRequest,
+  UpdateClientRequest,
+  UpdateClientStatusRequest,
+  CreateClientUriRequest,
+  UpdateClientUriRequest,
+  AddClientApisRequest,
+  AddClientApiPermissionsRequest
+} from '@/services/api/clients/types'
 
 /**
  * Query key factory for clients
@@ -40,7 +40,7 @@ import type {
 export const clientKeys = {
   all: ['clients'] as const,
   lists: () => [...clientKeys.all, 'list'] as const,
-  list: (params?: ClientQueryParamsInterface) => [...clientKeys.lists(), params] as const,
+  list: (params?: ClientQueryParams) => [...clientKeys.lists(), params] as const,
   details: () => [...clientKeys.all, 'detail'] as const,
   detail: (id: string) => [...clientKeys.details(), id] as const,
   secret: (id: string) => [...clientKeys.all, 'secret', id] as const,
@@ -52,7 +52,7 @@ export const clientKeys = {
 /**
  * Hook to fetch clients with optional filters and pagination
  */
-export function useClients(params?: ClientQueryParamsInterface) {
+export function useClients(params?: ClientQueryParams) {
   return useQuery({
     queryKey: clientKeys.list(params),
     queryFn: () => fetchClients(params),
@@ -77,7 +77,7 @@ export function useCreateClient() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateClientRequestInterface) => createClient(data),
+    mutationFn: (data: CreateClientRequest) => createClient(data),
     onSuccess: () => {
       // Invalidate clients list to refetch
       queryClient.invalidateQueries({ queryKey: clientKeys.lists() })
@@ -92,7 +92,7 @@ export function useUpdateClient() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, data }: { clientId: string; data: UpdateClientRequestInterface }) =>
+    mutationFn: ({ clientId, data }: { clientId: string; data: UpdateClientRequest }) =>
       updateClient(clientId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific client and the clients list
@@ -124,7 +124,7 @@ export function useUpdateClientStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, data }: { clientId: string; data: UpdateClientStatusRequestInterface }) =>
+    mutationFn: ({ clientId, data }: { clientId: string; data: UpdateClientStatusRequest }) =>
       updateClientStatus(clientId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific client and the clients list
@@ -174,7 +174,7 @@ export function useCreateClientUri() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, data }: { clientId: string; data: CreateClientUriRequestInterface }) =>
+    mutationFn: ({ clientId, data }: { clientId: string; data: CreateClientUriRequest }) =>
       createClientUri(clientId, data),
     onSuccess: (_, variables) => {
       // Invalidate client URIs to refetch
@@ -190,7 +190,7 @@ export function useUpdateClientUri() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, clientUriId, data }: { clientId: string; clientUriId: string; data: UpdateClientUriRequestInterface }) =>
+    mutationFn: ({ clientId, clientUriId, data }: { clientId: string; clientUriId: string; data: UpdateClientUriRequest }) =>
       updateClientUri(clientId, clientUriId, data),
     onSuccess: (_, variables) => {
       // Invalidate client URIs to refetch
@@ -233,7 +233,7 @@ export function useAddClientApis() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, data }: { clientId: string; data: AddClientApisRequestInterface }) =>
+    mutationFn: ({ clientId, data }: { clientId: string; data: AddClientApisRequest }) =>
       addClientApis(clientId, data),
     onSuccess: (_, variables) => {
       // Invalidate client APIs to refetch
@@ -265,7 +265,7 @@ export function useAddClientApiPermissions() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clientId, apiId, data }: { clientId: string; apiId: string; data: AddClientApiPermissionsRequestInterface }) =>
+    mutationFn: ({ clientId, apiId, data }: { clientId: string; apiId: string; data: AddClientApiPermissionsRequest }) =>
       addClientApiPermissions(clientId, apiId, data),
     onSuccess: (_, variables) => {
       // Invalidate client APIs to refetch

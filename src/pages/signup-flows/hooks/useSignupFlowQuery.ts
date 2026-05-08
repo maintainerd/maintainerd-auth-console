@@ -1,10 +1,10 @@
 import * as React from "react"
 import type { PaginationState, SortingState } from "@tanstack/react-table"
 import { useSignupFlows } from "@/hooks/useSignupFlows"
-import type { SignupFlowStatusType } from "@/services/api/signup-flow/types"
+import type { SignupFlowStatus } from "@/services/api/signup-flows/types"
 
 interface SignupFlowFilters {
-  status: SignupFlowStatusType[]
+  status: SignupFlowStatus[]
 }
 
 export function useSignupFlowQuery() {

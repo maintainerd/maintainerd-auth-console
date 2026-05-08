@@ -4,8 +4,8 @@ import {
   addTenantMember,
   updateTenantMemberRole,
   deleteTenantMember,
-} from '@/services/api/tenant/members'
-import type { TenantMembersListParams } from '@/services/api/tenant/members'
+} from '@/services/api/tenants/members'
+import type { TenantMembersListParams } from '@/services/api/tenants/members'
 
 export function useTenantMembers(tenantId: string, params: TenantMembersListParams = {}) {
   return useQuery({

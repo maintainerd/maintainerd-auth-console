@@ -3,9 +3,9 @@
  * Redux-specific types for tenant state management
  */
 
-import type { TenantEntity } from '@/services/api/tenant/types'
+import type { TenantEntity } from '@/services/api/tenants/types'
 
-export interface TenantStateInterface {
+export interface TenantState {
   currentTenant: TenantEntity | null
   isLoading: boolean
   error: string | null

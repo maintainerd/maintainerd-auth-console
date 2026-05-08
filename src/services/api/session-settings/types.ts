@@ -5,7 +5,7 @@
 /**
  * Session settings configuration
  */
-export interface SessionSettingsType {
+export interface SessionSettings {
   // Session Timeouts
   sessionTimeout?: number
   idleTimeout?: number
@@ -70,7 +70,7 @@ export interface SessionSettingsPayload {
 /**
  * API Response for session settings (backend returns snake_case)
  */
-export interface SessionSettingsResponseInterface {
+export interface SessionSettingsResponse {
   success: boolean
   data: SessionSettingsPayload
   message: string

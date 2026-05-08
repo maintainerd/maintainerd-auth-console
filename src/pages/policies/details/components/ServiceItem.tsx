@@ -9,10 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { ServiceType } from "@/services/api/service/types"
+import type { Service } from "@/services/api/services/types"
 
 interface ServiceItemProps {
-  service: ServiceType
+  service: Service
   policyId: string
 }
 

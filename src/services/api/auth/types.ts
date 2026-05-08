@@ -3,7 +3,7 @@
  * Type definitions for authentication-related API requests and responses
  */
 
-import type { ApiResponse } from '../types/common'
+import type { ApiResponse } from '../types'
 
 /**
  * Profile entity from API

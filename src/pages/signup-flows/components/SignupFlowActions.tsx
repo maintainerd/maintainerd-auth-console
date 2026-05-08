@@ -18,10 +18,10 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useDeleteSignupFlow, useUpdateSignupFlowStatus } from "@/hooks/useSignupFlows"
 import { useToast } from "@/hooks/useToast"
-import type { SignupFlowType } from "@/services/api/signup-flow/types"
+import type { SignupFlow } from "@/services/api/signup-flows/types"
 
 interface SignupFlowActionsProps {
-  signupFlow: SignupFlowType
+  signupFlow: SignupFlow
 }
 
 export function SignupFlowActions({ signupFlow }: SignupFlowActionsProps) {

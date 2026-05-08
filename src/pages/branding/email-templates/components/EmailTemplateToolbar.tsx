@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { EmailTemplate, EmailTemplateStatusType } from "@/services/api/email-template/types"
+import type { EmailTemplate, EmailTemplateStatus } from "@/services/api/email-templates/types"
 
-const EMAIL_TEMPLATE_STATUSES: EmailTemplateStatusType[] = ['active', 'inactive'] as const
+const EMAIL_TEMPLATE_STATUSES: EmailTemplateStatus[] = ['active', 'inactive'] as const
 
 export interface FilterState {
-  status: EmailTemplateStatusType[]
+  status: EmailTemplateStatus[]
 }
 
 interface EmailTemplateToolbarProps {

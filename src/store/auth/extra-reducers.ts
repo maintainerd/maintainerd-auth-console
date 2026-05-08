@@ -5,9 +5,9 @@
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import { loginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
-import type { AuthStateInterface } from './types'
+import type { AuthState } from './types'
 
-export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthStateInterface>) => {
+export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
   builder
     // Login
     .addCase(loginAsync.pending, (state) => {

@@ -54,11 +54,11 @@ This document is the *how* counterpart to [`feature-list.md`](./feature-list.md)
 - [x] Path alias `@/*` → `src/*` configured in both `tsconfig.json` and `vite.config.ts`.
 - [x] Per-resource colocation in `services/api/<resource>/{index,types}.ts`.
 - [x] Per-feature colocation in `pages/<feature>/{index,components,details,form,hooks}/`.
-- [ ] 🟡 **Standardize folder casing.** All folders MUST be `kebab-case` (already mostly true). Verify on every new feature.
-- [ ] 🟡 **Resource-folder names must be plural** when they represent collections (`users/`, `roles/`, `clients/`). Settings-style singletons stay singular (`security-settings/`, `session-settings/`).
-- [ ] 🟡 **Service folders must match the API resource path**, not the UI label. `services/api/auth-client/` should be renamed to `services/api/clients/` to match `/api/v1/clients` and the `pages/clients/` folder. Divergence is a bug magnet.
-- [ ] 🟡 The placeholder folder `src/services/api/types/` (empty, with a sibling `types.ts` shell) should be removed. Per-resource types live in `services/api/<resource>/types.ts`.
-- [ ] 🟢 **Adopt a feature-folder convention** for any page that grows beyond ~3 files: `pages/<feature>/{index.tsx,components/,details/,form/,hooks/,types.ts,constants.ts}`. Pattern is partially in place — make it the rule.
+- [x] 🟡 **Standardize folder casing.** All folders MUST be `kebab-case` (already mostly true). Verify on every new feature.
+- [x] 🟡 **Resource-folder names must be plural** when they represent collections (`users/`, `roles/`, `clients/`). Settings-style singletons stay singular (`security-settings/`, `session-settings/`).
+- [x] 🟡 **Service folders must match the API resource path**, not the UI label. `services/api/auth-client/` should be renamed to `services/api/clients/` to match `/api/v1/clients` and the `pages/clients/` folder. Divergence is a bug magnet.
+- [x] 🟡 The placeholder folder `src/services/api/types/` (empty, with a sibling `types.ts` shell) should be removed. Per-resource types live in `services/api/<resource>/types.ts`.
+- [x] 🟢 **Adopt a feature-folder convention** for any page that grows beyond ~3 files: `pages/<feature>/{index.tsx,components/,details/,form/,hooks/,types.ts,constants.ts}`. Pattern is partially in place — make it the rule.
 - [ ] 🟢 **Where to put what** — codify in `CONTRIBUTING.md`:
   - `src/lib/` — third-party wrappers and framework glue (`queryClient.ts`, `validations/`).
   - `src/utils/` — pure, framework-agnostic helpers (`tenant.ts`, `formatDate.ts`).
@@ -72,20 +72,20 @@ This document is the *how* counterpart to [`feature-list.md`](./feature-list.md)
 | React components | `PascalCase.tsx` | `UserListTable.tsx` |
 | Hooks | `camelCase.ts` starting with `use` | `useUsers.ts` |
 | Services / utilities / constants | `camelCase.ts` | `client.ts`, `tenant.ts` |
-| Types-only files | `types.ts` (per folder) | `services/api/user/types.ts` |
-| Index barrels | `index.ts` / `index.tsx` | `services/api/user/index.ts` |
+| Types-only files | `types.ts` (per folder) | `services/api/users/types.ts` |
+| Index barrels | `index.ts` / `index.tsx` | `services/api/users/index.ts` |
 | Tests | mirrors source + `.test.ts(x)` | `useUsers.test.ts` |
 | Stories | mirrors source + `.stories.tsx` | `Button.stories.tsx` |
 
 - [ ] 🟡 Document and enforce via ESLint (`eslint-plugin-unicorn`'s `filename-case`).
-- [ ] 🟡 Avoid `index.tsx` for non-barrel pages; prefer `pages/users/UsersPage.tsx` re-exported via `pages/users/index.ts` so component names appear in stack traces.
+- [x] 🟡 Avoid `index.tsx` for non-barrel pages; prefer `pages/users/UsersPage.tsx` re-exported via `pages/users/index.ts` so component names appear in stack traces.
 
 ### Type & symbol naming
 
-- [ ] 🟡 **Drop the `Interface` / `Type` suffix from type names** (`UserType`, `UserListResponseInterface`). Prefer plain `User`, `UserListResponse`. The suffix adds noise without disambiguation.
-- [ ] 🟡 **DTO vs domain naming.** Wire shapes (matching backend payloads exactly) live in `<resource>/types.ts` and use the `Dto` suffix only when a separate domain shape exists. Prefer one shape per resource unless mapping is needed.
-- [ ] 🟢 Boolean variables prefixed `is`, `has`, `should`, `can` (`isActive`, `hasUnsavedChanges`, `canDelete`).
-- [ ] 🟢 Event handlers prefixed `handle` for local handlers and `on` for prop names (`<Button onClick={handleSubmit}>`).
+- [x] 🟡 **Drop the `Interface` / `Type` suffix from type names** (`UserType`, `UserListResponseInterface`). Prefer plain `User`, `UserListResponse`. The suffix adds noise without disambiguation. Suffix is retained only for categorical union aliases that aren't backend resources (e.g. `ApiType`, `ProviderType`, `ClientType`, `OnboardingType`, `TemplateType`, `ClientUriType`).
+- [x] 🟡 **DTO vs domain naming.** Wire shapes (matching backend payloads exactly) live in `<resource>/types.ts` and use the `Dto` suffix only when a separate domain shape exists. Prefer one shape per resource unless mapping is needed.
+- [x] 🟢 Boolean variables prefixed `is`, `has`, `should`, `can` (`isActive`, `hasUnsavedChanges`, `canDelete`).
+- [x] 🟢 Event handlers prefixed `handle` for local handlers and `on` for prop names (`<Button onClick={handleSubmit}>`).
 
 
 ## 2. Function, Hook & Variable Naming

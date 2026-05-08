@@ -3,7 +3,7 @@
  */
 
 import { useApis } from '@/hooks/useApis'
-import type { ApiQueryParamsInterface } from '@/services'
+import type { ApiQueryParams } from '@/services'
 
 interface UseServiceApisParams {
   serviceId: string
@@ -26,7 +26,7 @@ export function useServiceApis({
   displayName,
   description
 }: UseServiceApisParams) {
-  const params: ApiQueryParamsInterface = {
+  const params: ApiQueryParams = {
     service_id: serviceId,
     page,
     limit,

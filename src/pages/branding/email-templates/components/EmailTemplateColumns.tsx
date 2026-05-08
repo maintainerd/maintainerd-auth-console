@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { EmailTemplateActions } from "./EmailTemplateActions"
 import { formatDistanceToNow } from "date-fns"
-import type { EmailTemplate } from "@/services/api/email-template/types"
+import type { EmailTemplate } from "@/services/api/email-templates/types"
 
 const getStatusBadge = (status: 'active' | 'inactive') => {
   const statusConfig = {

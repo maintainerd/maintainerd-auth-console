@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { EmailTemplate } from "@/services/api/email-template/types"
+import type { EmailTemplate } from "@/services/api/email-templates/types"
 
 interface EmailTemplateContentProps {
   template: EmailTemplate

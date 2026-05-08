@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Trash2 } from "lucide-react"
-import type { TenantEntity } from "@/services/api/tenant/types"
+import type { TenantEntity } from "@/services/api/tenants/types"
 
 interface AdvancedSettingsProps {
   tenant: TenantEntity

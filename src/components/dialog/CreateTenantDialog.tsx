@@ -14,7 +14,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormTextareaField, FormSelectField, FormCheckboxField } from "@/components/form"
 import { createTenantSchema, type CreateTenantFormData } from "@/lib/validations"
 import { useCreateTenant } from "@/hooks/useTenants"
-import type { TenantStatusType } from "@/services/api/tenant/types"
+import type { TenantStatus } from "@/services/api/tenants/types"
 
 interface CreateTenantDialogProps {
   open: boolean
@@ -39,7 +39,7 @@ export function CreateTenantDialog({
       name: "",
       display_name: "",
       description: "",
-      status: "active" as TenantStatusType,
+      status: "active" as TenantStatus,
       is_public: true,
     },
   })
@@ -55,7 +55,7 @@ export function CreateTenantDialog({
     try {
       await createTenantMutation.mutateAsync({
         ...data,
-        status: data.status as TenantStatusType,
+        status: data.status as TenantStatus,
       })
       onOpenChange(false)
     } catch {

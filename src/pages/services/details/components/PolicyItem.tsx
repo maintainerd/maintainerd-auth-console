@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { useServicePolicyMutations } from "../hooks/useServicePolicyMutations"
-import type { PolicyType } from "@/services/api/policy/types"
+import type { Policy } from "@/services/api/policies/types"
 
 interface PolicyItemProps {
-  policy: PolicyType
+  policy: Policy
   serviceId: string
 }
 

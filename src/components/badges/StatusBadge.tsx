@@ -1,14 +1,14 @@
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Clock, AlertTriangle, Wrench, Archive, FileEdit, Timer } from "lucide-react"
-import type { StatusType } from "@/types/status"
+import type { Status } from "@/types/status"
 
 interface StatusBadgeProps {
-  status: StatusType
+  status: Status
   className?: string
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const statusConfig: Record<StatusType, {
+  const statusConfig: Record<Status, {
     label: string
     variant: "default" | "secondary" | "outline"
     icon: typeof CheckCircle

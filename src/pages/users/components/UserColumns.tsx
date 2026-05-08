@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
-import type { UserType } from "@/services/api/user/types"
+import type { User } from "@/services/api/users/types"
 
-type UserStatusType = 'active' | 'inactive' | 'pending' | 'suspended'
+type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended'
 
-const getStatusBadge = (status: UserStatusType) => {
+const getStatusBadge = (status: UserStatus) => {
   const statusConfig = {
     active: {
       icon: CheckCircle,
@@ -56,7 +56,7 @@ const getVerificationBadge = (isVerified: boolean, label: string) => {
   )
 }
 
-export const userColumns: ColumnDef<UserType>[] = [
+export const userColumns: ColumnDef<User>[] = [
   {
     id: "User",
     accessorKey: "username",

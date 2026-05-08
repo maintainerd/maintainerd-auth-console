@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { PolicyStatementType } from "@/services/api/policy/types"
+import type { PolicyStatement } from "@/services/api/policies/types"
 
 interface PolicyStatementsTabProps {
-  statements: PolicyStatementType[]
+  statements: PolicyStatement[]
 }
 
 export function PolicyStatementsTab({ statements }: PolicyStatementsTabProps) {

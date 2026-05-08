@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { StatusBadge } from '@/components/badges'
 import { Badge } from '@/components/ui/badge'
 import { SmsTemplateActions } from './SmsTemplateActions'
-import type { SmsTemplate } from '@/services/api/sms-template/types'
+import type { SmsTemplate } from '@/services/api/sms-templates/types'
 
 export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
   {

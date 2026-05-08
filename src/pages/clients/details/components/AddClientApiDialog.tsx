@@ -29,7 +29,7 @@ import { useApis } from "@/hooks/useApis"
 import { usePermissions } from "@/hooks/usePermissions"
 import { useAddClientApis, useAddClientApiPermissions } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
-import type { ApiType } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 interface AddClientApiDialogProps {
   open: boolean
@@ -39,7 +39,7 @@ interface AddClientApiDialogProps {
 
 export function AddClientApiDialog({ open, onOpenChange, clientId }: AddClientApiDialogProps) {
   const [apiSearchOpen, setApiSearchOpen] = useState(false)
-  const [selectedApi, setSelectedApi] = useState<ApiType | null>(null)
+  const [selectedApi, setSelectedApi] = useState<Api | null>(null)
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
   const [permissionSearchQuery, setPermissionSearchQuery] = useState("")
 
@@ -73,7 +73,7 @@ export function AddClientApiDialog({ open, onOpenChange, clientId }: AddClientAp
     }
   }, [open])
 
-  const handleApiSelect = (api: ApiType) => {
+  const handleApiSelect = (api: Api) => {
     setSelectedApi(api)
     setSelectedPermissions([])
     setApiSearchOpen(false)

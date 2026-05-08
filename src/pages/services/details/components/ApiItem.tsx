@@ -8,10 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { ApiType } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 interface ApiItemProps {
-  api: ApiType
+  api: Api
   onView: () => void
 }
 

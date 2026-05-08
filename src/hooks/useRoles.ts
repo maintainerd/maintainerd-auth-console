@@ -13,14 +13,14 @@ import {
   updateRoleStatus,
   addRolePermissions,
   removeRolePermission
-} from '@/services/api/role'
+} from '@/services/api/roles'
 import type {
-  RoleQueryParamsInterface,
-  CreateRoleRequestInterface,
-  UpdateRoleRequestInterface,
-  UpdateRoleStatusRequestInterface,
-  AddRolePermissionsRequestInterface
-} from '@/services/api/role/types'
+  RoleQueryParams,
+  CreateRoleRequest,
+  UpdateRoleRequest,
+  UpdateRoleStatusRequest,
+  AddRolePermissionsRequest
+} from '@/services/api/roles/types'
 
 /**
  * Query key factory for Roles
@@ -28,7 +28,7 @@ import type {
 export const roleKeys = {
   all: ['roles'] as const,
   lists: () => [...roleKeys.all, 'list'] as const,
-  list: (params?: RoleQueryParamsInterface) => [...roleKeys.lists(), params] as const,
+  list: (params?: RoleQueryParams) => [...roleKeys.lists(), params] as const,
   details: () => [...roleKeys.all, 'detail'] as const,
   detail: (id: string) => [...roleKeys.details(), id] as const,
 }
@@ -36,7 +36,7 @@ export const roleKeys = {
 /**
  * Hook to fetch Roles with optional filters and pagination
  */
-export function useRoles(params?: RoleQueryParamsInterface) {
+export function useRoles(params?: RoleQueryParams) {
   return useQuery({
     queryKey: roleKeys.list(params),
     queryFn: () => fetchRoles(params),
@@ -61,7 +61,7 @@ export function useCreateRole() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateRoleRequestInterface) => createRole(data),
+    mutationFn: (data: CreateRoleRequest) => createRole(data),
     onSuccess: () => {
       // Invalidate Roles list to refetch
       queryClient.invalidateQueries({ queryKey: roleKeys.lists() })
@@ -76,7 +76,7 @@ export function useUpdateRole() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roleId, data }: { roleId: string; data: UpdateRoleRequestInterface }) =>
+    mutationFn: ({ roleId, data }: { roleId: string; data: UpdateRoleRequest }) =>
       updateRole(roleId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific Role and the Roles list
@@ -108,7 +108,7 @@ export function useUpdateRoleStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roleId, data }: { roleId: string; data: UpdateRoleStatusRequestInterface }) =>
+    mutationFn: ({ roleId, data }: { roleId: string; data: UpdateRoleStatusRequest }) =>
       updateRoleStatus(roleId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific Role and the Roles list
@@ -125,7 +125,7 @@ export function useAddRolePermissions() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roleId, data }: { roleId: string; data: AddRolePermissionsRequestInterface }) =>
+    mutationFn: ({ roleId, data }: { roleId: string; data: AddRolePermissionsRequest }) =>
       addRolePermissions(roleId, data),
     onSuccess: (_, variables) => {
       // Invalidate role permissions queries to refetch

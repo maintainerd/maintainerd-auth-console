@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/badges"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
-import type { SmsTemplate } from "@/services/api/sms-template/types"
+import type { SmsTemplate } from "@/services/api/sms-templates/types"
 
 interface SmsTemplateInformationProps {
   template: SmsTemplate

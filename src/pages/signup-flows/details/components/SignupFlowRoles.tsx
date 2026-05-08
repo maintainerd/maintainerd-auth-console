@@ -9,7 +9,7 @@ import { DeleteConfirmationDialog } from "@/components/dialog"
 import { useSignupFlowRoles, useRemoveSignupFlowRole } from "@/hooks/useSignupFlows"
 import { useToast } from "@/hooks/useToast"
 import { AssignSignupFlowRolesDialog } from "./AssignSignupFlowRolesDialog"
-import type { SignupFlowRoleType } from "@/services/api/signup-flow/types"
+import type { SignupFlowRole } from "@/services/api/signup-flows/types"
 import {
   getCoreRowModel,
   useReactTable,
@@ -27,7 +27,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
   })
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<SignupFlowRoleType | null>(null)
+  const [selectedRole, setSelectedRole] = useState<SignupFlowRole | null>(null)
 
   const { showSuccess, showError } = useToast()
   const removeRoleMutation = useRemoveSignupFlowRole()
@@ -55,7 +55,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
     manualPagination: true,
   })
 
-  const handleDeleteRole = (role: SignupFlowRoleType) => {
+  const handleDeleteRole = (role: SignupFlowRole) => {
     setSelectedRole(role)
     setDeleteDialogOpen(true)
   }
@@ -120,7 +120,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
 
           {data && data.rows.length > 0 && (
             <div className="space-y-3">
-              {data.rows.map((role: SignupFlowRoleType) => (
+              {data.rows.map((role: SignupFlowRole) => (
                 <div
                   key={role.role_id}
                   className="flex items-start justify-between p-4 border rounded-lg"

@@ -18,15 +18,15 @@ import {
   removeApiKeyApi,
   addApiKeyApiPermissions,
   removeApiKeyApiPermission
-} from '@/services/api/api-key'
+} from '@/services/api/api-keys'
 import type {
-  ApiKeyQueryParamsInterface,
-  CreateApiKeyRequestInterface,
-  UpdateApiKeyRequestInterface,
-  UpdateApiKeyStatusRequestInterface,
-  AddApiKeyApisRequestInterface,
-  AddApiKeyApiPermissionsRequestInterface
-} from '@/services/api/api-key/types'
+  ApiKeyQueryParams,
+  CreateApiKeyRequest,
+  UpdateApiKeyRequest,
+  UpdateApiKeyStatusRequest,
+  AddApiKeyApisRequest,
+  AddApiKeyApiPermissionsRequest
+} from '@/services/api/api-keys/types'
 
 /**
  * Query key factory for API keys
@@ -34,7 +34,7 @@ import type {
 export const apiKeyKeys = {
   all: ['api-keys'] as const,
   lists: () => [...apiKeyKeys.all, 'list'] as const,
-  list: (params?: ApiKeyQueryParamsInterface) => [...apiKeyKeys.lists(), params] as const,
+  list: (params?: ApiKeyQueryParams) => [...apiKeyKeys.lists(), params] as const,
   details: () => [...apiKeyKeys.all, 'detail'] as const,
   detail: (id: string) => [...apiKeyKeys.details(), id] as const,
   config: (id: string) => [...apiKeyKeys.all, 'config', id] as const,
@@ -45,7 +45,7 @@ export const apiKeyKeys = {
 /**
  * Hook to fetch API keys with optional filters and pagination
  */
-export function useApiKeys(params?: ApiKeyQueryParamsInterface) {
+export function useApiKeys(params?: ApiKeyQueryParams) {
   return useQuery({
     queryKey: apiKeyKeys.list(params),
     queryFn: () => fetchApiKeys(params),
@@ -70,7 +70,7 @@ export function useCreateApiKey() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateApiKeyRequestInterface) => createApiKey(data),
+    mutationFn: (data: CreateApiKeyRequest) => createApiKey(data),
     onSuccess: () => {
       // Invalidate API keys list to refetch
       queryClient.invalidateQueries({ queryKey: apiKeyKeys.lists() })
@@ -85,7 +85,7 @@ export function useUpdateApiKey() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: UpdateApiKeyRequestInterface }) =>
+    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: UpdateApiKeyRequest }) =>
       updateApiKey(apiKeyId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific API key and the list
@@ -117,7 +117,7 @@ export function useUpdateApiKeyStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: UpdateApiKeyStatusRequestInterface }) =>
+    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: UpdateApiKeyStatusRequest }) =>
       updateApiKeyStatus(apiKeyId, data),
     onSuccess: (_, variables) => {
       // Invalidate the specific API key and the list
@@ -167,7 +167,7 @@ export function useAddApiKeyApis() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: AddApiKeyApisRequestInterface }) =>
+    mutationFn: ({ apiKeyId, data }: { apiKeyId: string; data: AddApiKeyApisRequest }) =>
       addApiKeyApis(apiKeyId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: apiKeyKeys.apis(variables.apiKeyId) })
@@ -197,7 +197,7 @@ export function useAddApiKeyApiPermissions() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ apiKeyId, apiId, data }: { apiKeyId: string; apiId: string; data: AddApiKeyApiPermissionsRequestInterface }) =>
+    mutationFn: ({ apiKeyId, apiId, data }: { apiKeyId: string; apiId: string; data: AddApiKeyApiPermissionsRequest }) =>
       addApiKeyApiPermissions(apiKeyId, apiId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: apiKeyKeys.apis(variables.apiKeyId) })

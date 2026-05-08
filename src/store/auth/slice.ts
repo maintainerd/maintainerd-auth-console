@@ -6,10 +6,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { authExtraReducers } from './extra-reducers'
-import type { AuthStateInterface } from './types'
+import type { AuthState } from './types'
 import type { ProfileEntity } from '@/services/api/auth/types'
 
-const initialState: AuthStateInterface = {
+const initialState: AuthState = {
   profile: null,
   isAuthenticated: false,
   isLoading: false,
@@ -21,14 +21,14 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    clearError: (state: AuthStateInterface) => {
+    clearError: (state: AuthState) => {
       state.error = null
     },
-    setProfile: (state: AuthStateInterface, action: PayloadAction<ProfileEntity | null>) => {
+    setProfile: (state: AuthState, action: PayloadAction<ProfileEntity | null>) => {
       state.profile = action.payload
       state.isAuthenticated = !!action.payload
     },
-    clearAuth: (state: AuthStateInterface) => {
+    clearAuth: (state: AuthState) => {
       state.profile = null
       state.isAuthenticated = false
       state.error = null

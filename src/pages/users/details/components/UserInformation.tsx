@@ -2,10 +2,10 @@ import { Mail, Phone, Calendar, CheckCircle, XCircle, Shield, Building2 } from "
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import type { UserType } from "@/services/api/user/types"
+import type { User } from "@/services/api/users/types"
 
 interface UserInformationProps {
-  user: UserType
+  user: User
 }
 
 export function UserInformation({ user }: UserInformationProps) {

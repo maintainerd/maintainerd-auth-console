@@ -14,10 +14,10 @@ import {
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 import { useDeleteUser, useVerifyUserEmail, useVerifyUserPhone, useCompleteUserAccount } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { UserType } from "@/services/api/user/types"
+import type { User } from "@/services/api/users/types"
 
 interface UserHeaderProps {
-  user: UserType
+  user: User
   tenantId: string
   userId: string
 }

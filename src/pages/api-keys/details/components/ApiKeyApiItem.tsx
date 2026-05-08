@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SystemBadge } from "@/components/badges"
 import { useApiKeyApiPermissions } from "@/hooks/useApiKeys"
-import type { ApiKeyApiItemType } from "@/services/api/api-key/types"
+import type { ApiKeyApiItem } from "@/services/api/api-keys/types"
 
 interface ApiKeyApiItemProps {
   apiKeyId: string
-  api: ApiKeyApiItemType
+  api: ApiKeyApiItem
   isExpanded: boolean
   onToggleExpand: () => void
   onDelete: () => void

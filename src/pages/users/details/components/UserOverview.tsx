@@ -1,9 +1,9 @@
 import { Settings } from "lucide-react"
 import { InformationCard } from "@/components/card"
-import type { UserType } from "@/services/api/user/types"
+import type { User } from "@/services/api/users/types"
 
 interface UserOverviewProps {
-  user: UserType
+  user: User
 }
 
 export function UserOverview({ user }: UserOverviewProps) {

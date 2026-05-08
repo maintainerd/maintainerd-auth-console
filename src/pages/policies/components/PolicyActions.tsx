@@ -16,17 +16,17 @@ import {
   Pause,
   Trash2
 } from "lucide-react"
-import type { PolicyType, PolicyStatusType } from "@/services/api/policy/types"
+import type { Policy, PolicyStatus } from "@/services/api/policies/types"
 import { useDeletePolicy, useUpdatePolicyStatus } from "@/hooks/usePolicies"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 
 interface PolicyActionsProps {
-  policy: PolicyType
+  policy: Policy
 }
 
 type StatusAction = {
-  status: PolicyStatusType
+  status: PolicyStatus
   title: string
   description: string
 }
@@ -53,7 +53,7 @@ export function PolicyActions({ policy }: PolicyActionsProps) {
     navigate(`/${tenantId}/policies/${policy.policy_id}/edit`)
   }
 
-  const handleStatusChange = (status: PolicyStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: PolicyStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

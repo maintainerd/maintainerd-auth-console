@@ -22,13 +22,13 @@ import {
 import { userProfileSchema } from "@/lib/validations"
 import { useCreateUserProfile, useUpdateUserProfile } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { UserProfileType } from "@/services/api/user/types"
+import type { UserProfile } from "@/services/api/users/types"
 
 interface ProfileFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   userId: string
-  profile?: UserProfileType
+  profile?: UserProfile
 }
 
 const GENDER_OPTIONS: SelectOption[] = [

@@ -2,12 +2,12 @@ import { FileText, Server } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { PolicyStatementsTab } from "./PolicyStatementsTab"
 import { PolicyServicesTab } from "./PolicyServicesTab"
-import type { PolicyStatementType } from "@/services/api/policy/types"
+import type { PolicyStatement } from "@/services/api/policies/types"
 
 interface PolicyTabsProps {
   activeTab: string
   setActiveTab: (tab: string) => void
-  statements: PolicyStatementType[]
+  statements: PolicyStatement[]
   tenantId: string
   policyId: string
   serviceCount: number

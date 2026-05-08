@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Check, X } from 'lucide-react'
-import type { LoginTemplateLayoutMetadata } from '@/services/api/login-template/types'
+import type { LoginTemplateLayoutMetadata } from '@/services/api/login-templates/types'
 
 interface LoginTemplateLayoutProps {
   metadata?: LoginTemplateLayoutMetadata

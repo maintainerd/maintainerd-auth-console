@@ -7,9 +7,9 @@ import { ArrowUpDown, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { RoleActions } from "./RoleActions"
 import { SystemBadge } from "@/components/badges"
-import type { RoleType } from "@/services/api/role/types"
+import type { Role } from "@/services/api/roles/types"
 
-export const roleColumns: ColumnDef<RoleType>[] = [
+export const roleColumns: ColumnDef<Role>[] = [
   {
     accessorKey: "name",
     id: "name",

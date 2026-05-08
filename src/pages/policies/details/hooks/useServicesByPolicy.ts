@@ -4,9 +4,9 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { fetchServicesByPolicy } from '@/services'
-import type { ServiceQueryParamsInterface } from '@/services/api/service/types'
+import type { ServiceQueryParams } from '@/services/api/services/types'
 
-interface UseServicesByPolicyParams extends ServiceQueryParamsInterface {
+interface UseServicesByPolicyParams extends ServiceQueryParams {
   policyId: string
 }
 
@@ -20,7 +20,7 @@ export function useServicesByPolicy({
   display_name,
   description,
 }: UseServicesByPolicyParams) {
-  const params: ServiceQueryParamsInterface = {
+  const params: ServiceQueryParams = {
     page,
     limit,
     sort_by,

@@ -4,9 +4,9 @@
 
 import { get, put } from '@/services'
 import type {
-  PasswordPoliciesType,
+  PasswordPolicies,
   PasswordPoliciesPayload,
-  PasswordPoliciesResponseInterface,
+  PasswordPoliciesResponse,
   ApiResponse
 } from './types'
 
@@ -17,8 +17,8 @@ const API_ENDPOINTS = {
 /**
  * Fetch password policies
  */
-export async function fetchPasswordPolicies(): Promise<PasswordPoliciesType> {
-  const response = await get<PasswordPoliciesResponseInterface>(API_ENDPOINTS.PASSWORD_POLICIES)
+export async function fetchPasswordPolicies(): Promise<PasswordPolicies> {
+  const response = await get<PasswordPoliciesResponse>(API_ENDPOINTS.PASSWORD_POLICIES)
 
   if (!response.success) {
     throw new Error(response.message || 'Failed to fetch password policies')
@@ -27,7 +27,7 @@ export async function fetchPasswordPolicies(): Promise<PasswordPoliciesType> {
   // Transform snake_case response to camelCase
   const data = response.data
   
-  const transformed: PasswordPoliciesType = {
+  const transformed: PasswordPolicies = {
     minLength: data.min_length,
     maxLength: data.max_length,
     requireUppercase: data.require_uppercase,
@@ -62,8 +62,8 @@ export async function fetchPasswordPolicies(): Promise<PasswordPoliciesType> {
  */
 export async function updatePasswordPolicies(
   data: PasswordPoliciesPayload
-): Promise<PasswordPoliciesType> {
-  const response = await put<ApiResponse<PasswordPoliciesType>>(
+): Promise<PasswordPolicies> {
+  const response = await put<ApiResponse<PasswordPolicies>>(
     API_ENDPOINTS.PASSWORD_POLICIES,
     data
   )

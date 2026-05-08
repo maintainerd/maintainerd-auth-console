@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/useToast"
 import { useClientSecret } from "@/hooks/useClients"
-import type { ClientTypeEnum } from "@/services/api/auth-client/types"
+import type { ClientType } from "@/services/api/clients/types"
 
 interface ClientCredentialsProps {
   clientId: string
-  clientType: ClientTypeEnum
+  clientType: ClientType
 }
 
 export function ClientCredentials({ clientId, clientType }: ClientCredentialsProps) {

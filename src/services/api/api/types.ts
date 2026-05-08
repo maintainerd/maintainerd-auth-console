@@ -2,31 +2,31 @@
  * API API Types
  */
 
-import type { StatusType } from '@/types/status'
-import type { ServiceType } from '../service/types'
+import type { Status } from '@/types/status'
+import type { Service } from '../services/types'
 
 /**
  * API status type - defines valid statuses for APIs only
  */
-export type ApiStatusType = Extract<StatusType, 'active' | 'inactive'>
+export type ApiStatus = Extract<Status, 'active' | 'inactive'>
 
 /**
  * API type enum
  */
-export type ApiTypeEnum = 'rest' | 'grpc' | 'graphql' | 'soap' | 'webhook' | 'websocket' | 'rpc'
+export type ApiType = 'rest' | 'grpc' | 'graphql' | 'soap' | 'webhook' | 'websocket' | 'rpc'
 
 /**
  * API type
  */
-export type ApiType = {
+export type Api = {
   api_id: string
   name: string
   display_name: string
   description: string
-  api_type: ApiTypeEnum
+  api_type: ApiType
   identifier: string
-  service: ServiceType
-  status: ApiStatusType
+  service: Service
+  status: ApiStatus
   is_default: boolean
   is_system: boolean
   created_at: string
@@ -36,7 +36,7 @@ export type ApiType = {
 /**
  * API list query parameters interface
  */
-export interface ApiQueryParamsInterface {
+export interface ApiQueryParams {
   name?: string
   display_name?: string
   description?: string
@@ -54,8 +54,8 @@ export interface ApiQueryParamsInterface {
 /**
  * Paginated API list response interface
  */
-export interface ApiListResponseInterface {
-  rows: ApiType[]
+export interface ApiListResponse {
+  rows: Api[]
   total: number
   page: number
   limit: number
@@ -65,15 +65,15 @@ export interface ApiListResponseInterface {
 /**
  * Single API response interface
  */
-export interface ApiResponseInterface {
+export interface ApiResponse {
   api_id: string
   name: string
   display_name: string
   description: string
-  api_type: ApiTypeEnum
+  api_type: ApiType
   identifier: string
-  service: ServiceType
-  status: ApiStatusType
+  service: Service
+  status: ApiStatus
   is_default: boolean
   is_system: boolean
   created_at: string
@@ -83,31 +83,31 @@ export interface ApiResponseInterface {
 /**
  * Create API request interface
  */
-export interface CreateApiRequestInterface {
+export interface CreateApiRequest {
   name: string
   display_name: string
   description: string
-  api_type: ApiTypeEnum
+  api_type: ApiType
   service_id: string
-  status: ApiStatusType
+  status: ApiStatus
 }
 
 /**
  * Update API request interface
  */
-export interface UpdateApiRequestInterface {
+export interface UpdateApiRequest {
   name: string
   display_name: string
   description: string
-  api_type: ApiTypeEnum
-  status: ApiStatusType
+  api_type: ApiType
+  status: ApiStatus
   service_id: string
 }
 
 /**
  * Update API status request interface
  */
-export interface UpdateApiStatusRequestInterface {
-  status: ApiStatusType
+export interface UpdateApiStatusRequest {
+  status: ApiStatus
 }
 

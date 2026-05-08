@@ -12,14 +12,14 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUpdateClientStatus, useDeleteClient } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
-import type { ClientType, ClientStatusType } from "@/services/api/auth-client/types"
+import type { Client, ClientStatus } from "@/services/api/clients/types"
 
 interface ClientActionsProps {
-  client: ClientType
+  client: Client
 }
 
 interface PendingStatusAction {
-  status: ClientStatusType
+  status: ClientStatus
   title: string
   description: string
 }
@@ -43,7 +43,7 @@ export function ClientActions({ client }: ClientActionsProps) {
     navigate(`/${tenantId}/clients/${client.client_id}/edit`)
   }
 
-  const handleStatusChange = (status: ClientStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: ClientStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

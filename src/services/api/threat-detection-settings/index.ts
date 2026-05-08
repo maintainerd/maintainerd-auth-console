@@ -4,9 +4,9 @@
 
 import { get, put } from '@/services'
 import type {
-  ThreatDetectionSettingsType,
+  ThreatDetectionSettings,
   ThreatDetectionSettingsPayload,
-  ThreatDetectionSettingsResponseInterface,
+  ThreatDetectionSettingsResponse,
   ApiResponse
 } from './types'
 
@@ -17,8 +17,8 @@ const API_ENDPOINTS = {
 /**
  * Fetch threat detection settings
  */
-export async function fetchThreatDetectionSettings(): Promise<ThreatDetectionSettingsType> {
-  const response = await get<ThreatDetectionSettingsResponseInterface>(API_ENDPOINTS.THREAT_SETTINGS)
+export async function fetchThreatDetectionSettings(): Promise<ThreatDetectionSettings> {
+  const response = await get<ThreatDetectionSettingsResponse>(API_ENDPOINTS.THREAT_SETTINGS)
 
   if (!response.success) {
     throw new Error(response.message || 'Failed to fetch threat detection settings')
@@ -27,7 +27,7 @@ export async function fetchThreatDetectionSettings(): Promise<ThreatDetectionSet
   // Transform snake_case response to camelCase
   const snakeData = response.data
   
-  const transformed: ThreatDetectionSettingsType = {
+  const transformed: ThreatDetectionSettings = {
     bruteForceEnabled: snakeData.brute_force_enabled,
     maxFailedAttempts: snakeData.max_failed_attempts,
     bruteForceWindow: snakeData.brute_force_window,
@@ -64,8 +64,8 @@ export async function fetchThreatDetectionSettings(): Promise<ThreatDetectionSet
  */
 export async function updateThreatDetectionSettings(
   data: ThreatDetectionSettingsPayload
-): Promise<ThreatDetectionSettingsType> {
-  const response = await put<ApiResponse<ThreatDetectionSettingsType>>(
+): Promise<ThreatDetectionSettings> {
+  const response = await put<ApiResponse<ThreatDetectionSettings>>(
     API_ENDPOINTS.THREAT_SETTINGS,
     data
   )

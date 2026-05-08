@@ -9,17 +9,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Edit, Trash2, Eye, Play, Pause } from "lucide-react"
-import type { IdentityProviderType, IdentityProviderStatusType } from "@/services/api/identity-provider/types"
+import type { IdentityProvider, IdentityProviderStatus } from "@/services/api/identity-providers/types"
 import { useDeleteIdentityProvider, useUpdateIdentityProviderStatus } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 
 interface SocialProviderActionsProps {
-  provider: IdentityProviderType
+  provider: IdentityProvider
 }
 
 type StatusAction = {
-  status: IdentityProviderStatusType
+  status: IdentityProviderStatus
   title: string
   description: string
 }
@@ -42,7 +42,7 @@ export function SocialProviderActions({ provider }: SocialProviderActionsProps) 
     navigate(`/${tenantId}/providers/social/${provider.identity_provider_id}/edit`)
   }
 
-  const handleStatusChange = (status: IdentityProviderStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: IdentityProviderStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

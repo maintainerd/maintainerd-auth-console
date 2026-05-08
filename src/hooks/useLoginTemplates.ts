@@ -6,13 +6,13 @@ import {
   updateLoginTemplate,
   updateLoginTemplateStatus,
   deleteLoginTemplate,
-} from '@/services/api/login-template'
+} from '@/services/api/login-templates'
 import type {
   LoginTemplateQueryParams,
   CreateLoginTemplateRequest,
   UpdateLoginTemplateRequest,
   UpdateLoginTemplateStatusRequest,
-} from '@/services/api/login-template/types'
+} from '@/services/api/login-templates/types'
 import { useToast } from './useToast'
 
 const QUERY_KEYS = {

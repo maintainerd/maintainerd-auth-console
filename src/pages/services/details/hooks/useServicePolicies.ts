@@ -3,7 +3,7 @@
  */
 
 import { usePolicies } from '@/hooks/usePolicies'
-import type { PolicyQueryParamsInterface } from '@/services'
+import type { PolicyQueryParams } from '@/services'
 
 interface UseServicePoliciesParams {
   serviceId: string
@@ -24,7 +24,7 @@ export function useServicePolicies({
   name,
   description
 }: UseServicePoliciesParams) {
-  const params: PolicyQueryParamsInterface = {
+  const params: PolicyQueryParams = {
     service_id: serviceId,
     page,
     limit,

@@ -6,10 +6,10 @@
 import { useState, useMemo } from 'react'
 import type { SortingState, PaginationState } from '@tanstack/react-table'
 import { useSmsTemplates } from '@/hooks/useSmsTemplates'
-import type { SmsTemplateStatusType } from '@/services/api/sms-template/types'
+import type { SmsTemplateStatus } from '@/services/api/sms-templates/types'
 
 interface SmsTemplateFilters {
-  status: SmsTemplateStatusType[]
+  status: SmsTemplateStatus[]
 }
 
 export function useSmsTemplateQuery() {

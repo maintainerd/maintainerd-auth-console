@@ -13,19 +13,19 @@ import {
 import { useDeleteClient } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ClientStatusType } from "@/services/api/auth-client/types"
+import type { ClientStatus } from "@/services/api/clients/types"
 
 interface ClientHeaderProps {
   client: {
     display_name: string
     name: string
-    status: ClientStatusType
+    status: ClientStatus
     is_system: boolean
   }
   tenantId: string
   clientId: string
-  getStatusColor: (status: ClientStatusType) => string
-  getStatusText: (status: ClientStatusType) => string
+  getStatusColor: (status: ClientStatus) => string
+  getStatusText: (status: ClientStatus) => string
 }
 
 export function ClientHeader({ client, tenantId, clientId, getStatusColor, getStatusText }: ClientHeaderProps) {

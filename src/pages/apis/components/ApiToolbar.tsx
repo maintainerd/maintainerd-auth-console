@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { ApiType } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 export interface FilterState {
   status: string[]
@@ -42,7 +42,7 @@ interface ApiToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<ApiType>
+  table: Table<Api>
 }
 
 export function ApiToolbar({ filter, setFilter, filters, onFiltersChange, table }: ApiToolbarProps) {

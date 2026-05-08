@@ -8,7 +8,7 @@ import { DataTablePagination } from "@/components/data-table"
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUserProfiles, useDeleteUserProfile, useSetUserProfileAsDefault } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { UserProfileType } from "@/services/api/user/types"
+import type { UserProfile } from "@/services/api/users/types"
 import { ProfileFormDialog } from "./ProfileFormDialog"
 import { ProfileActions } from "./ProfileActions"
 import {
@@ -29,7 +29,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isSetDefaultOpen, setIsSetDefaultOpen] = useState(false)
-  const [selectedProfile, setSelectedProfile] = useState<UserProfileType | undefined>()
+  const [selectedProfile, setSelectedProfile] = useState<UserProfile | undefined>()
 
   const { showSuccess, showError } = useToast()
   const deleteProfileMutation = useDeleteUserProfile()
@@ -47,17 +47,17 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     setIsFormOpen(true)
   }
 
-  const handleEditProfile = (profile: UserProfileType) => {
+  const handleEditProfile = (profile: UserProfile) => {
     setSelectedProfile(profile)
     setIsFormOpen(true)
   }
 
-  const handleDeleteProfile = (profile: UserProfileType) => {
+  const handleDeleteProfile = (profile: UserProfile) => {
     setSelectedProfile(profile)
     setIsDeleteOpen(true)
   }
 
-  const handleSetAsDefault = async (profile: UserProfileType) => {
+  const handleSetAsDefault = async (profile: UserProfile) => {
     setSelectedProfile(profile)
     setIsSetDefaultOpen(true)
   }
@@ -177,7 +177,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
 
           {data && data.rows.length > 0 && (
             <div className="space-y-4">
-              {data.rows.map((profile: UserProfileType) => (
+              {data.rows.map((profile: UserProfile) => (
                 <div
                   key={profile.profile_id}
                   className="p-4 border rounded-lg space-y-4"

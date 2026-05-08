@@ -11,13 +11,13 @@ import {
   updateIdentityProvider, 
   deleteIdentityProvider, 
   updateIdentityProviderStatus 
-} from '@/services/api/identity-provider'
+} from '@/services/api/identity-providers'
 import type {
-  IdentityProviderQueryParamsInterface,
-  CreateIdentityProviderRequestInterface,
-  UpdateIdentityProviderRequestInterface,
-  UpdateIdentityProviderStatusRequestInterface
-} from '@/services/api/identity-provider/types'
+  IdentityProviderQueryParams,
+  CreateIdentityProviderRequest,
+  UpdateIdentityProviderRequest,
+  UpdateIdentityProviderStatusRequest
+} from '@/services/api/identity-providers/types'
 
 /**
  * Query key factory for identity providers
@@ -25,7 +25,7 @@ import type {
 export const identityProviderKeys = {
   all: ['identityProviders'] as const,
   lists: () => [...identityProviderKeys.all, 'list'] as const,
-  list: (params?: IdentityProviderQueryParamsInterface) => [...identityProviderKeys.lists(), params] as const,
+  list: (params?: IdentityProviderQueryParams) => [...identityProviderKeys.lists(), params] as const,
   details: () => [...identityProviderKeys.all, 'detail'] as const,
   detail: (id: string) => [...identityProviderKeys.details(), id] as const,
 }
@@ -33,7 +33,7 @@ export const identityProviderKeys = {
 /**
  * Hook to fetch identity providers with optional filters and pagination
  */
-export function useIdentityProviders(params?: IdentityProviderQueryParamsInterface) {
+export function useIdentityProviders(params?: IdentityProviderQueryParams) {
   return useQuery({
     queryKey: identityProviderKeys.list(params),
     queryFn: () => fetchIdentityProviders(params),
@@ -58,7 +58,7 @@ export function useCreateIdentityProvider() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateIdentityProviderRequestInterface) => createIdentityProvider(data),
+    mutationFn: (data: CreateIdentityProviderRequest) => createIdentityProvider(data),
     onSuccess: () => {
       // Invalidate identity providers list to refetch
       queryClient.invalidateQueries({ queryKey: identityProviderKeys.lists() })
@@ -73,7 +73,7 @@ export function useUpdateIdentityProvider() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ identityProviderId, data }: { identityProviderId: string; data: UpdateIdentityProviderRequestInterface }) =>
+    mutationFn: ({ identityProviderId, data }: { identityProviderId: string; data: UpdateIdentityProviderRequest }) =>
       updateIdentityProvider(identityProviderId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific identity provider and the identity providers list
@@ -105,7 +105,7 @@ export function useUpdateIdentityProviderStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ identityProviderId, data }: { identityProviderId: string; data: UpdateIdentityProviderStatusRequestInterface }) =>
+    mutationFn: ({ identityProviderId, data }: { identityProviderId: string; data: UpdateIdentityProviderStatusRequest }) =>
       updateIdentityProviderStatus(identityProviderId, data),
     onSuccess: (_, variables) => {
       // Invalidate both the specific identity provider and the identity providers list

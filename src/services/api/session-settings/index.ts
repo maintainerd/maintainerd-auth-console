@@ -4,9 +4,9 @@
 
 import { get, put } from '@/services'
 import type {
-  SessionSettingsType,
+  SessionSettings,
   SessionSettingsPayload,
-  SessionSettingsResponseInterface,
+  SessionSettingsResponse,
   ApiResponse
 } from './types'
 
@@ -17,8 +17,8 @@ const API_ENDPOINTS = {
 /**
  * Fetch session settings
  */
-export async function fetchSessionSettings(): Promise<SessionSettingsType> {
-  const response = await get<SessionSettingsResponseInterface>(API_ENDPOINTS.SESSION_SETTINGS)
+export async function fetchSessionSettings(): Promise<SessionSettings> {
+  const response = await get<SessionSettingsResponse>(API_ENDPOINTS.SESSION_SETTINGS)
 
   if (!response.success) {
     throw new Error(response.message || 'Failed to fetch session settings')
@@ -27,7 +27,7 @@ export async function fetchSessionSettings(): Promise<SessionSettingsType> {
   // Transform snake_case response to camelCase
   const snakeData = response.data
   
-  const transformed: SessionSettingsType = {
+  const transformed: SessionSettings = {
     sessionTimeout: snakeData.session_timeout,
     idleTimeout: snakeData.idle_timeout,
     absoluteTimeout: snakeData.absolute_timeout,
@@ -60,8 +60,8 @@ export async function fetchSessionSettings(): Promise<SessionSettingsType> {
  */
 export async function updateSessionSettings(
   data: SessionSettingsPayload
-): Promise<SessionSettingsType> {
-  const response = await put<ApiResponse<SessionSettingsType>>(
+): Promise<SessionSettings> {
+  const response = await put<ApiResponse<SessionSettings>>(
     API_ENDPOINTS.SESSION_SETTINGS,
     data
   )

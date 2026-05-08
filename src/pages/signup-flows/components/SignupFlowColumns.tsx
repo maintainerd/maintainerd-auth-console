@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import type { SignupFlowType } from "@/services/api/signup-flow/types"
+import type { SignupFlow } from "@/services/api/signup-flows/types"
 import { SignupFlowActions } from "./SignupFlowActions"
 
-export const signupFlowColumns: ColumnDef<SignupFlowType>[] = [
+export const signupFlowColumns: ColumnDef<SignupFlow>[] = [
   {
     id: "Name",
     accessorKey: "name",

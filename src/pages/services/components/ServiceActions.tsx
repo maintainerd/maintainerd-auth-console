@@ -18,17 +18,17 @@ import {
   Archive,
   XCircle
 } from "lucide-react"
-import type { ServiceType, ServiceStatusType } from "@/services/api/service/types"
+import type { Service, ServiceStatus } from "@/services/api/services/types"
 import { useDeleteService, useUpdateServiceStatus } from "@/hooks/useServices"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 
 interface ServiceActionsProps {
-  service: ServiceType
+  service: Service
 }
 
 type StatusAction = {
-  status: ServiceStatusType
+  status: ServiceStatus
   title: string
   description: string
 }
@@ -57,7 +57,7 @@ export function ServiceActions({ service }: ServiceActionsProps) {
     navigate(`/${tenantId}/services/${service.service_id}/edit`)
   }
 
-  const handleStatusChange = (status: ServiceStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: ServiceStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

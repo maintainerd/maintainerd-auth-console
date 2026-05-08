@@ -11,4 +11,4 @@ export {
   fetchTenantByIdentifierAsync,
   initializeTenantAsync
 } from './actions'
-export type { TenantStateInterface } from './types'
+export type { TenantState } from './types'

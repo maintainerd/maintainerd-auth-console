@@ -12,14 +12,14 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUpdateSmsTemplateStatus, useDeleteSmsTemplate } from "@/hooks/useSmsTemplates"
 import { useToast } from "@/hooks/useToast"
-import type { SmsTemplate, SmsTemplateStatusType } from "@/services/api/sms-template/types"
+import type { SmsTemplate, SmsTemplateStatus } from "@/services/api/sms-templates/types"
 
 interface SmsTemplateActionsProps {
   template: SmsTemplate
 }
 
 interface PendingStatusAction {
-  status: SmsTemplateStatusType
+  status: SmsTemplateStatus
   title: string
   description: string
 }
@@ -43,7 +43,7 @@ export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
     navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}/edit`)
   }
 
-  const handleStatusChange = (status: SmsTemplateStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: SmsTemplateStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

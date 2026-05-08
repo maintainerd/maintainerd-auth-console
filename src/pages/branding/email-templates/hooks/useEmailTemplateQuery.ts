@@ -6,10 +6,10 @@
 import { useState, useMemo } from 'react'
 import type { SortingState, PaginationState } from '@tanstack/react-table'
 import { useEmailTemplates } from '@/hooks/useEmailTemplates'
-import type { EmailTemplateStatusType } from '@/services/api/email-template/types'
+import type { EmailTemplateStatus } from '@/services/api/email-templates/types'
 
 interface EmailTemplateFilters {
-  status: EmailTemplateStatusType[]
+  status: EmailTemplateStatus[]
 }
 
 export function useEmailTemplateQuery() {

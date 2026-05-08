@@ -2,7 +2,7 @@ import * as React from "react"
 import { useSearchParams } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { useIdentityProviders } from "@/hooks/useIdentityProviders"
-import type { IdentityProviderQueryParams } from "@/services/api/identity-provider/types"
+import type { IdentityProviderQueryParams } from "@/services/api/identity-providers/types"
 
 export interface FilterState {
   status: string[]

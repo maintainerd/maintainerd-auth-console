@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { SmsTemplate } from "@/services/api/sms-template/types"
+import type { SmsTemplate } from "@/services/api/sms-templates/types"
 
 interface SmsTemplateContentProps {
   template: SmsTemplate

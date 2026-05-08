@@ -13,20 +13,20 @@ import {
 import { useDeleteApi } from "@/hooks/useApis"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ApiStatusType } from "@/services/api/api/types"
+import type { ApiStatus } from "@/services/api/api/types"
 
 interface ApiHeaderProps {
   api: {
     name: string
     displayName: string
     description: string
-    status: ApiStatusType
+    status: ApiStatus
     isSystem: boolean
   }
   tenantId: string
   apiId: string
-  getStatusColor: (status: ApiStatusType) => string
-  getStatusText: (status: ApiStatusType) => string
+  getStatusColor: (status: ApiStatus) => string
+  getStatusText: (status: ApiStatus) => string
 }
 
 export function ApiHeader({ api, tenantId, apiId, getStatusColor, getStatusText }: ApiHeaderProps) {

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { policyKeys } from "@/hooks/usePolicies"
-import { fetchPolicies } from "@/services/api/policy"
+import { fetchPolicies } from "@/services/api/policies"
 import { useServicePolicyMutations } from "../hooks/useServicePolicyMutations"
 
 interface PolicyAssignDialogProps {

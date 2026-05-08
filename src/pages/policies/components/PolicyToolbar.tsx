@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { PolicyType } from "@/services/api/policy/types"
+import type { Policy } from "@/services/api/policies/types"
 
 export interface FilterState {
   status: string[]
@@ -41,7 +41,7 @@ interface PolicyToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<PolicyType>
+  table: Table<Policy>
 }
 
 export function PolicyToolbar({ filter, setFilter, filters, onFiltersChange, table }: PolicyToolbarProps) {

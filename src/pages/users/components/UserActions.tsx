@@ -12,14 +12,14 @@ import {
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUpdateUserStatus, useDeleteUser } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { UserType, UserStatusType } from "@/services/api/user/types"
+import type { User, UserStatus } from "@/services/api/users/types"
 
 interface UserActionsProps {
-  user: UserType
+  user: User
 }
 
 interface PendingStatusAction {
-  status: UserStatusType
+  status: UserStatus
   title: string
   description: string
 }
@@ -43,7 +43,7 @@ export function UserActions({ user }: UserActionsProps) {
     navigate(`/${tenantId}/users/${user.user_id}/edit`)
   }
 
-  const handleStatusChange = (status: UserStatusType, title: string, description: string) => {
+  const handleStatusChange = (status: UserStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
     setShowStatusDialog(true)
   }

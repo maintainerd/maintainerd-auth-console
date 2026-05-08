@@ -4,4 +4,4 @@
  */
 
 // Auth types are now in @/services/api/auth/types
-// Tenant types are now in @/services/api/tenant/types
+// Tenant types are now in @/services/api/tenants/types

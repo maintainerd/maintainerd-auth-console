@@ -3,7 +3,7 @@
  */
 
 import { usePermissions } from '@/hooks/usePermissions'
-import type { PermissionQueryParamsInterface } from '@/services/api/permission/types'
+import type { PermissionQueryParams } from '@/services/api/permissions/types'
 
 interface UseApiPermissionsParams {
   apiId: string
@@ -24,7 +24,7 @@ export function useApiPermissions({
   name,
   description
 }: UseApiPermissionsParams) {
-  const params: PermissionQueryParamsInterface = {
+  const params: PermissionQueryParams = {
     api_id: apiId,
     page,
     limit,

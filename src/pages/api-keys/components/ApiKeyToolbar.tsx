@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { ApiKeyType } from "@/services/api/api-key/types"
+import type { ApiKey } from "@/services/api/api-keys/types"
 
 const API_KEY_STATUSES = ['active', 'inactive'] as const
 
@@ -27,7 +27,7 @@ interface ApiKeyToolbarProps {
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<ApiKeyType>
+  table: Table<ApiKey>
 }
 
 export function ApiKeyToolbar({ filter, setFilter, filters, onFiltersChange, table }: ApiKeyToolbarProps) {

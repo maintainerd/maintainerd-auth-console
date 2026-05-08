@@ -5,7 +5,7 @@
 /**
  * General security settings configuration
  */
-export interface GeneralSecuritySettingsType {
+export interface GeneralSecuritySettings {
   // Multi-Factor Authentication
   mfaRequired?: boolean
   mfaMethods?: string[]
@@ -60,7 +60,7 @@ export interface GeneralSecuritySettingsPayload {
 /**
  * API Response for general security settings (backend returns snake_case)
  */
-export interface GeneralSecuritySettingsResponseInterface {
+export interface GeneralSecuritySettingsResponse {
   success: boolean
   data: GeneralSecuritySettingsPayload
   message: string

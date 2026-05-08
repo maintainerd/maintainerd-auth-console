@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Key } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import type { ApiKeyType } from "@/services/api/api-key/types"
+import type { ApiKey } from "@/services/api/api-keys/types"
 
 interface ApiKeyInformationProps {
-  apiKey: ApiKeyType
+  apiKey: ApiKey
 }
 
 export function ApiKeyInformation({ apiKey }: ApiKeyInformationProps) {

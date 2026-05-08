@@ -13,19 +13,19 @@ import {
 import { useDeletePolicy } from "@/hooks/usePolicies"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { PolicyStatusType } from "@/services/api/policy/types"
+import type { PolicyStatus } from "@/services/api/policies/types"
 
 interface PolicyHeaderProps {
   policy: {
     name: string
     description: string
-    status: PolicyStatusType
+    status: PolicyStatus
     is_system: boolean
   }
   tenantId: string
   policyId: string
-  getStatusColor: (status: PolicyStatusType) => string
-  getStatusText: (status: PolicyStatusType) => string
+  getStatusColor: (status: PolicyStatus) => string
+  getStatusText: (status: PolicyStatus) => string
 }
 
 export function PolicyHeader({ policy, tenantId, policyId, getStatusColor, getStatusText }: PolicyHeaderProps) {
