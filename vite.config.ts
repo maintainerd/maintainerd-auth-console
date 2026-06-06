@@ -46,9 +46,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],
-      // Scope coverage to the shared service factory (the reusable standard).
+      // Scope coverage to the shared service factory + the Users listing components.
       include: [
         'src/services/api/_lib/**',
+        'src/pages/users/components/UserActions.tsx',
+        'src/pages/users/components/UserColumns.tsx',
+        'src/pages/users/components/UserListing.tsx',
+        'src/pages/users/components/UserToolbar.tsx',
       ],
       exclude: ['**/*.test.{ts,tsx}', 'src/test/**'],
       thresholds: {
