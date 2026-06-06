@@ -4,11 +4,11 @@ import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/utils"
 import { UserListing } from "./UserListing"
 import type { User } from "@/services/api/users/types"
+import type { ServerListResult } from "@/components/data-table"
 
-const { navigateMock, useUserQueryMock, setFiltersMock } = vi.hoisted(() => ({
+const { navigateMock, useUsersMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
-  useUserQueryMock: vi.fn(),
-  setFiltersMock: vi.fn(),
+  useUsersMock: vi.fn(),
 }))
 
 vi.mock("react-router-dom", async () => {
@@ -16,12 +16,8 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
-vi.mock("../hooks/useUserQuery", () => ({
-  useUserQuery: () => useUserQueryMock(),
-}))
-
-// UserActions (rendered inside the actions column) needs these stubbed.
 vi.mock("@/hooks/useUsers", () => ({
+  useUsers: (...args: unknown[]) => useUsersMock(...args),
   useUpdateUserStatus: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useDeleteUser: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
@@ -49,31 +45,19 @@ function makeUser(overrides: Partial<User> = {}): User {
   }
 }
 
-type QueryReturn = ReturnType<typeof baseQuery>
-
-function baseQuery(overrides: Partial<ReturnType<typeof baseQueryShape>> = {}) {
-  return { ...baseQueryShape(), ...overrides }
+interface UseUsersReturn {
+  data?: ServerListResult<User>
+  isLoading: boolean
+  error: Error | null
 }
 
-function baseQueryShape() {
-  return {
-    users: [] as User[],
-    rowCount: 0,
+function setUsers(value: Partial<UseUsersReturn>) {
+  useUsersMock.mockReturnValue({
+    data: { rows: [], total: 0 },
     isLoading: false,
-    error: null as Error | null,
-    searchQuery: "",
-    setSearchQuery: vi.fn(),
-    filters: { status: [] as string[] },
-    setFilters: setFiltersMock,
-    sorting: [{ id: "created_at", desc: false }],
-    setSorting: vi.fn(),
-    pagination: { pageIndex: 0, pageSize: 10 },
-    setPagination: vi.fn(),
-  }
-}
-
-function setQuery(value: QueryReturn) {
-  useUserQueryMock.mockReturnValue(value)
+    error: null,
+    ...value,
+  })
 }
 
 const u = () => userEvent.setup({ pointerEventsCheck: 0 })
@@ -81,15 +65,11 @@ const u = () => userEvent.setup({ pointerEventsCheck: 0 })
 describe("UserListing", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    setUsers({})
   })
 
   it("renders rows and navigates on row click", async () => {
-    setQuery(
-      baseQuery({
-        users: [makeUser({ user_id: "u9", fullname: "Jane Doe" })],
-        rowCount: 1,
-      }),
-    )
+    setUsers({ data: { rows: [makeUser({ user_id: "u9", fullname: "Jane Doe" })], total: 1 } })
     const user = u()
     renderWithProviders(<UserListing />)
 
@@ -98,31 +78,88 @@ describe("UserListing", () => {
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/users/u9"))
   })
 
-  it("shows the active-filters chip and Clear all calls setFilters", async () => {
-    setQuery(
-      baseQuery({
-        users: [makeUser()],
-        rowCount: 1,
-        filters: { status: ["active", "pending"] },
-      }),
-    )
-    const user = u()
-    renderWithProviders(<UserListing />)
-
-    expect(screen.getByText("Status: active, pending")).toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: /clear all/i }))
-    expect(setFiltersMock).toHaveBeenCalledWith({ status: [] })
-  })
-
-  it("renders the loading state without crashing", () => {
-    setQuery(baseQuery({ isLoading: true }))
+  it("renders the loading state", () => {
+    setUsers({ isLoading: true })
     renderWithProviders(<UserListing />)
     expect(screen.getByPlaceholderText(/search users/i)).toBeInTheDocument()
   })
 
-  it("renders the error state without crashing", () => {
-    setQuery(baseQuery({ error: new Error("failed") }))
+  it("renders the error state", () => {
+    setUsers({ error: new Error("failed") })
     renderWithProviders(<UserListing />)
     expect(screen.getByText(/failed to load data/i)).toBeInTheDocument()
+  })
+
+  it("clicking New User navigates to the create route", async () => {
+    setUsers({ data: { rows: [makeUser()], total: 1 } })
+    const user = u()
+    renderWithProviders(<UserListing />)
+
+    await user.click(screen.getByRole("button", { name: /new user/i }))
+    expect(navigateMock).toHaveBeenCalledWith("/t1/users/create")
+  })
+
+  it("typing in the search box debounces into the API params", async () => {
+    setUsers({ data: { rows: [makeUser()], total: 1 } })
+    renderWithProviders(<UserListing />)
+
+    const input = screen.getByPlaceholderText(/search users/i)
+    const user = u()
+    await user.type(input, "alice")
+
+    await waitFor(() =>
+      expect(useUsersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ username: "alice", email: "alice", phone: "alice" }),
+      ),
+    )
+  })
+
+  it("toggling a Status filter checkbox updates the API params and shows the chip", async () => {
+    setUsers({ data: { rows: [makeUser()], total: 1 } })
+    const user = u()
+    renderWithProviders(<UserListing />)
+
+    await user.click(screen.getByRole("button", { name: /filters/i }))
+    const checkbox = await screen.findByRole("checkbox", { name: "active" })
+    await user.click(checkbox)
+
+    await waitFor(() =>
+      expect(useUsersMock).toHaveBeenCalledWith(expect.objectContaining({ status: "active" })),
+    )
+    expect(await screen.findByText("Status: active")).toBeInTheDocument()
+  })
+
+  it("Clear all removes the active filters", async () => {
+    setUsers({ data: { rows: [makeUser()], total: 1 } })
+    const user = u()
+    renderWithProviders(<UserListing />)
+
+    await user.click(screen.getByRole("button", { name: /filters/i }))
+    const checkbox = await screen.findByRole("checkbox", { name: "active" })
+    await user.click(checkbox)
+
+    expect(await screen.findByText("Status: active")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Clear all" }))
+    await waitFor(() => expect(screen.queryByText("Status: active")).not.toBeInTheDocument())
+  })
+
+  it("clicking a sortable column header toggles sort in the API params", async () => {
+    setUsers({ data: { rows: [makeUser()], total: 1 } })
+    const user = u()
+    renderWithProviders(<UserListing />)
+
+    await user.click(screen.getByRole("button", { name: /^status$/i }))
+    await waitFor(() =>
+      expect(useUsersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ sort_by: "Status", sort_order: "asc" }),
+      ),
+    )
+    // Toggle again -> desc
+    await user.click(screen.getByRole("button", { name: /^status$/i }))
+    await waitFor(() =>
+      expect(useUsersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ sort_by: "Status", sort_order: "desc" }),
+      ),
+    )
   })
 })
