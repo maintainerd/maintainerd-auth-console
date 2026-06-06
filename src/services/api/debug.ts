@@ -58,5 +58,6 @@ if (import.meta.env.DEV) {
   console.log('💡 Run debugApiConnection() in console to test API connectivity')
   
   // Make it available globally for console debugging
-  ;(window as any).debugApiConnection = debugApiConnection
+  ;(window as Window & { debugApiConnection?: typeof debugApiConnection }).debugApiConnection =
+    debugApiConnection
 }

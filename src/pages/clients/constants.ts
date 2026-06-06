@@ -15,13 +15,13 @@ export type ClientCategory = typeof CLIENT_TYPES[number]
 
 export type FieldMapping = {
   id?: string           // Unique identifier for React key
-  fieldType: "standard" | "custom" // Whether it's a standard field or custom field
+  fieldType?: "standard" | "custom" // Whether it's a standard field or custom field
   localField?: string    // Local field name for standard fields (e.g., "email", "username", "firstName")
   customFieldName?: string // Custom field name when fieldType is "custom"
   externalField: string // External provider field name (e.g., "email_address", "login", "given_name")
   required: boolean     // Whether this field mapping is required
   transform?: string    // Optional transformation rule (e.g., "lowercase", "trim")
-  category: "user" | "profile" | "custom" // Where the field is stored
+  category?: "user" | "profile" | "custom" // Where the field is stored
 }
 
 export type Client = {

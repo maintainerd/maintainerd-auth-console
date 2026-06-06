@@ -5,7 +5,7 @@ export type PolicyStatement = {
   effect: PolicyEffect
   actions: string[]
   resources: string[]
-  conditions?: Record<string, any>
+  conditions?: Record<string, unknown>
 }
 
 export type Policy = {

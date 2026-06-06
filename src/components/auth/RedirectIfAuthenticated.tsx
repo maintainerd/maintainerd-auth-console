@@ -28,7 +28,7 @@ export function RedirectIfAuthenticated({
     const defaultRedirect = currentTenant ? `/${currentTenant.identifier}/dashboard` : '/def4ult/dashboard'
 
     // Check if there's a redirect location from the login state
-    const from = (location.state as any)?.from?.pathname || redirectTo || defaultRedirect
+    const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || redirectTo || defaultRedirect
     return <Navigate to={from} replace />
   }
 

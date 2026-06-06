@@ -20,12 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ApiKeyToolbar } from "./ApiKeyToolbar"
-import type { ApiKey, ApiKeyStatus } from "../constants"
-
-interface FilterState {
-  statuses: ApiKeyStatus[]
-}
+import type { Table as TableType } from "@tanstack/react-table"
+import { ApiKeyToolbar, type FilterState } from "./ApiKeyToolbar"
+import type { ApiKey } from "../constants"
+import type { ApiKey as ApiKeyResource } from "@/services/api/api-keys/types"
 
 interface ApiKeyDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -42,7 +40,7 @@ export function ApiKeyDataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState({})
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filters, setFilters] = React.useState<FilterState>({
-    statuses: []
+    status: []
   })
 
   const filteredData = React.useMemo(() => {
@@ -57,7 +55,7 @@ export function ApiKeyDataTable<TData, TValue>({
         apiKey.permissions.some(permission => permission.toLowerCase().includes(searchLower))
 
       // Status filter
-      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(apiKey.status)
+      const matchesStatus = filters.status.length === 0 || filters.status.includes(apiKey.status)
 
       return matchesSearch && matchesStatus
     })
@@ -90,8 +88,8 @@ export function ApiKeyDataTable<TData, TValue>({
   // Active filters display
   const activeFilters = React.useMemo(() => {
     const filtersList = []
-    if (filters.statuses.length > 0) {
-      filtersList.push(`Status: ${filters.statuses.join(", ")}`)
+    if (filters.status.length > 0) {
+      filtersList.push(`Status: ${filters.status.join(", ")}`)
     }
     return filtersList
   }, [filters])
@@ -99,10 +97,11 @@ export function ApiKeyDataTable<TData, TValue>({
   return (
     <div className="w-full space-y-4">
       <ApiKeyToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        filter={searchQuery}
+        setFilter={setSearchQuery}
         filters={filters}
         onFiltersChange={setFilters}
+        table={table as unknown as TableType<ApiKeyResource>}
       />
 
       {/* Active Filters Display */}
@@ -119,7 +118,7 @@ export function ApiKeyDataTable<TData, TValue>({
             size="sm"
             className="h-6 px-2 text-xs"
             onClick={() => setFilters({
-              statuses: []
+              status: []
             })}
           >
             Clear all

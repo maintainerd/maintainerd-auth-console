@@ -133,7 +133,7 @@ export const setupProfileContactSchema = yup.object().shape({
       if (!value || value.trim() === '') return undefined
       return value.trim()
     })
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number')
+    .matches(/^\+?[1-9][\d]{0,15}$/, 'Please enter a valid phone number')
 })
 
 // Setup Profile Form Schema - Step 3: Location & Preferences

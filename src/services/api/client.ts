@@ -90,7 +90,11 @@ axiosInstance.interceptors.response.use(
 
     if (error.response) {
       // Server responded with error status
-      const data = error.response.data as any
+      const data = error.response.data as {
+        error?: string
+        details?: string | object
+        success?: boolean
+      } | undefined
       const errorMessage = data?.error || `HTTP ${error.response.status}: ${error.response.statusText}`
       const errorDetails = data?.details || undefined
 
@@ -143,7 +147,7 @@ export async function get<T>(endpoint: string, config?: AxiosRequestConfig): Pro
 /**
  * HTTP POST request
  */
-export async function post<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export async function post<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
   const response = await axiosInstance.post<T>(endpoint, data, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }
@@ -151,7 +155,7 @@ export async function post<T>(endpoint: string, data?: any, config?: AxiosReques
 /**
  * HTTP PUT request
  */
-export async function put<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export async function put<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
   const response = await axiosInstance.put<T>(endpoint, data, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }
@@ -167,7 +171,7 @@ export async function deleteRequest<T>(endpoint: string, config?: AxiosRequestCo
 /**
  * HTTP PATCH request
  */
-export async function patch<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export async function patch<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
   const response = await axiosInstance.patch<T>(endpoint, data, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }

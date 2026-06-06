@@ -6,7 +6,9 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // dist + coverage are build/test output; src/components/ui is vendored shadcn
+  // (prebuilt primitives we don't author), so none of them are linted.
+  globalIgnores(['dist', 'coverage', 'src/components/ui']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

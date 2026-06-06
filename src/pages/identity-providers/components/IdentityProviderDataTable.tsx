@@ -34,6 +34,20 @@ interface IdentityProviderDataTableProps<TData, TValue> {
   data: TData[]
 }
 
+/**
+ * Subset of fields used for searching and filtering identity provider rows.
+ */
+interface FilterableProvider {
+  id?: string
+  name?: string
+  display_name?: string
+  description?: string
+  identifier?: string
+  provider?: string
+  status?: string
+  is_system?: boolean
+}
+
 export function IdentityProviderDataTable<TData, TValue>({
   columns,
   data,
@@ -44,40 +58,47 @@ export function IdentityProviderDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
-    type: [],
-    status: []
+    status: [],
+    provider: [],
+    isSystem: "all"
   })
 
   // Apply advanced filters to data
   const filteredData = React.useMemo(() => {
-    return data.filter((item: any) => {
+    return data.filter((row) => {
+      const item = row as FilterableProvider
+
       // Search filter
       if (filter.trim()) {
         const searchValue = filter.toLowerCase()
         const searchableFields = [
           item.name,
+          item.display_name,
           item.description,
-          item.type,
-          item.endpoint,
+          item.identifier,
           item.id
         ]
-        const matchesSearch = searchableFields.some(field => 
+        const matchesSearch = searchableFields.some(field =>
           field?.toLowerCase().includes(searchValue)
         )
         if (!matchesSearch) return false
       }
 
-      // Type filter
-      if (advancedFilters.type.length > 0) {
-        if (!advancedFilters.type.includes(item.type)) return false
+      // Provider filter
+      if (advancedFilters.provider.length > 0) {
+        if (!item.provider || !advancedFilters.provider.includes(item.provider)) return false
       }
 
       // Status filter
       if (advancedFilters.status.length > 0) {
-        if (!advancedFilters.status.includes(item.status)) return false
+        if (!item.status || !advancedFilters.status.includes(item.status)) return false
       }
 
-
+      // System / regular provider filter
+      if (advancedFilters.isSystem !== "all") {
+        const wantSystem = advancedFilters.isSystem === "system"
+        if (Boolean(item.is_system) !== wantSystem) return false
+      }
 
       return true
     })
@@ -92,7 +113,7 @@ export function IdentityProviderDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    getRowId: (row) => (row as any).id, // Use id as the unique identifier
+    getRowId: (row) => (row as FilterableProvider).id ?? "", // Use id as the unique identifier
     state: {
       sorting,
       columnFilters,
@@ -103,40 +124,39 @@ export function IdentityProviderDataTable<TData, TValue>({
   // Calculate active filters for display
   const activeFilters = React.useMemo(() => {
     const filters: string[] = []
-    
-    if (advancedFilters.type.length > 0) {
-      // Get type names for display
-      const typeNames = advancedFilters.type.map(id => {
-        const typeMap: Record<string, string> = {
+
+    if (advancedFilters.provider.length > 0) {
+      // Get provider names for display
+      const providerNames = advancedFilters.provider.map(id => {
+        const providerMap: Record<string, string> = {
+          "internal": "Internal",
           "cognito": "AWS Cognito",
-          "auth0": "Auth0",
-          "okta": "Okta",
-          "azure_ad": "Azure AD",
-          "keycloak": "Keycloak",
-          "firebase": "Firebase",
-          "custom": "Custom"
+          "auth0": "Auth0"
         }
-        return typeMap[id] || id
+        return providerMap[id] || id
       })
-      filters.push(...typeNames.map(name => `Type: ${name}`))
+      filters.push(...providerNames.map(name => `Provider: ${name}`))
     }
-    
+
     if (advancedFilters.status.length > 0) {
-      const statusNames = advancedFilters.status.map(status => 
+      const statusNames = advancedFilters.status.map(status =>
         status.charAt(0).toUpperCase() + status.slice(1)
       )
       filters.push(...statusNames.map(name => `Status: ${name}`))
     }
-    
 
-    
+    if (advancedFilters.isSystem !== "all") {
+      filters.push(advancedFilters.isSystem === "system" ? "System Providers" : "Regular Providers")
+    }
+
     return filters
   }, [advancedFilters])
 
   const clearAllFilters = () => {
     setAdvancedFilters({
-      type: [],
-      status: []
+      status: [],
+      provider: [],
+      isSystem: "all"
     })
   }
 
@@ -145,7 +165,9 @@ export function IdentityProviderDataTable<TData, TValue>({
       <IdentityProviderToolbar
         filter={filter}
         setFilter={setFilter}
+        filters={advancedFilters}
         onFiltersChange={setAdvancedFilters}
+        table={table}
       />
 
       {/* Active Filters Display */}

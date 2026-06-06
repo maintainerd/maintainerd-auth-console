@@ -47,8 +47,7 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
       onUpload,
       uploading = false,
       ...props
-    },
-    ref
+    }
   ) => {
     const [dragActive, setDragActive] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(value || null)

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { ColumnDef, SortingState, ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
+import type { ColumnDef, SortingState, ColumnFiltersState, VisibilityState, Table as TableType } from "@tanstack/react-table"
 import {
   flexRender,
   getCoreRowModel,
@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { RoleToolbar, type FilterState } from "./RoleToolbar"
+import type { Role } from "../constants"
+import type { Role as RoleResource } from "@/services/api/roles/types"
 
 interface RoleDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -36,31 +38,33 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
 
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
     status: [],
-    isSystem: "all"
+    isSystem: "all",
+    isDefault: "all"
   })
 
 
 
   // Apply advanced filters to data
   const filteredData = React.useMemo(() => {
-    return data.filter((item: any) => {
+    return data.filter((item) => {
+      const role = item as Role
+
       // Status filter
       if (advancedFilters.status.length > 0) {
-        const status = item.isActive ? "active" : "inactive"
+        const status = role.isActive ? "active" : "inactive"
         if (!advancedFilters.status.includes(status)) {
           return false
         }
       }
-      
+
 
       // System role filter
       if (advancedFilters.isSystem !== "all") {
-        if (advancedFilters.isSystem === "system" && !item.isSystem) return false
-        if (advancedFilters.isSystem === "custom" && item.isSystem) return false
+        if (advancedFilters.isSystem === "system" && !role.isSystem) return false
+        if (advancedFilters.isSystem === "custom" && role.isSystem) return false
       }
-      
 
-      
+
       return true
     })
   }, [data, advancedFilters])
@@ -95,6 +99,9 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
     if (advancedFilters.isSystem !== "all") {
       filters.push(`Type: ${advancedFilters.isSystem} roles`)
     }
+    if (advancedFilters.isDefault !== "all") {
+      filters.push(`Default: ${advancedFilters.isDefault} roles`)
+    }
 
     return filters
   }, [advancedFilters])
@@ -102,7 +109,8 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
   const clearAllFilters = () => {
     setAdvancedFilters({
       status: [],
-      isSystem: "all"
+      isSystem: "all",
+      isDefault: "all"
     })
   }
 
@@ -111,7 +119,9 @@ export function RoleDataTable<TData, TValue>({ columns, data }: RoleDataTablePro
       <RoleToolbar
         filter={filter}
         setFilter={setFilter}
+        filters={advancedFilters}
         onFiltersChange={setAdvancedFilters}
+        table={table as unknown as TableType<RoleResource>}
       />
 
       {/* Active Filters Display */}

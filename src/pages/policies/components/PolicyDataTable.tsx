@@ -25,14 +25,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PolicyToolbar } from "./PolicyToolbar"
-import type { Policy, PolicyStatus } from "../constants"
-
-interface FilterState {
-  statuses: PolicyStatus[]
-  isSystem: boolean | null
-  hasServices: boolean | null
-}
+import type { Table as TableType } from "@tanstack/react-table"
+import { PolicyToolbar, type FilterState } from "./PolicyToolbar"
+import type { Policy } from "../constants"
+import type { Policy as PolicyResource } from "@/services/api/policies/types"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -49,9 +45,9 @@ export function PolicyDataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState({})
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filters, setFilters] = React.useState<FilterState>({
-    statuses: [],
-    isSystem: null,
-    hasServices: null
+    status: [],
+    isSystem: "all",
+    serviceId: ""
   })
 
   const filteredData = React.useMemo(() => {
@@ -65,14 +61,16 @@ export function PolicyDataTable<TData, TValue>({
         policy.appliedToServices.some(service => service.toLowerCase().includes(searchLower))
 
       // Status filter
-      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(policy.status)
+      const matchesStatus = filters.status.length === 0 || filters.status.includes(policy.status)
 
       // System filter
-      const matchesSystem = filters.isSystem === null || policy.isSystem === filters.isSystem
+      const matchesSystem = filters.isSystem === "all" ||
+        (filters.isSystem === "system" && policy.isSystem) ||
+        (filters.isSystem === "regular" && !policy.isSystem)
 
       // Services filter
-      const matchesServices = filters.hasServices === null || 
-        (filters.hasServices === true && policy.serviceCount > 0)
+      const matchesServices = !filters.serviceId ||
+        policy.appliedToServices.includes(filters.serviceId)
 
       return matchesSearch && matchesStatus && matchesSystem && matchesServices
     })
@@ -105,14 +103,15 @@ export function PolicyDataTable<TData, TValue>({
   // Active filters display
   const activeFilters = React.useMemo(() => {
     const filtersList = []
-    if (filters.statuses.length > 0) {
-      filtersList.push(`Status: ${filters.statuses.join(", ")}`)
+    if (filters.status.length > 0) {
+      filtersList.push(`Status: ${filters.status.join(", ")}`)
     }
-    if (filters.isSystem === true) {
-      filtersList.push("Type: System policies")
+    if (filters.isSystem !== "all") {
+      const typeLabel = filters.isSystem === "system" ? "System" : "Regular"
+      filtersList.push(`Type: ${typeLabel} policies`)
     }
-    if (filters.hasServices === true) {
-      filtersList.push("Application: Applied to services")
+    if (filters.serviceId) {
+      filtersList.push(`Service ID: ${filters.serviceId}`)
     }
     return filtersList
   }, [filters])
@@ -120,10 +119,11 @@ export function PolicyDataTable<TData, TValue>({
   return (
     <div className="w-full space-y-4">
       <PolicyToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        filter={searchQuery}
+        setFilter={setSearchQuery}
         filters={filters}
         onFiltersChange={setFilters}
+        table={table as unknown as TableType<PolicyResource>}
       />
 
       {/* Active Filters Display */}
@@ -140,9 +140,9 @@ export function PolicyDataTable<TData, TValue>({
             size="sm"
             className="h-6 px-2 text-xs"
             onClick={() => setFilters({
-              statuses: [],
-              isSystem: null,
-              hasServices: null
+              status: [],
+              isSystem: "all",
+              serviceId: ""
             })}
           >
             Clear all

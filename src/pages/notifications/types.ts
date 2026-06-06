@@ -12,6 +12,6 @@ export interface Notification {
     serviceId?: string
     apiId?: string
     tenantId?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }

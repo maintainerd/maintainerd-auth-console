@@ -42,39 +42,23 @@ export function useTenant() {
   }, [dispatch])
 
   const fetchTenant = useCallback(async (identifier?: string) => {
-    try {
-      const result = await dispatch(fetchTenantAsync(identifier)).unwrap()
-      return result
-    } catch (error) {
-      throw error
-    }
+    const result = await dispatch(fetchTenantAsync(identifier)).unwrap()
+    return result
   }, [dispatch])
 
   const fetchDefault = useCallback(async () => {
-    try {
-      const result = await dispatch(fetchDefaultTenantAsync()).unwrap()
-      return result
-    } catch (error) {
-      throw error
-    }
+    const result = await dispatch(fetchDefaultTenantAsync()).unwrap()
+    return result
   }, [dispatch])
 
   const fetchByIdentifier = useCallback(async (identifier: string) => {
-    try {
-      const result = await dispatch(fetchTenantByIdentifierAsync(identifier)).unwrap()
-      return result
-    } catch (error) {
-      throw error
-    }
+    const result = await dispatch(fetchTenantByIdentifierAsync(identifier)).unwrap()
+    return result
   }, [dispatch])
 
   const initializeTenant = useCallback(async (identifier?: string) => {
-    try {
-      const result = await dispatch(initializeTenantAsync(identifier)).unwrap()
-      return result
-    } catch (error) {
-      throw error
-    }
+    const result = await dispatch(initializeTenantAsync(identifier)).unwrap()
+    return result
   }, [dispatch])
 
   const clearTenantError = useCallback(() => {

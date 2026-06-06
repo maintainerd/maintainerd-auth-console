@@ -24,7 +24,6 @@ import {
 } from "lucide-react"
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch"
 import { DataTableViewOptions } from "@/components/data-table"
-import type { IdentityProvider } from "@/services/api/identity-providers/types"
 
 export interface FilterState {
   status: string[]
@@ -36,15 +35,15 @@ export interface FilterState {
  * IdentityProviderToolbar Props
  * Props for the identity provider toolbar component including search and filters
  */
-interface IdentityProviderToolbarProps {
+interface IdentityProviderToolbarProps<TData> {
   filter: string
   setFilter: (value: string) => void
   filters: FilterState
   onFiltersChange: (filters: FilterState) => void
-  table: Table<IdentityProvider>
+  table: Table<TData>
 }
 
-export function IdentityProviderToolbar({ filter, setFilter, filters, onFiltersChange, table }: IdentityProviderToolbarProps) {
+export function IdentityProviderToolbar<TData>({ filter, setFilter, filters, onFiltersChange, table }: IdentityProviderToolbarProps<TData>) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)

@@ -54,10 +54,10 @@ export function useSocialProviderQuery() {
 
     // Add filters
     if (filters.status.length > 0) {
-      params.status = filters.status.join(",") as any
+      params.status = filters.status.join(",")
     }
     if (filters.provider.length > 0) {
-      params.provider = filters.provider.join(",") as any
+      params.provider = filters.provider.join(",")
     }
     if (filters.isSystem !== "all") {
       params.is_system = filters.isSystem === "system"

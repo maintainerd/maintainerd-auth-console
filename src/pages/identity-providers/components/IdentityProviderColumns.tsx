@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Settings, Cloud, Key, Shield } from "lucide-react"
+import { ArrowUpDown, Cloud, Key, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"

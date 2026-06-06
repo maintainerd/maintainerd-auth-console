@@ -92,7 +92,7 @@ export async function fetchProfile(): Promise<ProfileEntity | null> {
     }
 
     return null
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -137,7 +137,7 @@ export async function validateAuthentication(): Promise<ProfileEntity | null> {
     }
 
     return null
-  } catch (error) {
+  } catch {
     return null
   }
 }

@@ -27,7 +27,7 @@ export type LogEntry = {
   statusCode?: number
   responseTime?: number
   status: LogStatus
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   tags: string[]
 }
 

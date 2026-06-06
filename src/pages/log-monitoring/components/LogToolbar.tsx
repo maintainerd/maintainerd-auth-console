@@ -56,10 +56,9 @@ interface LogToolbarProps {
   onToggleLiveMode: () => void
 }
 
-export function LogToolbar({ 
-  filter, 
-  setFilter, 
-  selectedCount = 0, 
+export function LogToolbar({
+  filter,
+  setFilter,
   onFiltersChange,
   isLiveMode,
   onToggleLiveMode
