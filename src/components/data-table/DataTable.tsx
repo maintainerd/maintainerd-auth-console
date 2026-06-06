@@ -32,7 +32,9 @@ export function DataTable<TData>({
   return (
     <div className="overflow-hidden rounded-md border bg-background">
       <Table>
-        <TableHeader>
+        {/* On mobile the header is hidden and each row stacks into one column;
+            the normal table layout returns at md+. */}
+        <TableHeader className="hidden md:table-header-group">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -75,7 +77,7 @@ export function DataTable<TData>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className={cn(onRowClick && "cursor-pointer")}
+                className={cn("block md:table-row", onRowClick && "cursor-pointer")}
                 onClick={
                   onRowClick
                     ? (event) => {
@@ -92,7 +94,7 @@ export function DataTable<TData>({
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="block md:table-cell">
                     {flexRender(
                       cell.column.columnDef.cell,
                       cell.getContext()
