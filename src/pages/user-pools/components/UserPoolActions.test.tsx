@@ -107,10 +107,12 @@ describe("UserPoolActions", () => {
     expect(showError).toHaveBeenCalled()
   })
 
-  it("hides Delete for system pools", async () => {
+  it("hides Delete and the status action for system pools (immutable, hold root users)", async () => {
     const user = setup({ ...pool, is_system: true })
     await user.click(screen.getByRole("button", { name: /open menu/i }))
     expect(await screen.findByText("View Details")).toBeInTheDocument()
     expect(screen.queryByText("Delete User Pool")).not.toBeInTheDocument()
+    expect(screen.queryByText("Deactivate")).not.toBeInTheDocument()
+    expect(screen.queryByText("Activate")).not.toBeInTheDocument()
   })
 })
