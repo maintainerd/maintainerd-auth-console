@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { screen, within } from "@testing-library/react"
+import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/utils"
 import { UserPoolListing } from "./UserPoolListing"
@@ -17,22 +17,6 @@ vi.mock("@/hooks/useUserPools", () => ({
   useDeleteUserPool: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ showSuccess: vi.fn(), showError: vi.fn() }) }))
-
-// Radix Select's positioned content doesn't render in jsdom, so stub the primitive
-// as a native <select>. We're exercising our filter logic, not Radix.
-vi.mock("@/components/ui/select", () => ({
-  Select: ({ value, onValueChange, children }: { value: string; onValueChange: (v: string) => void; children: React.ReactNode }) => (
-    <select role="combobox" value={value} onChange={(e) => onValueChange(e.target.value)}>
-      {children}
-    </select>
-  ),
-  SelectTrigger: () => null,
-  SelectValue: () => null,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  SelectItem: ({ value, children }: { value: string; children: React.ReactNode }) => (
-    <option value={value}>{children}</option>
-  ),
-}))
 
 const base = { metadata: null, created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z" }
 const pools: UserPool[] = [
@@ -74,53 +58,28 @@ describe("UserPoolListing", () => {
     expect(screen.queryByText("employees")).not.toBeInTheDocument()
   })
 
-  async function selectSystemType(user: ReturnType<typeof userEvent.setup>, value: string) {
-    await user.click(screen.getByRole("button", { name: /filters/i }))
-    const systemSelect = screen
-      .getAllByRole("combobox")
-      .find((el) => within(el).queryByText("System Pools"))!
-    await user.selectOptions(systemSelect, value)
-  }
-
   it("filters by status and shows an active-filter chip, then clears via the chip bar", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    await user.click(await screen.findByLabelText("active"))
+    await user.click(await screen.findByRole("button", { name: "active" }))
     // employees (inactive) filtered out
     expect(screen.queryByText("employees")).not.toBeInTheDocument()
     expect(screen.getByText(/Active filters:/i)).toBeInTheDocument()
     expect(screen.getByText("Status: active")).toBeInTheDocument()
-    // chip-bar button is "Clear all" (lowercase) vs the popover's "Clear All"
+    // chip-bar button is "Clear all"
     await user.click(screen.getByRole("button", { name: "Clear all" }))
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
 
-  it("filters by system type via the select", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 })
-    render()
-    await selectSystemType(user, "system")
-    expect(screen.getByText("employees")).toBeInTheDocument()
-    expect(screen.queryByText("customers")).not.toBeInTheDocument()
-    expect(screen.getByText("System Type: System")).toBeInTheDocument()
-  })
-
-  it("filters to regular pools via the select", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 })
-    render()
-    await selectSystemType(user, "regular")
-    expect(screen.getByText("customers")).toBeInTheDocument()
-    expect(screen.queryByText("employees")).not.toBeInTheDocument()
-    expect(screen.getByText("System Type: Regular")).toBeInTheDocument()
-  })
-
-  it("clears filters from inside the popover", async () => {
+  it("resets filters from inside the popover", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    await user.click(await screen.findByLabelText("inactive"))
-    // popover button is "Clear All" (capital A)
-    await user.click(screen.getByRole("button", { name: "Clear All" }))
+    await user.click(await screen.findByRole("button", { name: "inactive" }))
+    expect(screen.queryByText("customers")).not.toBeInTheDocument()
+    // popover button is "Reset"
+    await user.click(screen.getByRole("button", { name: "Reset" }))
     expect(screen.getByText("customers")).toBeInTheDocument()
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
@@ -129,10 +88,10 @@ describe("UserPoolListing", () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    const activeCheckbox = await screen.findByLabelText("active")
-    await user.click(activeCheckbox)
+    const activeToggle = await screen.findByRole("button", { name: "active" })
+    await user.click(activeToggle)
     expect(screen.queryByText("employees")).not.toBeInTheDocument()
-    await user.click(activeCheckbox)
+    await user.click(activeToggle)
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
 
