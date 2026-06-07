@@ -3,8 +3,8 @@
  * Base HTTP client with common functionality like error handling, timeouts, etc.
  */
 
-import axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
-import { API_CONFIG } from './config'
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
+import { API_CONFIG, API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from './config'
 import './debug' // Import debug utilities in development
 
 // Custom error class
@@ -33,10 +33,61 @@ const axiosInstance = axios.create({
   withCredentials: true, // Include cookies for authentication
 })
 
+// Endpoints where a 401 means a genuine credential failure (not an expired
+// session), so we must NOT attempt a token refresh — including the refresh
+// endpoint itself, to avoid an infinite loop.
+const NO_REFRESH_ENDPOINTS = [
+  API_ENDPOINTS.AUTH.LOGIN,
+  API_ENDPOINTS.AUTH.REGISTER,
+  API_ENDPOINTS.AUTH.LOGOUT,
+  API_ENDPOINTS.AUTH.REFRESH,
+  API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+  API_ENDPOINTS.AUTH.RESET_PASSWORD,
+]
+
+// Single-flight refresh: concurrent 401s share one refresh request instead of
+// stampeding the refresh endpoint.
+let refreshPromise: Promise<void> | null = null
+
+function refreshSession(): Promise<void> {
+  if (!refreshPromise) {
+    // withCredentials sends the httpOnly refresh-token cookie; the
+    // `X-Token-Delivery: cookie` header tells the backend to rotate and
+    // Set-Cookie the new access/refresh tokens (cookie-based session).
+    refreshPromise = axiosInstance
+      .post(API_ENDPOINTS.AUTH.REFRESH, null, {
+        headers: { ...TOKEN_DELIVERY_HEADER },
+      })
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+  return refreshPromise
+}
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean }
+
 // Response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    // On an expired access token (401), transparently refresh once and retry the
+    // original request. Skipped for auth endpoints and already-retried requests.
+    const original = error.config as RetriableRequestConfig | undefined
+    const requestUrl = original?.url || ''
+    const isAuthEndpoint = NO_REFRESH_ENDPOINTS.some((endpoint) => requestUrl.includes(endpoint))
+
+    if (error.response?.status === 401 && original && !original._retry && !isAuthEndpoint) {
+      original._retry = true
+      try {
+        await refreshSession()
+        return axiosInstance(original)
+      } catch {
+        // Refresh failed — fall through to normal error handling below.
+      }
+    }
+
     if (error.response) {
       // Server responded with error status
       const data = error.response.data as any

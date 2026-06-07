@@ -9,4 +9,3 @@ export interface BaseThreatDetectionSettingsProps {
   control: Control<ThreatDetectionSettingsFormData>
   watch: UseFormWatch<ThreatDetectionSettingsFormData>
 }
-}

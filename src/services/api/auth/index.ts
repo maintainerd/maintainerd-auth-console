@@ -4,7 +4,7 @@
  */
 
 import { post, get } from '../client'
-import { API_ENDPOINTS } from '../config'
+import { API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from '../config'
 import type { ProfileEntity, LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
 
 /**
@@ -18,9 +18,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 		API_ENDPOINTS.AUTH.LOGIN,
 		data,
 		{
-			headers: {
-				'X-Token-Delivery': 'cookie'
-			}
+			headers: { ...TOKEN_DELIVERY_HEADER }
 		}
 	)
 	return response
@@ -66,9 +64,7 @@ export async function register(data: RegisterServiceRequest): Promise<RegisterRe
     endpoint,
     registerData,
     {
-      headers: {
-        'X-Token-Delivery': 'cookie'
-      }
+      headers: { ...TOKEN_DELIVERY_HEADER }
     }
   )
   return response
