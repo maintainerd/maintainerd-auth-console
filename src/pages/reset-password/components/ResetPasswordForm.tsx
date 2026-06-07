@@ -61,7 +61,7 @@ const ResetPasswordForm = () => {
       })
       setPasswordReset(true)
       showSuccess("Password has been reset successfully")
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseError(error)
       const errorMessage = parsedError.message || "Failed to reset password. Please try again."
       setResetPasswordError(errorMessage)
