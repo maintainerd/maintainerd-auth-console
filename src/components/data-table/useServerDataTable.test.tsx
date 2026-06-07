@@ -1,0 +1,200 @@
+import { describe, it, expect, vi } from "vitest"
+import { render, screen, act } from "@testing-library/react"
+import type { ColumnDef, SortingState } from "@tanstack/react-table"
+import { MemoryRouter, Routes, Route } from "react-router-dom"
+import {
+  useServerDataTable,
+  type FilterGroup,
+  type UseServerDataTableOptions,
+  type UseServerDataTableResult,
+} from "./useServerDataTable"
+
+interface Row {
+  id: string
+  name: string
+}
+
+const COLUMNS: ColumnDef<Row>[] = [
+  { id: "name", accessorKey: "name", header: "Name" },
+]
+const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
+const SEARCH_FIELDS = ["name"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "inactive"] },
+]
+
+/** Spy hook capturing the params the engine assembles. */
+function makeUseData(result?: { rows: Row[]; total: number }) {
+  const spy = vi.fn()
+  const useData = (params: Record<string, unknown>) => {
+    spy(params)
+    return {
+      data: result,
+      isLoading: false,
+      error: null as Error | null,
+    }
+  }
+  return { spy, useData }
+}
+
+interface HarnessProps {
+  options: Omit<UseServerDataTableOptions<Row, Record<string, unknown>>, "columns">
+  onResult?: (result: UseServerDataTableResult<Row>) => void
+}
+
+function Harness({ options, onResult }: HarnessProps) {
+  const result = useServerDataTable<Row>({ columns: COLUMNS, ...options })
+  onResult?.(result)
+  return (
+    <div>
+      <span data-testid="rowcount">{result.table.getRowModel().rows.length}</span>
+      <span data-testid="pagecount">{result.table.getPageCount()}</span>
+      <span data-testid="search">{result.search}</span>
+      <span data-testid="chips">{result.activeFilters.join("|")}</span>
+    </div>
+  )
+}
+
+function renderHarness(props: HarnessProps, route = "/t1") {
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      <Routes>
+        <Route path="/:tenantId/*" element={<Harness {...props} />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe("useServerDataTable", () => {
+  it("uses defaults when the URL has no query params", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, filterGroups: FILTER_GROUPS, useData },
+    })
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 1,
+        limit: 10,
+        sort_by: "name",
+        sort_order: "asc",
+      }),
+    )
+    // No search/filter params present
+    const params = spy.mock.calls[0][0]
+    expect(params.name).toBeUndefined()
+    expect(params.status).toBeUndefined()
+    // pageCount when total=0
+    expect(screen.getByTestId("pagecount").textContent).toBe("0")
+  })
+
+  it("seeds state from URL query params (search, filter group, sort desc, page, limit)", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    renderHarness(
+      {
+        options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, filterGroups: FILTER_GROUPS, useData },
+      },
+      "/t1?search=bob&status=active,inactive&sortBy=name&sortOrder=desc&page=3&limit=25",
+    )
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 3,
+        limit: 25,
+        sort_by: "name",
+        sort_order: "desc",
+        name: "bob",
+        status: "active,inactive",
+      }),
+    )
+    expect(screen.getByTestId("search").textContent).toBe("bob")
+    expect(screen.getByTestId("chips").textContent).toBe("Status: active, inactive")
+  })
+
+  it("uses a custom defaultPageSize when limit is absent", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, useData, defaultPageSize: 50 },
+    })
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ limit: 50 }))
+  })
+
+  it("defaults filterGroups to empty (omitted) — no filter params, no chips", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, useData },
+    })
+    const params = spy.mock.calls[0][0]
+    expect(params.status).toBeUndefined()
+    expect(screen.getByTestId("chips").textContent).toBe("")
+  })
+
+  it("uses apiKey instead of key when assembling filter params", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    const groups: readonly FilterGroup[] = [
+      { key: "status", apiKey: "state", label: "Status", options: ["active"] },
+    ]
+    renderHarness(
+      {
+        options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, filterGroups: groups, useData },
+      },
+      "/t1?status=active",
+    )
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ state: "active" }))
+    const params = spy.mock.calls.at(-1)?.[0]
+    expect(params.status).toBeUndefined()
+  })
+
+  it("falls back to defaultSort[0].id in apiParams when sorting is emptied", () => {
+    const { spy, useData } = makeUseData({ rows: [], total: 0 })
+    let captured: UseServerDataTableResult<Row> | undefined
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, useData },
+      onResult: (r) => {
+        captured = r
+      },
+    })
+    act(() => {
+      captured!.table.setSorting([])
+    })
+    const params = spy.mock.calls.at(-1)?.[0]
+    expect(params.sort_by).toBe("name")
+    expect(params.sort_order).toBe("asc")
+  })
+
+  it("returns rows=[] when data is undefined", () => {
+    const { useData } = makeUseData(undefined)
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, useData },
+    })
+    expect(screen.getByTestId("rowcount").textContent).toBe("0")
+    expect(screen.getByTestId("pagecount").textContent).toBe("0")
+  })
+
+  it("computes pageCount from total and exposes rows", () => {
+    const { useData } = makeUseData({ rows: [{ id: "1", name: "a" }], total: 25 })
+    renderHarness({
+      options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, useData },
+    })
+    expect(screen.getByTestId("rowcount").textContent).toBe("1")
+    // ceil(25 / 10) = 3
+    expect(screen.getByTestId("pagecount").textContent).toBe("3")
+  })
+
+  it("clearFilters resets all groups", () => {
+    const { useData } = makeUseData({ rows: [], total: 0 })
+    let captured: UseServerDataTableResult<Row> | undefined
+    renderHarness(
+      {
+        options: { defaultSort: DEFAULT_SORT, searchFields: SEARCH_FIELDS, filterGroups: FILTER_GROUPS, useData },
+        onResult: (r) => {
+          captured = r
+        },
+      },
+      "/t1?status=active",
+    )
+    expect(captured!.activeFilters).toEqual(["Status: active"])
+    act(() => {
+      captured!.clearFilters()
+    })
+    expect(captured!.activeFilters).toEqual([])
+  })
+})

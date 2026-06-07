@@ -1,0 +1,198 @@
+import * as React from "react"
+import { useSearchParams } from "react-router-dom"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  PaginationState,
+  SortingState,
+  Table,
+  VisibilityState,
+} from "@tanstack/react-table"
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+
+/**
+ * A multi-select (checkbox) filter group for a listing.
+ *
+ * The `key` is the state key, the URL query key, and (by default) the API param
+ * name; set `apiKey` if the backend expects a different name.
+ */
+export interface FilterGroup {
+  key: string
+  label: string
+  options: readonly string[]
+  apiKey?: string
+}
+
+/** Listing filter state: each group key → the selected values. */
+export type ListingFilters = Record<string, string[]>
+
+/** The shape every paginated list endpoint returns inside `data`. */
+export interface ServerListResult<TRow> {
+  rows: TRow[]
+  total: number
+}
+
+/**
+ * A TanStack-Query list hook: `(apiParams) => { data, isLoading, error }`.
+ *
+ * `TParams` lets a page pass its strongly-typed list hook (e.g. `useUsers`)
+ * directly; the engine builds generic params internally and casts to `TParams`
+ * once, here, so no listing page needs an adapter or cast.
+ */
+export type UseListData<TRow, TParams> = (params: TParams) => {
+  data?: ServerListResult<TRow>
+  isLoading: boolean
+  error: Error | null
+}
+
+export interface UseServerDataTableOptions<TRow, TParams> {
+  columns: ColumnDef<TRow>[]
+  /** Default sort applied when the URL doesn't specify one. */
+  defaultSort: SortingState
+  /** API params the free-text search maps to (the server matches against them). */
+  searchFields: string[]
+  /** TanStack-Query list hook: `(apiParams) => { data, isLoading, error }`. */
+  useData: UseListData<TRow, TParams>
+  /** Stable (module-level) filter group config. */
+  filterGroups?: readonly FilterGroup[]
+  defaultPageSize?: number
+}
+
+export interface UseServerDataTableResult<TRow> {
+  table: Table<TRow>
+  isLoading: boolean
+  error: Error | null
+  search: string
+  setSearch: (value: string) => void
+  filters: ListingFilters
+  setFilters: (filters: ListingFilters) => void
+  /** Human-readable "Label: a, b" chips for the active filters. */
+  activeFilters: string[]
+  clearFilters: () => void
+}
+
+const EMPTY_FILTER_GROUPS: readonly FilterGroup[] = []
+
+/**
+ * The shared engine for server-driven listing tables: URL-synced search / filters /
+ * sorting / pagination, API-param assembly, and the TanStack table — so a listing
+ * page only declares its columns + a small config instead of re-implementing all of it.
+ *
+ * Pass `columns`, `filterGroups`, `searchFields`, and `defaultSort` as stable
+ * (module-level) values.
+ */
+export function useServerDataTable<TRow, TParams = Record<string, unknown>>({
+  columns,
+  defaultSort,
+  searchFields,
+  useData,
+  filterGroups = EMPTY_FILTER_GROUPS,
+  defaultPageSize = 10,
+}: UseServerDataTableOptions<TRow, TParams>): UseServerDataTableResult<TRow> {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const [search, setSearch] = React.useState(() => searchParams.get("search") || "")
+  const [filters, setFilters] = React.useState<ListingFilters>(() => {
+    const initial: ListingFilters = {}
+    for (const group of filterGroups) {
+      initial[group.key] = searchParams.get(group.key)?.split(",").filter(Boolean) ?? []
+    }
+    return initial
+  })
+  const [sorting, setSorting] = React.useState<SortingState>(() => {
+    const sortBy = searchParams.get("sortBy")
+    return sortBy ? [{ id: sortBy, desc: searchParams.get("sortOrder") === "desc" }] : defaultSort
+  })
+  const [pagination, setPagination] = React.useState<PaginationState>(() => ({
+    pageIndex: Math.max(0, Number(searchParams.get("page") || 1) - 1),
+    pageSize: Number(searchParams.get("limit") || defaultPageSize),
+  }))
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+
+  const apiParams = React.useMemo(() => {
+    const params: Record<string, unknown> = {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      sort_by: sorting.length > 0 ? sorting[0].id : defaultSort[0]?.id,
+      sort_order: sorting.length > 0 && sorting[0].desc ? "desc" : "asc",
+    }
+    if (search) {
+      for (const field of searchFields) params[field] = search
+    }
+    for (const group of filterGroups) {
+      const values = filters[group.key]
+      if (values?.length) params[group.apiKey ?? group.key] = values.join(",")
+    }
+    return params
+  }, [search, filters, sorting, pagination, defaultSort, searchFields, filterGroups])
+
+  const { data, isLoading, error } = useData(apiParams as unknown as TParams)
+  const rows = React.useMemo(() => data?.rows ?? [], [data])
+  const rowCount = data?.total ?? 0
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    pageCount: Math.ceil(rowCount / pagination.pageSize) || 0,
+    manualPagination: true,
+    manualSorting: true,
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: { sorting, pagination, columnFilters, columnVisibility },
+  })
+
+  // Mirror state to the URL so listings are shareable / bookmarkable.
+  React.useEffect(() => {
+    const params = new URLSearchParams()
+    if (search) params.set("search", search)
+    for (const group of filterGroups) {
+      const values = filters[group.key]
+      if (values?.length) params.set(group.key, values.join(","))
+    }
+    if (sorting.length > 0) {
+      params.set("sortBy", sorting[0].id)
+      params.set("sortOrder", sorting[0].desc ? "desc" : "asc")
+    }
+    params.set("page", String(pagination.pageIndex + 1))
+    params.set("limit", String(pagination.pageSize))
+    setSearchParams(params, { replace: true })
+  }, [search, filters, sorting, pagination, filterGroups, setSearchParams])
+
+  const activeFilters = React.useMemo(() => {
+    const chips: string[] = []
+    for (const group of filterGroups) {
+      const values = filters[group.key]
+      if (values?.length) chips.push(`${group.label}: ${values.join(", ")}`)
+    }
+    return chips
+  }, [filters, filterGroups])
+
+  const clearFilters = React.useCallback(() => {
+    const cleared: ListingFilters = {}
+    for (const group of filterGroups) cleared[group.key] = []
+    setFilters(cleared)
+  }, [filterGroups])
+
+  return {
+    table,
+    isLoading,
+    error,
+    search,
+    setSearch,
+    filters,
+    setFilters,
+    activeFilters,
+    clearFilters,
+  }
+}

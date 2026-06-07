@@ -46,13 +46,17 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],
-      // Scope coverage to the shared service factory + the Users listing components.
+      // Scope coverage to the shared service factory, the shared listing engine,
+      // and the Users listing components (the reference implementation).
       include: [
         'src/services/api/_lib/**',
+        'src/components/data-table/useServerDataTable.ts',
+        'src/components/data-table/ListingToolbar.tsx',
+        'src/components/data-table/ResourceListing.tsx',
+        'src/components/data-table/RowActions.tsx',
         'src/pages/users/components/UserActions.tsx',
         'src/pages/users/components/UserColumns.tsx',
         'src/pages/users/components/UserListing.tsx',
-        'src/pages/users/components/UserToolbar.tsx',
       ],
       exclude: ['**/*.test.{ts,tsx}', 'src/test/**'],
       thresholds: {
