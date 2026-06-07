@@ -1,6 +1,5 @@
 import type { Table as TableType } from "@tanstack/react-table"
 import { flexRender } from "@tanstack/react-table"
-import { Loader2 } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -9,6 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 interface DataTableProps<TData> {
   table: TableType<TData>
@@ -16,6 +17,8 @@ interface DataTableProps<TData> {
   emptyMessage?: string
   isLoading?: boolean
   error?: Error | null
+  /** When provided, rows are clickable (except clicks on interactive controls). */
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData>({
@@ -24,6 +27,7 @@ export function DataTable<TData>({
   emptyMessage = "No results.",
   isLoading = false,
   error = null,
+  onRowClick,
 }: DataTableProps<TData>) {
   return (
     <div className="overflow-hidden rounded-md border bg-background">
@@ -48,16 +52,15 @@ export function DataTable<TData>({
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell
-                colSpan={columnCount}
-                className="h-24 text-center"
-              >
-                <div className="flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              </TableCell>
-            </TableRow>
+            Array.from({ length: 5 }).map((_, rowIndex) => (
+              <TableRow key={`skeleton-${rowIndex}`}>
+                {Array.from({ length: columnCount }).map((_, cellIndex) => (
+                  <TableCell key={cellIndex}>
+                    <Skeleton className="h-5 w-full max-w-[180px]" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : error ? (
             <TableRow>
               <TableCell
@@ -72,6 +75,17 @@ export function DataTable<TData>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className={cn(onRowClick && "cursor-pointer")}
+                onClick={
+                  onRowClick
+                    ? (event) => {
+                        // Ignore clicks that land on interactive controls (e.g. the
+                        // row-actions menu button) so they don't trigger navigation.
+                        if ((event.target as HTMLElement).closest("button, a, input, label")) return
+                        onRowClick(row.original)
+                      }
+                    : undefined
+                }
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

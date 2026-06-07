@@ -10,9 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react"
-import { DeleteConfirmationDialog } from "@/components/dialog"
-import { useDeleteUserPool } from "@/hooks/useUserPools"
+import { MoreHorizontal, Eye, Edit, Play, Pause, Trash2 } from "lucide-react"
+import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { useDeleteUserPool, useSetUserPoolStatus } from "@/hooks/useUserPools"
 import { useToast } from "@/hooks/useToast"
 import type { UserPool } from "@/services/api/user-pools/types"
 
@@ -25,8 +25,13 @@ export function UserPoolActions({ userPool }: UserPoolActionsProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
 
   const deleteUserPoolMutation = useDeleteUserPool()
+  const setStatusMutation = useSetUserPoolStatus()
+
+  const isActive = userPool.status === "active"
+  const nextStatus = isActive ? "inactive" : "active"
 
   const handleViewDetails = () => {
     navigate(`/${tenantId}/user-pools/${userPool.user_pool_id}`)
@@ -34,6 +39,15 @@ export function UserPoolActions({ userPool }: UserPoolActionsProps) {
 
   const handleEdit = () => {
     navigate(`/${tenantId}/user-pools/${userPool.user_pool_id}/edit`)
+  }
+
+  const handleConfirmStatus = async () => {
+    try {
+      await setStatusMutation.mutateAsync({ userPoolId: userPool.user_pool_id, status: nextStatus })
+      showSuccess(`User pool ${isActive ? "deactivated" : "activated"}`)
+    } catch (error) {
+      showError(error)
+    }
   }
 
   const handleDelete = async () => {
@@ -65,6 +79,20 @@ export function UserPoolActions({ userPool }: UserPoolActionsProps) {
             Edit User Pool
           </DropdownMenuItem>
 
+          <DropdownMenuItem onClick={() => setShowStatusDialog(true)}>
+            {isActive ? (
+              <>
+                <Pause className="mr-2 h-4 w-4" />
+                Deactivate
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-4 w-4" />
+                Activate
+              </>
+            )}
+          </DropdownMenuItem>
+
           {!userPool.is_system && (
             <>
               <DropdownMenuSeparator />
@@ -79,6 +107,16 @@ export function UserPoolActions({ userPool }: UserPoolActionsProps) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ConfirmationDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+        onConfirm={handleConfirmStatus}
+        title={isActive ? "Deactivate User Pool" : "Activate User Pool"}
+        description={`Are you sure you want to ${isActive ? "deactivate" : "activate"} "${userPool.name}"?`}
+        confirmText={isActive ? "Deactivate" : "Activate"}
+        isLoading={setStatusMutation.isPending}
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}

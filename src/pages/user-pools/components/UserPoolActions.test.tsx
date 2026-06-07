@@ -12,8 +12,10 @@ vi.mock("react-router-dom", async (importOriginal) => ({
 }))
 
 const deleteAsync = vi.fn()
+const setStatusAsync = vi.fn()
 vi.mock("@/hooks/useUserPools", () => ({
   useDeleteUserPool: () => ({ mutateAsync: deleteAsync, isPending: false }),
+  useSetUserPoolStatus: () => ({ mutateAsync: setStatusAsync, isPending: false }),
 }))
 
 const showSuccess = vi.fn()
@@ -73,6 +75,35 @@ describe("UserPoolActions", () => {
     await user.click(await screen.findByText("Delete User Pool"))
     await user.type(await screen.findByPlaceholderText(/Enter "customers" to confirm/), "customers")
     await user.click(screen.getByRole("button", { name: "Delete" }))
+    expect(showError).toHaveBeenCalled()
+  })
+
+  it("deactivates an active pool after confirmation", async () => {
+    setStatusAsync.mockResolvedValue(undefined)
+    const user = setup() // pool is active
+    await user.click(screen.getByRole("button", { name: /open menu/i }))
+    await user.click(await screen.findByText("Deactivate"))
+    await user.click(screen.getByRole("button", { name: "Deactivate" }))
+    expect(setStatusAsync).toHaveBeenCalledWith({ userPoolId: "up-1", status: "inactive" })
+    expect(showSuccess).toHaveBeenCalledWith("User pool deactivated")
+  })
+
+  it("activates an inactive pool", async () => {
+    setStatusAsync.mockResolvedValue(undefined)
+    const user = setup({ ...pool, status: "inactive" })
+    await user.click(screen.getByRole("button", { name: /open menu/i }))
+    await user.click(await screen.findByText("Activate"))
+    await user.click(screen.getByRole("button", { name: "Activate" }))
+    expect(setStatusAsync).toHaveBeenCalledWith({ userPoolId: "up-1", status: "active" })
+    expect(showSuccess).toHaveBeenCalledWith("User pool activated")
+  })
+
+  it("surfaces an error when the status change fails", async () => {
+    setStatusAsync.mockRejectedValue(new Error("boom"))
+    const user = setup()
+    await user.click(screen.getByRole("button", { name: /open menu/i }))
+    await user.click(await screen.findByText("Deactivate"))
+    await user.click(screen.getByRole("button", { name: "Deactivate" }))
     expect(showError).toHaveBeenCalled()
   })
 

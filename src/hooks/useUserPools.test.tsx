@@ -9,6 +9,7 @@ import {
   useCreateUserPool,
   useUpdateUserPool,
   useDeleteUserPool,
+  useSetUserPoolStatus,
 } from "./useUserPools"
 import * as service from "@/services/api/user-pools"
 
@@ -18,6 +19,7 @@ vi.mock("@/services/api/user-pools", () => ({
   createUserPool: vi.fn(),
   updateUserPool: vi.fn(),
   deleteUserPool: vi.fn(),
+  setUserPoolStatus: vi.fn(),
 }))
 
 const mocked = vi.mocked(service)
@@ -92,6 +94,17 @@ describe("mutations", () => {
       data: { name: "x", display_name: "", status: "active" },
     })
     expect(mocked.updateUserPool).toHaveBeenCalledWith("1", { name: "x", display_name: "", status: "active" })
+    expect(spy).toHaveBeenCalledWith({ queryKey: userPoolKeys.detail("1") })
+    expect(spy).toHaveBeenCalledWith({ queryKey: userPoolKeys.lists() })
+  })
+
+  it("useSetUserPoolStatus invalidates the detail and the list", async () => {
+    mocked.setUserPoolStatus.mockResolvedValue({ user_pool_id: "1" } as never)
+    const { queryClient, wrapper } = makeWrapper()
+    const spy = vi.spyOn(queryClient, "invalidateQueries")
+    const { result } = renderHook(() => useSetUserPoolStatus(), { wrapper })
+    await result.current.mutateAsync({ userPoolId: "1", status: "inactive" })
+    expect(mocked.setUserPoolStatus).toHaveBeenCalledWith("1", "inactive")
     expect(spy).toHaveBeenCalledWith({ queryKey: userPoolKeys.detail("1") })
     expect(spy).toHaveBeenCalledWith({ queryKey: userPoolKeys.lists() })
   })

@@ -10,10 +10,12 @@ import {
   createUserPool,
   updateUserPool,
   deleteUserPool,
+  setUserPoolStatus,
 } from '@/services/api/user-pools'
 import type {
   CreateUserPoolRequest,
   UpdateUserPoolRequest,
+  UserPoolStatus,
 } from '@/services/api/user-pools/types'
 
 /**
@@ -70,6 +72,22 @@ export function useUpdateUserPool() {
   return useMutation({
     mutationFn: ({ userPoolId, data }: { userPoolId: string; data: UpdateUserPoolRequest }) =>
       updateUserPool(userPoolId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: userPoolKeys.detail(variables.userPoolId) })
+      queryClient.invalidateQueries({ queryKey: userPoolKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to set a user pool's status (activate / deactivate)
+ */
+export function useSetUserPoolStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userPoolId, status }: { userPoolId: string; status: UserPoolStatus }) =>
+      setUserPoolStatus(userPoolId, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: userPoolKeys.detail(variables.userPoolId) })
       queryClient.invalidateQueries({ queryKey: userPoolKeys.lists() })
