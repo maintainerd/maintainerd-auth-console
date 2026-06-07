@@ -93,14 +93,22 @@ export function DataTable<TData>({
                     : undefined
                 }
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="block md:table-cell">
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const isActions = cell.column.id === "actions"
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      // Mobile: compact vertical padding; the actions cell right-aligns
+                      // instead of taking a left-flushed line. Normal table cell at md+.
+                      className={cn(
+                        "py-1 md:table-cell md:py-2",
+                        isActions ? "flex justify-end" : "block",
+                      )}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (
