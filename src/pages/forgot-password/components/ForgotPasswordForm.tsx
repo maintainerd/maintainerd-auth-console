@@ -34,7 +34,7 @@ const ForgotPasswordForm = () => {
       await forgotPassword(data.email)
       setEmailSent(true)
       showSuccess("Password reset instructions have been sent to your email")
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseError(error)
       const errorMessage = parsedError.message || "Failed to send reset email. Please try again."
       setForgotPasswordError(errorMessage)

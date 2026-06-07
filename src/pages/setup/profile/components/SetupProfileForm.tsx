@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { MultiStepForm, type MultiStepFormStep } from "@/components/form"
 import { useSetupProfile, useCompleteSetup } from "@/hooks/useSetup"
@@ -24,7 +24,7 @@ const SetupProfileForm = () => {
     'location': 2,
     'summary': 3
   }
-  const stepNames = ['personal', 'contact', 'location', 'summary']
+  const stepNames = useMemo(() => ['personal', 'contact', 'location', 'summary'], [])
   const currentStepParam = searchParams.get('step') || 'personal'
   const currentStep = stepMap[currentStepParam as keyof typeof stepMap] ?? 0
 
@@ -32,7 +32,7 @@ const SetupProfileForm = () => {
     if (!searchParams.get('step')) {
       setSearchParams({ step: 'personal' }, { replace: true })
     }
-  }, [])
+  }, [searchParams, setSearchParams])
   
   const [formData, setFormData] = useState<Partial<CreateProfileRequest>>({})
   const [stepValidation, setStepValidation] = useState({
