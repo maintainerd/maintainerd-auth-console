@@ -24,9 +24,11 @@ export {
   createTenant,
   createAdmin,
   createProfile,
+  getSetupStatus,
+  completeSetup,
   getDefaultTenantMetadata,
   createTenantWithDefaults,
-  isSetupCompleted
+  isSetupCompleted,
 } from './api/setup'
 
 // Authentication service functions

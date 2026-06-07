@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/useToast"
 import { AddApiKeyApiDialog } from "./AddApiKeyApiDialog"
 import { AddApiKeyApiPermissionsDialog } from "./AddApiKeyApiPermissionsDialog"
 import { ApiKeyApiItem } from "./ApiKeyApiItem"
-import type { ApiKeyApiItem } from "@/services/api/api-keys/types"
+import type { ApiKeyApiItem as ApiKeyApiItemType } from "@/services/api/api-keys/types"
 
 interface ApiKeyApisProps {
   apiKeyId: string
@@ -30,7 +30,7 @@ export function ApiKeyApis({ apiKeyId }: ApiKeyApisProps) {
     apiName: "",
     existingPermissionIds: []
   })
-  const [deleteApiDialog, setDeleteApiDialog] = useState<{ open: boolean; api: ApiKeyApiItem | null }>({
+  const [deleteApiDialog, setDeleteApiDialog] = useState<{ open: boolean; api: ApiKeyApiItemType | null }>({
     open: false,
     api: null
   })

@@ -26,9 +26,11 @@ export const API_CONFIG = {
 // API Endpoints
 export const API_ENDPOINTS = {
   SETUP: {
+    STATUS: '/setup/status',
     CREATE_TENANT: '/setup/create_tenant',
     CREATE_ADMIN: '/setup/create_admin',
     CREATE_PROFILE: '/setup/create_profile',
+    COMPLETE: '/setup/complete',
   },
   AUTH: {
     LOGIN: '/login',

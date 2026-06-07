@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import { MultiStepForm, type MultiStepFormStep } from "@/components/form"
-import { useSetupProfile } from "@/hooks/useSetup"
+import { useSetupProfile, useCompleteSetup } from "@/hooks/useSetup"
 import type { CreateProfileRequest } from "@/services/api/setup/types"
 import PersonalInfoStep from "./steps/PersonalInfoStep"
 import ContactInfoStep from "./steps/ContactInfoStep"
@@ -12,8 +12,10 @@ import ProfileSetupSuccess from "./ProfileSetupSuccess"
 const SetupProfileForm = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const { isLoading, createUserProfile } = useSetupProfile()
+  const { isLoading: isCompleting, finalizeSetup } = useCompleteSetup()
   const [isNavigating, setIsNavigating] = useState(false)
   const [isProfileCreated, setIsProfileCreated] = useState(false)
+  const [isSetupComplete, setIsSetupComplete] = useState(false)
   const navigationTimeoutRef = useRef<number | null>(null)
 
   const stepMap = {
@@ -83,10 +85,9 @@ const SetupProfileForm = () => {
 
   const handleComplete = async () => {
     if (!formData.first_name || !formData.last_name || !formData.email) {
-      return // Form validation should prevent this
+      return
     }
 
-    // Generate display name from first and last name
     const displayName = `${formData.first_name} ${formData.last_name}`
 
     const profileData: CreateProfileRequest = {
@@ -107,10 +108,12 @@ const SetupProfileForm = () => {
 
     const result = await createUserProfile(profileData)
     if (result.success) {
-      // Set success state to show the success page
       setIsProfileCreated(true)
+      const completeResult = await finalizeSetup()
+      if (completeResult.success) {
+        setIsSetupComplete(true)
+      }
     }
-    // Error handling is done in the hook
   }
 
   const steps: MultiStepFormStep[] = [
@@ -173,7 +176,7 @@ const SetupProfileForm = () => {
 
   // Show success page if profile was created successfully
   if (isProfileCreated) {
-    return <ProfileSetupSuccess />
+    return <ProfileSetupSuccess isCompleting={isCompleting} isComplete={isSetupComplete} />
   }
 
   return (
