@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table"
+import type { ColumnDef, ColumnFiltersState, SortingState, Table as TableInstance, VisibilityState } from "@tanstack/react-table"
 import {
   flexRender,
   getCoreRowModel,
@@ -21,12 +21,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ClientToolbar } from "./ClientToolbar"
-import type { Client, ClientStatus, ClientCategory } from "../constants"
-
-interface FilterState {
-  types: ClientCategory[]
-  statuses: ClientStatus[]
-}
+import type { FilterState } from "./ClientToolbar"
+import type { Client } from "../constants"
+import type { Client as ClientApiType } from "@/services/api/clients/types"
 
 interface ClientDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -43,8 +40,10 @@ export function ClientDataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState({})
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filters, setFilters] = React.useState<FilterState>({
-    types: [],
-    statuses: []
+    status: [],
+    clientType: [],
+    isSystem: "all",
+    identityProviderId: ""
   })
 
   const filteredData = React.useMemo(() => {
@@ -57,10 +56,10 @@ export function ClientDataTable<TData, TValue>({
         client.clientId.toLowerCase().includes(searchLower)
 
       // Type filter
-      const matchesType = filters.types.length === 0 || filters.types.includes(client.type)
+      const matchesType = filters.clientType.length === 0 || filters.clientType.includes(client.type)
 
       // Status filter
-      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(client.status)
+      const matchesStatus = filters.status.length === 0 || filters.status.includes(client.status)
 
       return matchesSearch && matchesType && matchesStatus
     })
@@ -93,11 +92,11 @@ export function ClientDataTable<TData, TValue>({
   // Active filters display
   const activeFilters = React.useMemo(() => {
     const filtersList = []
-    if (filters.types.length > 0) {
-      filtersList.push(`Type: ${filters.types.join(", ")}`)
+    if (filters.clientType.length > 0) {
+      filtersList.push(`Type: ${filters.clientType.join(", ")}`)
     }
-    if (filters.statuses.length > 0) {
-      filtersList.push(`Status: ${filters.statuses.join(", ")}`)
+    if (filters.status.length > 0) {
+      filtersList.push(`Status: ${filters.status.join(", ")}`)
     }
     return filtersList
   }, [filters])
@@ -105,10 +104,11 @@ export function ClientDataTable<TData, TValue>({
   return (
     <div className="w-full space-y-4">
       <ClientToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        filter={searchQuery}
+        setFilter={setSearchQuery}
         filters={filters}
         onFiltersChange={setFilters}
+        table={table as unknown as TableInstance<ClientApiType>}
       />
 
       {/* Active Filters Display */}
@@ -125,8 +125,10 @@ export function ClientDataTable<TData, TValue>({
             size="sm"
             className="h-6 px-2 text-xs"
             onClick={() => setFilters({
-              types: [],
-              statuses: []
+              status: [],
+              clientType: [],
+              isSystem: "all",
+              identityProviderId: ""
             })}
           >
             Clear all

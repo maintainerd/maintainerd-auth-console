@@ -1,6 +1,49 @@
-import type { User, UserProfile } from "./components/UserColumns"
+import type { UserStatus } from "@/services/api/users/types"
 
-export const MOCK_USERS: User[] = [
+/**
+ * Mock user shape used by the local mock data fixtures below.
+ * This is intentionally distinct from the API `User` type in
+ * `@/services/api/users/types`, which models the backend response.
+ */
+export interface MockUser {
+  id: string
+  username: string
+  email: string
+  roles: string[]
+  status: UserStatus
+  phone?: string
+  createdAt: string
+  lastLogin?: string
+  emailVerified: boolean
+  isActive: boolean
+  twoFactorEnabled: boolean
+  loginAttempts: number
+  lastPasswordChange?: string
+}
+
+/**
+ * Mock user profile shape used by the local mock data fixtures below.
+ */
+export interface MockUserProfile {
+  userId: string
+  firstName?: string
+  lastName?: string
+  displayName?: string
+  avatar?: string
+  bio?: string
+  birthDate?: string
+  gender?: string
+  phoneNumber?: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+}
+
+export type { MockUser as User, MockUserProfile as UserProfile }
+
+export const MOCK_USERS: MockUser[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
     username: "reyco.seguma",
@@ -109,7 +152,7 @@ export const MOCK_USERS: User[] = [
 ]
 
 // Mock user profiles (separate from user data)
-export const MOCK_USER_PROFILES: UserProfile[] = [
+export const MOCK_USER_PROFILES: MockUserProfile[] = [
   {
     userId: "550e8400-e29b-41d4-a716-446655440001",
     firstName: "Reyco",

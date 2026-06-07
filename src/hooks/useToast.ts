@@ -19,13 +19,12 @@ export interface ParsedError {
 
 export function useToast(options: UseToastOptions = {}) {
   const {
-    defaultErrorTitle = "Error",
     defaultErrorDescription = "An unexpected error occurred"
   } = options
 
   const showError = useCallback((
     error: unknown,
-    title?: string,
+    _title?: string,
     description?: string
   ) => {
     let errorMessage = description || defaultErrorDescription
@@ -35,7 +34,7 @@ export function useToast(options: UseToastOptions = {}) {
       errorMessage = error.message
 
       // Check if this is an API error with responseData
-      const apiError = error as any
+      const apiError = error as { responseData?: { error: string; details?: unknown } }
       if (apiError.responseData) {
         const { error: apiErrorMessage, details } = apiError.responseData
 
@@ -61,7 +60,7 @@ export function useToast(options: UseToastOptions = {}) {
     }
 
     toast.error(errorMessage)
-  }, [defaultErrorTitle, defaultErrorDescription])
+  }, [defaultErrorDescription])
 
   const showSuccess = useCallback((
     title: string,
@@ -96,7 +95,7 @@ export function useToast(options: UseToastOptions = {}) {
       message = error.message
 
       // Check if this is an API error with responseData
-      const apiError = error as any
+      const apiError = error as { responseData?: { error: string; details?: unknown } }
       if (apiError.responseData) {
         const { error: apiErrorMessage, details } = apiError.responseData
 

@@ -7,9 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
 import { MOCK_USER_PROFILES, MOCK_USERS } from "../constants"
-import type { UserProfile } from "../components/UserColumns"
 
 export default function UserProfileForm() {
   const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()

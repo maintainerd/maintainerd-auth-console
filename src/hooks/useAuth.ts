@@ -76,7 +76,7 @@ export function useAuth() {
     try {
       await dispatch(validateAuthAsync()).unwrap()
       return true
-    } catch (error) {
+    } catch {
       // Silent failure for auth check - don't show error toast
       return false
     }
@@ -85,7 +85,7 @@ export function useAuth() {
   const initializeAuth = useCallback(async () => {
     try {
       await dispatch(initializeAuthAsync()).unwrap()
-    } catch (error) {
+    } catch {
       // Silent failure for auth initialization - don't show error toast
     }
   }, [dispatch])
@@ -102,7 +102,7 @@ export function useAuth() {
     try {
       const result = await dispatch(fetchProfileAsync()).unwrap()
       return result
-    } catch (error) {
+    } catch {
       // Silent failure - profile might not exist yet
       return null
     }

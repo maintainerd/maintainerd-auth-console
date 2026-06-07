@@ -46,8 +46,8 @@ const RegisterForm = () => {
 
       showSuccess('Account created successfully! Please complete your profile.')
       navigate('/register/profile', { replace: true })
-    } catch (error: any) {
-      const errorMessage = error?.message || "Registration failed. Please try again."
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again."
       setRegisterError(errorMessage)
     }
   }

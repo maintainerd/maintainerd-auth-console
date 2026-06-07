@@ -27,8 +27,8 @@ export const loginAsync = createAsyncThunk(
 			const response = await authLogin(data)
 			const userProfile = await fetchProfile()
 			return { data: userProfile, message: response.message }
-		} catch (error: any) {
-			const errorMessage = error?.message || 'Login failed'
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : 'Login failed'
 			return thunkAPI.rejectWithValue({ message: errorMessage })
 		}
   }
@@ -40,8 +40,8 @@ export const registerAsync = createAsyncThunk(
     try {
       const response = await authRegister(data)
       return { data: response.data }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Registration failed'
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed'
       return thunkAPI.rejectWithValue({ message: errorMessage })
     }
   }
@@ -89,8 +89,8 @@ export const forgotPasswordAsync = createAsyncThunk(
   async (data: ForgotPasswordRequest, thunkAPI) => {
     try {
       await authForgotPassword(data)
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to send reset email'
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email'
       return thunkAPI.rejectWithValue({ message: errorMessage })
     }
   }
@@ -106,8 +106,8 @@ export const resetPasswordAsync = createAsyncThunk(
   async (data: ResetPasswordAsyncRequest, thunkAPI) => {
     try {
       await authResetPassword(data.password, data.queryParams)
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to reset password'
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reset password'
       return thunkAPI.rejectWithValue({ message: errorMessage })
     }
   }

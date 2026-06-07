@@ -1,4 +1,16 @@
-import type { Role } from "./components/RoleColumns"
+export interface Role {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  permissions: string[]
+  userCount: number
+  isSystem: boolean
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+}
 
 export const MOCK_ROLES: Role[] = [
   {

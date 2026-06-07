@@ -45,8 +45,8 @@ const LoginForm = () => {
 				const redirectPath = `/${tenantIdentifier}/dashboard`
 				navigate(redirectPath, { replace: true })
 			}
-    } catch (err: any) {
-      const errorMessage = err?.message || "Invalid email or password"
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Invalid email or password"
       setLoginError(errorMessage)
     }
   }

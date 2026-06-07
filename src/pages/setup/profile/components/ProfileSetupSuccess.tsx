@@ -9,7 +9,7 @@ interface ProfileSetupSuccessProps {
   isComplete?: boolean
 }
 
-const ProfileSetupSuccess = ({ isCompleting = false, isComplete = false }: ProfileSetupSuccessProps) => {
+const ProfileSetupSuccess = ({ isComplete = false }: ProfileSetupSuccessProps) => {
   const navigate = useNavigate()
 
   useEffect(() => {

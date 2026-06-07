@@ -16,7 +16,7 @@ export type ClientSecret = {
  * Client config type (dynamic fields)
  */
 export type ClientConfig = {
-  config: Record<string, any>
+  config: Record<string, unknown>
 }
 
 /**
@@ -136,7 +136,7 @@ export interface CreateClientRequest {
   domain: string
   identity_provider_id: string
   status: ClientStatus
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 /**
@@ -149,7 +149,7 @@ export interface UpdateClientRequest {
   domain: string
   identity_provider_id?: string
   status: ClientStatus
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 /**

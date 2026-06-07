@@ -1,16 +1,14 @@
-import type { SocialProvider } from "./components/SocialProviderColumns"
-
 // Available status options
 export const SOCIAL_PROVIDER_STATUSES = [
   "active",
-  "inactive", 
+  "inactive",
   "configuring"
 ] as const
 
 // Available provider types
 export const SOCIAL_PROVIDER_TYPES = [
   "google",
-  "facebook", 
+  "facebook",
   "github",
   "twitter",
   "linkedin",
@@ -20,7 +18,30 @@ export const SOCIAL_PROVIDER_TYPES = [
   "custom"
 ] as const
 
-export const MOCK_SOCIAL_PROVIDERS: SocialProvider[] = [
+/**
+ * Shape of the mock social provider records used for local development.
+ */
+export interface MockSocialProvider {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  identifier: string
+  type: string
+  status: string
+  userCount: number
+  clientId: string
+  clientSecret: string
+  scopes: string[]
+  endpoint: string
+  metadata?: Record<string, string>
+  createdAt: string
+  createdBy: string
+  updatedAt: string
+  lastSync: string | null
+}
+
+export const MOCK_SOCIAL_PROVIDERS: MockSocialProvider[] = [
   {
     id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     name: "google-oauth",

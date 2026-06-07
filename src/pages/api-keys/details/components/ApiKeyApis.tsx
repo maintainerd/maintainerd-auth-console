@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Server, Search, Plus, Trash2 } from "lucide-react"
+import { Server, Search, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { InformationCard } from "@/components/card"
@@ -86,7 +86,7 @@ export function ApiKeyApis({ apiKeyId }: ApiKeyApisProps) {
         permissionId: deletePermissionDialog.permissionId
       })
       showSuccess("Permission removed from API key API successfully")
-      setDeletePermissionDialog({ open: false, apiId: null, permissionId: null, permissionName: null })
+      setDeletePermissionDialog({ open: false, apiId: "", permissionId: "", permissionName: "" })
     } catch (error) {
       showError(error)
     }

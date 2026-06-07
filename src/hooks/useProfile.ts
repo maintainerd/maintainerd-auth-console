@@ -33,7 +33,7 @@ export function useProfile() {
         dispatch(setProfile(response.data))
       }
       return { success: true, data: response }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseError(error)
       if (parsedError.isValidationError && parsedError.fieldErrors) {
         const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
@@ -43,7 +43,7 @@ export function useProfile() {
       } else {
         showError(error, "Failed to create profile")
       }
-      return { success: false, message: error.message, fieldErrors: parsedError.fieldErrors }
+      return { success: false, message: parsedError.message, fieldErrors: parsedError.fieldErrors }
     } finally {
       setIsLoading(false)
     }
@@ -62,7 +62,7 @@ export function useProfile() {
         dispatch(setProfile(response.data))
       }
       return { success: true, data: response }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const parsedError = parseError(error)
       if (parsedError.isValidationError && parsedError.fieldErrors) {
         const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
@@ -73,7 +73,7 @@ export function useProfile() {
         showError(error, "Failed to create profile")
       }
 
-      return { success: false, message: error.message, fieldErrors: parsedError.fieldErrors }
+      return { success: false, message: parsedError.message, fieldErrors: parsedError.fieldErrors }
     } finally {
       setIsLoading(false)
     }

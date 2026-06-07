@@ -5,7 +5,7 @@ interface IdentityProviderConfigTabProps {
   provider: {
     provider: string
     is_system: boolean
-    config: Record<string, any>
+    config: Record<string, unknown>
   }
 }
 

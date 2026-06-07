@@ -14,7 +14,7 @@ import {
   completeSetup,
   getSetupStatus,
 } from '@/services'
-import type { CreateAdminRequest, CreateProfileRequest, SetupStatusData, ProfileData } from '@/services/api/setup/types'
+import type { CreateAdminRequest, CreateProfileRequest, SetupStatusData } from '@/services/api/setup/types'
 import type { ProfileEntity } from '@/services/api/auth/types'
 
 export function useSetupStatus() {

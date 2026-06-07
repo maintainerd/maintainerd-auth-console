@@ -34,6 +34,20 @@ interface SocialProviderDataTableProps<TData, TValue> {
   data: TData[]
 }
 
+/**
+ * Subset of fields used for searching and filtering social provider rows.
+ */
+interface FilterableProvider {
+  id?: string
+  name?: string
+  display_name?: string
+  description?: string
+  identifier?: string
+  provider?: string
+  status?: string
+  is_system?: boolean
+}
+
 export function SocialProviderDataTable<TData, TValue>({
   columns,
   data,
@@ -44,29 +58,38 @@ export function SocialProviderDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
-    type: [],
-    status: []
+    status: [],
+    provider: [],
+    isSystem: "all"
   })
 
   const filteredData = React.useMemo(() => {
-    return data.filter((item: any) => {
+    return data.filter((row) => {
+      const item = row as FilterableProvider
+
       // Text search
       if (filter) {
-        const searchFields = [item.name, item.description, item.type, item.clientId, item.id]
-        const searchText = searchFields.join(" ").toLowerCase()
+        const searchFields = [item.name, item.display_name, item.description, item.identifier, item.id]
+        const searchText = searchFields.filter(Boolean).join(" ").toLowerCase()
         if (!searchText.includes(filter.toLowerCase())) {
           return false
         }
       }
 
-      // Provider type filter
-      if (advancedFilters.type.length > 0) {
-        if (!advancedFilters.type.includes(item.type)) return false
+      // Provider filter
+      if (advancedFilters.provider.length > 0) {
+        if (!item.provider || !advancedFilters.provider.includes(item.provider)) return false
       }
 
       // Status filter
       if (advancedFilters.status.length > 0) {
-        if (!advancedFilters.status.includes(item.status)) return false
+        if (!item.status || !advancedFilters.status.includes(item.status)) return false
+      }
+
+      // System / regular provider filter
+      if (advancedFilters.isSystem !== "all") {
+        const wantSystem = advancedFilters.isSystem === "system"
+        if (Boolean(item.is_system) !== wantSystem) return false
       }
 
       return true
@@ -82,7 +105,7 @@ export function SocialProviderDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    getRowId: (row) => (row as any).id, // Use id as the unique identifier
+    getRowId: (row) => (row as FilterableProvider).id ?? "", // Use id as the unique identifier
     state: {
       sorting,
       columnFilters,
@@ -93,39 +116,45 @@ export function SocialProviderDataTable<TData, TValue>({
   // Generate active filters display
   const activeFilters = React.useMemo(() => {
     const filters: string[] = []
-    
-    if (advancedFilters.type.length > 0) {
-      const typeNames = advancedFilters.type.map(type => 
-        type.charAt(0).toUpperCase() + type.slice(1)
+
+    if (advancedFilters.provider.length > 0) {
+      const providerNames = advancedFilters.provider.map(provider =>
+        provider.charAt(0).toUpperCase() + provider.slice(1)
       )
-      filters.push(...typeNames.map(name => `Type: ${name}`))
+      filters.push(...providerNames.map(name => `Provider: ${name}`))
     }
-    
+
     if (advancedFilters.status.length > 0) {
-      const statusNames = advancedFilters.status.map(status => 
+      const statusNames = advancedFilters.status.map(status =>
         status.charAt(0).toUpperCase() + status.slice(1)
       )
       filters.push(...statusNames.map(name => `Status: ${name}`))
     }
-    
+
+    if (advancedFilters.isSystem !== "all") {
+      filters.push(advancedFilters.isSystem === "system" ? "System Providers" : "Regular Providers")
+    }
+
     return filters
   }, [advancedFilters])
 
   const clearAllFilters = () => {
     setFilter("")
     setAdvancedFilters({
-      type: [],
-      status: []
+      status: [],
+      provider: [],
+      isSystem: "all"
     })
   }
 
   return (
     <div className="space-y-4">
       <SocialProviderToolbar
-        searchValue={filter}
-        onSearchChange={setFilter}
+        filter={filter}
+        setFilter={setFilter}
         filters={advancedFilters}
         onFiltersChange={setAdvancedFilters}
+        table={table}
       />
 
       {/* Active Filters Display */}

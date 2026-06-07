@@ -63,24 +63,6 @@ export interface ApiListResponse {
 }
 
 /**
- * Single API response interface
- */
-export interface ApiResponse {
-  api_id: string
-  name: string
-  display_name: string
-  description: string
-  api_type: ApiType
-  identifier: string
-  service: Service
-  status: ApiStatus
-  is_default: boolean
-  is_system: boolean
-  created_at: string
-  updated_at: string
-}
-
-/**
  * Create API request interface
  */
 export interface CreateApiRequest {

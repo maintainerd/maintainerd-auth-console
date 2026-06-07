@@ -62,7 +62,7 @@ export type IdentityProviderDetail = {
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, any> // Dynamic config based on provider
+  config: Record<string, unknown> // Dynamic config based on provider
   tenant: Tenant
   status: IdentityProviderStatus
   is_default: boolean
@@ -128,7 +128,7 @@ export interface IdentityProviderDetailResponse {
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, any>
+  config: Record<string, unknown>
   tenant: Tenant
   status: IdentityProviderStatus
   is_default: boolean
@@ -145,7 +145,7 @@ export interface CreateIdentityProviderRequest {
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
-  config: Record<string, any>
+  config: Record<string, unknown>
   status: IdentityProviderStatus
   tenant_id: string
 }
@@ -158,7 +158,7 @@ export interface UpdateIdentityProviderRequest {
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
-  config: Record<string, any>
+  config: Record<string, unknown>
   status: IdentityProviderStatus
 }
 

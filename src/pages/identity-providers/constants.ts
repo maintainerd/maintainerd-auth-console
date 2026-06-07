@@ -1,5 +1,3 @@
-import type { IdentityProvider } from "./components/IdentityProviderColumns"
-
 // Available status options
 export const IDENTITY_PROVIDER_STATUSES = [
   "active",
@@ -7,7 +5,29 @@ export const IDENTITY_PROVIDER_STATUSES = [
   "configuring"
 ] as const
 
-export const MOCK_IDENTITY_PROVIDERS: IdentityProvider[] = [
+/**
+ * Shape of the mock identity provider records used for local development.
+ */
+export interface MockIdentityProvider {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  identifier: string
+  type: string
+  status: string
+  userCount: number
+  isDefault: boolean
+  endpoint: string
+  metadata?: Record<string, string>
+  region?: string
+  createdAt: string
+  createdBy: string
+  updatedAt: string
+  lastSync?: string
+}
+
+export const MOCK_IDENTITY_PROVIDERS: MockIdentityProvider[] = [
   {
     id: "k8m3n9p2q7r5",
     name: "system-default",

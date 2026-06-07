@@ -3,7 +3,7 @@
  * Provides a consistent max-width centered container for detail pages and forms
  */
 
-import { ReactNode } from "react"
+import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 interface DetailsContainerProps {

@@ -7,9 +7,9 @@ import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
+  Api,
   ApiListResponse,
   ApiQueryParams,
-  ApiResponse,
   CreateApiRequest,
   UpdateApiRequest,
   UpdateApiStatusRequest
@@ -42,9 +42,9 @@ export async function fetchApis(params?: ApiQueryParams): Promise<ApiListRespons
 /**
  * Fetch a single API by ID
  */
-export async function fetchApiById(apiId: string): Promise<ApiResponse> {
+export async function fetchApiById(apiId: string): Promise<Api> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}`
-  const response = await get<ApiResponse<ApiResponse>>(endpoint)
+  const response = await get<ApiResponse<Api>>(endpoint)
 
   if (response.success && response.data) {
     return response.data
@@ -56,9 +56,9 @@ export async function fetchApiById(apiId: string): Promise<ApiResponse> {
 /**
  * Create a new API
  */
-export async function createApi(data: CreateApiRequest): Promise<ApiResponse> {
+export async function createApi(data: CreateApiRequest): Promise<Api> {
   const endpoint = API_ENDPOINTS.API
-  const response = await post<ApiResponse<ApiResponse>>(endpoint, data)
+  const response = await post<ApiResponse<Api>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
@@ -70,9 +70,9 @@ export async function createApi(data: CreateApiRequest): Promise<ApiResponse> {
 /**
  * Update an existing API
  */
-export async function updateApi(apiId: string, data: UpdateApiRequest): Promise<ApiResponse> {
+export async function updateApi(apiId: string, data: UpdateApiRequest): Promise<Api> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}`
-  const response = await put<ApiResponse<ApiResponse>>(endpoint, data)
+  const response = await put<ApiResponse<Api>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
@@ -96,9 +96,9 @@ export async function deleteApi(apiId: string): Promise<void> {
 /**
  * Update API status
  */
-export async function updateApiStatus(apiId: string, data: UpdateApiStatusRequest): Promise<ApiResponse> {
+export async function updateApiStatus(apiId: string, data: UpdateApiStatusRequest): Promise<Api> {
   const endpoint = `${API_ENDPOINTS.API}/${apiId}/status`
-  const response = await put<ApiResponse<ApiResponse>>(endpoint, data)
+  const response = await put<ApiResponse<Api>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data

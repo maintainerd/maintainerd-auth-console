@@ -24,12 +24,12 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 import { LogToolbar, type LogFilterState } from "./LogToolbar"
 import type { LogEntry } from "../constants"
 
-interface LogDataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface LogDataTableProps {
+  columns: ColumnDef<LogEntry>[]
+  data: LogEntry[]
 }
 
-export function LogDataTable<TData, TValue>({ columns, data }: LogDataTableProps<TData, TValue>) {
+export function LogDataTable({ columns, data }: LogDataTableProps) {
   const [filter, setFilter] = React.useState("")
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "timestamp", desc: true }])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -53,7 +53,7 @@ export function LogDataTable<TData, TValue>({ columns, data }: LogDataTableProps
 
   // Apply advanced filters to data
   const filteredData = React.useMemo(() => {
-    let filtered = data as LogEntry[]
+    let filtered = data
 
     // Apply advanced filters
     if (advancedFilters.levels.length > 0) {
@@ -252,7 +252,7 @@ export function LogDataTable<TData, TValue>({ columns, data }: LogDataTableProps
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div>
-          Showing {table.getFilteredRowModel().rows.length} of {(data as LogEntry[]).length} logs
+          Showing {table.getFilteredRowModel().rows.length} of {data.length} logs
           {filter && ` matching "${filter}"`}
         </div>
         <div>

@@ -10,8 +10,32 @@ export type * from './api/types'
 
 // Service-specific API types
 export type * from './api/auth/types'
-export type * from './api/setup/types'
-export type * from './api/tenants/types'
+// `setup/types` shares `CreateProfileRequest`/`CreateProfileResponse` with
+// `auth/types`; auth's definitions win, so re-export setup's remaining members
+// explicitly to avoid the ambiguous-wildcard conflict.
+export type {
+  CreateTenantRequest,
+  TenantData,
+  CreateTenantResponse,
+  CreateAdminRequest,
+  AdminData,
+  CreateAdminResponse,
+  ProfileData,
+  SetupStatusData,
+  SetupStatusResponse,
+  CompleteSetupData,
+  CompleteSetupResponse,
+} from './api/setup/types'
+// `tenants/types` shares `CreateTenantRequest` with `setup/types`; setup's
+// definition wins, so re-export tenants' remaining members explicitly.
+export type {
+  TenantStatus,
+  TenantEntity,
+  TenantListParams,
+  UpdateTenantRequest,
+  TenantResponse,
+  TenantListResponse,
+} from './api/tenants/types'
 export type * from './api/services/types'
 export type * from './api/api/types'
 export type * from './api/policies/types'
@@ -43,8 +67,10 @@ export {
   validateAuthentication,
   forgotPassword,
   resetPassword,
-  type ResetPasswordQueryParams
 } from './api/auth'
+// `ResetPasswordQueryParams` is a type-only member surfaced through the
+// `./api/auth/types` wildcard above (the `./api/auth` value module does not
+// re-export it).
 
 // Tenant service functions
 export {

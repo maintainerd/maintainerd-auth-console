@@ -4,7 +4,7 @@ import { logColumns } from "./components/LogColumns"
 import { MOCK_LOGS, type LogEntry } from "./constants"
 
 export default function LogMonitoringPage() {
-  const [logs, setLogs] = React.useState<LogEntry[]>(MOCK_LOGS)
+  const [logs] = React.useState<LogEntry[]>(MOCK_LOGS)
 
   return (
     <div className="flex flex-col gap-6">

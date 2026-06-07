@@ -63,7 +63,7 @@ export default function NotificationsPage() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-semibold tracking-tight">Notifications</h1>
             <div className="flex items-center gap-3">
-              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | "unread" | "read")}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>

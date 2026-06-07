@@ -22,13 +22,14 @@ import {
 } from "@/components/ui/select"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { UserToolbar, type FilterState } from "./UserToolbar"
+import type { User } from "@/services/api/users/types"
 
-interface UserDataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface UserDataTableProps<TValue> {
+  columns: ColumnDef<User, TValue>[]
+  data: User[]
 }
 
-export function UserDataTable<TData, TValue>({ columns, data }: UserDataTableProps<TData, TValue>) {
+export function UserDataTable<TValue>({ columns, data }: UserDataTableProps<TValue>) {
   const [filter, setFilter] = React.useState("")
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -36,65 +37,13 @@ export function UserDataTable<TData, TValue>({ columns, data }: UserDataTablePro
   const [rowSelection, setRowSelection] = React.useState({})
   const [advancedFilters, setAdvancedFilters] = React.useState<FilterState>({
     status: [],
-    roles: [],
-    roleSearch: "",
-    emailVerified: "all",
-    twoFactorEnabled: "all",
-    hasLoginAttempts: false
   })
-
-  // Extract unique roles from data for the filter
-  const availableRoles = React.useMemo(() => {
-    const allRoles = new Set<string>()
-    data.forEach((item: any) => {
-      if (item.roles && Array.isArray(item.roles)) {
-        item.roles.forEach((role: string) => allRoles.add(role))
-      }
-    })
-    return Array.from(allRoles).sort()
-  }, [data])
 
   // Filter data based on advanced filters
   const filteredData = React.useMemo(() => {
-    return data.filter((item: any) => {
+    return data.filter((item) => {
       // Status filter
       if (advancedFilters.status.length > 0 && !advancedFilters.status.includes(item.status)) {
-        return false
-      }
-
-      // Roles filter (selected roles)
-      if (advancedFilters.roles.length > 0) {
-        const hasMatchingRole = advancedFilters.roles.some(role =>
-          item.roles && item.roles.includes(role)
-        )
-        if (!hasMatchingRole) return false
-      }
-
-      // Role search filter (search within user's roles)
-      if (advancedFilters.roleSearch.trim()) {
-        const searchTerm = advancedFilters.roleSearch.toLowerCase()
-        const hasMatchingRoleSearch = item.roles && item.roles.some((role: string) =>
-          role.toLowerCase().includes(searchTerm)
-        )
-        if (!hasMatchingRoleSearch) return false
-      }
-
-      // Email verification filter
-      if (advancedFilters.emailVerified !== "all") {
-        const isVerified = item.emailVerified === true
-        if (advancedFilters.emailVerified === "verified" && !isVerified) return false
-        if (advancedFilters.emailVerified === "unverified" && isVerified) return false
-      }
-
-      // 2FA filter
-      if (advancedFilters.twoFactorEnabled !== "all") {
-        const has2FA = item.twoFactorEnabled === true
-        if (advancedFilters.twoFactorEnabled === "enabled" && !has2FA) return false
-        if (advancedFilters.twoFactorEnabled === "disabled" && has2FA) return false
-      }
-
-      // Login attempts filter
-      if (advancedFilters.hasLoginAttempts && (!item.loginAttempts || item.loginAttempts === 0)) {
         return false
       }
 
@@ -113,23 +62,16 @@ export function UserDataTable<TData, TValue>({ columns, data }: UserDataTablePro
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    globalFilterFn: (row, _columnId, value) => {
+    globalFilterFn: (row, _columnId, value: string) => {
       const searchValue = value.toLowerCase()
-      const user = row.original as any
+      const user = row.original
 
       // Search in basic fields
-      const basicFields = ['name', 'email', 'phone']
-      const basicMatch = basicFields.some(field => {
+      const basicFields: Array<keyof User> = ["username", "fullname", "email", "phone"]
+      return basicFields.some((field) => {
         const fieldValue = user[field]
-        return fieldValue && String(fieldValue).toLowerCase().includes(searchValue)
+        return fieldValue != null && String(fieldValue).toLowerCase().includes(searchValue)
       })
-
-      // Search in roles array
-      const rolesMatch = user.roles && user.roles.some((role: string) =>
-        role.toLowerCase().includes(searchValue)
-      )
-
-      return basicMatch || rolesMatch
     },
     state: {
       sorting,
@@ -140,28 +82,11 @@ export function UserDataTable<TData, TValue>({ columns, data }: UserDataTablePro
     },
   })
 
-  const selectedCount = Object.keys(rowSelection).length
-
   // Active filters display
   const activeFilters = React.useMemo(() => {
-    const filters = []
+    const filters: string[] = []
     if (advancedFilters.status.length > 0) {
       filters.push(`Status: ${advancedFilters.status.join(", ")}`)
-    }
-    if (advancedFilters.roles.length > 0) {
-      filters.push(`Selected roles: ${advancedFilters.roles.join(", ")}`)
-    }
-    if (advancedFilters.roleSearch.trim()) {
-      filters.push(`Role search: "${advancedFilters.roleSearch}"`)
-    }
-    if (advancedFilters.emailVerified !== "all") {
-      filters.push(`Email: ${advancedFilters.emailVerified}`)
-    }
-    if (advancedFilters.twoFactorEnabled !== "all") {
-      filters.push(`2FA: ${advancedFilters.twoFactorEnabled}`)
-    }
-    if (advancedFilters.hasLoginAttempts) {
-      filters.push("Has login attempts")
     }
     return filters
   }, [advancedFilters])
@@ -171,9 +96,9 @@ export function UserDataTable<TData, TValue>({ columns, data }: UserDataTablePro
       <UserToolbar
         filter={filter}
         setFilter={setFilter}
-        selectedCount={selectedCount}
+        filters={advancedFilters}
         onFiltersChange={setAdvancedFilters}
-        availableRoles={availableRoles}
+        table={table}
       />
 
       {/* Active Filters Display */}
@@ -191,11 +116,6 @@ export function UserDataTable<TData, TValue>({ columns, data }: UserDataTablePro
             className="h-6 px-2 text-xs"
             onClick={() => setAdvancedFilters({
               status: [],
-              roles: [],
-              roleSearch: "",
-              emailVerified: "all",
-              twoFactorEnabled: "all",
-              hasLoginAttempts: false
             })}
           >
             Clear all

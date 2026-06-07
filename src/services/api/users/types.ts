@@ -37,7 +37,7 @@ export type UserProfile = {
   timezone: string
   language: string
   is_default: boolean
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }
@@ -265,7 +265,7 @@ export interface CreateUserProfileRequest {
   timezone?: string
   language?: string
   profile_url?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 /**
@@ -288,5 +288,5 @@ export interface UpdateUserProfileRequest {
   timezone?: string
   language?: string
   profile_url?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
