@@ -5,10 +5,8 @@
  */
 export interface FilterState {
   status: string[]
-  isSystem: string
 }
 
 export const DEFAULT_USER_POOL_FILTERS: FilterState = {
   status: [],
-  isSystem: "all",
 }

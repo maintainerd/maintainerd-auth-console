@@ -42,8 +42,6 @@ export function UserPoolListing() {
         return false
       }
       if (filters.status.length > 0 && !filters.status.includes(pool.status)) return false
-      if (filters.isSystem === "system" && !pool.is_system) return false
-      if (filters.isSystem === "regular" && pool.is_system) return false
       return true
     })
   }, [pools, search, filters])
@@ -68,9 +66,6 @@ export function UserPoolListing() {
     const labels: string[] = []
     if (filters.status.length > 0) {
       labels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    if (filters.isSystem !== "all") {
-      labels.push(`System Type: ${filters.isSystem === "system" ? "System" : "Regular"}`)
     }
     return labels
   }, [filters])
