@@ -1,31 +1,19 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Boxes } from "lucide-react"
+import { Boxes } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserPoolActions } from "./UserPoolActions"
 import { SystemBadge } from "@/components/badges"
+import { DataTableColumnHeader } from "@/components/data-table"
 import type { UserPool } from "@/services/api/user-pools/types"
-
-// Consistent sortable-header styling, applied identically to every column.
-const SORT_HEADER_CLASS = "h-auto p-0 font-semibold hover:bg-transparent"
 
 export const userPoolColumns: ColumnDef<UserPool>[] = [
   {
     accessorKey: "name",
     id: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className={SORT_HEADER_CLASS}
-      >
-        User Pool
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="User Pool" />,
     cell: ({ row }) => {
       const pool = row.original
       return (
@@ -43,16 +31,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
   {
     accessorKey: "identifier",
     id: "identifier",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className={SORT_HEADER_CLASS}
-      >
-        Identifier
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Identifier" />,
     cell: ({ row }) => (
       <div className="px-3 py-1">
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
@@ -64,16 +43,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
   {
     accessorKey: "status",
     id: "status",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className={SORT_HEADER_CLASS}
-      >
-        Status
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const pool = row.original
       return (
@@ -88,16 +58,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
   {
     accessorKey: "created_at",
     id: "created",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className={SORT_HEADER_CLASS}
-      >
-        Created
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const pool = row.original
       return (

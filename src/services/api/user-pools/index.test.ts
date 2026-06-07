@@ -12,8 +12,11 @@ const { api } = vi.hoisted(() => ({
 const { createResourceApiMock } = vi.hoisted(() => ({
   createResourceApiMock: vi.fn(() => api),
 }))
+const { patchMock } = vi.hoisted(() => ({ patchMock: vi.fn() }))
 
 vi.mock("../_lib/resource", () => ({ createResourceApi: createResourceApiMock }))
+vi.mock("../client", () => ({ patch: patchMock }))
+vi.mock("../_lib/unwrap", () => ({ unwrap: (res: { data: unknown }) => res.data }))
 
 import * as service from "./index"
 import { API_ENDPOINTS } from "../config"
@@ -49,5 +52,14 @@ describe("user-pools service", () => {
   it("deleteUserPool delegates to api.remove", () => {
     service.deleteUserPool("up-1")
     expect(api.remove).toHaveBeenCalledWith("up-1")
+  })
+
+  it("setUserPoolStatus PATCHes the status endpoint and unwraps", async () => {
+    patchMock.mockResolvedValue({ success: true, data: { user_pool_id: "up-1", status: "inactive" } })
+    await expect(service.setUserPoolStatus("up-1", "inactive")).resolves.toEqual({
+      user_pool_id: "up-1",
+      status: "inactive",
+    })
+    expect(patchMock).toHaveBeenCalledWith("/user-pools/up-1/status", { status: "inactive" })
   })
 })

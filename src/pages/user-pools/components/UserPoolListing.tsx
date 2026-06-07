@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import type { SortingState, VisibilityState, PaginationState } from "@tanstack/react-table"
 import {
   getCoreRowModel,
@@ -13,6 +14,8 @@ import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/compon
 import { useUserPools } from "@/hooks/useUserPools"
 
 export function UserPoolListing() {
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const columns = React.useMemo(() => userPoolColumns, [])
 
   const [search, setSearch] = React.useState("")
@@ -89,6 +92,7 @@ export function UserPoolListing() {
         columnCount={columns.length}
         isLoading={isLoading}
         error={error}
+        onRowClick={(pool) => navigate(`/${tenantId}/user-pools/${pool.user_pool_id}`)}
       />
       <DataTablePagination table={table} />
     </div>

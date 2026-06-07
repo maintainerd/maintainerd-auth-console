@@ -15,6 +15,7 @@ const useUserPoolsMock = vi.fn()
 vi.mock("@/hooks/useUserPools", () => ({
   useUserPools: () => useUserPoolsMock(),
   useDeleteUserPool: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useSetUserPoolStatus: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ showSuccess: vi.fn(), showError: vi.fn() }) }))
 
@@ -102,6 +103,13 @@ describe("UserPoolListing", () => {
       await user.click(screen.getByRole("button", { name: header }))
     }
     expect(screen.getByText("customers")).toBeInTheDocument()
+  })
+
+  it("opens the details page when a row is clicked", async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 })
+    render()
+    await user.click(screen.getByText("customers"))
+    expect(navigate).toHaveBeenCalledWith("/t1/user-pools/1")
   })
 
   it("navigates to the create page from the New button", async () => {
