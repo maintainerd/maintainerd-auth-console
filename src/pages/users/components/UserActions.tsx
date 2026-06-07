@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Ban } from "lucide-react"
+import { MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Ban, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -18,10 +18,62 @@ interface UserActionsProps {
   user: User
 }
 
-interface PendingStatusAction {
+interface StatusAction {
   status: UserStatus
+  label: string
   title: string
   description: string
+  icon: LucideIcon
+}
+
+// Available status transitions per current status (exhaustive over UserStatus).
+const STATUS_ACTIONS: Record<UserStatus, StatusAction[]> = {
+  inactive: [
+    {
+      status: "active",
+      label: "Activate User",
+      title: "Activate User",
+      description:
+        "Are you sure you want to activate this user? They will be able to sign in and access the system.",
+      icon: Play,
+    },
+  ],
+  active: [
+    {
+      status: "inactive",
+      label: "Deactivate User",
+      title: "Deactivate User",
+      description: "Are you sure you want to deactivate this user? They will no longer be able to sign in.",
+      icon: Pause,
+    },
+    {
+      status: "suspended",
+      label: "Suspend User",
+      title: "Suspend User",
+      description:
+        "Are you sure you want to suspend this user? This is typically used for security concerns or policy violations. They will be immediately logged out and cannot sign in.",
+      icon: Ban,
+    },
+  ],
+  suspended: [
+    {
+      status: "active",
+      label: "Activate User",
+      title: "Activate User",
+      description: "Are you sure you want to activate this suspended user? They will be able to sign in again.",
+      icon: Play,
+    },
+  ],
+  pending: [
+    {
+      status: "active",
+      label: "Activate User",
+      title: "Activate User",
+      description:
+        "Are you sure you want to activate this pending user? They will be able to sign in and access the system.",
+      icon: Play,
+    },
+  ],
 }
 
 export function UserActions({ user }: UserActionsProps) {
@@ -33,7 +85,7 @@ export function UserActions({ user }: UserActionsProps) {
 
   const [showStatusDialog, setShowStatusDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [pendingStatusAction, setPendingStatusAction] = useState<PendingStatusAction | null>(null)
+  const [pendingStatusAction, setPendingStatusAction] = useState<StatusAction | null>(null)
 
   const handleViewDetails = () => {
     navigate(`/${tenantId}/users/${user.user_id}`)
@@ -43,20 +95,15 @@ export function UserActions({ user }: UserActionsProps) {
     navigate(`/${tenantId}/users/${user.user_id}/edit`)
   }
 
-  const handleStatusChange = (status: UserStatus, title: string, description: string) => {
-    setPendingStatusAction({ status, title, description })
+  const openStatusDialog = (action: StatusAction) => {
+    setPendingStatusAction(action)
     setShowStatusDialog(true)
   }
 
-  const handleConfirmStatusChange = async () => {
-    if (!pendingStatusAction) return
-
+  const handleConfirmStatusChange = async (action: StatusAction) => {
     try {
-      await updateStatusMutation.mutateAsync({
-        userId: user.user_id,
-        data: { status: pendingStatusAction.status }
-      })
-      showSuccess(`User status updated to ${pendingStatusAction.status}`)
+      await updateStatusMutation.mutateAsync({ userId: user.user_id, data: { status: action.status } })
+      showSuccess(`User status updated to ${action.status}`)
     } catch (error) {
       showError(error)
     }
@@ -91,66 +138,34 @@ export function UserActions({ user }: UserActionsProps) {
             Edit User
           </DropdownMenuItem>
 
-          {user.status === 'inactive' ? (
-            <DropdownMenuItem
-              onClick={() => handleStatusChange('active', 'Activate User', 'Are you sure you want to activate this user? They will be able to sign in and access the system.')}
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Activate User
+          {STATUS_ACTIONS[user.status].map((action) => (
+            <DropdownMenuItem key={action.label} onClick={() => openStatusDialog(action)}>
+              <action.icon className="mr-2 h-4 w-4" />
+              {action.label}
             </DropdownMenuItem>
-          ) : user.status === 'active' ? (
-            <>
-              <DropdownMenuItem
-                onClick={() => handleStatusChange('inactive', 'Deactivate User', 'Are you sure you want to deactivate this user? They will no longer be able to sign in.')}
-              >
-                <Pause className="mr-2 h-4 w-4" />
-                Deactivate User
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleStatusChange('suspended', 'Suspend User', 'Are you sure you want to suspend this user? This is typically used for security concerns or policy violations. They will be immediately logged out and cannot sign in.')}
-              >
-                <Ban className="mr-2 h-4 w-4" />
-                Suspend User
-              </DropdownMenuItem>
-            </>
-          ) : user.status === 'suspended' ? (
-            <DropdownMenuItem
-              onClick={() => handleStatusChange('active', 'Activate User', 'Are you sure you want to activate this suspended user? They will be able to sign in again.')}
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Activate User
-            </DropdownMenuItem>
-          ) : user.status === 'pending' ? (
-            <DropdownMenuItem
-              onClick={() => handleStatusChange('active', 'Activate User', 'Are you sure you want to activate this pending user? They will be able to sign in and access the system.')}
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Activate User
-            </DropdownMenuItem>
-          ) : null}
+          ))}
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive"
-          >
+          <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
             <Trash2 className="mr-2 h-4 w-4" />
             Delete User
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ConfirmationDialog
-        open={showStatusDialog}
-        onOpenChange={setShowStatusDialog}
-        onConfirm={handleConfirmStatusChange}
-        title={pendingStatusAction?.title || "Change Status"}
-        description={pendingStatusAction?.description || "Are you sure you want to change the user status?"}
-        confirmText="Confirm"
-        cancelText="Cancel"
-        variant="default"
-        isLoading={updateStatusMutation.isPending}
-      />
+      {pendingStatusAction && (
+        <ConfirmationDialog
+          open={showStatusDialog}
+          onOpenChange={setShowStatusDialog}
+          onConfirm={() => handleConfirmStatusChange(pendingStatusAction)}
+          title={pendingStatusAction.title}
+          description={pendingStatusAction.description}
+          confirmText="Confirm"
+          cancelText="Cancel"
+          variant="default"
+          isLoading={updateStatusMutation.isPending}
+        />
+      )}
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
