@@ -13,7 +13,6 @@ import {
 	TrendingUp,
 	Mail,
 	Building2,
-	Boxes,
 } from "lucide-react"
 
 export const data = {
@@ -37,11 +36,6 @@ export const data = {
     {
       label: "Identity & Access",
       items: [
-        {
-          title: "User Pools",
-          route: "/user-pools",
-          icon: Boxes,
-        },
         {
           title: "User Management",
           route: "/user-management",

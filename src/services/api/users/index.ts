@@ -1,9 +1,15 @@
 /**
  * User API Service
- * Service for managing user-related API calls
+ *
+ * Standard CRUD goes through the shared resource factory; the bespoke endpoints
+ * (status, roles, identities, profiles, verification) compose the same
+ * unwrap/buildQuery helpers so the whole service is consistent.
  */
 
 import { get, post, put, patch, deleteRequest } from '../client'
+import { createResourceApi } from '../_lib/resource'
+import { unwrap, assertSuccess } from '../_lib/unwrap'
+import { buildQuery } from '../_lib/query'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
@@ -21,311 +27,85 @@ import type {
   UserProfilesResponse,
   CreateUserProfileRequest,
   UpdateUserProfileRequest,
-  UserProfile
+  UserProfile,
 } from './types'
 
-/**
- * Fetch users with optional filters and pagination
- */
-export async function fetchUsers(params?: UserQueryParams): Promise<UserListResponse> {
-  const queryParams = new URLSearchParams()
+const userApi = createResourceApi<User, CreateUserRequest, UpdateUserRequest, UserListResponse>(
+  API_ENDPOINTS.USER,
+  'user',
+)
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value))
-      }
-    })
-  }
+// ── Standard CRUD ───────────────────────────────────────────────────────────
+export const fetchUsers = (params?: UserQueryParams): Promise<UserListResponse> =>
+  userApi.list(params as Record<string, unknown> | undefined)
+export const fetchUserById = (userId: string): Promise<User> => userApi.getById(userId)
+export const createUser = (data: CreateUserRequest): Promise<User> => userApi.create(data)
+export const updateUser = (userId: string, data: UpdateUserRequest): Promise<User> =>
+  userApi.update(userId, data)
+export const deleteUser = (userId: string): Promise<void> => userApi.remove(userId)
 
-  const endpoint = `${API_ENDPOINTS.USER}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await get<ApiResponse<UserListResponse>>(endpoint)
+// ── Bespoke endpoints ─────────────────────────────────────────────────────────
+const base = API_ENDPOINTS.USER
 
-  if (response.success && response.data) {
-    return response.data
-  }
+export const updateUserStatus = (userId: string, data: UpdateUserStatusRequest): Promise<User> =>
+  patch<ApiResponse<User>>(`${base}/${userId}/status`, data).then((r) => unwrap(r, 'update user status'))
 
-  throw new Error(response.message || 'Failed to fetch users')
-}
+export const fetchUserRoles = (userId: string, params?: UserRolesQueryParams): Promise<UserRolesResponse> =>
+  get<ApiResponse<UserRolesResponse>>(`${base}/${userId}/roles${buildQuery(params as Record<string, unknown>)}`).then(
+    (r) => unwrap(r, 'fetch user roles'),
+  )
 
-/**
- * Fetch a single user by ID
- */
-export async function fetchUserById(userId: string): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}`
-  const response = await get<ApiResponse<User>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to fetch user')
-}
-
-/**
- * Create a new user
- */
-export async function createUser(data: CreateUserRequest): Promise<User> {
-  const endpoint = API_ENDPOINTS.USER
-  const response = await post<ApiResponse<User>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to create user')
-}
-
-/**
- * Update an existing user
- */
-export async function updateUser(userId: string, data: UpdateUserRequest): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}`
-  const response = await put<ApiResponse<User>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to update user')
-}
-
-/**
- * Delete a user
- */
-export async function deleteUser(userId: string): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}`
-  const response = await deleteRequest<ApiResponse<void>>(endpoint)
-
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to delete user')
-  }
-}
-
-/**
- * Update user status (activate, deactivate, suspend)
- */
-export async function updateUserStatus(userId: string, data: UpdateUserStatusRequest): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/status`
-  const response = await patch<ApiResponse<User>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to update user status')
-}
-
-/**
- * Fetch user roles with optional filters and pagination
- */
-export async function fetchUserRoles(userId: string, params?: UserRolesQueryParams): Promise<UserRolesResponse> {
-  const queryParams = new URLSearchParams()
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value))
-      }
-    })
-  }
-
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/roles${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await get<ApiResponse<UserRolesResponse>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to fetch user roles')
-}
-
-/**
- * Fetch user identities with optional filters and pagination
- */
-export async function fetchUserIdentities(userId: string, params?: UserIdentitiesQueryParams): Promise<UserIdentitiesResponse> {
-  const queryParams = new URLSearchParams()
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value))
-      }
-    })
-  }
-
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/identities${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await get<ApiResponse<UserIdentitiesResponse>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to fetch user identities')
-}
-
-/**
- * Assign roles to a user
- */
-export async function assignUserRoles(
+export const fetchUserIdentities = (
   userId: string,
-  data: { role_ids: string[] }
-): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/roles`
-  const response = await post<ApiResponse<void>>(endpoint, data)
+  params?: UserIdentitiesQueryParams,
+): Promise<UserIdentitiesResponse> =>
+  get<ApiResponse<UserIdentitiesResponse>>(
+    `${base}/${userId}/identities${buildQuery(params as Record<string, unknown>)}`,
+  ).then((r) => unwrap(r, 'fetch user identities'))
 
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to assign roles to user')
-  }
-}
+export const assignUserRoles = (userId: string, data: { role_ids: string[] }): Promise<void> =>
+  post<ApiResponse<void>>(`${base}/${userId}/roles`, data).then((r) => assertSuccess(r, 'assign roles to user'))
 
-/**
- * Remove a role from a user
- */
-export async function removeUserRole(
+export const removeUserRole = (userId: string, roleId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/roles/${roleId}`).then((r) =>
+    assertSuccess(r, 'remove role from user'),
+  )
+
+export const fetchUserProfiles = (
   userId: string,
-  roleId: string
-): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/roles/${roleId}`
-  const response = await deleteRequest<ApiResponse<void>>(endpoint)
+  params?: UserProfilesQueryParams,
+): Promise<UserProfilesResponse> =>
+  get<ApiResponse<UserProfilesResponse>>(
+    `${base}/${userId}/profiles${buildQuery(params as Record<string, unknown>)}`,
+  ).then((r) => unwrap(r, 'fetch user profiles'))
 
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to remove role from user')
-  }
-}
+export const createUserProfile = (userId: string, data: CreateUserProfileRequest): Promise<UserProfile> =>
+  post<ApiResponse<UserProfile>>(`${base}/${userId}/profiles`, data).then((r) => unwrap(r, 'create user profile'))
 
-/**
- * Fetch user profiles
- */
-export async function fetchUserProfiles(
-  userId: string,
-  params?: UserProfilesQueryParams
-): Promise<UserProfilesResponse> {
-  const queryParams = new URLSearchParams()
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value))
-      }
-    })
-  }
-
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/profiles${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await get<ApiResponse<UserProfilesResponse>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to fetch user profiles')
-}
-
-/**
- * Create a user profile
- */
-export async function createUserProfile(
-  userId: string,
-  data: CreateUserProfileRequest
-): Promise<UserProfile> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/profiles`
-  const response = await post<ApiResponse<UserProfile>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to create user profile')
-}
-
-/**
- * Update a user profile
- */
-export async function updateUserProfile(
+export const updateUserProfile = (
   userId: string,
   profileId: string,
-  data: UpdateUserProfileRequest
-): Promise<UserProfile> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/profiles/${profileId}`
-  const response = await put<ApiResponse<UserProfile>>(endpoint, data)
+  data: UpdateUserProfileRequest,
+): Promise<UserProfile> =>
+  put<ApiResponse<UserProfile>>(`${base}/${userId}/profiles/${profileId}`, data).then((r) =>
+    unwrap(r, 'update user profile'),
+  )
 
-  if (response.success && response.data) {
-    return response.data
-  }
+export const deleteUserProfile = (userId: string, profileId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/profiles/${profileId}`).then((r) =>
+    assertSuccess(r, 'delete user profile'),
+  )
 
-  throw new Error(response.message || 'Failed to update user profile')
-}
+export const setUserProfileAsDefault = (userId: string, profileId: string): Promise<UserProfile> =>
+  put<ApiResponse<UserProfile>>(`${base}/${userId}/profiles/${profileId}/set-default`, {}).then((r) =>
+    unwrap(r, 'set profile as default'),
+  )
 
-/**
- * Delete a user profile
- */
-export async function deleteUserProfile(
-  userId: string,
-  profileId: string
-): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/profiles/${profileId}`
-  const response = await deleteRequest<ApiResponse<void>>(endpoint)
+export const verifyUserEmail = (userId: string): Promise<User> =>
+  patch<ApiResponse<User>>(`${base}/${userId}/verify-email`).then((r) => unwrap(r, 'verify email'))
 
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to delete user profile')
-  }
-}
+export const verifyUserPhone = (userId: string): Promise<User> =>
+  patch<ApiResponse<User>>(`${base}/${userId}/verify-phone`).then((r) => unwrap(r, 'verify phone'))
 
-/**
- * Set a user profile as default
- */
-export async function setUserProfileAsDefault(
-  userId: string,
-  profileId: string
-): Promise<UserProfile> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/profiles/${profileId}/set-default`
-  const response = await put<ApiResponse<UserProfile>>(endpoint, {})
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to set profile as default')
-}
-
-/**
- * Mark user email as verified
- */
-export async function verifyUserEmail(userId: string): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/verify-email`
-  const response = await patch<ApiResponse<User>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to verify email')
-}
-
-/**
- * Mark user phone as verified
- */
-export async function verifyUserPhone(userId: string): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/verify-phone`
-  const response = await patch<ApiResponse<User>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to verify phone')
-}
-
-/**
- * Mark user account as completed
- */
-export async function completeUserAccount(userId: string): Promise<User> {
-  const endpoint = `${API_ENDPOINTS.USER}/${userId}/complete-account`
-  const response = await patch<ApiResponse<User>>(endpoint)
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.message || 'Failed to complete account')
-}
+export const completeUserAccount = (userId: string): Promise<User> =>
+  patch<ApiResponse<User>>(`${base}/${userId}/complete-account`).then((r) => unwrap(r, 'complete account'))

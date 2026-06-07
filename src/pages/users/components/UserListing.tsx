@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
 import {
   getCoreRowModel,
@@ -12,6 +13,8 @@ import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/compon
 import { useUserQuery } from "../hooks/useUserQuery"
 
 export function UserListing() {
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
@@ -86,6 +89,7 @@ export function UserListing() {
         columnCount={columns.length}
         isLoading={isLoading}
         error={error}
+        onRowClick={(user) => navigate(`/${tenantId}/users/${user.user_id}`)}
       />
       <DataTablePagination table={table} />
     </div>

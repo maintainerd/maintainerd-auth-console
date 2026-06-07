@@ -59,7 +59,6 @@ export const API_ENDPOINTS = {
   API_KEY: '/api_keys',
   ROLE: '/roles',
   USER: '/users',
-  USER_POOL: '/user-pools',
   SIGNUP_FLOW: '/signup_flows',
   EMAIL_TEMPLATE: '/email_templates',
   SMS_TEMPLATE: '/sms_templates',

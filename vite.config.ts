@@ -46,13 +46,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],
-      // Scope coverage to the User Pools feature + the shared service factory it uses.
+      // Scope coverage to the shared service factory (the reusable standard).
       include: [
-        'src/services/api/user-pools/**',
         'src/services/api/_lib/**',
-        'src/hooks/useUserPools.ts',
-        'src/lib/validations/userPoolSchema.ts',
-        'src/pages/user-pools/**',
       ],
       exclude: ['**/*.test.{ts,tsx}', 'src/test/**'],
       thresholds: {

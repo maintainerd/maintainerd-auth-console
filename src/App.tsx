@@ -24,9 +24,6 @@ import UserDetailsPage from './pages/users/details'
 import UserAddOrUpdateForm from './pages/users/form'
 import UserProfileForm from './pages/users/profile-form'
 import RolesPage from './pages/roles'
-import UserPoolsPage from './pages/user-pools'
-import UserPoolDetailsPage from './pages/user-pools/details'
-import UserPoolAddOrUpdateForm from './pages/user-pools/form'
 
 import ServicesPage from './pages/services'
 import ServiceDetailsPage from './pages/services/details'
@@ -150,10 +147,6 @@ function App() {
           <Route path="security/sessions" element={<SessionManagementPage />} />
           <Route path="security/threats" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
-          <Route path="user-pools" element={<UserPoolsPage />} />
-          <Route path="user-pools/create" element={<UserPoolAddOrUpdateForm />} />
-          <Route path="user-pools/:userPoolId" element={<UserPoolDetailsPage />} />
-          <Route path="user-pools/:userPoolId/edit" element={<UserPoolAddOrUpdateForm />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/create" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId" element={<UserDetailsPage />} />
