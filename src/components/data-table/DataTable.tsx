@@ -79,9 +79,13 @@ export function DataTable<TData>({
                 onClick={
                   onRowClick
                     ? (event) => {
-                        // Ignore clicks that land on interactive controls (e.g. the
-                        // row-actions menu button) so they don't trigger navigation.
-                        if ((event.target as HTMLElement).closest("button, a, input, label")) return
+                        const target = event.target as HTMLElement
+                        // Portaled UI (the row-actions menu, confirm dialogs) lives
+                        // outside the row in the DOM but bubbles here via React's
+                        // tree — ignore those so they don't trigger navigation.
+                        if (!event.currentTarget.contains(target)) return
+                        // Ignore in-row interactive controls (e.g. the menu trigger).
+                        if (target.closest("button, a, input, label")) return
                         onRowClick(row.original)
                       }
                     : undefined

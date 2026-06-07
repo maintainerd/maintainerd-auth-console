@@ -112,6 +112,18 @@ describe("UserPoolListing", () => {
     expect(navigate).toHaveBeenCalledWith("/t1/user-pools/1")
   })
 
+  it("does not navigate when using the row actions menu; opens the confirm dialog", async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 })
+    render()
+    // open the first row's (customers, active) actions menu and click Deactivate
+    await user.click(screen.getAllByRole("button", { name: /open menu/i })[0])
+    await user.click(await screen.findByText("Deactivate"))
+    // the row's onRowClick must NOT fire from the portaled menu
+    expect(navigate).not.toHaveBeenCalled()
+    // and the confirmation dialog is shown
+    expect(screen.getByRole("button", { name: "Deactivate" })).toBeInTheDocument()
+  })
+
   it("navigates to the create page from the New button", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
