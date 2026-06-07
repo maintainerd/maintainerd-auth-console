@@ -79,19 +79,23 @@ export function UserPoolActions({ userPool }: UserPoolActionsProps) {
             Edit User Pool
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => setShowStatusDialog(true)}>
-            {isActive ? (
-              <>
-                <Pause className="mr-2 h-4 w-4" />
-                Deactivate
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Activate
-              </>
-            )}
-          </DropdownMenuItem>
+          {/* System pools hold root users and are immutable — the backend rejects
+              any status change, so the action is hidden for them. */}
+          {!userPool.is_system && (
+            <DropdownMenuItem onClick={() => setShowStatusDialog(true)}>
+              {isActive ? (
+                <>
+                  <Pause className="mr-2 h-4 w-4" />
+                  Deactivate
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Activate
+                </>
+              )}
+            </DropdownMenuItem>
+          )}
 
           {!userPool.is_system && (
             <>
