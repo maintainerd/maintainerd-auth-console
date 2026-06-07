@@ -5,15 +5,15 @@ import {
 	Webhook,
 	MessageSquare,
 	LifeBuoy,
-	Zap,
-	Wrench,
+	LayoutDashboard,
 	Palette,
-	Container,
 	Server,
 	KeyRound,
 	Layers,
 	TrendingUp,
-	GitBranch,
+	Mail,
+	Building2,
+	Boxes,
 } from "lucide-react"
 
 export const data = {
@@ -22,178 +22,162 @@ export const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
-    // 1. Setup & Configuration (Top Priority)
+  // Sidebar navigation grouped into labeled sections (enterprise IA).
+  navSections: [
     {
-      title: "Get Started",
-      route: "/dashboard",
-      icon: Wrench,
-			active: true,
-    },
-
-    {
-      title: "Services",
-      route: "/services",
-      icon: Server,
+      label: "Overview",
       items: [
         {
-          title: "Services",
-          route: "/services",
-        },
-        {
-          title: "APIs",
-          route: "/apis",
-        },
-        {
-          title: "Policies",
-          route: "/policies",
-        },
-      ],
-    },
-
-    // 2. Core Management (Daily Operations)
-    {
-      title: "User Management",
-      route: "/user-management",
-      icon: Users,
-      items: [
-        {
-          title: "Users",
-          route: "/users",
-        },
-        {
-          title: "Roles",
-          route: "/roles",
+          title: "Get Started",
+          route: "/dashboard",
+          icon: LayoutDashboard,
         },
       ],
     },
     {
-      title: "Providers",
-      route: "/providers",
-      icon: KeyRound,
+      label: "Identity & Access",
       items: [
         {
-          title: "Identity",
-          route: "/providers/identity",
+          title: "User Pools",
+          route: "/user-pools",
+          icon: Boxes,
         },
         {
-          title: "Social",
-          route: "/providers/social",
+          title: "User Management",
+          route: "/user-management",
+          icon: Users,
+          items: [
+            { title: "Users", route: "/users" },
+            { title: "Roles", route: "/roles" },
+            { title: "Invitations", route: "/invites" },
+          ],
+        },
+        {
+          title: "Authentication",
+          route: "/authentication",
+          icon: KeyRound,
+          items: [
+            { title: "Identity Providers", route: "/providers/identity" },
+            { title: "Social Connections", route: "/providers/social" },
+            { title: "Sign-up Flows", route: "/signup-flows" },
+            { title: "Multi-Factor Auth", route: "/mfa" },
+          ],
         },
       ],
     },
     {
-      title: "Applications",
-      route: "/applications",
-      icon: Layers,
+      label: "Applications & APIs",
       items: [
         {
-          title: "Clients",
-          route: "/clients",
+          title: "Applications",
+          route: "/applications",
+          icon: Layers,
+          items: [
+            { title: "Clients", route: "/clients" },
+            { title: "API Keys", route: "/api-keys" },
+          ],
         },
         {
-          title: "API Keys",
-          route: "/api-keys",
+          title: "APIs & Resources",
+          route: "/apis-resources",
+          icon: Server,
+          items: [
+            { title: "Services", route: "/services" },
+            { title: "APIs", route: "/apis" },
+            { title: "Permissions", route: "/permissions" },
+            { title: "Policies", route: "/policies" },
+          ],
         },
       ],
     },
     {
-      title: "Auth Flows",
-      route: "/auth-flows",
-      icon: GitBranch,
+      label: "Security",
       items: [
         {
-          title: "Sign Up Flows",
-          route: "/signup-flows",
+          title: "Security",
+          route: "/security",
+          icon: Shield,
+          items: [
+            { title: "Multi-Factor (MFA)", route: "/security/settings" },
+            { title: "Password Policy", route: "/security/password-policies" },
+            { title: "Sessions", route: "/security/sessions" },
+            { title: "Threat Detection", route: "/security/threats" },
+            { title: "Account Lockout", route: "/security/lockout" },
+            { title: "Registration", route: "/security/registration" },
+            { title: "Tokens", route: "/security/tokens" },
+            { title: "IP Restrictions", route: "/security/ip-restrictions" },
+          ],
         },
       ],
     },
-
-    // 3. Security (Technical Configuration)
     {
-      title: "Security",
-      route: "/security",
-      icon: Shield,
+      label: "Branding & Messaging",
       items: [
         {
-          title: "Security Settings",
-          route: "/security/settings",
+          title: "Branding",
+          route: "/branding",
+          icon: Palette,
+          items: [
+            { title: "Login Page", route: "/branding/login" },
+            { title: "Email Templates", route: "/branding/email-templates" },
+            { title: "SMS Templates", route: "/branding/sms-templates" },
+            { title: "Branding Settings", route: "/branding/settings" },
+          ],
         },
         {
-          title: "Password Policies",
-          route: "/security/password-policies",
-        },
-        {
-          title: "Session Management",
-          route: "/security/sessions",
-        },
-        {
-          title: "Threat Detection",
-          route: "/security/threats",
-        },
-
-        {
-          title: "IP Restrictions",
-          route: "/security/ip-restrictions",
+          title: "Messaging",
+          route: "/messaging",
+          icon: Mail,
+          items: [
+            { title: "Email Delivery", route: "/messaging/email" },
+            { title: "SMS Delivery", route: "/messaging/sms" },
+          ],
         },
       ],
     },
-
-    // 4. Monitoring (Observability)
     {
-      title: "Monitoring",
-      route: "/monitoring",
-      icon: TrendingUp,
+      label: "Operations",
       items: [
         {
-          title: "Analytics",
-          route: "/analytics",
+          title: "Events & Webhooks",
+          route: "/events",
+          icon: Webhook,
+          items: [
+            { title: "Webhooks", route: "/webhooks" },
+            { title: "Event Routes", route: "/events/routes" },
+            { title: "Event Types", route: "/events/types" },
+          ],
         },
         {
-          title: "Logs",
-          route: "/logs",
+          title: "Monitoring",
+          route: "/monitoring",
+          icon: TrendingUp,
+          items: [
+            { title: "Analytics", route: "/analytics" },
+            { title: "Audit Logs", route: "/logs" },
+          ],
         },
       ],
     },
-
-    // 5. Customization & Admin (Less Frequent)
     {
-      title: "Branding",
-      route: "/branding",
-      icon: Palette,
+      label: "Administration",
       items: [
         {
-          title: "Login",
-          route: "/branding/login",
+          title: "Organization",
+          route: "/organization",
+          icon: Building2,
+          items: [
+            { title: "Tenants", route: "/tenants" },
+            { title: "Tenant Members", route: "/tenant/members" },
+            { title: "Tenant Settings", route: "/tenant/settings" },
+          ],
         },
         {
-          title: "Email Templates",
-          route: "/branding/email-templates",
-        },
-        {
-          title: "SMS Templates",
-          route: "/branding/sms-templates",
+          title: "Settings",
+          route: "/settings",
+          icon: Settings,
         },
       ],
-    },
-
-    // 6. Events & Monitoring (Coming Soon)
-    {
-      title: "Events",
-      route: "/events",
-      icon: Zap,
-      comingSoon: true,
-    },
-    {
-      title: "Webhooks",
-      route: "/webhooks",
-      icon: Webhook,
-      comingSoon: true,
-    },
-    {
-      title: "Settings",
-      route: "/settings",
-      icon: Settings,
     },
   ],
   navSecondary: [

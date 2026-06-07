@@ -14,8 +14,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{...props}
 			className="top-14 h-[calc(100vh-3.5rem)] [&_[data-sidebar=sidebar]]:bg-white"
 		>
-      <SidebarContent className="py-6 px-3 bg-white">
-        <NavMain items={data.navMain} />
+      <SidebarContent className="py-3 px-2 gap-1 bg-white">
+        <NavMain sections={data.navSections} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
     </Sidebar>

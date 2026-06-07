@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -10,16 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { LogOut, Settings, User, Bell, Globe, ChevronDown, Plus, Shield } from "lucide-react"
+import { LogOut, Settings, User, Bell, Globe } from "lucide-react"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
 import { useParams, useNavigate } from "react-router-dom"
-import { useTenantsList } from "@/hooks/useTenants"
-import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from "@/store/hooks"
-import type { TenantEntity } from "@/services/api/tenants/types"
-import { CreateTenantDialog } from "@/components/dialog"
+import { TenantSwitcher } from "@/components/navigation/TenantSwitcher"
 
 export function TopNav() {
   // Note: tenantId parameter actually contains the tenant identifier (random alphanumeric)
@@ -28,26 +24,12 @@ export function TopNav() {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const { showSuccess, showError } = useToast()
-  const { data: tenantsData, isLoading: tenantsLoading } = useTenantsList({ limit: 100 })
-  const tenants = tenantsData?.data?.rows as TenantEntity[] || []
   const profile = useAppSelector((state) => state.auth.profile)
-  const [createTenantOpen, setCreateTenantOpen] = useState(false)
-
-  // Find current tenant by identifier (tenantId parameter contains the tenant identifier)
-  const currentTenant = tenants.find((t: TenantEntity) => t.identifier === tenantId) || tenants[0] || { name: 'Tenant', identifier: '', description: '', is_system: false }
 
   const handleViewAllNotifications = () => {
     if (tenantId) {
       navigate(`/${tenantId}/notifications`)
     }
-  }
-
-  const handleTenantSwitch = (tenantIdentifier: string) => {
-    navigate(`/${tenantIdentifier}/dashboard`)
-  }
-
-  const handleCreateTenant = () => {
-    setCreateTenantOpen(true)
   }
 
   const handleLogout = async () => {
@@ -70,58 +52,12 @@ export function TopNav() {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <MaintainedAuthIcon width={30} height={30} className="shrink-0" />
-          <span className="text-lg font-semibold">M9d-Auth</span>
+          <span className="hidden text-lg font-semibold sm:inline">M9d-Auth</span>
         </div>
 
         {/* Tenant Selector */}
-        <div className="ml-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                <span className="text-sm">{currentTenant?.name || 'Tenant'}</span>
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="start">
-              <DropdownMenuLabel>Switch Tenant</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-60 overflow-y-auto">
-                {tenantsLoading ? (
-                  <div className="p-4 text-center text-muted-foreground text-sm">Loading tenants...</div>
-                ) : tenants.length === 0 ? (
-                  <div className="p-4 text-center text-muted-foreground text-sm">No tenants found</div>
-                ) : tenants.map((tenant: TenantEntity) => (
-                  <DropdownMenuItem
-                    key={tenant.tenant_id}
-                    onClick={() => handleTenantSwitch(tenant.identifier)}
-                    className={`cursor-pointer ${tenant.identifier === tenantId ? 'bg-accent' : ''}`}
-                  >
-                    <div className="flex flex-col w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{tenant.name}</span>
-                        {tenant.is_system && (
-                          <Badge variant="secondary" className="text-xs">
-                            <Shield className="h-2 w-2 mr-1" />
-                            System
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {tenant.description}
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleCreateTenant} className="text-blue-600 cursor-pointer">
-                <Plus className="h-4 w-4 mr-2" />
-                <span>Create New Tenant</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
+        <TenantSwitcher className="ml-4" />
+
         {/* Right side items */}
         <div className="ml-auto flex items-center gap-6">
           {/* Navigation Items */}
@@ -191,7 +127,7 @@ export function TopNav() {
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button variant="ghost" size="icon" className="hidden text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:inline-flex">
                   <Globe className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -253,12 +189,6 @@ export function TopNav() {
           </div>
         </div>
       </div>
-
-      {/* Create Tenant Dialog */}
-      <CreateTenantDialog
-        open={createTenantOpen}
-        onOpenChange={setCreateTenantOpen}
-      />
     </nav>
   )
 }
