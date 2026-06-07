@@ -62,7 +62,7 @@ jobs:
         with:
           files: coverage/lcov.info
           flags: unittests
-          name: auth-console
+          name: maintainerd-auth-console
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
