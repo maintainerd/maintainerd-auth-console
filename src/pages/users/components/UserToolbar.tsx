@@ -73,12 +73,12 @@ export function UserToolbar({ filter, setFilter, filters, onFiltersChange, table
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full sm:w-80"
+          className="w-full bg-background sm:w-80"
         />
 
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="relative">
+            <Button variant="outline" size="sm" className="relative h-9 bg-background">
               <Filter className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
@@ -130,7 +130,7 @@ export function UserToolbar({ filter, setFilter, filters, onFiltersChange, table
 
       <div className="flex flex-wrap items-center gap-2">
         <DataTableViewOptions table={table} />
-        <Button size="sm" onClick={handleCreateUser}>
+        <Button size="sm" className="h-9" onClick={handleCreateUser}>
           <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">New User</span>
         </Button>
