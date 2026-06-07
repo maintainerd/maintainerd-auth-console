@@ -5,20 +5,20 @@
 <br clear="left">
 
 <p>
-  <a href="https://github.com/maintainerd/auth-console/actions/workflows/ci.yml">
-    <img src="https://github.com/maintainerd/auth-console/actions/workflows/ci.yml/badge.svg" alt="CI">
+  <a href="https://github.com/maintainerd/maintainerd-auth-console/actions/workflows/ci.yml">
+    <img src="https://github.com/maintainerd/maintainerd-auth-console/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <a href="https://github.com/maintainerd/auth-console/actions/workflows/security.yml">
-    <img src="https://github.com/maintainerd/auth-console/actions/workflows/security.yml/badge.svg" alt="Security">
+  <a href="https://github.com/maintainerd/maintainerd-auth-console/actions/workflows/security.yml">
+    <img src="https://github.com/maintainerd/maintainerd-auth-console/actions/workflows/security.yml/badge.svg" alt="Security">
   </a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/maintainerd/auth-console">
-    <img src="https://api.scorecard.dev/projects/github.com/maintainerd/auth-console/badge" alt="OpenSSF Scorecard">
+  <a href="https://scorecard.dev/viewer/?uri=github.com/maintainerd/maintainerd-auth-console">
+    <img src="https://api.scorecard.dev/projects/github.com/maintainerd/maintainerd-auth-console/badge" alt="OpenSSF Scorecard">
   </a>
   <a href="https://www.bestpractices.dev/projects/TODO">
     <img src="https://img.shields.io/badge/openssf_best_practices-in_progress-yellow?logo=opensourcesecurityfoundation&logoColor=white" alt="OpenSSF Best Practices">
   </a>
-  <a href="https://codecov.io/gh/maintainerd/auth-console">
-    <img src="https://codecov.io/gh/maintainerd/auth-console/graph/badge.svg" alt="Coverage">
+  <a href="https://codecov.io/gh/maintainerd/maintainerd-auth-console">
+    <img src="https://codecov.io/gh/maintainerd/maintainerd-auth-console/graph/badge.svg" alt="Coverage">
   </a>
 </p>
 
@@ -65,8 +65,8 @@ It can be used in three ways:
 ### Run the console
 
 ```bash
-git clone https://github.com/maintainerd/auth-console.git
-cd auth-console
+git clone https://github.com/maintainerd/maintainerd-auth-console.git
+cd maintainerd-auth-console
 
 # Install dependencies
 npm install
@@ -192,8 +192,8 @@ Contributions are welcome. Please read the [getting started guide](docs/getting-
 
 ```bash
 # Fork the repo, then:
-git clone https://github.com/<your-username>/auth-console.git
-cd auth-console
+git clone https://github.com/<your-username>/maintainerd-auth-console.git
+cd maintainerd-auth-console
 
 npm install
 npm run dev      # start the dev server
