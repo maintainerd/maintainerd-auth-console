@@ -77,7 +77,12 @@ export function DataTable<TData>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className={cn("block md:table-row", onRowClick && "cursor-pointer")}
+                // Mobile: a padded card (relative, so the actions can pin to the
+                // top-right). md+: a normal table row.
+                className={cn(
+                  "relative block p-4 pr-14 md:static md:table-row md:p-0 md:pr-0",
+                  onRowClick && "cursor-pointer",
+                )}
                 onClick={
                   onRowClick
                     ? (event) => {
@@ -98,11 +103,13 @@ export function DataTable<TData>({
                   return (
                     <TableCell
                       key={cell.id}
-                      // Mobile: compact vertical padding; the actions cell right-aligns
-                      // instead of taking a left-flushed line. Normal table cell at md+.
                       className={cn(
-                        "py-1 md:table-cell md:py-2",
-                        isActions ? "flex justify-end" : "block",
+                        "md:table-cell md:px-2 md:py-2",
+                        isActions
+                          ? // Mobile: pinned to the card's top-right, level with the name.
+                            "absolute right-3 top-3 p-0 md:static"
+                          : // Mobile: stacked, compact, card padding handles the gutters.
+                            "block px-0 py-1",
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

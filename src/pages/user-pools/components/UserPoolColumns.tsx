@@ -17,7 +17,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
     cell: ({ row }) => {
       const pool = row.original
       return (
-        <div className="flex max-w-xs flex-col gap-1 px-3 py-1">
+        <div className="flex flex-col gap-1 md:max-w-xs md:px-3 md:py-1">
           <div className="flex items-center gap-2">
             <Boxes className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">{pool.name}</span>
@@ -33,7 +33,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
     id: "identifier",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Identifier" />,
     cell: ({ row }) => (
-      <div className="px-3 py-1">
+      <div className="md:px-3 md:py-1">
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
           {row.original.identifier}
         </code>
@@ -47,7 +47,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
     cell: ({ row }) => {
       const pool = row.original
       return (
-        <div className="px-3 py-1">
+        <div className="md:px-3 md:py-1">
           <Badge variant={pool.status === "active" ? "secondary" : "outline"} className="capitalize">
             {pool.status}
           </Badge>
@@ -62,7 +62,7 @@ export const userPoolColumns: ColumnDef<UserPool>[] = [
     cell: ({ row }) => {
       const pool = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
+        <div className="flex flex-col gap-1 md:px-3 md:py-1">
           <span className="text-sm font-medium">
             {formatDistanceToNow(new Date(pool.created_at), { addSuffix: true })}
           </span>
