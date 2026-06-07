@@ -1,9 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
+import { DataTableColumnHeader } from "@/components/data-table"
 import type { User } from "@/services/api/users/types"
 
 type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended'
@@ -60,17 +60,7 @@ export const userColumns: ColumnDef<User>[] = [
   {
     id: "User",
     accessorKey: "username",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          User
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="User" />,
     cell: ({ row }) => {
       const user = row.original
       return (
@@ -93,17 +83,7 @@ export const userColumns: ColumnDef<User>[] = [
   {
     id: "Username",
     accessorKey: "username",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Username
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
     cell: ({ row }) => {
       const user = row.original
       return (
@@ -130,17 +110,7 @@ export const userColumns: ColumnDef<User>[] = [
   {
     id: "Status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const user = row.original
       return (
@@ -181,17 +151,7 @@ export const userColumns: ColumnDef<User>[] = [
   {
     id: "Created",
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const user = row.original
       return (

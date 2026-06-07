@@ -89,12 +89,6 @@ export {
   type UserFormData
 } from './userSchema'
 
-// User Pool schemas
-export {
-  userPoolSchema,
-  type UserPoolFormData
-} from './userPoolSchema'
-
 // User Profile schemas
 export {
   userProfileSchema,
