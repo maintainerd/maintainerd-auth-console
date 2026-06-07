@@ -2,57 +2,40 @@
  * Setup Service
  * Service layer for setup-related API calls
  */
-
-import { post } from '../client'
+import { get, post } from '../client'
 import { API_ENDPOINTS } from '../config'
-import type { CreateTenantRequest, CreateTenantResponse, CreateAdminRequest, CreateAdminResponse, CreateProfileRequest, CreateProfileResponse } from './types'
+import type {
+  CreateTenantRequest,
+  CreateTenantResponse,
+  CreateAdminRequest,
+  CreateAdminResponse,
+  CreateProfileRequest,
+  CreateProfileResponse,
+  SetupStatusResponse,
+  CompleteSetupResponse,
+} from './types'
 
-/**
- * Create a new tenant
- * @param data - Tenant creation data
- * @returns Promise<CreateTenantResponse>
- */
 export async function createTenant(data: CreateTenantRequest): Promise<CreateTenantResponse> {
-  const response = await post<CreateTenantResponse>(
-		API_ENDPOINTS.SETUP.CREATE_TENANT,
-		data
-	)
-	return response
+  return post<CreateTenantResponse>(API_ENDPOINTS.SETUP.CREATE_TENANT, data)
 }
 
-/**
- * Create a new admin user
- * @param data - Admin creation data
- * @returns Promise<CreateAdminResponse>
- */
 export async function createAdmin(data: CreateAdminRequest): Promise<CreateAdminResponse> {
-  const response = await post<CreateAdminResponse>(
-		API_ENDPOINTS.SETUP.CREATE_ADMIN,
-		data
-	)
-	return response
+  return post<CreateAdminResponse>(API_ENDPOINTS.SETUP.CREATE_ADMIN, data)
 }
 
-/**
- * Create a new profile
- * @param data - Profile creation data
- * @returns Promise<CreateProfileResponse>
- */
 export async function createProfile(data: CreateProfileRequest): Promise<CreateProfileResponse> {
-  const response = await post<CreateProfileResponse>(
-		API_ENDPOINTS.SETUP.CREATE_PROFILE,
-		data
-	)
-	return response
+  return post<CreateProfileResponse>(API_ENDPOINTS.SETUP.CREATE_PROFILE, data)
 }
 
-/**
- * Get default tenant metadata for setup
- * @returns Promise with default tenant metadata
- */
+export async function getSetupStatus(): Promise<SetupStatusResponse> {
+  return get<SetupStatusResponse>(API_ENDPOINTS.SETUP.STATUS)
+}
+
+export async function completeSetup(): Promise<CompleteSetupResponse> {
+  return post<CompleteSetupResponse>(API_ENDPOINTS.SETUP.COMPLETE, {})
+}
+
 export async function getDefaultTenantMetadata() {
-  // This would typically fetch from an API endpoint
-  // For now, return default values
   return {
     application_logo_url: '',
     favicon_url: '',
@@ -61,44 +44,40 @@ export async function getDefaultTenantMetadata() {
     date_format: 'YYYY-MM-DD',
     time_format: '24h',
     privacy_policy_url: '',
-    term_of_service_url: ''
+    term_of_service_url: '',
   }
 }
 
-/**
- * Create tenant with default metadata
- * @param name - Tenant name
- * @param description - Tenant description
- * @returns Promise<CreateTenantResponse>
- */
-export async function createTenantWithDefaults(name: string, display_name: string, description: string): Promise<CreateTenantResponse> {
+export async function createTenantWithDefaults(
+  name: string,
+  display_name: string,
+  description: string,
+): Promise<CreateTenantResponse> {
   const defaultMetadata = await getDefaultTenantMetadata()
-  const tenantData: CreateTenantRequest = {
+  return createTenant({
     name,
     display_name,
     description,
-    metadata: defaultMetadata
-  }
-  return createTenant(tenantData)
+    metadata: defaultMetadata,
+  })
 }
 
-/**
- * Check if setup is completed
- * This would typically check if required setup steps are done
- * @returns Promise<boolean>
- */
 export async function isSetupCompleted(): Promise<boolean> {
-  // This would typically make an API call to check setup status
-  // For now, return false to indicate setup is needed
-  return false
+  try {
+    const response = await getSetupStatus()
+    return response.success && response.data != null && response.data.is_setup_complete === true
+  } catch {
+    return false
+  }
 }
 
-// Export functions as an object for backward compatibility
 export const setupService = {
   createTenant,
   createAdmin,
   createProfile,
+  getSetupStatus,
+  completeSetup,
   getDefaultTenantMetadata,
   createTenantWithDefaults,
-  isSetupCompleted
+  isSetupCompleted,
 }
