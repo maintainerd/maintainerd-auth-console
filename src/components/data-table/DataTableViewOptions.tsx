@@ -18,7 +18,7 @@ export function DataTableViewOptions<TData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="h-9 bg-background">
           Columns <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

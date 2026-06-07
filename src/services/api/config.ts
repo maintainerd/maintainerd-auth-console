@@ -23,6 +23,11 @@ export const API_CONFIG = {
   },
 } as const
 
+// Token delivery mode for this app. Sent on every token-issuing request
+// (login, register, refresh) so the backend delivers tokens as httpOnly cookies
+// instead of in the response body. Single source of truth — reuse everywhere.
+export const TOKEN_DELIVERY_HEADER = { 'X-Token-Delivery': 'cookie' } as const
+
 // API Endpoints
 export const API_ENDPOINTS = {
   SETUP: {
@@ -36,7 +41,10 @@ export const API_ENDPOINTS = {
     LOGIN: '/login',
     REGISTER: '/register',
     LOGOUT: '/logout',
-    REFRESH: '/refresh',
+    // POST /api/v1/refresh-token — rotates the session using the httpOnly
+    // refresh-token cookie (scoped to this path) and Set-Cookies fresh tokens
+    // when called with `X-Token-Delivery: cookie`.
+    REFRESH: '/refresh-token',
     PROFILE: '/profile',
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
@@ -51,6 +59,7 @@ export const API_ENDPOINTS = {
   API_KEY: '/api_keys',
   ROLE: '/roles',
   USER: '/users',
+  USER_POOL: '/user-pools',
   SIGNUP_FLOW: '/signup_flows',
   EMAIL_TEMPLATE: '/email_templates',
   SMS_TEMPLATE: '/sms_templates',
