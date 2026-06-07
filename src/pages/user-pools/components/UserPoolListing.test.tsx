@@ -63,7 +63,7 @@ describe("UserPoolListing", () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    await user.click(await screen.findByRole("button", { name: "active" }))
+    await user.click(await screen.findByLabelText("active"))
     // employees (inactive) filtered out
     expect(screen.queryByText("employees")).not.toBeInTheDocument()
     expect(screen.getByText(/Active filters:/i)).toBeInTheDocument()
@@ -73,14 +73,14 @@ describe("UserPoolListing", () => {
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
 
-  it("resets filters from inside the popover", async () => {
+  it("clears filters from inside the popover", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    await user.click(await screen.findByRole("button", { name: "inactive" }))
+    await user.click(await screen.findByLabelText("inactive"))
     expect(screen.queryByText("customers")).not.toBeInTheDocument()
-    // popover button is "Reset"
-    await user.click(screen.getByRole("button", { name: "Reset" }))
+    // popover button is "Clear All" (capital A) vs the chip bar's "Clear all"
+    await user.click(screen.getByRole("button", { name: "Clear All" }))
     expect(screen.getByText("customers")).toBeInTheDocument()
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
@@ -89,10 +89,10 @@ describe("UserPoolListing", () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     render()
     await user.click(screen.getByRole("button", { name: /filters/i }))
-    const activeToggle = await screen.findByRole("button", { name: "active" })
-    await user.click(activeToggle)
+    const activeCheckbox = await screen.findByLabelText("active")
+    await user.click(activeCheckbox)
     expect(screen.queryByText("employees")).not.toBeInTheDocument()
-    await user.click(activeToggle)
+    await user.click(activeCheckbox)
     expect(screen.getByText("employees")).toBeInTheDocument()
   })
 

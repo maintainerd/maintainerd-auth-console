@@ -1,12 +1,12 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import type { Table } from "@tanstack/react-table"
-import { Check, Filter, Plus } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Popover,
   PopoverContent,
@@ -38,22 +38,11 @@ export function UserPoolToolbar({ filter, setFilter, filters, onFiltersChange, t
     onDebouncedChange: setFilter,
   })
 
-  const toggleStatus = React.useCallback(
-    (status: string) => {
-      onFiltersChange({
-        status: filters.status.includes(status)
-          ? filters.status.filter((s) => s !== status)
-          : [...filters.status, status],
-      })
-    },
-    [filters, onFiltersChange],
-  )
-
   const clearAllFilters = React.useCallback(() => {
     onFiltersChange(DEFAULT_USER_POOL_FILTERS)
   }, [onFiltersChange])
 
-  const activeFilterCount = filters.status.length
+  const activeFilterCount = filters.status.length > 0 ? 1 : 0
 
   const handleCreate = React.useCallback(() => {
     navigate(`/${tenantId}/user-pools/create`)
@@ -82,40 +71,42 @@ export function UserPoolToolbar({ filter, setFilter, filters, onFiltersChange, t
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-60 p-2" align="start">
-            <div className="px-2 py-1.5 text-sm font-medium">Filter by status</div>
-            <div className="flex flex-col">
-              {USER_POOL_STATUSES.map((status) => {
-                const selected = filters.status.includes(status)
-                return (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => toggleStatus(status)}
-                    className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
-                  >
-                    <span className="flex items-center gap-2 capitalize">
-                      <span
-                        className={cn(
-                          "size-2 rounded-full",
-                          status === "active" ? "bg-emerald-500" : "bg-slate-300",
-                        )}
+          <PopoverContent className="w-80" align="start">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filters</h4>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Status</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {USER_POOL_STATUSES.map((status) => (
+                    <div key={status} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`status-${status}`}
+                        checked={filters.status.includes(status)}
+                        onCheckedChange={(checked) => {
+                          onFiltersChange({
+                            status: checked
+                              ? [...filters.status, status]
+                              : filters.status.filter((s) => s !== status),
+                          })
+                        }}
                       />
-                      {status}
-                    </span>
-                    {selected && <Check className="size-4 text-foreground" />}
-                  </button>
-                )
-              })}
+                      <Label htmlFor={`status-${status}`} className="text-sm capitalize">
+                        {status}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            {activeFilterCount > 0 && (
-              <>
-                <Separator className="my-1" />
-                <Button variant="ghost" size="sm" className="w-full justify-center" onClick={clearAllFilters}>
-                  Reset
-                </Button>
-              </>
-            )}
           </PopoverContent>
         </Popover>
       </div>
