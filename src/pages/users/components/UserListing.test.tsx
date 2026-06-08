@@ -69,11 +69,11 @@ describe("UserListing", () => {
   })
 
   it("renders rows and navigates on row click", async () => {
-    setUsers({ data: { rows: [makeUser({ user_id: "u9", fullname: "Jane Doe" })], total: 1 } })
+    setUsers({ data: { rows: [makeUser({ user_id: "u9", username: "janedoe" })], total: 1 } })
     const user = u()
     renderWithProviders(<UserListing />)
 
-    const cell = screen.getByText("Jane Doe")
+    const cell = screen.getByText("janedoe")
     await user.click(cell)
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/users/u9"))
   })
