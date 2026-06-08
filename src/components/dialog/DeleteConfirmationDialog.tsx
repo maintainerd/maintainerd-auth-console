@@ -10,8 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle } from "lucide-react"
+import { TriangleAlert, Loader2 } from "lucide-react"
 
 interface DeleteConfirmationDialogProps {
   open: boolean
@@ -19,9 +18,13 @@ interface DeleteConfirmationDialogProps {
   onConfirm: () => void | Promise<void>
   title: string
   description: string
-  confirmationText: string
+  /** Optional extra consequence shown as a destructive callout below the description. */
+  confirmationText?: string
+  /** The exact text the user must type to enable the destructive action. */
   itemName: string
   isDeleting?: boolean
+  /** Label for the destructive button (default "Delete"). */
+  confirmLabel?: string
 }
 
 export function DeleteConfirmationDialog({
@@ -33,9 +36,10 @@ export function DeleteConfirmationDialog({
   confirmationText,
   itemName,
   isDeleting = false,
+  confirmLabel = "Delete",
 }: DeleteConfirmationDialogProps) {
   const [inputValue, setInputValue] = useState("")
-  const isConfirmEnabled = inputValue === itemName
+  const isConfirmEnabled = inputValue.trim() === itemName.trim()
 
   // Reset input when dialog opens/closes
   useEffect(() => {
@@ -53,39 +57,39 @@ export function DeleteConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <TriangleAlert className="size-5" />
+            </div>
+            <DialogTitle>{title}</DialogTitle>
+          </div>
+          <DialogDescription className="pt-1 text-left">{description}</DialogDescription>
         </DialogHeader>
 
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
+        {confirmationText && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
             {confirmationText}
-          </AlertDescription>
-        </Alert>
+          </div>
+        )}
 
         <div className="space-y-2">
-          <Label htmlFor="confirmation-input">
-            Type <span className="font-semibold">"{itemName}"</span> to confirm
+          <Label htmlFor="confirmation-input" className="font-normal text-muted-foreground">
+            Type <span className="font-semibold text-foreground">{itemName}</span> to confirm
           </Label>
           <Input
             id="confirmation-input"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder={`Enter "${itemName}" to confirm`}
             disabled={isDeleting}
             autoComplete="off"
+            autoFocus
           />
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
           <Button
@@ -93,11 +97,11 @@ export function DeleteConfirmationDialog({
             onClick={handleConfirm}
             disabled={!isConfirmEnabled || isDeleting}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting && <Loader2 className="size-4 animate-spin" />}
+            {confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

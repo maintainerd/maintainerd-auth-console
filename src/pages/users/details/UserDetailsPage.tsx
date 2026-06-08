@@ -1,124 +1,61 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { ArrowLeft, Shield, User, Key } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Shield, User, Key } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DetailsContainer } from "@/components/container"
+import { DetailLayout } from "@/components/details"
 import { useUser } from "@/hooks/useUsers"
-import { UserHeader, UserInformation, UserOverview, UserRoles, UserIdentities, UserProfiles } from "./components"
+import { UserHeader, UserOverview, UserRoles, UserIdentities, UserProfiles } from "./components"
+
+const TABS = [
+  { value: "overview", label: "Overview", icon: User },
+  { value: "profiles", label: "Profiles", icon: User },
+  { value: "roles", label: "Roles", icon: Shield },
+  { value: "identities", label: "Identities", icon: Key },
+] as const
 
 export default function UserDetailsPage() {
   const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Get active tab from URL or default to 'overview'
-  const activeTab = searchParams.get('tab') || 'overview'
+  const activeTab = searchParams.get("tab") || "overview"
+  const handleTabChange = (tab: string) => setSearchParams({ tab })
 
-  const handleTabChange = (tab: string) => {
-    setSearchParams({ tab })
-  }
-
-  // Fetch user from API
-  const { data: userData, isLoading, isError } = useUser(userId || '')
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching user details
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state
-  if (isError || !userData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <h2 className="text-2xl font-semibold">User Not Found</h2>
-        <p className="text-muted-foreground">The user you're looking for doesn't exist.</p>
-        <Button onClick={() => navigate(`/${tenantId}/users`)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Users
-        </Button>
-      </div>
-    )
-  }
-
-  const user = userData
+  const { data: user, isLoading, isError } = useUser(userId || "")
 
   return (
-    <DetailsContainer>
-      <div className="flex flex-col gap-6">
-        {/* Back Button */}
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/${tenantId}/users`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Users
-          </Button>
-        </div>
+    <DetailLayout
+      backLabel="Back to Users"
+      onBack={() => navigate(`/${tenantId}/users`)}
+      isLoading={isLoading}
+      isError={isError || !user}
+      notFoundTitle="User not found"
+      notFoundDescription="The user you're looking for doesn't exist or may have been removed."
+    >
+      <UserHeader user={user!} tenantId={tenantId!} userId={userId!} />
 
-        {/* Header */}
-        <UserHeader
-          user={user}
-          tenantId={tenantId!}
-          userId={userId!}
-        />
-
-        {/* User Information */}
-        <UserInformation user={user} />
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList>
-            <TabsTrigger value="overview" className="gap-2">
-              <User className="h-4 w-4" />
-              Overview
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {TABS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {label}
             </TabsTrigger>
-            <TabsTrigger value="profiles" className="gap-2">
-              <User className="h-4 w-4" />
-              Profiles
-            </TabsTrigger>
-            <TabsTrigger value="roles" className="gap-2">
-              <Shield className="h-4 w-4" />
-              Roles
-            </TabsTrigger>
-            <TabsTrigger value="identities" className="gap-2">
-              <Key className="h-4 w-4" />
-              Identities
-            </TabsTrigger>
-          </TabsList>
+          ))}
+        </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6">
-            <UserOverview user={user} />
-          </TabsContent>
-
-          {/* Profiles Tab */}
-          <TabsContent value="profiles" className="mt-6">
-            <UserProfiles userId={userId!} />
-          </TabsContent>
-
-          {/* Roles Tab */}
-          <TabsContent value="roles" className="mt-6">
-            <UserRoles userId={userId!} />
-          </TabsContent>
-
-          {/* Identities Tab */}
-          <TabsContent value="identities" className="mt-6">
-            <UserIdentities userId={userId!} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DetailsContainer>
+        <TabsContent value="overview" className="mt-4">
+          <UserOverview user={user!} />
+        </TabsContent>
+        <TabsContent value="profiles" className="mt-4">
+          <UserProfiles userId={userId!} />
+        </TabsContent>
+        <TabsContent value="roles" className="mt-4">
+          <UserRoles userId={userId!} />
+        </TabsContent>
+        <TabsContent value="identities" className="mt-4">
+          <UserIdentities userId={userId!} />
+        </TabsContent>
+      </Tabs>
+    </DetailLayout>
   )
 }

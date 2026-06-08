@@ -1,9 +1,19 @@
 import { useState } from "react"
-import { Edit, Trash2, MoreVertical, CheckCircle, Phone, UserCheck } from "lucide-react"
+import {
+  Edit,
+  Trash2,
+  MoreVertical,
+  CheckCircle2,
+  Phone,
+  UserCheck,
+  Mail,
+  Building2,
+  CalendarDays,
+  Minus,
+} from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { useDeleteUser, useVerifyUserEmail, useVerifyUserPhone, useCompleteUserAccount } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { User } from "@/services/api/users/types"
@@ -20,6 +31,35 @@ interface UserHeaderProps {
   user: User
   tenantId: string
   userId: string
+}
+
+/** A subtle verified / not-verified inline indicator (no pastel blocks). */
+function VerifiedMark({ verified }: { verified: boolean }) {
+  return verified ? (
+    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+      <CheckCircle2 className="size-3.5" />
+      Verified
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+      <Minus className="size-3.5" />
+      Not verified
+    </span>
+  )
+}
+
+/** Profile / account completion shown as a subtle check or dash. */
+function CompletionMark({ label, complete }: { label: string; complete: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm">
+      {complete ? (
+        <CheckCircle2 className="size-3.5 text-emerald-600" />
+      ) : (
+        <Minus className="size-3.5 text-muted-foreground" />
+      )}
+      <span className={complete ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+    </span>
+  )
 }
 
 export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
@@ -34,136 +74,153 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
 
+  const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
+    try {
+      await mutate()
+      showSuccess(successMessage)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
   const handleDelete = async () => {
     try {
       await deleteUserMutation.mutateAsync(userId)
       showSuccess("User deleted successfully")
-      // Navigate back to Users list
       navigate(`/${tenantId}/users`)
     } catch (error) {
       showError(error)
     }
   }
 
-  const handleVerifyEmail = async () => {
-    try {
-      await verifyEmailMutation.mutateAsync(userId)
-      showSuccess("Email verified successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
+  const initials = (user.fullname || user.username).slice(0, 2).toUpperCase()
 
-  const handleVerifyPhone = async () => {
-    try {
-      await verifyPhoneMutation.mutateAsync(userId)
-      showSuccess("Phone verified successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
-
-  const handleCompleteAccount = async () => {
-    try {
-      await completeAccountMutation.mutateAsync(userId)
-      showSuccess("Account completed successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { className: string }> = {
-      active: { className: "bg-green-100 text-green-800 border-green-200" },
-      inactive: { className: "bg-gray-100 text-gray-800 border-gray-200" },
-      pending: { className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-      suspended: { className: "bg-red-100 text-red-800 border-red-200" },
-    }
-
-    const config = statusConfig[status] || statusConfig.inactive
-
-    return (
-      <Badge variant="outline" className={config.className}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    )
-  }
+  const attributes: DetailAttribute[] = [
+    {
+      icon: Mail,
+      label: "Email",
+      value: (
+        <div className="flex flex-col gap-0.5">
+          <span className="break-all">{user.email}</span>
+          <VerifiedMark verified={user.is_email_verified} />
+        </div>
+      ),
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: user.phone ? (
+        <div className="flex flex-col gap-0.5">
+          <span>{user.phone}</span>
+          <VerifiedMark verified={user.is_phone_verified} />
+        </div>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+    },
+    {
+      icon: UserCheck,
+      label: "Account",
+      value: (
+        <div className="flex flex-col gap-1">
+          <CompletionMark label="Profile" complete={user.is_profile_completed} />
+          <CompletionMark label="Account" complete={user.is_account_completed} />
+        </div>
+      ),
+    },
+    ...(user.tenant
+      ? [
+          {
+            icon: Building2,
+            label: "Tenant",
+            value: (
+              <div className="flex flex-col gap-0.5">
+                <span className="font-medium">{user.tenant.name}</span>
+                <span className="font-mono text-xs text-muted-foreground">{user.tenant.identifier}</span>
+              </div>
+            ),
+          } satisfies DetailAttribute,
+        ]
+      : []),
+    { icon: CalendarDays, label: "Created", value: format(new Date(user.created_at), "PP") },
+    { icon: CalendarDays, label: "Last updated", value: format(new Date(user.updated_at), "PP") },
+  ]
 
   return (
     <>
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage 
-              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`} 
-              alt={user.fullname || user.username} 
-            />
-            <AvatarFallback className="text-lg">
-              {user.username.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {user.fullname || user.username}
-              </h1>
-              {getStatusBadge(user.status)}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              @{user.username}
-            </p>
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-lg font-semibold text-white shadow-sm shadow-blue-500/20">
+            {initials}
           </div>
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
+        }
+        title={user.fullname || user.username}
+        badge={<StatusBadge status={user.status} />}
+        subtitle={`@${user.username}`}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/users/${userId}/edit`, {
+                  state: { from: `/${tenantId}/users/${userId}`, backLabel: "Back to User Details" },
+                })
+              }
+            >
+              <Edit className="size-4" />
+              Edit
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/users/${userId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit User
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowVerifyEmailDialog(true)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Mark Email as Verified
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowVerifyPhoneDialog(true)}>
-              <Phone className="mr-2 h-4 w-4" />
-              Mark Phone as Verified
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowCompleteAccountDialog(true)}>
-              <UserCheck className="mr-2 h-4 w-4" />
-              Mark Account as Completed
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete User
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                  <span className="sr-only">Open actions</span>
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowVerifyEmailDialog(true)}>
+                  <CheckCircle2 className="mr-2 size-4" />
+                  Mark Email as Verified
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowVerifyPhoneDialog(true)}>
+                  <Phone className="mr-2 size-4" />
+                  Mark Phone as Verified
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowCompleteAccountDialog(true)}>
+                  <UserCheck className="mr-2 size-4" />
+                  Mark Account as Completed
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Delete User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
         title="Delete User"
-        description="Are you sure you want to delete this user? This action cannot be undone."
+        description="This permanently deletes the user account and all associated data. This action cannot be undone."
         itemName={user.fullname || user.username}
-        confirmationText="DELETE"
         isDeleting={deleteUserMutation.isPending}
       />
 
       <ConfirmationDialog
         open={showVerifyEmailDialog}
         onOpenChange={setShowVerifyEmailDialog}
-        onConfirm={handleVerifyEmail}
+        onConfirm={() => runAction(() => verifyEmailMutation.mutateAsync(userId), "Email verified successfully")}
         title="Verify Email"
         description="Are you sure you want to mark this user's email as verified?"
         isLoading={verifyEmailMutation.isPending}
@@ -172,7 +229,7 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
       <ConfirmationDialog
         open={showVerifyPhoneDialog}
         onOpenChange={setShowVerifyPhoneDialog}
-        onConfirm={handleVerifyPhone}
+        onConfirm={() => runAction(() => verifyPhoneMutation.mutateAsync(userId), "Phone verified successfully")}
         title="Verify Phone"
         description="Are you sure you want to mark this user's phone as verified?"
         isLoading={verifyPhoneMutation.isPending}
@@ -181,7 +238,9 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
       <ConfirmationDialog
         open={showCompleteAccountDialog}
         onOpenChange={setShowCompleteAccountDialog}
-        onConfirm={handleCompleteAccount}
+        onConfirm={() =>
+          runAction(() => completeAccountMutation.mutateAsync(userId), "Account completed successfully")
+        }
         title="Complete Account"
         description="Are you sure you want to mark this user's account as completed?"
         isLoading={completeAccountMutation.isPending}

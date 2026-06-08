@@ -91,7 +91,6 @@ export function RowActions({ items }: { items: RowActionItem[] }) {
             onConfirm={() => runConfirm(activeConfirm)}
             title={activeConfirm.confirm.title}
             description={activeConfirm.confirm.description}
-            confirmationText={activeConfirm.confirm.description}
             itemName={activeConfirm.confirm.itemName ?? ""}
             isDeleting={isSubmitting}
           />

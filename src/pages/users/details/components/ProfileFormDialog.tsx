@@ -86,9 +86,9 @@ export function ProfileFormDialog({
     if (open && profile) {
       reset({
         first_name: profile.first_name,
-        middle_name: profile.metadata?.middle_name as string || undefined,
-        last_name: profile.last_name,
-        suffix: profile.metadata?.suffix as string || undefined,
+        middle_name: profile.middle_name || undefined,
+        last_name: profile.last_name || undefined,
+        suffix: profile.suffix || undefined,
         display_name: profile.display_name || undefined,
         birthdate: profile.birthdate ? profile.birthdate.split('T')[0] : undefined,
         gender: profile.gender || undefined,
@@ -100,7 +100,7 @@ export function ProfileFormDialog({
         country: profile.country || undefined,
         timezone: profile.timezone || undefined,
         language: profile.language || undefined,
-        profile_url: profile.metadata?.profile_url as string || undefined,
+        profile_url: profile.profile_url || undefined,
       })
 
       // Load custom metadata

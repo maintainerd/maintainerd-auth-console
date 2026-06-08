@@ -45,20 +45,11 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
     manualPagination: true,
   })
 
-  const getProviderBadge = (provider: string) => {
-    const colors: Record<string, string> = {
-      default: "bg-blue-100 text-blue-800 border-blue-200",
-      google: "bg-red-100 text-red-800 border-red-200",
-      github: "bg-gray-100 text-gray-800 border-gray-200",
-      facebook: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    }
-
-    return (
-      <Badge variant="outline" className={colors[provider] || colors.default}>
-        {provider.charAt(0).toUpperCase() + provider.slice(1)}
-      </Badge>
-    )
-  }
+  const getProviderBadge = (provider: string) => (
+    <Badge variant="secondary" className="font-normal capitalize">
+      {provider}
+    </Badge>
+  )
 
   return (
     <InformationCard
@@ -115,38 +106,40 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
                       </div>
 
                       {/* Client Information */}
-                      <div className="mt-3 p-3 bg-muted/50 rounded-md space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs font-medium">Client Information</span>
+                      {identity.client && (
+                        <div className="mt-3 p-3 bg-muted/50 rounded-md space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs font-medium">Client Information</span>
+                          </div>
+                          <div className="text-xs space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-24">Name:</span>
+                              <span className="font-medium">{identity.client.display_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-24">Type:</span>
+                              <Badge variant="secondary" className="text-xs h-5">
+                                {identity.client.client_type}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-24">Domain:</span>
+                              <span className="font-mono">{identity.client.domain || "—"}</span>
+                            </div>
+                            {identity.client.is_default && (
+                              <Badge variant="outline" className="text-xs mt-1">
+                                Default Client
+                              </Badge>
+                            )}
+                            {identity.client.is_system && (
+                              <Badge variant="outline" className="text-xs mt-1 ml-1">
+                                System Client
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-xs space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground w-24">Name:</span>
-                            <span className="font-medium">{identity.client.display_name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground w-24">Type:</span>
-                            <Badge variant="secondary" className="text-xs h-5">
-                              {identity.client.client_type}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground w-24">Domain:</span>
-                            <span className="font-mono">{identity.client.domain}</span>
-                          </div>
-                          {identity.client.is_default && (
-                            <Badge variant="outline" className="text-xs mt-1">
-                              Default Client
-                            </Badge>
-                          )}
-                          {identity.client.is_system && (
-                            <Badge variant="outline" className="text-xs mt-1 ml-1">
-                              System Client
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+                      )}
 
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                         <Calendar className="h-3 w-3" />

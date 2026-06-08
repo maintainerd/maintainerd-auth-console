@@ -1,0 +1,34 @@
+import { cn } from "@/lib/utils"
+
+// Common status keywords → dot colour. Any entity's status string maps through
+// here; unknown values fall back to a neutral slate dot. Colour is carried by a
+// small dot (not a pastel block), which reads enterprise rather than "vibecoded".
+const STATUS_DOT: Record<string, string> = {
+  active: "bg-emerald-500",
+  enabled: "bg-emerald-500",
+  verified: "bg-emerald-500",
+  pending: "bg-amber-500",
+  draft: "bg-amber-500",
+  inactive: "bg-slate-400",
+  disabled: "bg-slate-400",
+  archived: "bg-slate-400",
+  suspended: "bg-red-500",
+  blocked: "bg-red-500",
+  revoked: "bg-red-500",
+}
+
+/** A restrained, entity-agnostic status pill: a small coloured dot + label. */
+export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  const dot = STATUS_DOT[status?.toLowerCase()] ?? "bg-slate-400"
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-0.5 text-xs font-medium capitalize",
+        className,
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", dot)} />
+      {status}
+    </span>
+  )
+}

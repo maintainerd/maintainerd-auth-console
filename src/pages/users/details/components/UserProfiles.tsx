@@ -116,24 +116,25 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     }
   }
 
-  const getGenderBadge = (gender: string) => {
+  // first/last name are optional on the backend, so build a name without
+  // interpolating "undefined".
+  const profileName = (profile: UserProfile) =>
+    profile.display_name?.trim() ||
+    [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim() ||
+    "Unnamed profile"
+
+  const getGenderBadge = (gender?: string) => {
     if (!gender) {
       return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+        <Badge variant="outline" className="font-normal text-muted-foreground">
           Not specified
         </Badge>
       )
     }
 
-    const colors: Record<string, string> = {
-      male: "bg-blue-100 text-blue-800 border-blue-200",
-      female: "bg-pink-100 text-pink-800 border-pink-200",
-      other: "bg-purple-100 text-purple-800 border-purple-200",
-    }
-
     return (
-      <Badge variant="outline" className={colors[gender] || colors.other}>
-        {gender.charAt(0).toUpperCase() + gender.slice(1)}
+      <Badge variant="secondary" className="font-normal capitalize">
+        {gender}
       </Badge>
     )
   }
@@ -191,7 +192,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold text-base">
-                            {profile.display_name || `${profile.first_name} ${profile.last_name}`}
+                            {profileName(profile)}
                           </h4>
                           {profile.is_default && (
                             <Badge variant="default" className="gap-1">
@@ -201,7 +202,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {profile.first_name} {profile.last_name}
+                          {[profile.first_name, profile.last_name].filter(Boolean).join(" ")}
                         </p>
                       </div>
                     </div>
@@ -343,7 +344,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
       onOpenChange={setIsSetDefaultOpen}
       onConfirm={handleConfirmSetAsDefault}
       title="Set Profile as Default"
-      description={`Are you sure you want to set "${selectedProfile?.display_name || `${selectedProfile?.first_name} ${selectedProfile?.last_name}`}" as the default profile?`}
+      description={`Are you sure you want to set "${selectedProfile ? profileName(selectedProfile) : ""}" as the default profile?`}
       confirmText="Set as Default"
       isLoading={setAsDefaultMutation.isPending}
     />
@@ -353,9 +354,8 @@ export function UserProfiles({ userId }: UserProfilesProps) {
       onOpenChange={setIsDeleteOpen}
       onConfirm={handleConfirmDelete}
       title="Delete Profile"
-      description="Are you sure you want to delete this profile? This action cannot be undone."
-      itemName={selectedProfile ? `${selectedProfile.first_name} ${selectedProfile.last_name}` : ""}
-      confirmationText="DELETE"
+      description="This permanently deletes this profile. This action cannot be undone."
+      itemName={selectedProfile ? profileName(selectedProfile) : ""}
       isDeleting={deleteProfileMutation.isPending}
     />
   </>
