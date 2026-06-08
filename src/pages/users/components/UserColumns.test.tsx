@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { renderWithProviders } from "@/test/utils"
 import { userColumns } from "./UserColumns"
@@ -54,24 +54,20 @@ const statuses: UserStatus[] = ["active", "inactive", "pending", "suspended"]
 describe("userColumns", () => {
   it("renders all cell branches across multiple users", () => {
     const data: User[] = [
-      // status active, fullname present, phone present, profile+account variants
       makeUser({
         user_id: "u1",
         username: "active_user",
-        fullname: "Active Person",
-        phone: "111",
+        email: "active@test.com",
         status: "active",
         is_profile_completed: true,
         is_account_completed: true,
         is_email_verified: true,
         is_phone_verified: true,
       }),
-      // status inactive, no fullname (falls back to username), no phone
       makeUser({
         user_id: "u2",
         username: "inactive_user",
-        fullname: "",
-        phone: "",
+        email: "inactive@test.com",
         status: "inactive",
         is_profile_completed: false,
         is_account_completed: false,
@@ -84,9 +80,9 @@ describe("userColumns", () => {
 
     renderWithProviders(<Harness data={data} />)
 
-    // Headers
-    expect(screen.getByText("User")).toBeInTheDocument()
-    expect(screen.getByText("Username")).toBeInTheDocument()
+    // Headers (DataTableColumnHeader renders as sortable buttons)
+    expect(screen.getByRole("button", { name: "Username" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Email" })).toBeInTheDocument()
     expect(screen.getByText("Verification")).toBeInTheDocument()
     expect(screen.getByText("Profile Status")).toBeInTheDocument()
 
@@ -96,21 +92,22 @@ describe("userColumns", () => {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
 
-    // fullname present vs fallback to username
-    expect(screen.getByText("Active Person")).toBeInTheDocument()
-    // u2 has empty fullname -> the "User" cell shows the username
-    expect(screen.getAllByText("inactive_user").length).toBeGreaterThan(0)
+    // usernames rendered in Name column
+    expect(screen.getByText("active_user")).toBeInTheDocument()
+    expect(screen.getByText("inactive_user")).toBeInTheDocument()
 
-    // phone present rendered
-    expect(screen.getByText("111")).toBeInTheDocument()
+    // emails rendered in Email column
+    expect(screen.getByText("active@test.com")).toBeInTheDocument()
+    expect(screen.getByText("inactive@test.com")).toBeInTheDocument()
 
-    // verification badges (Email/Phone labels appear per row)
-    expect(screen.getAllByText("Email").length).toBe(data.length)
-    expect(screen.getAllByText("Phone").length).toBe(data.length)
+    // verification badges (Email/Phone labels appear per row — scope to tbody to exclude header)
+    const tbody = document.querySelector("tbody")!
+    expect(within(tbody).getAllByText("Email").length).toBe(data.length)
+    expect(within(tbody).getAllByText("Phone").length).toBe(data.length)
 
     // profile/account labels per row
-    expect(screen.getAllByText("Profile").length).toBe(data.length)
-    expect(screen.getAllByText("Account").length).toBe(data.length)
+    expect(within(tbody).getAllByText("Profile").length).toBe(data.length)
+    expect(within(tbody).getAllByText("Account").length).toBe(data.length)
 
     // actions menu trigger renders per row
     expect(screen.getAllByRole("button", { name: /open menu/i }).length).toBe(data.length)

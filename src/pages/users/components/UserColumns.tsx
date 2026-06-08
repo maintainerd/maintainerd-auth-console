@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle, User as UserIcon } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
 import { DataTableColumnHeader } from "@/components/data-table"
@@ -56,37 +56,28 @@ const getVerificationBadge = (isVerified: boolean, label: string) => {
 
 export const userColumns: ColumnDef<User>[] = [
   {
-    id: "User",
-    accessorKey: "username",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="User" />,
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <span className="font-medium">{user.fullname || user.username}</span>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Mail className="w-3 h-3" />
-            <span className="truncate">{user.email}</span>
-          </div>
-          {user.phone && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Phone className="w-3 h-3" />
-              <span>{user.phone}</span>
-            </div>
-          )}
-        </div>
-      )
-    },
-  },
-  {
     id: "Username",
     accessorKey: "username",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
     cell: ({ row }) => {
       const user = row.original
       return (
+        <div className="flex items-center gap-2 px-3 py-1">
+          <UserIcon className="size-4 text-muted-foreground shrink-0" />
+          <span className="font-medium">{user.username}</span>
+        </div>
+      )
+    },
+  },
+  {
+    id: "Email",
+    accessorKey: "email",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+    cell: ({ row }) => {
+      const user = row.original
+      return (
         <div className="px-3 py-1">
-          <span className="font-mono text-sm">{user.username}</span>
+          <span className="text-sm text-muted-foreground">{user.email}</span>
         </div>
       )
     },
