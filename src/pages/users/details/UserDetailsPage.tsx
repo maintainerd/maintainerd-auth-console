@@ -1,15 +1,25 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { Shield, User, Key } from "lucide-react"
+import { Shield, IdCard, KeyRound, Braces, Monitor, Activity } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useUser } from "@/hooks/useUsers"
-import { UserHeader, UserOverview, UserRoles, UserIdentities, UserProfiles } from "./components"
+import {
+  UserHeader,
+  UserMetadata,
+  UserRoles,
+  UserIdentities,
+  UserProfiles,
+  UserActivity,
+  UserSessions,
+} from "./components"
 
 const TABS = [
-  { value: "overview", label: "Overview", icon: User },
-  { value: "profiles", label: "Profiles", icon: User },
+  { value: "profiles", label: "Profiles", icon: IdCard },
   { value: "roles", label: "Roles", icon: Shield },
-  { value: "identities", label: "Identities", icon: Key },
+  { value: "identities", label: "Identities", icon: KeyRound },
+  { value: "sessions", label: "Sessions", icon: Monitor },
+  { value: "activity", label: "Activity", icon: Activity },
+  { value: "metadata", label: "Metadata", icon: Braces },
 ] as const
 
 export default function UserDetailsPage() {
@@ -17,7 +27,7 @@ export default function UserDetailsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const activeTab = searchParams.get("tab") || "overview"
+  const activeTab = searchParams.get("tab") || "profiles"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
 
   const { data: user, isLoading, isError } = useUser(userId || "")
@@ -43,9 +53,6 @@ export default function UserDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="overview" className="mt-4">
-          <UserOverview user={user!} />
-        </TabsContent>
         <TabsContent value="profiles" className="mt-4">
           <UserProfiles userId={userId!} />
         </TabsContent>
@@ -54,6 +61,15 @@ export default function UserDetailsPage() {
         </TabsContent>
         <TabsContent value="identities" className="mt-4">
           <UserIdentities userId={userId!} />
+        </TabsContent>
+        <TabsContent value="sessions" className="mt-4">
+          <UserSessions userId={userId!} />
+        </TabsContent>
+        <TabsContent value="activity" className="mt-4">
+          <UserActivity userId={userId!} />
+        </TabsContent>
+        <TabsContent value="metadata" className="mt-4">
+          <UserMetadata user={user!} />
         </TabsContent>
       </Tabs>
     </DetailLayout>

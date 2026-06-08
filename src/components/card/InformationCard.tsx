@@ -12,12 +12,12 @@ interface InformationCardProps {
 
 export function InformationCard({ title, description, icon: Icon, action, children }: InformationCardProps) {
   return (
-    <Card>
+    <Card className="shadow-xs">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <CardTitle className={Icon ? "flex items-center gap-2" : undefined}>
-              {Icon && <Icon className="h-5 w-5" />}
+            <CardTitle className={Icon ? "flex items-center gap-2 text-base" : "text-base"}>
+              {Icon && <Icon className="size-4" />}
               {title}
             </CardTitle>
             {description && (

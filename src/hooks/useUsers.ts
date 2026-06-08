@@ -22,7 +22,11 @@ import {
   removeUserRole,
   verifyUserEmail,
   verifyUserPhone,
-  completeUserAccount
+  completeUserAccount,
+  resetUserMfa,
+  fetchUserActivity,
+  fetchUserSessions,
+  revokeUserSession
 } from '@/services/api/users'
 import type {
   UserQueryParams,
@@ -33,7 +37,8 @@ import type {
   UserIdentitiesQueryParams,
   UserProfilesQueryParams,
   CreateUserProfileRequest,
-  UpdateUserProfileRequest
+  UpdateUserProfileRequest,
+  UserActivityQueryParams
 } from '@/services/api/users/types'
 
 /**
@@ -51,6 +56,9 @@ export const userKeys = {
   identitiesList: (id: string, params?: UserIdentitiesQueryParams) => [...userKeys.identities(id), params] as const,
   profiles: (id: string) => [...userKeys.all, 'profiles', id] as const,
   profilesList: (id: string, params?: UserProfilesQueryParams) => [...userKeys.profiles(id), params] as const,
+  activity: (id: string) => [...userKeys.all, 'activity', id] as const,
+  activityList: (id: string, params?: UserActivityQueryParams) => [...userKeys.activity(id), params] as const,
+  sessions: (id: string) => [...userKeys.all, 'sessions', id] as const,
 }
 
 /**
@@ -313,6 +321,52 @@ export function useCompleteUserAccount() {
       // Invalidate the specific user to refetch
       queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to reset a user's MFA enrollment (admin action)
+ */
+export function useResetUserMfa() {
+  return useMutation({
+    mutationFn: (userId: string) => resetUserMfa(userId),
+  })
+}
+
+/**
+ * Hook to fetch a user's activity (auth events)
+ */
+export function useUserActivity(userId: string, params?: UserActivityQueryParams) {
+  return useQuery({
+    queryKey: userKeys.activityList(userId, params),
+    queryFn: () => fetchUserActivity(userId, params),
+    enabled: !!userId,
+  })
+}
+
+/**
+ * Hook to fetch a user's active sessions
+ */
+export function useUserSessions(userId: string) {
+  return useQuery({
+    queryKey: userKeys.sessions(userId),
+    queryFn: () => fetchUserSessions(userId),
+    enabled: !!userId,
+  })
+}
+
+/**
+ * Hook to revoke a single user session (admin action)
+ */
+export function useRevokeUserSession() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userId, sessionId }: { userId: string; sessionId: string }) =>
+      revokeUserSession(userId, sessionId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.sessions(variables.userId) })
     },
   })
 }

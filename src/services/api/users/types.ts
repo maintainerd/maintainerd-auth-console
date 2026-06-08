@@ -254,7 +254,7 @@ export interface UserProfilesResponse {
 export interface CreateUserProfileRequest {
   first_name: string
   middle_name?: string
-  last_name: string
+  last_name?: string
   suffix?: string
   display_name?: string
   birthdate?: string
@@ -292,4 +292,54 @@ export interface UpdateUserProfileRequest {
   language?: string
   profile_url?: string
   metadata?: Record<string, unknown>
+}
+
+/**
+ * Activity (auth-event) types — the read-only audit trail for a user.
+ */
+export interface UserActivityQueryParams {
+  category?: string
+  event_type?: string
+  severity?: string
+  result?: string
+  date_from?: string
+  date_to?: string
+  page?: number
+  limit?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+export interface AuthEvent {
+  auth_event_id: string
+  category: string
+  event_type: string
+  severity: string
+  result: string
+  ip_address: string
+  user_agent?: string | null
+  description?: string | null
+  error_reason?: string | null
+  created_at: string
+}
+
+export interface UserActivityResponse {
+  rows: AuthEvent[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
+
+/**
+ * Session type — an active sign-in session for a user (admin view).
+ */
+export interface UserSession {
+  session_id: string
+  ip_address?: string | null
+  user_agent?: string | null
+  last_used_at?: string | null
+  expires_at?: string | null
+  absolute_expires_at?: string | null
+  created_at: string
 }

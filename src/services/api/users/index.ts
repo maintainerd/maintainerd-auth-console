@@ -28,6 +28,9 @@ import type {
   CreateUserProfileRequest,
   UpdateUserProfileRequest,
   UserProfile,
+  UserActivityQueryParams,
+  UserActivityResponse,
+  UserSession,
 } from './types'
 
 const userApi = createResourceApi<User, CreateUserRequest, UpdateUserRequest, UserListResponse>(
@@ -109,3 +112,22 @@ export const verifyUserPhone = (userId: string): Promise<User> =>
 
 export const completeUserAccount = (userId: string): Promise<User> =>
   patch<ApiResponse<User>>(`${base}/${userId}/complete-account`).then((r) => unwrap(r, 'complete account'))
+
+// Admin action: reset a user's MFA enrollment (POST /mfa/admin/users/{uuid}/reset).
+export const resetUserMfa = (userId: string): Promise<void> =>
+  post<ApiResponse<void>>(`/mfa/admin/users/${userId}/reset`).then((r) => assertSuccess(r, 'reset MFA'))
+
+// Activity: the auth-events recorded against this user (read-only audit trail).
+export const fetchUserActivity = (userId: string, params?: UserActivityQueryParams): Promise<UserActivityResponse> =>
+  get<ApiResponse<UserActivityResponse>>(
+    `${API_ENDPOINTS.AUTH_EVENTS}${buildQuery({ ...params, user: userId } as Record<string, unknown>)}`,
+  ).then((r) => unwrap(r, 'fetch user activity'))
+
+// Sessions: active sessions for this user, with admin revoke.
+export const fetchUserSessions = (userId: string): Promise<UserSession[]> =>
+  get<ApiResponse<UserSession[]>>(`${base}/${userId}/sessions`).then((r) => unwrap(r, 'fetch user sessions'))
+
+export const revokeUserSession = (userId: string, sessionId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/sessions/${sessionId}`).then((r) =>
+    assertSuccess(r, 'revoke session'),
+  )

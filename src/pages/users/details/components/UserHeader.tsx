@@ -10,6 +10,7 @@ import {
   Building2,
   CalendarDays,
   Minus,
+  ShieldOff,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -23,7 +24,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
-import { useDeleteUser, useVerifyUserEmail, useVerifyUserPhone, useCompleteUserAccount } from "@/hooks/useUsers"
+import {
+  useDeleteUser,
+  useVerifyUserEmail,
+  useVerifyUserPhone,
+  useCompleteUserAccount,
+  useResetUserMfa,
+} from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { User } from "@/services/api/users/types"
 
@@ -69,10 +76,12 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const verifyEmailMutation = useVerifyUserEmail()
   const verifyPhoneMutation = useVerifyUserPhone()
   const completeAccountMutation = useCompleteUserAccount()
+  const resetMfaMutation = useResetUserMfa()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
+  const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
 
   const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
     try {
@@ -193,6 +202,10 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
                   <UserCheck className="mr-2 size-4" />
                   Mark Account as Completed
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowResetMfaDialog(true)}>
+                  <ShieldOff className="mr-2 size-4" />
+                  Reset MFA
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
@@ -244,6 +257,16 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         title="Complete Account"
         description="Are you sure you want to mark this user's account as completed?"
         isLoading={completeAccountMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showResetMfaDialog}
+        onOpenChange={setShowResetMfaDialog}
+        onConfirm={() => runAction(() => resetMfaMutation.mutateAsync(userId), "MFA reset successfully")}
+        title="Reset MFA"
+        description="This removes all of the user's multi-factor authentication enrollments. They'll be prompted to set up MFA again on next sign-in. Continue?"
+        confirmText="Reset MFA"
+        isLoading={resetMfaMutation.isPending}
       />
     </>
   )

@@ -36,10 +36,11 @@ export const roleKeys = {
 /**
  * Hook to fetch Roles with optional filters and pagination
  */
-export function useRoles(params?: RoleQueryParams) {
+export function useRoles(params?: RoleQueryParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: roleKeys.list(params),
     queryFn: () => fetchRoles(params),
+    enabled: options?.enabled,
   })
 }
 

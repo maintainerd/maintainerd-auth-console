@@ -17,9 +17,10 @@ import {
   FormInputField,
   FormTextareaField,
   FormSelectField,
-  type SelectOption
+  FormDateField,
 } from "@/components/form"
 import { userProfileSchema } from "@/lib/validations"
+import { countryOptions, timezoneOptions, languageOptions, genderOptions } from "@/lib/constants"
 import { useCreateUserProfile, useUpdateUserProfile } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserProfile } from "@/services/api/users/types"
@@ -30,12 +31,6 @@ interface ProfileFormDialogProps {
   userId: string
   profile?: UserProfile
 }
-
-const GENDER_OPTIONS: SelectOption[] = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
-]
 
 export function ProfileFormDialog({
   open,
@@ -103,15 +98,14 @@ export function ProfileFormDialog({
         profile_url: profile.profile_url || undefined,
       })
 
-      // Load custom metadata
+      // Load custom metadata (middle_name/suffix/profile_url are real fields now,
+      // not metadata, so nothing to filter out).
       if (profile.metadata) {
-        const metadataFields = Object.entries(profile.metadata)
-          .filter(([key]) => !['middle_name', 'suffix', 'profile_url'].includes(key))
-          .map(([key, value], index) => ({
-            id: `metadata-${index}`,
-            key,
-            value: String(value)
-          }))
+        const metadataFields = Object.entries(profile.metadata).map(([key, value], index) => ({
+          id: `metadata-${index}`,
+          key,
+          value: String(value),
+        }))
         setCustomFields(metadataFields)
       }
     } else if (!open) {
@@ -171,35 +165,34 @@ export function ProfileFormDialog({
     }
 
     try {
-      // Build metadata object
+      // Custom metadata is purely user-defined key/value data now — the name
+      // parts and picture are first-class fields the backend accepts directly.
       const metadata: Record<string, string> = {}
-      
-      // Add form fields that go into metadata
-      if (data.middle_name) metadata.middle_name = data.middle_name
-      if (data.suffix) metadata.suffix = data.suffix
-      if (data.profile_url) metadata.profile_url = data.profile_url
-
-      // Add custom fields
       customFields.forEach(field => {
         if (field.key.trim() && field.value.trim()) {
           metadata[field.key.trim()] = field.value.trim()
         }
       })
 
+      // The schema already trims and drops empty optionals to `undefined`, so we
+      // can pass the validated values straight through.
       const requestData = {
         first_name: data.first_name,
+        middle_name: data.middle_name,
         last_name: data.last_name,
-        display_name: data.display_name || undefined,
-        birthdate: data.birthdate || undefined,
-        gender: data.gender || undefined,
-        bio: data.bio || undefined,
-        phone: data.phone || undefined,
-        email: data.email || undefined,
-        address: data.address || undefined,
-        city: data.city || undefined,
-        country: data.country || undefined,
-        timezone: data.timezone || undefined,
-        language: data.language || undefined,
+        suffix: data.suffix,
+        display_name: data.display_name,
+        birthdate: data.birthdate,
+        gender: data.gender,
+        bio: data.bio,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        city: data.city,
+        country: data.country,
+        timezone: data.timezone,
+        language: data.language,
+        profile_url: data.profile_url,
         metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       }
 
@@ -246,6 +239,7 @@ export function ProfileFormDialog({
               <FormInputField
                 label="First Name"
                 placeholder="John"
+                maxLength={100}
                 error={errors.first_name?.message}
                 required
                 {...register("first_name")}
@@ -253,19 +247,21 @@ export function ProfileFormDialog({
               <FormInputField
                 label="Middle Name"
                 placeholder="Michael"
+                maxLength={100}
                 error={errors.middle_name?.message}
                 {...register("middle_name")}
               />
               <FormInputField
                 label="Last Name"
                 placeholder="Doe"
+                maxLength={100}
                 error={errors.last_name?.message}
-                required
                 {...register("last_name")}
               />
               <FormInputField
                 label="Suffix"
                 placeholder="Jr., Sr., etc."
+                maxLength={50}
                 error={errors.suffix?.message}
                 {...register("suffix")}
               />
@@ -275,6 +271,8 @@ export function ProfileFormDialog({
               <FormInputField
                 label="Display Name"
                 placeholder="John M. Doe"
+                description="Shown across the app; defaults to the full name"
+                maxLength={100}
                 error={errors.display_name?.message}
                 {...register("display_name")}
               />
@@ -285,7 +283,7 @@ export function ProfileFormDialog({
                   <FormSelectField
                     label="Gender"
                     placeholder="Select gender"
-                    options={GENDER_OPTIONS}
+                    options={genderOptions}
                     value={field.value}
                     onValueChange={field.onChange}
                     error={errors.gender?.message}
@@ -295,15 +293,22 @@ export function ProfileFormDialog({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField
-                label="Birthdate"
-                type="date"
-                error={errors.birthdate?.message}
-                {...register("birthdate")}
+              <Controller
+                name="birthdate"
+                control={control}
+                render={({ field }) => (
+                  <FormDateField
+                    label="Birthdate"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    error={errors.birthdate?.message}
+                  />
+                )}
               />
               <FormInputField
-                label="Profile URL"
-                placeholder="https://example.com"
+                label="Profile Picture URL"
+                placeholder="https://example.com/avatar.png"
+                maxLength={1000}
                 error={errors.profile_url?.message}
                 {...register("profile_url")}
               />
@@ -312,6 +317,7 @@ export function ProfileFormDialog({
             <FormTextareaField
               label="Bio"
               placeholder="Tell us about yourself..."
+              maxLength={1000}
               error={errors.bio?.message}
               {...register("bio")}
             />
@@ -325,12 +331,15 @@ export function ProfileFormDialog({
                 label="Email"
                 type="email"
                 placeholder="john.doe@example.com"
+                maxLength={255}
                 error={errors.email?.message}
                 {...register("email")}
               />
               <FormInputField
                 label="Phone"
-                placeholder="+1234567890"
+                type="tel"
+                placeholder="+1 555 123 4567"
+                maxLength={20}
                 error={errors.phone?.message}
                 {...register("phone")}
               />
@@ -343,6 +352,7 @@ export function ProfileFormDialog({
             <FormInputField
               label="Address"
               placeholder="123 Main St"
+              maxLength={500}
               error={errors.address?.message}
               {...register("address")}
             />
@@ -350,14 +360,23 @@ export function ProfileFormDialog({
               <FormInputField
                 label="City"
                 placeholder="New York"
+                maxLength={100}
                 error={errors.city?.message}
                 {...register("city")}
               />
-              <FormInputField
-                label="Country Code"
-                placeholder="US"
-                error={errors.country?.message}
-                {...register("country")}
+              <Controller
+                name="country"
+                control={control}
+                render={({ field }) => (
+                  <FormSelectField
+                    label="Country"
+                    placeholder="Select country"
+                    options={countryOptions}
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    error={errors.country?.message}
+                  />
+                )}
               />
             </div>
           </div>
@@ -366,61 +385,90 @@ export function ProfileFormDialog({
           <div className="space-y-4">
             <h3 className="font-medium">Preferences</h3>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField
-                label="Timezone"
-                placeholder="America/New_York"
-                error={errors.timezone?.message}
-                {...register("timezone")}
+              <Controller
+                name="timezone"
+                control={control}
+                render={({ field }) => (
+                  <FormSelectField
+                    label="Timezone"
+                    placeholder="Select timezone"
+                    options={timezoneOptions}
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    error={errors.timezone?.message}
+                  />
+                )}
               />
-              <FormInputField
-                label="Language"
-                placeholder="en-US"
-                error={errors.language?.message}
-                {...register("language")}
+              <Controller
+                name="language"
+                control={control}
+                render={({ field }) => (
+                  <FormSelectField
+                    label="Language"
+                    placeholder="Select language"
+                    options={languageOptions}
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    error={errors.language?.message}
+                  />
+                )}
               />
             </div>
           </div>
 
           {/* Custom Metadata */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium">Custom Metadata</h3>
-              <Button type="button" variant="outline" size="sm" onClick={addCustomField}>
-                <Plus className="h-4 w-4 mr-2" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-medium">Custom Metadata</h3>
+                <p className="text-sm text-muted-foreground">
+                  Optional key-value pairs stored alongside the profile.
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addCustomField} className="h-9 shrink-0 gap-2">
+                <Plus className="size-4" />
                 Add Field
               </Button>
             </div>
 
             {metadataError && (
-              <p className="text-sm text-destructive">{metadataError}</p>
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{metadataError}</div>
             )}
 
-            {customFields.map((field) => (
-              <div key={field.id} className="flex gap-2">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Key"
-                    value={field.key}
-                    onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <Input
-                    placeholder="Value"
-                    value={field.value}
-                    onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeCustomField(field.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            {customFields.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-8 text-center">
+                <p className="text-sm text-muted-foreground">No custom metadata yet.</p>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-2">
+                {customFields.map((field) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <Input
+                      aria-label="Metadata key"
+                      placeholder="Key (e.g., employee_id)"
+                      value={field.key}
+                      onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
+                    />
+                    <Input
+                      aria-label="Metadata value"
+                      placeholder="Value"
+                      value={field.value}
+                      onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCustomField(field.id)}
+                      className="size-9 shrink-0 p-0 text-muted-foreground"
+                    >
+                      <span className="sr-only">Remove field</span>
+                      <X className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
