@@ -28,4 +28,4 @@ coverage
 .obsidian/
 
 # Environment files
-.env
+.envtsconfig.tsbuildinfo

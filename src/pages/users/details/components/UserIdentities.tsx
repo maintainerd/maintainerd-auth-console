@@ -1,16 +1,13 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Key, Calendar, Globe } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import { DataTablePagination } from "@/components/data-table"
+import { EmptyState, ListSkeleton } from "@/components/details"
+import { DataTablePagination, usePaginationTable } from "@/components/data-table"
 import { useUserIdentities } from "@/hooks/useUsers"
 import type { UserIdentity } from "@/services/api/users/types"
-import {
-  getCoreRowModel,
-  useReactTable,
-  type PaginationState,
-} from "@tanstack/react-table"
+import { type PaginationState } from "@tanstack/react-table"
 
 interface UserIdentitiesProps {
   userId: string
@@ -29,129 +26,100 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
     sort_order: 'desc',
   })
 
-  // Create a simple table instance for pagination
-  const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
-
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    pageCount: data?.total_pages || 0,
-    state: {
-      pagination,
-    },
+  const table = usePaginationTable({
+    pagination,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    pageCount: data?.total_pages ?? 0,
   })
-
-  const getProviderBadge = (provider: string) => (
-    <Badge variant="secondary" className="font-normal capitalize">
-      {provider}
-    </Badge>
-  )
 
   return (
     <InformationCard
       title="User Identities"
-      description="Authentication identities associated with this user"
+      description="How this user can authenticate — provider, subject, and the client each identity is linked to. Read-only."
       icon={Key}
     >
       <div className="space-y-4">
-        {/* Horizontal line */}
-        <div className="border-t" />
+        {isLoading && <ListSkeleton />}
 
-        {/* Scrollable content area */}
-        <div className="max-h-[600px] overflow-y-auto pr-2">
-          {isLoading && (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading identities...
-            </div>
-          )}
+        {isError && (
+          <p className="py-8 text-center text-sm text-destructive">Failed to load identities</p>
+        )}
 
-          {isError && (
-            <div className="text-center py-8 text-destructive">
-              Failed to load identities
-            </div>
-          )}
+        {data && data.rows.length === 0 && (
+          <EmptyState
+            icon={Key}
+            title="No identities"
+            description="This user has no linked authentication identities yet."
+          />
+        )}
 
-          {data && data.rows.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No identities found for this user
-            </div>
-          )}
-
-          {data && data.rows.length > 0 && (
-            <div className="space-y-3">
-              {data.rows.map((identity: UserIdentity) => (
-                <div
-                  key={identity.user_identity_id}
-                  className="flex items-start justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Key className="h-4 w-4 text-primary" />
+        {data && data.rows.length > 0 && (
+          <div className="space-y-3">
+            {data.rows.map((identity: UserIdentity) => (
+              <div key={identity.user_identity_id} className="rounded-lg border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <Key className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-3">
+                    {/* Provider + subject */}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Provider
+                        </p>
+                        <p className="text-sm font-medium capitalize">{identity.provider}</p>
+                      </div>
+                      <div className="min-w-0 space-y-0.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Subject
+                        </p>
+                        <p className="break-all font-mono text-sm">{identity.sub}</p>
+                      </div>
                     </div>
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">Identity Provider</p>
-                        {getProviderBadge(identity.provider)}
-                      </div>
-                      
-                      <div className="text-sm space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground w-20">Subject:</span>
-                          <span className="font-mono text-xs">{identity.sub}</span>
-                        </div>
-                      </div>
 
-                      {/* Client Information */}
-                      {identity.client && (
-                        <div className="mt-3 p-3 bg-muted/50 rounded-md space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Globe className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs font-medium">Client Information</span>
-                          </div>
-                          <div className="text-xs space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground w-24">Name:</span>
-                              <span className="font-medium">{identity.client.display_name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground w-24">Type:</span>
-                              <Badge variant="secondary" className="text-xs h-5">
-                                {identity.client.client_type}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground w-24">Domain:</span>
-                              <span className="font-mono">{identity.client.domain || "—"}</span>
-                            </div>
-                            {identity.client.is_default && (
-                              <Badge variant="outline" className="text-xs mt-1">
-                                Default Client
-                              </Badge>
-                            )}
-                            {identity.client.is_system && (
-                              <Badge variant="outline" className="text-xs mt-1 ml-1">
-                                System Client
-                              </Badge>
-                            )}
-                          </div>
+                    {/* Linked client */}
+                    {identity.client && (
+                      <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+                        <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          <Globe className="size-3.5" />
+                          Linked client
                         </div>
-                      )}
-
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                        <Calendar className="h-3 w-3" />
-                        Created {format(new Date(identity.created_at), "PPP")}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-medium">{identity.client.display_name}</span>
+                          <Badge variant="secondary" className="font-normal capitalize">
+                            {identity.client.client_type}
+                          </Badge>
+                          {identity.client.is_default && (
+                            <Badge variant="outline" className="font-normal">
+                              Default
+                            </Badge>
+                          )}
+                          {identity.client.is_system && (
+                            <Badge variant="outline" className="font-normal">
+                              System
+                            </Badge>
+                          )}
+                        </div>
+                        {identity.client.domain && (
+                          <p className="break-all font-mono text-xs text-muted-foreground">
+                            {identity.client.domain}
+                          </p>
+                        )}
                       </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="size-3" />
+                      Connected {format(new Date(identity.created_at), "PPP")}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination controls */}
         {data && data.total > 0 && (

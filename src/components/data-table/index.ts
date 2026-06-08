@@ -6,6 +6,7 @@ export { DataTableViewOptions } from './DataTableViewOptions'
 export { ListingToolbar } from './ListingToolbar'
 export { ResourceListing } from './ResourceListing'
 export { RowActions, type RowActionItem } from './RowActions'
+export { usePaginationTable } from './usePaginationTable'
 export {
   useServerDataTable,
   type FilterGroup,

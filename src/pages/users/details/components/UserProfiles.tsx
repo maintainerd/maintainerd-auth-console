@@ -1,21 +1,18 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { User, Calendar, Mail, Phone, MapPin, Globe, Clock, Languages, Check, Plus } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import { DataTablePagination } from "@/components/data-table"
+import { EmptyState, ListSkeleton } from "@/components/details"
+import { DataTablePagination, usePaginationTable } from "@/components/data-table"
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUserProfiles, useDeleteUserProfile, useSetUserProfileAsDefault } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserProfile } from "@/services/api/users/types"
 import { ProfileFormDialog } from "./ProfileFormDialog"
 import { ProfileActions } from "./ProfileActions"
-import {
-  getCoreRowModel,
-  useReactTable,
-  type PaginationState,
-} from "@tanstack/react-table"
+import { type PaginationState } from "@tanstack/react-table"
 
 interface UserProfilesProps {
   userId: string
@@ -92,20 +89,10 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     }
   }
 
-  // Create a simple table instance for pagination
-  const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
-
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    pageCount: data?.total_pages || 0,
-    state: {
-      pagination,
-    },
+  const table = usePaginationTable({
+    pagination,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    pageCount: data?.total_pages ?? 0,
   })
 
   const formatDate = (dateString: string) => {
@@ -116,28 +103,13 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     }
   }
 
-  // first/last name are optional on the backend, so build a name without
-  // interpolating "undefined".
-  const profileName = (profile: UserProfile) =>
-    profile.display_name?.trim() ||
-    [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim() ||
-    "Unnamed profile"
-
-  const getGenderBadge = (gender?: string) => {
-    if (!gender) {
-      return (
-        <Badge variant="outline" className="font-normal text-muted-foreground">
-          Not specified
-        </Badge>
-      )
-    }
-
-    return (
-      <Badge variant="secondary" className="font-normal capitalize">
-        {gender}
-      </Badge>
-    )
-  }
+  // Name fields are optional on the backend, so compose without interpolating
+  // "undefined". Prefer the display name; fall back to the composed legal name.
+  const legalName = (p: UserProfile) =>
+    [p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(" ").trim()
+  const profileName = (p: UserProfile) => p.display_name?.trim() || legalName(p) || "Unnamed profile"
+  const initials = (name: string) =>
+    /* v8 ignore next */ name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?"
 
   return (
     <>
@@ -153,61 +125,79 @@ export function UserProfiles({ userId }: UserProfilesProps) {
         }
       >
       <div className="space-y-4">
-        {/* Horizontal line */}
-        <div className="border-t" />
-
-        {/* Scrollable content area */}
-        <div className="max-h-[600px] overflow-y-auto pr-2">
-          {isLoading && (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading profiles...
-            </div>
-          )}
+        {isLoading && <ListSkeleton />}
 
           {isError && (
-            <div className="text-center py-8 text-destructive">
-              Failed to load profiles
-            </div>
+            <p className="py-8 text-center text-sm text-destructive">Failed to load profiles</p>
           )}
 
           {data && data.rows.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No profiles found for this user
-            </div>
+            <EmptyState
+              icon={User}
+              title="No profiles"
+              description="This user has no profiles yet. Create one to capture personal details and preferences."
+            />
           )}
 
           {data && data.rows.length > 0 && (
             <div className="space-y-4">
-              {data.rows.map((profile: UserProfile) => (
-                <div
-                  key={profile.profile_id}
-                  className="p-4 border rounded-lg space-y-4"
-                >
-                  {/* Header with name and default badge */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-base">
-                            {profileName(profile)}
-                          </h4>
-                          {profile.is_default && (
-                            <Badge variant="default" className="gap-1">
-                              <Check className="h-3 w-3" />
-                              Default
-                            </Badge>
+              {data.rows.map((profile: UserProfile) => {
+                const name = profileName(profile)
+                const legal = legalName(profile)
+                const subParts = [
+                  profile.display_name?.trim() && legal && legal !== name ? legal : null,
+                  profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : null,
+                ].filter(Boolean)
+
+                const attributes: { icon: typeof Mail; value: string }[] = []
+                if (profile.email) attributes.push({ icon: Mail, value: profile.email })
+                if (profile.phone) attributes.push({ icon: Phone, value: profile.phone })
+                if (profile.birthdate) attributes.push({ icon: Calendar, value: formatDate(profile.birthdate) })
+                if (profile.timezone) attributes.push({ icon: Clock, value: profile.timezone })
+                if (profile.language) attributes.push({ icon: Languages, value: profile.language })
+                const location = [profile.address, [profile.city, profile.country].filter(Boolean).join(", ")]
+                  .filter(Boolean)
+                  .join(" · ")
+                if (location) attributes.push({ icon: MapPin, value: location })
+
+                return (
+                  <div
+                    key={profile.profile_id}
+                    className={`space-y-4 rounded-lg border p-4 ${
+                      profile.is_default
+                        ? "border-blue-200 bg-blue-50"
+                        : "border-border/60 bg-muted/20"
+                    }`}
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        {profile.profile_url ? (
+                          <img
+                            src={profile.profile_url}
+                            alt={name}
+                            className="size-10 shrink-0 rounded-full object-cover ring-2 ring-background"
+                          />
+                        ) : (
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white shadow-sm shadow-blue-500/20">
+                            {initials(name)}
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-semibold">{name}</h4>
+                            {profile.is_default && (
+                              <Badge variant="secondary" className="gap-1 font-normal">
+                                <Check className="size-3" />
+                                Default
+                              </Badge>
+                            )}
+                          </div>
+                          {subParts.length > 0 && (
+                            <p className="text-sm text-muted-foreground">{subParts.join(" · ")}</p>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {[profile.first_name, profile.last_name].filter(Boolean).join(" ")}
-                        </p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getGenderBadge(profile.gender)}
                       <ProfileActions
                         profile={profile}
                         onEdit={handleEditProfile}
@@ -215,118 +205,55 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                         onSetAsDefault={handleSetAsDefault}
                       />
                     </div>
-                  </div>
 
-                  {/* Bio */}
-                  {profile.bio && (
-                    <div className="pt-2 border-t">
-                      <p className="text-sm text-muted-foreground italic">{profile.bio}</p>
-                    </div>
-                  )}
+                    {/* Bio */}
+                    {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
 
-                  {/* Contact Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    {profile.email && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Email:</span>
-                        <span className="font-medium">{profile.email}</span>
-                      </div>
-                    )}
-
-                    {profile.phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Phone:</span>
-                        <span className="font-medium">{profile.phone}</span>
-                      </div>
-                    )}
-
-                    {profile.birthdate && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Birthdate:</span>
-                        <span className="font-medium">{formatDate(profile.birthdate)}</span>
-                      </div>
-                    )}
-
-                    {profile.timezone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Timezone:</span>
-                        <span className="font-medium">{profile.timezone}</span>
-                      </div>
-                    )}
-
-                    {profile.language && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Languages className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Language:</span>
-                        <span className="font-medium">{profile.language}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Location Information */}
-                  {(profile.address || profile.city || profile.country) && (
-                    <div className="pt-2 border-t">
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                        <div className="flex-1">
-                          <span className="text-muted-foreground">Location:</span>
-                          <div className="font-medium mt-1">
-                            {profile.address && <div>{profile.address}</div>}
-                            {(profile.city || profile.country) && (
-                              <div>
-                                {profile.city}
-                                {profile.city && profile.country && ', '}
-                                {profile.country}
-                              </div>
-                            )}
+                    {/* Attributes */}
+                    {attributes.length > 0 && (
+                      <div className="grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                        {attributes.map(({ icon: Icon, value }) => (
+                          <div key={value} className="flex items-center gap-2 text-sm">
+                            <Icon className="size-4 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{value}</span>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Metadata */}
-                  {profile.metadata && Object.keys(profile.metadata).length > 0 && (
-                    <div className="pt-2 border-t">
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">Metadata:</span>
-                        <div className="mt-2 space-y-1">
-                          {Object.entries(profile.metadata).map(([key, value]) => (
-                            <div key={key} className="flex gap-2">
-                              <span className="font-medium">{key}:</span>
-                              <span className="text-muted-foreground">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
+                    {/* Metadata */}
+                    {profile.metadata && Object.keys(profile.metadata).length > 0 && (
+                      <div className="divide-y rounded-md border bg-background text-sm">
+                        {Object.entries(profile.metadata).map(([key, value]) => (
+                          <div key={key} className="flex items-center justify-between gap-4 px-3 py-2">
+                            <span className="font-medium break-all">{key}</span>
+                            <span className="font-mono text-muted-foreground break-all">{String(value)}</span>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Footer with dates */}
-                  <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>Created: {formatDate(profile.created_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-3 w-3" />
-                      <span>Updated: {formatDate(profile.updated_at)}</span>
+                    {/* Footer */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="size-3" />
+                        Created {formatDate(profile.created_at)}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Globe className="size-3" />
+                        Updated {formatDate(profile.updated_at)}
+                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
-        </div>
 
         {/* Pagination */}
-        {data && data.rows.length > 0 && (
+        {data && data.total > 0 && (
           <div className="border-t pt-4">
-            <DataTablePagination table={table} />
+            <DataTablePagination table={table} rowCount={data.total} />
           </div>
         )}
       </div>

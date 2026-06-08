@@ -22,7 +22,6 @@ import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
 import UserDetailsPage from './pages/users/details'
 import UserAddOrUpdateForm from './pages/users/form'
-import UserProfileForm from './pages/users/profile-form'
 import RolesPage from './pages/roles'
 
 import ServicesPage from './pages/services'
@@ -139,7 +138,6 @@ function App() {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="monitoring" element={<AnalyticsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="users/:userId/profile" element={<UserProfileForm />} />
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
           <Route path="security/settings" element={<SecuritySettingsPage />} />
