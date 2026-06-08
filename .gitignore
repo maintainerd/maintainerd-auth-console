@@ -28,4 +28,7 @@ coverage
 .obsidian/
 
 # Environment files
-.envtsconfig.tsbuildinfo
+.env
+.env.*
+!.env.example
+tsconfig.tsbuildinfo
