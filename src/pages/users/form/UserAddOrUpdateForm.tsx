@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -20,6 +20,7 @@ import {
 import { userSchema } from "@/lib/validations"
 import { useUser, useCreateUser, useUpdateUser } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
+import { useMetadataFields } from "@/hooks/useMetadataFields"
 import type { UserStatus } from "@/services/api/users/types"
 
 // Status options for the select field
@@ -39,20 +40,27 @@ export default function UserAddOrUpdateForm() {
   const isEditing = Boolean(userId)
   const isCreating = !isEditing
 
-  // Honour where the user came from (e.g. the details page) so the back button,
-  // Cancel, and post-submit navigation return there. Falls back to the listing.
-  const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/users`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/users` ? "Back to Users" : "Back")
+  // Custom metadata via shared hook
+  const {
+    customFields,
+    metadataError,
+    addCustomField,
+    removeCustomField,
+    updateCustomField,
+    buildPayload,
+    resetFields,
+  } = useMetadataFields()
 
   // Fetch existing user if editing
   const { data: userData, isLoading: isFetchingUser } = useUser(userId || '')
   const createUserMutation = useCreateUser()
   const updateUserMutation = useUpdateUser()
 
-  // Custom metadata state
-  const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
-  const [metadataError, setMetadataError] = useState<string>("")
+  // Honour where the user came from (e.g. the details page) so the back button,
+  // Cancel, and post-submit navigation return there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/${tenantId}/users`
+  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/users` ? "Back to Users" : "Back")
 
   // React Hook Form setup
   const {
@@ -62,7 +70,8 @@ export default function UserAddOrUpdateForm() {
     reset,
     formState: { errors, isSubmitting }
   } = useForm({
-    resolver: yupResolver(userSchema, { context: { isCreating } }),
+    resolver: yupResolver(userSchema),
+    context: { isCreating },
     defaultValues: {
       username: "",
       email: "",
@@ -84,66 +93,21 @@ export default function UserAddOrUpdateForm() {
         password: undefined,
         status: userData.status,
       })
-
-      // Load metadata
-      if (userData.metadata) {
-        const metadataFields = Object.entries(userData.metadata).map(([key, value], index) => ({
-          id: `metadata-${index}`,
-          key,
-          value: String(value)
-        }))
-        setCustomFields(metadataFields)
-      }
+      resetFields(userData.metadata)
     }
-  }, [isEditing, userData, reset])
-
-  // Check for duplicate keys whenever custom fields change
-  useEffect(() => {
-    const keys = customFields.map(field => field.key.trim()).filter(key => key !== '')
-    const duplicateKeys = keys.filter((key, index) => keys.indexOf(key) !== index)
-
-    if (duplicateKeys.length > 0) {
-      const uniqueDuplicates = [...new Set(duplicateKeys)]
-      setMetadataError(`Duplicate metadata keys: ${uniqueDuplicates.join(', ')}`)
-    } else {
-      setMetadataError("")
-    }
-  }, [customFields])
+  }, [isEditing, userData, reset, resetFields])
 
   const isLoading = createUserMutation.isPending || updateUserMutation.isPending || isSubmitting
 
-  // Custom metadata handlers
-  const addCustomField = () => {
-    setCustomFields([...customFields, { id: Date.now().toString(), key: "", value: "" }])
-  }
-
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter(field => field.id !== id))
-  }
-
-  const updateCustomField = (id: string, key: string, value: string) => {
-    setCustomFields(customFields.map(field =>
-      field.id === id ? { ...field, key, value } : field
-    ))
-  }
-
   const onSubmit = async (data: yup.InferType<typeof userSchema>) => {
-    // Check for duplicate metadata keys
     if (metadataError) {
       showError(metadataError)
       return
     }
 
-    try {
-      // Build metadata object
-      const metadata: Record<string, string> = {}
-      customFields.forEach(field => {
-        if (field.key.trim() && field.value.trim()) {
-          metadata[field.key.trim()] = field.value.trim()
-        }
-      })
-      const metadataPayload = Object.keys(metadata).length > 0 ? metadata : undefined
+    const metadataPayload = buildPayload()
 
+    try {
       if (isCreating) {
         await createUserMutation.mutateAsync({
           username: data.username,
@@ -174,7 +138,7 @@ export default function UserAddOrUpdateForm() {
     }
   }
 
-  const pageTitle = isCreating ? "Create User" : `Edit ${userData?.fullname || userData?.username || "User"}`
+  const pageTitle = isCreating ? "Create User" : `Edit ${userData?.fullname || userData?.username}`
   const submitButtonText = isCreating ? "Create User" : "Update User"
 
   // Loading state while fetching the user to edit
@@ -307,6 +271,9 @@ export default function UserAddOrUpdateForm() {
                       value={field.value}
                       onValueChange={field.onChange}
                       disabled={isLoading}
+                      // Status is a constrained select defaulting to "active", so it
+                      // cannot produce a validation error — the branch is unreachable.
+                      /* v8 ignore next */
                       error={errors.status?.message}
                       required
                     />

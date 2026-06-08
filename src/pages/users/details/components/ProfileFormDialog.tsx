@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -23,6 +23,7 @@ import { userProfileSchema } from "@/lib/validations"
 import { countryOptions, timezoneOptions, languageOptions, genderOptions } from "@/lib/constants"
 import { useCreateUserProfile, useUpdateUserProfile } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
+import { useMetadataFields } from "@/hooks/useMetadataFields"
 import type { UserProfile } from "@/services/api/users/types"
 
 interface ProfileFormDialogProps {
@@ -38,8 +39,15 @@ export function ProfileFormDialog({
   userId,
   profile,
 }: ProfileFormDialogProps) {
-  const [customFields, setCustomFields] = useState<Array<{ id: string; key: string; value: string }>>([])
-  const [metadataError, setMetadataError] = useState<string>("")
+  const {
+    customFields,
+    metadataError,
+    addCustomField,
+    removeCustomField,
+    updateCustomField,
+    buildPayload,
+    resetFields,
+  } = useMetadataFields()
 
   const { showSuccess, showError } = useToast()
   const createProfileMutation = useCreateUserProfile()
@@ -98,16 +106,7 @@ export function ProfileFormDialog({
         profile_url: profile.profile_url || undefined,
       })
 
-      // Load custom metadata (middle_name/suffix/profile_url are real fields now,
-      // not metadata, so nothing to filter out).
-      if (profile.metadata) {
-        const metadataFields = Object.entries(profile.metadata).map(([key, value], index) => ({
-          id: `metadata-${index}`,
-          key,
-          value: String(value),
-        }))
-        setCustomFields(metadataFields)
-      }
+      resetFields(profile.metadata ?? null)
     } else if (!open) {
       reset({
         first_name: "",
@@ -127,36 +126,11 @@ export function ProfileFormDialog({
         language: undefined,
         profile_url: undefined,
       })
-      setCustomFields([])
-      setMetadataError("")
+      resetFields(null)
     }
-  }, [open, profile, reset])
+  }, [open, profile, reset, resetFields])
 
-  // Check for duplicate metadata keys
-  useEffect(() => {
-    const keys = customFields.map(f => f.key.trim()).filter(k => k !== '')
-    const duplicates = keys.filter((key, index) => keys.indexOf(key) !== index)
-    
-    if (duplicates.length > 0) {
-      setMetadataError(`Duplicate metadata keys: ${duplicates.join(', ')}`)
-    } else {
-      setMetadataError("")
-    }
-  }, [customFields])
-
-  const addCustomField = () => {
-    setCustomFields([...customFields, { id: `field-${Date.now()}`, key: '', value: '' }])
-  }
-
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter(field => field.id !== id))
-  }
-
-  const updateCustomField = (id: string, key: string, value: string) => {
-    setCustomFields(customFields.map(field =>
-      field.id === id ? { ...field, key, value } : field
-    ))
-  }
+  const isLoading = createProfileMutation.isPending || updateProfileMutation.isPending || isSubmitting
 
   const onSubmit = async (data: yup.InferType<typeof userProfileSchema>) => {
     if (metadataError) {
@@ -165,17 +139,8 @@ export function ProfileFormDialog({
     }
 
     try {
-      // Custom metadata is purely user-defined key/value data now — the name
-      // parts and picture are first-class fields the backend accepts directly.
-      const metadata: Record<string, string> = {}
-      customFields.forEach(field => {
-        if (field.key.trim() && field.value.trim()) {
-          metadata[field.key.trim()] = field.value.trim()
-        }
-      })
+      const metadataPayload = buildPayload()
 
-      // The schema already trims and drops empty optionals to `undefined`, so we
-      // can pass the validated values straight through.
       const requestData = {
         first_name: data.first_name,
         middle_name: data.middle_name,
@@ -193,7 +158,7 @@ export function ProfileFormDialog({
         timezone: data.timezone,
         language: data.language,
         profile_url: data.profile_url,
-        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+        metadata: metadataPayload,
       }
 
       if (isEditing) {
@@ -216,8 +181,6 @@ export function ProfileFormDialog({
       showError(error)
     }
   }
-
-  const isLoading = createProfileMutation.isPending || updateProfileMutation.isPending || isSubmitting
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

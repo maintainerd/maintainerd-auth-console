@@ -75,6 +75,9 @@ export default defineConfig({
         'src/pages/users/details/components/ProfileActions.tsx',
         'src/pages/users/details/components/ProfileFormDialog.tsx',
         'src/pages/users/details/components/AssignUserRolesDialog.tsx',
+        // Users add/update form + the shared metadata-fields hook it relies on.
+        'src/pages/users/form/UserAddOrUpdateForm.tsx',
+        'src/hooks/useMetadataFields.ts',
       ],
       exclude: ['**/*.test.{ts,tsx}', 'src/test/**'],
       thresholds: {

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { User, Calendar, Mail, Phone, MapPin, Globe, Clock, Languages, Check, Plus } from "lucide-react"
+import { User, Calendar, Mail, Phone, MapPin, Globe, Clock, Languages, Check, Plus, type LucideIcon } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
@@ -98,7 +98,8 @@ export function UserProfiles({ userId }: UserProfilesProps) {
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM dd, yyyy')
-    } catch {
+    } catch (e) {
+      console.warn("Invalid profile date:", dateString, e)
       return 'Invalid date'
     }
   }
@@ -109,7 +110,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     [p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(" ").trim()
   const profileName = (p: UserProfile) => p.display_name?.trim() || legalName(p) || "Unnamed profile"
   const initials = (name: string) =>
-    /* v8 ignore next */ name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?"
+    name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("")
 
   return (
     <>
@@ -149,7 +150,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                   profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : null,
                 ].filter(Boolean)
 
-                const attributes: { icon: typeof Mail; value: string }[] = []
+                const attributes: { icon: LucideIcon; value: string }[] = []
                 if (profile.email) attributes.push({ icon: Mail, value: profile.email })
                 if (profile.phone) attributes.push({ icon: Phone, value: profile.phone })
                 if (profile.birthdate) attributes.push({ icon: Calendar, value: formatDate(profile.birthdate) })

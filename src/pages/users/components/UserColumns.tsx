@@ -4,9 +4,7 @@ import { CheckCircle, XCircle, AlertTriangle, Mail, Phone } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
 import { DataTableColumnHeader } from "@/components/data-table"
-import type { User } from "@/services/api/users/types"
-
-type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended'
+import type { User, UserStatus } from "@/services/api/users/types"
 
 const getStatusBadge = (status: UserStatus) => {
   const statusConfig = {

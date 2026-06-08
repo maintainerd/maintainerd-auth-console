@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, type FormEvent } from "react"
 import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,9 +63,7 @@ export function AssignUserRolesDialog({
   }
 
   const handleSelectAll = () => {
-    /* v8 ignore next */ if (!rolesData?.rows) return
-    
-    const availableRoles = rolesData.rows.filter(
+    /* v8 ignore next */ const availableRoles = (rolesData?.rows ?? []).filter(
       role => !existingRoleIds.includes(role.role_id)
     )
     const availableRoleIds = availableRoles.map(r => r.role_id)
@@ -77,13 +75,12 @@ export function AssignUserRolesDialog({
     }
   }
 
-  const handleSubmit = async () => {
-    /* v8 ignore start */
+  const handleSubmit = async (e?: FormEvent) => {
+    e?.preventDefault()
     if (selectedRoles.length === 0) {
       showError("Please select at least one role")
       return
     }
-    /* v8 ignore stop */
 
     try {
       await assignRolesMutation.mutateAsync({
@@ -101,15 +98,15 @@ export function AssignUserRolesDialog({
   const isLoading = assignRolesMutation.isPending
 
   // Filter roles based on search query and exclude already assigned roles
-  const filteredRoles = rolesData?.rows.filter(role =>
+  const filteredRoles = rolesData?.rows?.filter(role =>
     !existingRoleIds.includes(role.role_id) &&
     (role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (role.description ?? "").toLowerCase().includes(searchQuery.toLowerCase()))
-  ) || []
+  ) ?? []
 
-  const availableRolesCount = rolesData?.rows.filter(
+  const availableRolesCount = rolesData?.rows?.filter(
     role => !existingRoleIds.includes(role.role_id)
-  ).length || 0
+  ).length ?? 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -217,29 +214,30 @@ export function AssignUserRolesDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={selectedRoles.length === 0 || isLoading}
-            className="gap-2"
-          >
-            {isLoading ? (
-              <>Assigning...</>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                Assign Roles
-              </>
-            )}
-          </Button>
+          <form onSubmit={handleSubmit} className="contents">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={selectedRoles.length === 0 || isLoading}
+              className="gap-2"
+            >
+              {isLoading ? (
+                <>Assigning...</>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Assign Roles
+                </>
+              )}
+            </Button>
+          </form>
         </DialogFooter>
       </DialogContent>
     </Dialog>
