@@ -14,7 +14,7 @@ const RegisterProfileForm = () => {
   const { isLoading, createProfileForRegister } = useProfile()
   const [isNavigating, setIsNavigating] = useState(false)
   const [isProfileCreated, setIsProfileCreated] = useState(false)
-  const navigationTimeoutRef = useRef<number | null>(null)
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const stepMap = {
     'personal': 0,

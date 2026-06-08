@@ -1,11 +1,13 @@
+import { useState, useMemo } from "react"
 import { Monitor, Globe, Calendar, Clock, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
-import { RowActions, type RowActionItem } from "@/components/data-table"
+import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { useUserSessions, useRevokeUserSession } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserSession } from "@/services/api/users/types"
+import { type PaginationState } from "@tanstack/react-table"
 
 interface UserSessionsProps {
   userId: string
@@ -15,15 +17,30 @@ function formatDate(value?: string | null) {
   if (!value) return "—"
   try {
     return format(new Date(value), "PPp")
-  } catch {
+  } catch (e) {
+    console.warn("Invalid session date:", value, e)
     return "—"
   }
 }
 
 export function UserSessions({ userId }: UserSessionsProps) {
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const { data, isLoading, isError } = useUserSessions(userId)
   const { showSuccess, showError } = useToast()
   const revokeMutation = useRevokeUserSession()
+
+  const sessions = useMemo(() => data ?? [], [data])
+
+  const paginatedSessions = useMemo(() => {
+    const start = pagination.pageIndex * pagination.pageSize
+    return sessions.slice(start, start + pagination.pageSize)
+  }, [sessions, pagination])
+
+  const table = usePaginationTable({
+    pagination,
+    onPaginationChange: setPagination,
+    pageCount: Math.max(1, Math.ceil(sessions.length / pagination.pageSize)),
+  })
 
   const revokeSession = async (session: UserSession) => {
     try {
@@ -68,9 +85,9 @@ export function UserSessions({ userId }: UserSessionsProps) {
           />
         )}
 
-        {data && data.length > 0 && (
+        {paginatedSessions.length > 0 && (
           <div className="space-y-3">
-            {data.map((session) => (
+            {paginatedSessions.map((session) => (
               <div
                 key={session.session_id}
                 className="flex items-start justify-between gap-3 rounded-lg border p-4"
@@ -102,6 +119,12 @@ export function UserSessions({ userId }: UserSessionsProps) {
                 <RowActions items={sessionActions(session)} />
               </div>
             ))}
+          </div>
+        )}
+
+        {sessions.length > 0 && (
+          <div className="border-t pt-4">
+            <DataTablePagination table={table} rowCount={sessions.length} />
           </div>
         )}
       </div>

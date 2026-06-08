@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, fireEvent } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/utils"
 import { AssignUserRolesDialog } from "./AssignUserRolesDialog"
@@ -184,6 +184,17 @@ describe("AssignUserRolesDialog", () => {
       <AssignUserRolesDialog open onOpenChange={noop} userId="u1" existingRoleIds={[]} />,
     )
     expect(screen.getByRole("button", { name: /assign roles/i })).toBeDisabled()
+    expect(assignMutateAsync).not.toHaveBeenCalled()
+  })
+
+  it("shows an error when the form is submitted with no roles selected (guard clause)", () => {
+    useRolesMock.mockReturnValue({ data: response([makeRole()]), isLoading: false })
+    renderWithProviders(
+      <AssignUserRolesDialog open onOpenChange={noop} userId="u1" existingRoleIds={[]} />,
+    )
+    const form = document.querySelector("form")!
+    fireEvent.submit(form)
+    expect(showErrorMock).toHaveBeenCalledWith("Please select at least one role")
     expect(assignMutateAsync).not.toHaveBeenCalled()
   })
 

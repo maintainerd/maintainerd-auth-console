@@ -16,7 +16,7 @@ const SetupProfileForm = () => {
   const [isNavigating, setIsNavigating] = useState(false)
   const [isProfileCreated, setIsProfileCreated] = useState(false)
   const [isSetupComplete, setIsSetupComplete] = useState(false)
-  const navigationTimeoutRef = useRef<number | null>(null)
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const stepMap = {
     'personal': 0,
