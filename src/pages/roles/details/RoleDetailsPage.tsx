@@ -1,99 +1,53 @@
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DetailsContainer } from "@/components/container"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { Shield, Users } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailLayout } from "@/components/details"
 import { useRole } from "@/hooks/useRoles"
-import { RoleHeader, RoleInformation, RoleTabs } from "./components"
-import { getStatusColor, getStatusText } from "./utils"
+import { RoleHeader, RolePermissionsTab, RoleUsers } from "./components"
+
+const TABS = [
+  { value: "permissions", label: "Permissions", icon: Shield },
+  { value: "users", label: "Users", icon: Users },
+] as const
 
 export default function RoleDetailsPage() {
   const { tenantId, roleId } = useParams<{ tenantId: string; roleId: string }>()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState("permissions")
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Fetch Role from API
-  const { data: roleData, isLoading, isError } = useRole(roleId || '')
+  const activeTab = searchParams.get("tab") || "permissions"
+  const handleTabChange = (tab: string) => setSearchParams({ tab })
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching role details
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Error or not found state
-  if (isError || !roleData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Role Not Found</h2>
-          <p className="text-muted-foreground mt-2">
-            The role you're looking for doesn't exist or has been removed.
-          </p>
-        </div>
-        <Button onClick={() => navigate(`/${tenantId}/roles`)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Roles
-        </Button>
-      </div>
-    )
-  }
-
-  // Map Role response to component data
-  const role = {
-    id: roleData.role_id,
-    name: roleData.name,
-    description: roleData.description,
-    status: roleData.status,
-    is_default: roleData.is_default,
-    is_system: roleData.is_system,
-    createdAt: roleData.created_at,
-    updatedAt: roleData.updated_at,
-  }
+  const { data: role, isLoading, isError } = useRole(roleId || "")
 
   return (
-    <DetailsContainer>
-      <div className="flex flex-col gap-6">
-        {/* Back Button */}
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/${tenantId}/roles`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Roles
-          </Button>
-        </div>
+    <DetailLayout
+      backLabel="Back to Roles"
+      onBack={() => navigate(`/${tenantId}/roles`)}
+      isLoading={isLoading}
+      isError={isError || !role}
+      notFoundTitle="Role not found"
+      notFoundDescription="The role you're looking for doesn't exist or may have been removed."
+    >
+      <RoleHeader role={role!} tenantId={tenantId!} roleId={roleId!} />
 
-        {/* Header */}
-        <RoleHeader
-          role={role}
-          tenantId={tenantId!}
-          roleId={roleId!}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-        />
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {TABS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-        {/* Role Information */}
-        <RoleInformation role={role} />
-
-        {/* Tabs */}
-        <RoleTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          roleId={roleId!}
-        />
-      </div>
-    </DetailsContainer>
+        <TabsContent value="permissions" className="mt-4">
+          <RolePermissionsTab roleId={roleId!} />
+        </TabsContent>
+        <TabsContent value="users" className="mt-4">
+          <RoleUsers roleId={roleId!} />
+        </TabsContent>
+      </Tabs>
+    </DetailLayout>
   )
 }

@@ -103,7 +103,8 @@ export function AddRolePermissionsDialog({
     }
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     if (selectedPermissions.length === 0) {
       showError("Please select at least one permission")
       return
@@ -286,29 +287,30 @@ export function AddRolePermissionsDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={selectedPermissions.length === 0 || isLoading}
-            className="gap-2"
-          >
-            {isLoading ? (
-              <>Adding...</>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                Add Permissions
-              </>
-            )}
-          </Button>
+          <form onSubmit={handleSubmit} className="contents">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={selectedPermissions.length === 0 || isLoading}
+              className="gap-2"
+            >
+              {isLoading ? (
+                <>Adding...</>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Add Permissions
+                </>
+              )}
+            </Button>
+          </form>
         </DialogFooter>
       </DialogContent>
     </Dialog>

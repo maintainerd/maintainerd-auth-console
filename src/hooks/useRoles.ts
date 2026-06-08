@@ -4,15 +4,16 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { 
-  fetchRoles, 
-  fetchRoleById, 
-  createRole, 
-  updateRole, 
-  deleteRole, 
+import {
+  fetchRoles,
+  fetchRoleById,
+  createRole,
+  updateRole,
+  deleteRole,
   updateRoleStatus,
   addRolePermissions,
-  removeRolePermission
+  removeRolePermission,
+  fetchRolePermissions,
 } from '@/services/api/roles'
 import type {
   RoleQueryParams,
@@ -31,6 +32,7 @@ export const roleKeys = {
   list: (params?: RoleQueryParams) => [...roleKeys.lists(), params] as const,
   details: () => [...roleKeys.all, 'detail'] as const,
   detail: (id: string) => [...roleKeys.details(), id] as const,
+  permissions: (id: string) => [...roleKeys.all, 'permissions', id] as const,
 }
 
 /**
@@ -130,7 +132,7 @@ export function useAddRolePermissions() {
       addRolePermissions(roleId, data),
     onSuccess: (_, variables) => {
       // Invalidate role permissions queries to refetch
-      queryClient.invalidateQueries({ queryKey: ['role-permissions', variables.roleId] })
+      queryClient.invalidateQueries({ queryKey: roleKeys.permissions(variables.roleId) })
     },
   })
 }
@@ -145,8 +147,21 @@ export function useRemoveRolePermission() {
     mutationFn: ({ roleId, permissionId }: { roleId: string; permissionId: string }) =>
       removeRolePermission(roleId, permissionId),
     onSuccess: (_, variables) => {
-      // Invalidate role permissions queries to refetch
-      queryClient.invalidateQueries({ queryKey: ['role-permissions', variables.roleId] })
+      queryClient.invalidateQueries({ queryKey: roleKeys.permissions(variables.roleId) })
     },
+  })
+}
+
+/**
+ * Hook to fetch permissions assigned to a role
+ */
+export function useRolePermissions(
+  roleId: string,
+  params?: { page?: number; limit?: number; sort_by?: string; sort_order?: "asc" | "desc"; status?: string },
+) {
+  return useQuery({
+    queryKey: roleKeys.permissions(roleId),
+    queryFn: () => fetchRolePermissions(roleId, params),
+    enabled: !!roleId,
   })
 }
