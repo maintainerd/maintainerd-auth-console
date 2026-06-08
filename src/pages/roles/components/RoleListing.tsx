@@ -1,103 +1,30 @@
-import * as React from "react"
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { RoleToolbar } from "./RoleToolbar"
+import { useNavigate, useParams } from "react-router-dom"
+import type { SortingState } from "@tanstack/react-table"
+import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { roleColumns } from "./RoleColumns"
-import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
-import { useRoleQuery } from "../hooks/useRoleQuery"
+import { useRoles } from "@/hooks/useRoles"
+
+const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
+const SEARCH_FIELDS = ["name", "description"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "inactive"] },
+]
 
 export function RoleListing() {
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-
-	const columns = React.useMemo(() => roleColumns, [])
-
-  const {
-    roles,
-    rowCount,
-    isLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    sorting,
-    setSorting,
-    pagination,
-    setPagination,
-  } = useRoleQuery()
-
-  const table = useReactTable({
-    data: roles,
-    columns,
-    pageCount: Math.ceil(rowCount / pagination.pageSize),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    manualSorting: true, // Server-side sorting
-    manualPagination: true, // Server-side pagination
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-  })
-
-  // Get active filters for display
-  const activeFilters = React.useMemo(() => {
-    const filterLabels: string[] = []
-    if (filters.status.length > 0) {
-      filterLabels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    if (filters.isSystem !== "all") {
-      const typeLabel = filters.isSystem === "system" ? "System" : "Regular"
-      filterLabels.push(`System Type: ${typeLabel}`)
-    }
-    if (filters.isDefault !== "all") {
-      const typeLabel = filters.isDefault === "default" ? "Default" : "Custom"
-      filterLabels.push(`Default Type: ${typeLabel}`)
-    }
-    return filterLabels
-  }, [filters])
-
-  const clearAllFilters = React.useCallback(() => {
-    setFilters({
-      status: [],
-      isSystem: "all",
-      isDefault: "all"
-    })
-  }, [setFilters])
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
-    <div className="space-y-4">
-      <RoleToolbar
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        table={table}
-      />
-      <DataTableActiveFilters
-        activeFilters={activeFilters}
-        onClearAll={clearAllFilters}
-      />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-      />
-      <DataTablePagination table={table} />
-    </div>
+    <ResourceListing
+      columns={roleColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search roles by name or description..."
+      useData={useRoles}
+      filterGroups={FILTER_GROUPS}
+      onRowClick={(role) => navigate(`/${tenantId}/roles/${role.role_id}`)}
+      onCreate={() => navigate(`/${tenantId}/roles/create`)}
+      createLabel="New Role"
+    />
   )
 }

@@ -1,10 +1,11 @@
 import { useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -18,7 +19,6 @@ import { roleSchema, type RoleFormData } from "@/lib/validations"
 import { useRole, useCreateRole, useUpdateRole } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
 
-// Status options for the select field
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
@@ -27,41 +27,39 @@ const STATUS_OPTIONS: SelectOption[] = [
 export default function RoleAddOrUpdateForm() {
   const { tenantId, roleId } = useParams<{ tenantId: string; roleId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { showSuccess, showError } = useToast()
-  const isEditing = !!roleId
+
+  const isEditing = Boolean(roleId)
   const isCreating = !isEditing
 
+  // Honour where the user came from so the back button and post-submit
+  // navigation return there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/${tenantId}/roles`
+  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/roles` ? "Back to Roles" : "Back")
+
   // Fetch existing role if editing
-  const { data: roleData, isLoading: isFetchingRole } = useRole(roleId || '')
+  const { data: roleData, isLoading: isFetchingRole } = useRole(roleId || "")
   const createRoleMutation = useCreateRole()
   const updateRoleMutation = useUpdateRole()
 
-  // React Hook Form setup
   const {
     register,
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm<RoleFormData>({
     resolver: yupResolver(roleSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      status: "active",
-    },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    defaultValues: { name: "", description: "", status: "active" },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
   })
 
-  // Load existing role data if editing
   useEffect(() => {
     if (isEditing && roleData) {
-      reset({
-        name: roleData.name,
-        description: roleData.description,
-        status: roleData.status,
-      })
+      reset({ name: roleData.name, description: roleData.description, status: roleData.status })
     }
   }, [isEditing, roleData, reset])
 
@@ -70,25 +68,15 @@ export default function RoleAddOrUpdateForm() {
 
   const onSubmit = async (data: RoleFormData) => {
     try {
-      const requestData = {
-        name: data.name,
-        description: data.description,
-        status: data.status,
-      }
-
+      const requestData = { name: data.name, description: data.description, status: data.status }
       if (isCreating) {
         await createRoleMutation.mutateAsync(requestData)
         showSuccess("Role created successfully")
       } else {
-        await updateRoleMutation.mutateAsync({
-          roleId: roleId!,
-          data: requestData
-        })
+        await updateRoleMutation.mutateAsync({ roleId: roleId!, data: requestData })
         showSuccess("Role updated successfully")
       }
-
-      // Navigate back to roles list
-      navigate(`/${tenantId}/roles`)
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
@@ -97,35 +85,63 @@ export default function RoleAddOrUpdateForm() {
   const pageTitle = isCreating ? "Create Role" : `Edit ${existingRole?.name || "Role"}`
   const submitButtonText = isCreating ? "Create Role" : "Update Role"
 
-  // Show loading state while fetching role data
+  // Loading state while fetching the role to edit
   if (isEditing && isFetchingRole) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching role details
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Role"
+            description="Update role settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </DetailsContainer>
     )
   }
 
-  // Show error if role not found
+  // Not-found state
   if (isEditing && !isFetchingRole && !roleData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Role Not Found</h2>
-          <p className="text-muted-foreground mt-2">
-            The role you're looking for doesn't exist or has been removed.
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Role"
+            description="Update role settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Role not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The role you're looking for doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => navigate(backTo)}>
+                <ArrowLeft className="mr-2 size-4" />
+                {backLabel}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Button onClick={() => navigate(`/${tenantId}/roles`)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Roles
-        </Button>
-      </div>
+      </DetailsContainer>
     )
   }
 
@@ -133,8 +149,8 @@ export default function RoleAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={`/${tenantId}/roles`}
-          backLabel="Back to Roles"
+          backUrl={backTo}
+          backLabel={backLabel}
           title={pageTitle}
           description={
             isCreating
@@ -146,16 +162,16 @@ export default function RoleAddOrUpdateForm() {
           warningMessage="This is a system role. Some settings may be restricted to prevent system instability."
         />
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={roleId || 'create'}>
-          {/* Basic Information */}
-          <Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={roleId || "create"}>
+          <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                The role name, status, and description.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                {/* Name */}
                 <FormInputField
                   label="Name"
                   placeholder="e.g., admin, developer, viewer"
@@ -166,7 +182,6 @@ export default function RoleAddOrUpdateForm() {
                   {...register("name")}
                 />
 
-                {/* Status */}
                 <Controller
                   name="status"
                   control={control}
@@ -185,7 +200,6 @@ export default function RoleAddOrUpdateForm() {
                 />
               </div>
 
-              {/* Description */}
               <FormTextareaField
                 label="Description"
                 placeholder="Provide a detailed description of the role and its purpose"
@@ -198,12 +212,11 @@ export default function RoleAddOrUpdateForm() {
             </CardContent>
           </Card>
 
-          {/* Form Actions */}
           <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/${tenantId}/roles`)}
+              onClick={() => navigate(backTo)}
               disabled={isLoading}
             >
               Cancel

@@ -154,7 +154,7 @@ export function useServerDataTable<TRow, TParams = Record<string, unknown>>({
 
   // Mirror state to the URL so listings are shareable / bookmarkable.
   React.useEffect(() => {
-    const params = new URLSearchParams()
+    const params = new URLSearchParams(searchParams)
     if (search) params.set("search", search)
     for (const group of filterGroups) {
       const values = filters[group.key]
@@ -167,7 +167,7 @@ export function useServerDataTable<TRow, TParams = Record<string, unknown>>({
     params.set("page", String(pagination.pageIndex + 1))
     params.set("limit", String(pagination.pageSize))
     setSearchParams(params, { replace: true })
-  }, [search, filters, sorting, pagination, filterGroups, setSearchParams])
+  }, [search, filters, sorting, pagination, filterGroups, searchParams, setSearchParams])
 
   const activeFilters = React.useMemo(() => {
     const chips: string[] = []

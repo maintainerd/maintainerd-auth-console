@@ -1,43 +1,26 @@
-"use client"
-
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Shield } from "lucide-react"
+import { Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { RoleActions } from "./RoleActions"
+import { DataTableColumnHeader } from "@/components/data-table"
 import { SystemBadge } from "@/components/badges"
 import type { Role } from "@/services/api/roles/types"
 
 export const roleColumns: ColumnDef<Role>[] = [
   {
+    id: "Role",
     accessorKey: "name",
-    id: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
-        >
-          Role
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
     cell: ({ row }) => {
       const role = row.original
       return (
         <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <Shield className="size-4 text-muted-foreground shrink-0" />
             <span className="font-medium">{role.name}</span>
             <SystemBadge isSystem={role.is_system} />
-            {role.is_default && (
-              <Badge variant="outline" className="text-xs">
-                Default
-              </Badge>
-            )}
+            {role.is_default && <Badge variant="outline" className="text-xs">Default</Badge>}
           </div>
           <span className="text-sm text-muted-foreground truncate">{role.description}</span>
         </div>
@@ -45,44 +28,25 @@ export const roleColumns: ColumnDef<Role>[] = [
     },
   },
   {
+    id: "Status",
     accessorKey: "status",
-    id: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const role = row.original
+      const isActive = role.status === "active"
       return (
         <div className="px-3 py-1">
-          <Badge variant={role.status === "active" ? "secondary" : "outline"} className="capitalize">
-            {role.status}
+          <Badge variant="outline" className={isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200"}>
+            <span className="capitalize">{role.status}</span>
           </Badge>
         </div>
       )
     },
   },
   {
+    id: "Created",
     accessorKey: "created_at",
-    id: "created",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const role = row.original
       return (
@@ -99,10 +63,13 @@ export const roleColumns: ColumnDef<Role>[] = [
   },
   {
     id: "actions",
-    enableHiding: false,
     cell: ({ row }) => {
       const role = row.original
-      return <RoleActions role={role} />
+      return (
+        <div className="px-3 py-1">
+          <RoleActions role={role} />
+        </div>
+      )
     },
   },
 ]
