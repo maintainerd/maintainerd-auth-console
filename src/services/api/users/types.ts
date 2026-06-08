@@ -24,20 +24,24 @@ export type UserStatus = Extract<Status, 'active' | 'inactive' | 'pending' | 'su
 export type UserProfile = {
   profile_id: string
   first_name: string
-  last_name: string
-  display_name: string
-  bio: string
-  birthdate: string
-  gender: string
-  phone: string
-  email: string
-  address: string
-  city: string
-  country: string
-  timezone: string
-  language: string
+  // The backend returns these as optional (omitempty) top-level fields.
+  middle_name?: string
+  last_name?: string
+  suffix?: string
+  display_name?: string
+  bio?: string
+  birthdate?: string
+  gender?: string
+  phone?: string
+  email?: string
+  address?: string
+  city?: string
+  country?: string
+  timezone?: string
+  language?: string
+  profile_url?: string
   is_default: boolean
-  metadata: Record<string, unknown>
+  metadata: Record<string, unknown> | null
   created_at: string
   updated_at: string
 }
@@ -60,12 +64,13 @@ export type User = {
   tenant?: {
     tenant_id: string
     name: string
+    display_name: string
     description: string
     identifier: string
     status: string
     is_public: boolean
-    is_default: boolean
     is_system: boolean
+    metadata: Record<string, unknown> | null
     created_at: string
     updated_at: string
   }
@@ -95,12 +100,13 @@ export type UserIdentity = {
   provider: string
   sub: string
   metadata: Record<string, unknown> | null
-  client: {
+  // The backend omits `client` when the identity has no linked client.
+  client?: {
     client_id: string
     name: string
     display_name: string
     client_type: string
-    domain: string
+    domain?: string
     status: string
     is_default: boolean
     is_system: boolean
@@ -143,13 +149,11 @@ export interface UserListResponse {
  */
 export interface CreateUserRequest {
   username: string
-  fullname: string
   email: string
   phone?: string
   password: string
   status: UserStatus
   metadata?: UserMetadata
-  tenant_id?: string
 }
 
 /**
@@ -157,7 +161,6 @@ export interface CreateUserRequest {
  */
 export interface UpdateUserRequest {
   username?: string
-  fullname?: string
   email?: string
   phone?: string
   status?: UserStatus

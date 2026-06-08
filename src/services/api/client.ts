@@ -54,8 +54,11 @@ function refreshSession(): Promise<void> {
     // withCredentials sends the httpOnly refresh-token cookie; the
     // `X-Token-Delivery: cookie` header tells the backend to rotate and
     // Set-Cookie the new access/refresh tokens (cookie-based session).
+    // `/refresh-token` is NOT in the middleware's form-encoded exempt list, so
+    // it requires `Content-Type: application/json`. Send `{}` (not null) so axios
+    // keeps that header — the actual refresh token rides in the httpOnly cookie.
     refreshPromise = axiosInstance
-      .post(API_ENDPOINTS.AUTH.REFRESH, null, {
+      .post(API_ENDPOINTS.AUTH.REFRESH, {}, {
         headers: { ...TOKEN_DELIVERY_HEADER },
       })
       .then(() => undefined)
@@ -146,17 +149,25 @@ export async function get<T>(endpoint: string, config?: AxiosRequestConfig): Pro
 
 /**
  * HTTP POST request
+ *
+ * Defaults the body to `{}` so axios keeps the `Content-Type: application/json`
+ * header (axios strips it when there is no body). The backend middleware
+ * requires that header on every POST/PUT/PATCH, so bodyless admin actions still
+ * send a truthful JSON content type. Callers passing form data (URLSearchParams)
+ * are unaffected — their body is already defined.
  */
 export async function post<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-  const response = await axiosInstance.post<T>(endpoint, data, config)
+  const response = await axiosInstance.post<T>(endpoint, data ?? {}, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }
 
 /**
  * HTTP PUT request
+ *
+ * Defaults the body to `{}` — see `post` for why (Content-Type compliance).
  */
 export async function put<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-  const response = await axiosInstance.put<T>(endpoint, data, config)
+  const response = await axiosInstance.put<T>(endpoint, data ?? {}, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }
 
@@ -170,9 +181,13 @@ export async function deleteRequest<T>(endpoint: string, config?: AxiosRequestCo
 
 /**
  * HTTP PATCH request
+ *
+ * Defaults the body to `{}` — see `post` for why (Content-Type compliance).
+ * This covers the bodyless admin actions (verify-email / verify-phone /
+ * complete-account) without each call site needing to pass `{}`.
  */
 export async function patch<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-  const response = await axiosInstance.patch<T>(endpoint, data, config)
+  const response = await axiosInstance.patch<T>(endpoint, data ?? {}, config)
   return response.data || ({ success: true, message: 'Request completed successfully' } as T)
 }
 

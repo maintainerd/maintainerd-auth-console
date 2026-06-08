@@ -1,6 +1,7 @@
 /**
  * User Form Validation Schema
- * Yup validation schema for user-related forms
+ * Yup validation schema for user-related forms. Kept in sync with the backend
+ * `UserCreateRequestDTO` / `UserUpdateRequestDTO` validation (internal/user).
  */
 
 import * as yup from 'yup'
@@ -11,16 +12,11 @@ export const userSchema = yup.object({
     .string()
     .required('Username is required')
     .min(3, 'Username must be at least 3 characters')
-    .max(100, 'Username must not exceed 100 characters')
+    .max(50, 'Username must not exceed 50 characters')
     .matches(
       /^[a-zA-Z0-9._@-]+$/,
       'Username must contain only letters, numbers, dots, underscores, @ and hyphens'
     ),
-  fullname: yup
-    .string()
-    .required('Full name is required')
-    .min(2, 'Full name must be at least 2 characters')
-    .max(150, 'Full name must not exceed 150 characters'),
   email: yup
     .string()
     .required('Email is required')
@@ -28,14 +24,10 @@ export const userSchema = yup.object({
     .max(255, 'Email must not exceed 255 characters'),
   phone: yup
     .string()
+    .transform((value) => (value === '' ? undefined : value))
     .optional()
-    .matches(
-      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
-      {
-        message: 'Invalid phone number format',
-        excludeEmptyString: true
-      }
-    ),
+    .min(10, 'Phone must be at least 10 characters')
+    .max(20, 'Phone must not exceed 20 characters'),
   password: yup
     .string()
     .when('$isCreating', {
@@ -57,7 +49,6 @@ export const userSchema = yup.object({
 
 export type UserFormData = {
   username: string
-  fullname: string
   email: string
   phone: string | undefined
   password: string | undefined
