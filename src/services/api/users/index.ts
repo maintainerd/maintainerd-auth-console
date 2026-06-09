@@ -31,6 +31,7 @@ import type {
   UserActivityQueryParams,
   UserActivityResponse,
   UserSession,
+  UserMFAResponse,
 } from './types'
 
 const userApi = createResourceApi<User, CreateUserRequest, UpdateUserRequest, UserListResponse>(
@@ -131,3 +132,7 @@ export const revokeUserSession = (userId: string, sessionId: string): Promise<vo
   deleteRequest<ApiResponse<void>>(`${base}/${userId}/sessions/${sessionId}`).then((r) =>
     assertSuccess(r, 'revoke session'),
   )
+
+// MFA: the user's MFA configuration (TOTP, WebAuthn keys, backup codes).
+export const fetchUserMFA = (userId: string): Promise<UserMFAResponse> =>
+  get<ApiResponse<UserMFAResponse>>(`${base}/${userId}/mfa`).then((r) => unwrap(r, 'fetch user MFA'))

@@ -84,7 +84,7 @@ describe("RolePermissionsTab", () => {
   })
 
   it("opens the add permissions dialog", async () => {
-    const { container } = renderWithProviders(<RolePermissionsTab roleId="r1" />)
+    renderWithProviders(<RolePermissionsTab roleId="r1" />)
     fireEvent.click(screen.getByText("Add Permission"))
     await waitFor(() => expect(screen.getByTestId("add-permissions-dialog")).toBeInTheDocument())
   })

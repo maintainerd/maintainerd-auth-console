@@ -4,7 +4,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { renderWithProviders } from "@/test/utils"
 import { roleColumns } from "./RoleColumns"
 import { DataTable } from "@/components/data-table"
-import type { Role, RoleStatus } from "@/services/api/roles/types"
+import type { Role } from "@/services/api/roles/types"
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom")
@@ -42,8 +42,6 @@ function Harness({ data }: { data: Role[] }) {
   })
   return <DataTable table={table} columnCount={roleColumns.length} />
 }
-
-const statuses: RoleStatus[] = ["active", "inactive"]
 
 describe("roleColumns", () => {
   it("renders all cell branches across multiple roles", () => {

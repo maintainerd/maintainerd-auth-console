@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { Shield, IdCard, KeyRound, Braces, Monitor, Activity } from "lucide-react"
+import { Shield, IdCard, KeyRound, Braces, Monitor, Activity, Smartphone } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useUser } from "@/hooks/useUsers"
@@ -11,12 +11,14 @@ import {
   UserProfiles,
   UserActivity,
   UserSessions,
+  UserMFA,
 } from "./components"
 
 const TABS = [
   { value: "profiles", label: "Profiles", icon: IdCard },
   { value: "roles", label: "Roles", icon: Shield },
   { value: "identities", label: "Identities", icon: KeyRound },
+  { value: "mfa", label: "MFA", icon: Smartphone },
   { value: "sessions", label: "Sessions", icon: Monitor },
   { value: "activity", label: "Activity", icon: Activity },
   { value: "metadata", label: "Metadata", icon: Braces },
@@ -61,6 +63,9 @@ export default function UserDetailsPage() {
         </TabsContent>
         <TabsContent value="identities" className="mt-4">
           <UserIdentities userId={userId!} />
+        </TabsContent>
+        <TabsContent value="mfa" className="mt-4">
+          <UserMFA userId={userId!} />
         </TabsContent>
         <TabsContent value="sessions" className="mt-4">
           <UserSessions userId={userId!} />

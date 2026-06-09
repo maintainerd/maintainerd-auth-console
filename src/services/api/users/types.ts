@@ -343,3 +343,21 @@ export interface UserSession {
   absolute_expires_at?: string | null
   created_at: string
 }
+
+/** MFA configuration for a user (admin view). */
+export interface UserMFAResponse {
+  is_totp_enabled: boolean
+  is_webauthn_enabled: boolean
+  is_sms_enabled: boolean
+  backup_codes_count: number
+  webauthn_keys?: UserMFAWebAuthnKey[]
+  mfa_enabled_at?: string | null
+}
+
+export interface UserMFAWebAuthnKey {
+  credential_uuid: string
+  name: string
+  transport?: string
+  last_used_at?: string | null
+  created_at: string
+}

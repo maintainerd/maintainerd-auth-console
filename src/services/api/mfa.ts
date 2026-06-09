@@ -1,0 +1,180 @@
+/**
+ * MFA API Service — self-service enrollment endpoints
+ */
+
+import { get, post, deleteRequest } from "./client"
+import { unwrap, assertSuccess } from "./_lib/unwrap"
+import type { ApiResponse } from "./types"
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+export interface MFAStatusResponse {
+  is_totp_enabled: boolean
+  is_webauthn_enabled: boolean
+  is_sms_available: boolean
+  backup_codes_count: number
+  webauthn_keys: MFAWebAuthnKey[]
+  mfa_enabled_at?: string | null
+}
+
+export interface MFAWebAuthnKey {
+  credential_uuid: string
+  name: string
+  transport: string
+  last_used_at?: string | null
+  created_at: string
+}
+
+export interface WebAuthnCredentialDownload {
+  credential_uuid: string
+  name: string
+  credential_key_id: string
+  public_key_base64: string
+  aaguid?: string
+  transport?: string
+  is_backup_eligible: boolean
+  is_backup_state: boolean
+  created_at: string
+}
+
+export interface TOTPEnrollResponse {
+  secret: string
+  qr_code_url: string
+}
+
+export interface TOTPVerifyRequest {
+  code: string
+}
+
+export interface BackupCodesResponse {
+  codes: string[]
+}
+
+export interface WebAuthnCredentialSummary {
+  credential_uuid: string
+  name: string
+  transport: string
+  created_at: string
+}
+
+// ── API ──────────────────────────────────────────────────────────────────────
+
+const BASE = "/mfa"
+
+export async function fetchMFAStatus(): Promise<MFAStatusResponse> {
+  const r: ApiResponse<MFAStatusResponse> = await get<ApiResponse<MFAStatusResponse>>(`${BASE}/status`)
+  return unwrap(r, "fetch MFA status")
+}
+
+export async function beginTOTPEnrollment(): Promise<TOTPEnrollResponse> {
+  const r: ApiResponse<TOTPEnrollResponse> = await post<ApiResponse<TOTPEnrollResponse>>(`${BASE}/totp/enroll`)
+  return unwrap(r, "begin TOTP enrollment")
+}
+
+export async function finishTOTPEnrollment(data: TOTPVerifyRequest): Promise<BackupCodesResponse> {
+  const r: ApiResponse<BackupCodesResponse> = await post<ApiResponse<BackupCodesResponse>>(`${BASE}/totp/verify`, data)
+  return unwrap(r, "finish TOTP enrollment")
+}
+
+export async function disableTOTP(): Promise<void> {
+  const r: ApiResponse<void> = await deleteRequest<ApiResponse<void>>(`${BASE}/totp`)
+  assertSuccess(r, "disable TOTP")
+}
+
+export async function getBackupCodesCount(): Promise<{ remaining: number }> {
+  const r: ApiResponse<{ remaining: number }> = await get<ApiResponse<{ remaining: number }>>(`${BASE}/backup-codes/count`)
+  return unwrap(r, "get backup codes count")
+}
+
+export async function regenerateBackupCodes(): Promise<BackupCodesResponse> {
+  const r: ApiResponse<BackupCodesResponse> = await post<ApiResponse<BackupCodesResponse>>(`${BASE}/backup-codes/regenerate`)
+  return unwrap(r, "regenerate backup codes")
+}
+
+export interface WebAuthnCreationOptions {
+  publicKey: {
+    rp: { name: string; id: string }
+    user: { name: string; displayName: string; id: string }
+    challenge: string
+    pubKeyCredParams: Array<{ type: string; alg: number }>
+    timeout: number
+    authenticatorSelection?: Record<string, unknown>
+  }
+}
+
+export async function beginWebAuthnRegistration(): Promise<WebAuthnCreationOptions> {
+  const r: ApiResponse<WebAuthnCreationOptions> = await post<ApiResponse<WebAuthnCreationOptions>>(`${BASE}/webauthn/register/begin`)
+  return unwrap(r, "begin WebAuthn registration")
+}
+
+export async function finishWebAuthnRegistration(
+  name: string,
+  credential: unknown,
+): Promise<WebAuthnCredentialSummary> {
+  const r: ApiResponse<WebAuthnCredentialSummary> = await post<ApiResponse<WebAuthnCredentialSummary>>(
+    `${BASE}/webauthn/register/finish?name=${encodeURIComponent(name)}`,
+    credential,
+  )
+  return unwrap(r, "finish WebAuthn registration")
+}
+
+export async function deleteWebAuthnCredential(credentialUuid: string): Promise<void> {
+  const r: ApiResponse<void> = await deleteRequest<ApiResponse<void>>(`${BASE}/webauthn/${credentialUuid}`)
+  assertSuccess(r, "delete WebAuthn credential")
+}
+
+export async function downloadWebAuthnCredential(credentialUuid: string): Promise<WebAuthnCredentialDownload> {
+  const r: ApiResponse<WebAuthnCredentialDownload> = await get<ApiResponse<WebAuthnCredentialDownload>>(`${BASE}/webauthn/${credentialUuid}/download`)
+  return unwrap(r, "download WebAuthn credential")
+}
+
+// ── SMS MFA ──────────────────────────────────────────────────────────────────
+
+export async function beginSMSEnrollment(phone: string): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/sms/enroll`, { phone })
+  assertSuccess(r, "begin SMS enrollment")
+}
+
+export async function verifySMSEnrollment(phone: string, code: string): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/sms/verify`, { phone, code })
+  assertSuccess(r, "verify SMS enrollment")
+}
+
+export async function disableSMS(): Promise<void> {
+  const r = await deleteRequest<ApiResponse<void>>(`${BASE}/sms`)
+  assertSuccess(r, "disable SMS")
+}
+
+// ── Step-up authentication ─────────────────────────────────────────────────────
+// Used to elevate a session (acr=2) before a sensitive action such as deleting
+// the account or revoking all sessions. The verified token is then passed as a
+// Bearer header on the gated request.
+
+export interface StepUpChallenge {
+  challenge_token: string
+  allowed_methods: string[]
+}
+
+export interface StepUpVerifyResult {
+  access_token: string
+  expires_in: number
+}
+
+export async function issueStepUpChallenge(): Promise<StepUpChallenge> {
+  const r = await post<ApiResponse<StepUpChallenge>>(`${BASE}/step-up/challenge`)
+  return unwrap(r, "issue step-up challenge")
+}
+
+export async function sendStepUpSMS(): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/step-up/send-sms`)
+  assertSuccess(r, "send step-up SMS code")
+}
+
+export async function verifyStepUp(challengeToken: string, method: string, code: string): Promise<StepUpVerifyResult> {
+  const r = await post<ApiResponse<StepUpVerifyResult>>(`${BASE}/step-up/verify`, {
+    challenge_token: challengeToken,
+    method,
+    code,
+  })
+  return unwrap(r, "verify step-up authentication")
+}
