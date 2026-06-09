@@ -20,6 +20,9 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import { fetchMFAStatus } from "@/services/api/mfa"
+import { DetailsContainer } from "@/components/container"
 
 // Placeholder metrics — wire to live counts (e.g. /users, /clients, /services,
 // /identity_providers, /auth-events/count) when those pages are built.
@@ -80,6 +83,39 @@ function NavRow({
   )
 }
 
+// Prompts the user to enable a second factor. Shown on the dashboard until at
+// least one MFA method is active, so securing the account reads as a required
+// onboarding step.
+function MfaSetupBanner({ onSetup }: { onSetup: () => void }) {
+  const { data, isLoading, isError } = useQuery({ queryKey: ["mfa", "status"], queryFn: fetchMFAStatus, retry: false })
+  if (isLoading || isError || !data) return null
+
+  const active = (data.is_totp_enabled ? 1 : 0) + (data.is_sms_available ? 1 : 0) + ((data.webauthn_keys?.length ?? 0) > 0 ? 1 : 0)
+  if (active > 0) return null
+
+  return (
+    <Card className="border-amber-500/40 bg-amber-500/[0.04] shadow-xs">
+      <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+            <ShieldAlert className="size-5" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="font-medium">Secure your account with two-factor authentication</p>
+            <p className="text-sm text-muted-foreground">
+              Add a second step at sign-in to protect your account. This is strongly recommended for all administrators.
+            </p>
+          </div>
+        </div>
+        <Button onClick={onSetup} className="shrink-0 self-start sm:self-auto">
+          <ShieldCheck className="mr-2 size-4" />
+          Set up MFA
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 const DashboardPage = () => {
   const navigate = useNavigate()
   const { tenantId } = useParams()
@@ -87,7 +123,8 @@ const DashboardPage = () => {
   const to = (path: string) => navigate(`/${tenantId}${path}`)
 
   return (
-    <div className="flex flex-col gap-6">
+    <DetailsContainer>
+      <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Get Started</h1>
@@ -95,6 +132,9 @@ const DashboardPage = () => {
           Welcome to your M9d-Auth dashboard. Manage your authentication services, users, and security settings.
         </p>
       </div>
+
+      {/* MFA setup prompt — shown until the user enables a second factor */}
+      <MfaSetupBanner onSetup={() => to("/account/mfa?from=dashboard")} />
 
       {/* KPI stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -223,7 +263,8 @@ const DashboardPage = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DetailsContainer>
   )
 }
 

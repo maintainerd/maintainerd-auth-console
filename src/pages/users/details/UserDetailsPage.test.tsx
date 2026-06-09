@@ -27,6 +27,7 @@ vi.mock("./components", () => ({
   UserIdentities: () => <div data-testid="tab-identities">identities</div>,
   UserSessions: () => <div data-testid="tab-sessions">sessions</div>,
   UserActivity: () => <div data-testid="tab-activity">activity</div>,
+  UserMFA: () => <div data-testid="tab-mfa">mfa</div>,
   UserMetadata: () => <div data-testid="tab-metadata">metadata</div>,
 }))
 

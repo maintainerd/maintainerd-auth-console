@@ -92,7 +92,7 @@ describe("RoleUsers", () => {
   })
 
   it("navigates to user details on card click", async () => {
-    const { container } = renderWithProviders(<RoleUsers roleId="r1" />)
+    renderWithProviders(<RoleUsers roleId="r1" />)
     setData({ data: { rows: [makeUser()], total: 1 } })
     waitFor(() => expect(screen.getByText("John Doe")).toBeInTheDocument())
   })

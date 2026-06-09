@@ -69,6 +69,14 @@ import SmsTemplatesPage from './pages/branding/sms-templates'
 import SmsTemplateDetailsPage from './pages/branding/sms-templates/details'
 import SmsTemplateForm from './pages/branding/sms-templates/form'
 import GeneralSettingsPage from './pages/settings'
+import EmailConfigPage from './pages/settings/email-config/EmailConfigPage'
+import SMSConfigPage from './pages/settings/sms-config/SMSConfigPage'
+import MFAPage, { MFAIndex } from './pages/account/MFAPage'
+import TOTPSetupPage from './pages/account/TOTPSetupPage'
+import PasskeySetupPage from './pages/account/PasskeySetupPage'
+import SMSSetupPage from './pages/account/SMSSetupPage'
+import ProfilePage from './pages/account/ProfilePage'
+import SettingsPage from './pages/account/SettingsPage'
 
 function App() {
   const location = useLocation()
@@ -134,12 +142,12 @@ function App() {
         <Route path="/setup/profile" element={<SetupProfilePage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
-          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="monitoring" element={<AnalyticsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="security/settings" element={<SecuritySettingsPage />} />
           <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
           <Route path="security/sessions" element={<SessionManagementPage />} />
@@ -203,6 +211,16 @@ function App() {
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
           <Route path="settings" element={<GeneralSettingsPage />} />
+          <Route path="messaging/email" element={<EmailConfigPage />} />
+          <Route path="messaging/sms" element={<SMSConfigPage />} />
+          <Route path="account/profile" element={<ProfilePage />} />
+          <Route path="account/settings" element={<SettingsPage />} />
+          <Route path="account/mfa" element={<MFAPage />}>
+            <Route index element={<MFAIndex />} />
+            <Route path="totp" element={<TOTPSetupPage />} />
+            <Route path="passkeys" element={<PasskeySetupPage />} />
+            <Route path="sms" element={<SMSSetupPage />} />
+          </Route>
         </Route>
       </Routes>
       <ToastContainer

@@ -26,7 +26,8 @@ import {
   resetUserMfa,
   fetchUserActivity,
   fetchUserSessions,
-  revokeUserSession
+  revokeUserSession,
+  fetchUserMFA,
 } from '@/services/api/users'
 import type {
   UserQueryParams,
@@ -59,6 +60,7 @@ export const userKeys = {
   activity: (id: string) => [...userKeys.all, 'activity', id] as const,
   activityList: (id: string, params?: UserActivityQueryParams) => [...userKeys.activity(id), params] as const,
   sessions: (id: string) => [...userKeys.all, 'sessions', id] as const,
+  mfa: (id: string) => [...userKeys.all, 'mfa', id] as const,
 }
 
 /**
@@ -368,6 +370,17 @@ export function useRevokeUserSession() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: userKeys.sessions(variables.userId) })
     },
+  })
+}
+
+/**
+ * Hook to fetch a user's MFA configuration
+ */
+export function useUserMFA(userId: string) {
+  return useQuery({
+    queryKey: userKeys.mfa(userId),
+    queryFn: () => fetchUserMFA(userId),
+    enabled: !!userId,
   })
 }
 
