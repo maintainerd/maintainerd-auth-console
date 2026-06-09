@@ -124,6 +124,13 @@ export const fetchUserActivity = (userId: string, params?: UserActivityQueryPara
     `${API_ENDPOINTS.AUTH_EVENTS}${buildQuery({ ...params, user: userId } as Record<string, unknown>)}`,
   ).then((r) => unwrap(r, 'fetch user activity'))
 
+// Recent activity: the latest auth-events across the tenant (no actor filter),
+// backend-scoped to the caller's session. Powers the dashboard activity feed.
+export const fetchRecentActivity = (params?: UserActivityQueryParams): Promise<UserActivityResponse> =>
+  get<ApiResponse<UserActivityResponse>>(
+    `${API_ENDPOINTS.AUTH_EVENTS}${buildQuery({ ...params } as Record<string, unknown>)}`,
+  ).then((r) => unwrap(r, 'fetch recent activity'))
+
 // Sessions: active sessions for this user, with admin revoke.
 export const fetchUserSessions = (userId: string): Promise<UserSession[]> =>
   get<ApiResponse<UserSession[]>>(`${base}/${userId}/sessions`).then((r) => unwrap(r, 'fetch user sessions'))

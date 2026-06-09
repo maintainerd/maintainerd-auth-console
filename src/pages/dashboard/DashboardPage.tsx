@@ -23,6 +23,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { fetchMFAStatus } from "@/services/api/mfa"
 import { DetailsContainer } from "@/components/container"
+import { RecentActivityCard } from "./components/RecentActivityCard"
 
 // Placeholder metrics — wire to live counts (e.g. /users, /clients, /services,
 // /identity_providers, /auth-events/count) when those pages are built.
@@ -83,15 +84,34 @@ function NavRow({
   )
 }
 
-// Prompts the user to enable a second factor. Shown on the dashboard until at
-// least one MFA method is active, so securing the account reads as a required
-// onboarding step.
-function MfaSetupBanner({ onSetup }: { onSetup: () => void }) {
+// Reflects the account's MFA posture on the dashboard. When no second factor is
+// active it shows an action-oriented amber prompt (securing the account reads as
+// a required onboarding step); once a factor is enrolled it collapses to a quiet
+// green confirmation rather than a loud banner, so the "secure" state stays calm
+// and the prompt only shouts when action is actually needed.
+function MfaStatusBanner({ onSetup }: { onSetup: () => void }) {
   const { data, isLoading, isError } = useQuery({ queryKey: ["mfa", "status"], queryFn: fetchMFAStatus, retry: false })
   if (isLoading || isError || !data) return null
 
   const active = (data.is_totp_enabled ? 1 : 0) + (data.is_sms_available ? 1 : 0) + ((data.webauthn_keys?.length ?? 0) > 0 ? 1 : 0)
-  if (active > 0) return null
+
+  if (active > 0) {
+    return (
+      <Card className="border-emerald-500/30 bg-emerald-500/[0.04] py-0 shadow-xs">
+        <CardContent className="flex items-center gap-3 p-3.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+            <ShieldCheck className="size-4" />
+          </div>
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-sm font-medium">Two-factor authentication is enabled</p>
+            <p className="text-xs text-muted-foreground">
+              Your account is protected with a second factor at sign-in.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="border-amber-500/40 bg-amber-500/[0.04] shadow-xs">
@@ -133,8 +153,8 @@ const DashboardPage = () => {
         </p>
       </div>
 
-      {/* MFA setup prompt — shown until the user enables a second factor */}
-      <MfaSetupBanner onSetup={() => to("/account/mfa?from=dashboard")} />
+      {/* MFA status — amber prompt until a factor is enrolled, then a quiet green confirmation */}
+      <MfaStatusBanner onSetup={() => to("/account/mfa?from=dashboard")} />
 
       {/* KPI stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -263,6 +283,9 @@ const DashboardPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Recent activity — latest tenant auth-events; supporting context, kept below the setup actions */}
+      <RecentActivityCard onViewAll={() => to("/logs")} />
       </div>
     </DetailsContainer>
   )
