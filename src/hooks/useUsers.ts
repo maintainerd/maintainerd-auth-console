@@ -25,6 +25,7 @@ import {
   completeUserAccount,
   resetUserMfa,
   fetchUserActivity,
+  fetchRecentActivity,
   fetchUserSessions,
   revokeUserSession,
   fetchUserMFA,
@@ -344,6 +345,17 @@ export function useUserActivity(userId: string, params?: UserActivityQueryParams
     queryKey: userKeys.activityList(userId, params),
     queryFn: () => fetchUserActivity(userId, params),
     enabled: !!userId,
+  })
+}
+
+/**
+ * Hook to fetch recent tenant-wide activity (auth events) for the dashboard feed.
+ * Not scoped to a single actor — the backend scopes results to the caller's session.
+ */
+export function useRecentActivity(params?: UserActivityQueryParams) {
+  return useQuery({
+    queryKey: ['auth-events', 'recent', params] as const,
+    queryFn: () => fetchRecentActivity(params),
   })
 }
 
