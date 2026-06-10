@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/useToast'
 import type { ProfileEntity } from '@/services/api/auth/types'
 import {
   loginAsync,
+  completeMFALoginAsync,
   registerAsync,
   logoutAsync,
   validateAuthAsync,
@@ -29,13 +30,35 @@ export function useAuth() {
   const login = useCallback(async (email: string, password: string) => {
     const result = await dispatch(loginAsync({ username: email, password })).unwrap()
 
-    // Check if profile exists
-    const userProfile = result.data
-    if (!userProfile) {
-      return { requiresProfileSetup: true }
+    // MFA enrolled: a second factor is required before the session is issued.
+    if (result.mfaRequired) {
+      return {
+        requiresProfileSetup: false,
+        mfaRequired: true,
+        challengeToken: result.mfaChallengeToken ?? '',
+        allowedMethods: result.mfaAllowedMethods ?? [],
+      }
     }
 
-    return { requiresProfileSetup: false }
+    // Check if profile exists
+    const userProfile = result.data
+    return { requiresProfileSetup: !userProfile, mfaRequired: false }
+  }, [dispatch])
+
+  // completeMFALogin finishes the login MFA second step (acr=2 session) and
+  // returns whether the user still needs to set up a profile.
+  const completeMFALogin = useCallback(async (
+    challengeToken: string,
+    method: string,
+    proof: { code?: string; assertion?: unknown },
+  ) => {
+    const result = await dispatch(completeMFALoginAsync({
+      mfa_challenge_token: challengeToken,
+      method,
+      code: proof.code,
+      assertion: proof.assertion,
+    })).unwrap()
+    return { requiresProfileSetup: !result.data }
   }, [dispatch])
 
   const register = useCallback(async (
@@ -129,6 +152,7 @@ export function useAuth() {
     error,
     // Actions
     login,
+    completeMFALogin,
     register,
     logout,
     checkAuth,

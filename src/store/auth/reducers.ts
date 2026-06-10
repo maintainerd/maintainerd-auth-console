@@ -6,4 +6,4 @@
 export { default as authReducer } from './slice'
 export { clearError, setProfile, clearAuth } from './slice'
 export { loginAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync } from './actions'
-export type { AuthState, LoginAsyncResponse } from './types'
+export type { AuthState } from './types'

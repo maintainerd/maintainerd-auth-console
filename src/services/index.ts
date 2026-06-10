@@ -59,6 +59,9 @@ export {
 export {
   authService,
   login,
+  verifyMFALogin,
+  sendMFALoginSMS,
+  beginMFALoginWebAuthn,
   register,
   logout,
   fetchProfile,

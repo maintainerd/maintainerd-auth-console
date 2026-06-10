@@ -5,6 +5,7 @@
 
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 import { API_CONFIG, API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from './config'
+import { requestStepUp } from './stepUp'
 import './debug' // Import debug utilities in development
 
 // Custom error class
@@ -69,7 +70,7 @@ function refreshSession(): Promise<void> {
   return refreshPromise
 }
 
-type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean }
+type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean; _stepUpRetry?: boolean }
 
 // Response interceptor for error handling
 axiosInstance.interceptors.response.use(
@@ -91,12 +92,31 @@ axiosInstance.interceptors.response.use(
       }
     }
 
+    // Step-up elevation. Sensitive actions (assign role, delete user, revoke
+    // sessions, admin MFA reset, …) require an acr=2 token. When the backend
+    // signals `step_up_required`, prompt for a second factor once, then retry
+    // the original request with the elevated Bearer token. The ceremony is
+    // single-flighted in requestStepUp(), so concurrent gated calls share it.
+    const stepUpCode = (error.response?.data as { code?: string } | undefined)?.code
+    if (error.response?.status === 403 && stepUpCode === 'step_up_required' && original && !original._stepUpRetry) {
+      original._stepUpRetry = true
+      try {
+        const elevatedToken = await requestStepUp()
+        original.headers = original.headers ?? {}
+        original.headers.Authorization = `Bearer ${elevatedToken}`
+        return axiosInstance(original)
+      } catch {
+        // User cancelled or step-up unavailable — fall through to error handling.
+      }
+    }
+
     if (error.response) {
       // Server responded with error status
       const data = error.response.data as {
         error?: string
         details?: string | object
         success?: boolean
+        code?: string
       } | undefined
       const errorMessage = data?.error || `HTTP ${error.response.status}: ${error.response.statusText}`
       const errorDetails = data?.details || undefined
@@ -104,6 +124,7 @@ axiosInstance.interceptors.response.use(
       const apiError = new ApiError({
         message: errorMessage,
         status: error.response.status,
+        code: data?.code,
       })
 
       // Attach the original response data for more detailed error handling

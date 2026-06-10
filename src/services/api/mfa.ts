@@ -5,6 +5,7 @@
 import { get, post, deleteRequest } from "./client"
 import { unwrap, assertSuccess } from "./_lib/unwrap"
 import type { ApiResponse } from "./types"
+import type { WebAuthnAssertionOptions } from "@/lib/webauthn"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,6 +119,14 @@ export async function finishWebAuthnRegistration(
   return unwrap(r, "finish WebAuthn registration")
 }
 
+// Starts a passkey assertion ceremony (step-up). The returned challenge is
+// consumed by navigator.credentials.get; the assertion is then sent to
+// /step-up/verify. The matching server-side session is keyed to the user.
+export async function beginWebAuthnAuthentication(): Promise<WebAuthnAssertionOptions> {
+  const r: ApiResponse<WebAuthnAssertionOptions> = await post<ApiResponse<WebAuthnAssertionOptions>>(`${BASE}/webauthn/auth/begin`)
+  return unwrap(r, "begin WebAuthn authentication")
+}
+
 export async function deleteWebAuthnCredential(credentialUuid: string): Promise<void> {
   const r: ApiResponse<void> = await deleteRequest<ApiResponse<void>>(`${BASE}/webauthn/${credentialUuid}`)
   assertSuccess(r, "delete WebAuthn credential")
@@ -170,11 +179,23 @@ export async function sendStepUpSMS(): Promise<void> {
   assertSuccess(r, "send step-up SMS code")
 }
 
-export async function verifyStepUp(challengeToken: string, method: string, code: string): Promise<StepUpVerifyResult> {
+// Proof for a step-up verification: a typed code (totp/sms/backup_code) or a
+// WebAuthn assertion (passkey). Exactly one is supplied per call.
+export interface StepUpProof {
+  code?: string
+  assertion?: unknown
+}
+
+export async function verifyStepUp(
+  challengeToken: string,
+  method: string,
+  proof: StepUpProof,
+): Promise<StepUpVerifyResult> {
   const r = await post<ApiResponse<StepUpVerifyResult>>(`${BASE}/step-up/verify`, {
     challenge_token: challengeToken,
     method,
-    code,
+    code: proof.code,
+    assertion: proof.assertion,
   })
   return unwrap(r, "verify step-up authentication")
 }

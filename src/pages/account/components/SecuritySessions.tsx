@@ -8,7 +8,7 @@ import { ConfirmationDialog } from "@/components/dialog"
 import { useToast } from "@/hooks/useToast"
 import { fetchAccountSessions, revokeAccountSession, revokeAllAccountSessions, type AccountSession } from "@/services/api/account"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { StepUpDialog } from "./StepUpDialog"
+import { StepUpDialog } from "@/components/stepup/StepUpDialog"
 
 function deviceLabel(ua?: string): { label: string; icon: typeof Monitor } {
   if (!ua) return { label: "Unknown device", icon: Globe }

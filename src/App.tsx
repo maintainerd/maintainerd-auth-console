@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { StepUpProvider } from './components/stepup/StepUpProvider'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import '@/styles/toast.css'
@@ -131,6 +132,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <StepUpProvider>
       <Routes>
 				<Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
@@ -235,6 +237,7 @@ function App() {
         pauseOnHover
         theme="light"
       />
+      </StepUpProvider>
     </QueryClientProvider>
   )
 }

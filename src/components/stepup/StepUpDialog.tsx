@@ -1,36 +1,34 @@
 import { useEffect, useState } from "react"
-import { ShieldCheck, Smartphone, MessageSquare, KeyRound } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { getAssertion } from "@/lib/webauthn"
+import { MFA_METHOD_META as METHOD_META, extractMFACode } from "@/lib/mfaMethods"
 import { useToast } from "@/hooks/useToast"
-import { issueStepUpChallenge, sendStepUpSMS, verifyStepUp } from "@/services/api/mfa"
+import { beginWebAuthnAuthentication, issueStepUpChallenge, sendStepUpSMS, verifyStepUp } from "@/services/api/mfa"
 import { useMutation } from "@tanstack/react-query"
-
-const METHOD_META: Record<string, { label: string; icon: LucideIcon; numeric: boolean }> = {
-  totp: { label: "Authenticator app", icon: Smartphone, numeric: true },
-  sms: { label: "Text message", icon: MessageSquare, numeric: true },
-  backup_code: { label: "Backup code", icon: KeyRound, numeric: false },
-}
 
 interface StepUpDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   /** Called with an elevated (acr=2) access token once verification succeeds. */
   onVerified: (accessToken: string) => void
+  /** Called when the user dismisses the dialog without verifying. */
+  onCancel?: () => void
   title?: string
   description?: string
 }
 
 /**
  * Prompts the user to re-confirm their identity with a second factor and returns
- * an elevated access token. Used to gate sensitive actions (delete account,
- * revoke all sessions) that the backend protects with step-up (acr=2).
+ * an elevated access token. Gates sensitive actions the backend protects with
+ * step-up (acr=2) — both self-service (delete account, revoke sessions) and, via
+ * the global step-up interceptor, admin actions (assign role, delete user, …).
  */
-export function StepUpDialog({ open, onOpenChange, onVerified, title, description }: StepUpDialogProps) {
+export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, description }: StepUpDialogProps) {
   const { showError } = useToast()
   const [challengeToken, setChallengeToken] = useState("")
   const [methods, setMethods] = useState<string[]>([])
@@ -56,7 +54,14 @@ export function StepUpDialog({ open, onOpenChange, onVerified, title, descriptio
   })
 
   const verifyMutation = useMutation({
-    mutationFn: () => verifyStepUp(challengeToken, method, code.trim()),
+    mutationFn: async () => {
+      if (METHOD_META[method]?.webauthn) {
+        const options = await beginWebAuthnAuthentication()
+        const assertion = await getAssertion(options)
+        return verifyStepUp(challengeToken, method, { assertion })
+      }
+      return verifyStepUp(challengeToken, method, { code: extractMFACode(method, code) })
+    },
     onSuccess: (res) => { onVerified(res.access_token); onOpenChange(false) },
     onError: (e) => showError(e),
   })
@@ -70,11 +75,22 @@ export function StepUpDialog({ open, onOpenChange, onVerified, title, descriptio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  // Treat any close-without-verify as a cancellation so callers (and the global
+  // step-up bridge) can settle their pending promise.
+  const handleOpenChange = (next: boolean) => {
+    if (!next && !verifyMutation.isSuccess) onCancel?.()
+    onOpenChange(next)
+  }
+
   const meta = METHOD_META[method]
+  const isWebAuthn = meta?.webauthn ?? false
   const numeric = meta?.numeric ?? false
+  const canSubmit = isWebAuthn
+    ? !verifyMutation.isPending
+    : Boolean(method) && Boolean(code.trim()) && !verifyMutation.isPending && (!numeric || code.length === 6)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -120,34 +136,46 @@ export function StepUpDialog({ open, onOpenChange, onVerified, title, descriptio
               </div>
             )}
 
-            {method === "sms" && (
-              <Button variant="outline" size="sm" onClick={() => smsMutation.mutate()} disabled={smsMutation.isPending}>
-                {smsMutation.isPending ? "Sending…" : smsSent ? "Resend code" : "Send code to my phone"}
-              </Button>
-            )}
+            {isWebAuthn ? (
+              <p className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
+                Use Face ID, Touch ID, Windows Hello, or your security key to confirm.
+              </p>
+            ) : (
+              <>
+                {method === "sms" && (
+                  <Button variant="outline" size="sm" onClick={() => smsMutation.mutate()} disabled={smsMutation.isPending}>
+                    {smsMutation.isPending ? "Sending…" : smsSent ? "Resend code" : "Send code to my phone"}
+                  </Button>
+                )}
 
-            <div className="space-y-2">
-              <Label htmlFor="stepup-code">{meta?.label ? `${meta.label} code` : "Code"}</Label>
-              <Input
-                id="stepup-code"
-                inputMode={numeric ? "numeric" : "text"}
-                autoComplete="one-time-code"
-                placeholder={numeric ? "000000" : "Enter your backup code"}
-                className={numeric ? "font-mono tracking-[0.4em] text-center" : "font-mono"}
-                value={code}
-                onChange={(e) => setCode(numeric ? e.target.value.replace(/\D/g, "").slice(0, 6) : e.target.value)}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stepup-code">{numeric ? `${meta?.label} code` : (meta?.label ?? "Code")}</Label>
+                  <Input
+                    id="stepup-code"
+                    inputMode={numeric ? "numeric" : "text"}
+                    autoComplete="one-time-code"
+                    placeholder={numeric ? "000000" : "Enter one backup code"}
+                    className={numeric ? "font-mono tracking-[0.4em] text-center" : "font-mono"}
+                    value={code}
+                    onChange={(e) => setCode(numeric ? e.target.value.replace(/\D/g, "").slice(0, 6) : e.target.value)}
+                  />
+                  {method === "backup_code" && (
+                    <p className="text-xs text-muted-foreground">
+                      Enter a single code from your saved list — each one works only once.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button
-            onClick={() => verifyMutation.mutate()}
-            disabled={!method || !code.trim() || verifyMutation.isPending || (numeric && code.length !== 6)}
-          >
-            {verifyMutation.isPending ? "Verifying…" : "Verify"}
+          <Button variant="ghost" onClick={() => handleOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => verifyMutation.mutate()} disabled={!canSubmit}>
+            {verifyMutation.isPending
+              ? (isWebAuthn ? "Waiting for device…" : "Verifying…")
+              : (isWebAuthn ? "Use passkey" : "Verify")}
           </Button>
         </DialogFooter>
       </DialogContent>

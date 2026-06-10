@@ -12,8 +12,3 @@ export interface AuthState {
   isInitialized: boolean
   error: string | null
 }
-
-export interface LoginAsyncResponse {
-  success: boolean
-  user: ProfileEntity
-}
