@@ -3,7 +3,7 @@
  * Custom hook for fetching Roles using TanStack Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import {
   fetchRoles,
   fetchRoleById,
@@ -33,6 +33,17 @@ export const roleKeys = {
   details: () => [...roleKeys.all, 'detail'] as const,
   detail: (id: string) => [...roleKeys.details(), id] as const,
   permissions: (id: string) => [...roleKeys.all, 'permissions', id] as const,
+  permissionsList: (id: string, params?: RolePermissionsQueryParams) =>
+    [...roleKeys.permissions(id), params] as const,
+}
+
+/** Query params for a role's paginated permissions listing. */
+export type RolePermissionsQueryParams = {
+  page?: number
+  limit?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+  status?: string
 }
 
 /**
@@ -157,11 +168,15 @@ export function useRemoveRolePermission() {
  */
 export function useRolePermissions(
   roleId: string,
-  params?: { page?: number; limit?: number; sort_by?: string; sort_order?: "asc" | "desc"; status?: string },
+  params?: RolePermissionsQueryParams,
 ) {
   return useQuery({
-    queryKey: roleKeys.permissions(roleId),
+    // params MUST be part of the key — otherwise changing page/limit reuses the
+    // cached first page and pagination appears broken.
+    queryKey: roleKeys.permissionsList(roleId, params),
     queryFn: () => fetchRolePermissions(roleId, params),
     enabled: !!roleId,
+    // Keep the current page visible while the next loads (no skeleton flash).
+    placeholderData: keepPreviousData,
   })
 }
