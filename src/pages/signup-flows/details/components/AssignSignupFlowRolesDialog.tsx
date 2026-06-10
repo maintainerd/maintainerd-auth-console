@@ -3,7 +3,6 @@ import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import {
 import { useRoles } from "@/hooks/useRoles"
 import { useAssignSignupFlowRoles } from "@/hooks/useSignupFlows"
 import { useToast } from "@/hooks/useToast"
+import { SelectableOptionRow } from "../../components/SelectableOptionRow"
 
 interface AssignSignupFlowRolesDialogProps {
   open: boolean
@@ -110,9 +110,9 @@ export function AssignSignupFlowRolesDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Assign Roles to Sign Up Flow</DialogTitle>
+          <DialogTitle>Assign Roles to Auth Flow</DialogTitle>
           <DialogDescription>
-            Select roles to assign to this sign up flow. Already assigned roles are not shown.
+            Select roles to assign to this auth flow. Already assigned roles are not shown.
           </DialogDescription>
         </DialogHeader>
 
@@ -164,31 +164,13 @@ export function AssignSignupFlowRolesDialog({
               </div>
             ) : (
               filteredRoles.map((role) => (
-                <div
+                <SelectableOptionRow
                   key={role.role_id}
-                  className="flex items-start space-x-3 p-4 hover:bg-accent/50 cursor-pointer"
-                  onClick={() => handleRoleToggle(role.role_id)}
-                >
-                  <Checkbox
-                    id={`role-${role.role_id}`}
-                    checked={selectedRoles.includes(role.role_id)}
-                    onCheckedChange={() => handleRoleToggle(role.role_id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <div className="flex-1 space-y-1">
-                    <Label
-                      htmlFor={`role-${role.role_id}`}
-                      className="text-sm font-medium leading-none cursor-pointer"
-                    >
-                      {role.name}
-                    </Label>
-                    {role.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {role.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  selected={selectedRoles.includes(role.role_id)}
+                  onToggle={() => handleRoleToggle(role.role_id)}
+                  title={role.name}
+                  description={role.description}
+                />
               ))
             )}
           </div>

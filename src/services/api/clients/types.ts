@@ -163,8 +163,8 @@ export interface UpdateClientStatusRequest {
  * Client URI type
  */
 export type ClientUri = {
-  client_uri_id: string
-  client_id: string
+  // The API returns the client URI's UUID under `uri_id`.
+  uri_id: string
   type: ClientUriType
   uri: string
   created_at: string

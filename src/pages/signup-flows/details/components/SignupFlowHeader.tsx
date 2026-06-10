@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Power, PowerOff } from "lucide-react"
+import { Edit, Trash2, MoreVertical, Power, PowerOff, Fingerprint, Box, Palette, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useDeleteSignupFlow, useUpdateSignupFlowStatus } from "@/hooks/useSignupFlows"
-import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { useDeleteSignupFlow, useUpdateSignupFlowStatus } from "@/hooks/useSignupFlows"
+import { useClient } from "@/hooks/useClients"
+import { useBrandings } from "@/hooks/useBranding"
+import { useToast } from "@/hooks/useToast"
+import { format } from "date-fns"
 import type { SignupFlow } from "@/services/api/signup-flows/types"
 
 interface SignupFlowHeaderProps {
@@ -21,108 +24,125 @@ interface SignupFlowHeaderProps {
   signupFlowId: string
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800 border-green-200'
-    case 'inactive':
-      return 'bg-red-100 text-red-800 border-red-200'
-    case 'draft':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200'
-  }
-}
-
 export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupFlowHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const deleteSignupFlowMutation = useDeleteSignupFlow()
+  const deleteMutation = useDeleteSignupFlow()
   const updateStatusMutation = useUpdateSignupFlowStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
+  const { data: client } = useClient(signupFlow.client_id || "")
+  const { data: brandings } = useBrandings()
+  const branding = signupFlow.branding_id
+    ? brandings?.find((b) => b.branding_id === signupFlow.branding_id)
+    : undefined
+
+  const isActive = signupFlow.status === "active"
+
   const handleDelete = async () => {
     try {
-      await deleteSignupFlowMutation.mutateAsync(signupFlowId)
-      showSuccess("Sign up flow deleted successfully")
-      navigate(`/${tenantId}/signup-flows`)
+      await deleteMutation.mutateAsync(signupFlowId)
+      showSuccess("Auth flow deleted successfully")
+      navigate(`/${tenantId}/auth-flows`)
     } catch (error) {
       showError(error)
     }
   }
 
   const handleToggleStatus = async () => {
-    const newStatus = signupFlow.status === 'active' ? 'inactive' : 'active'
+    const newStatus = isActive ? "inactive" : "active"
     try {
-      await updateStatusMutation.mutateAsync({
-        signupFlowId,
-        data: { status: newStatus }
-      })
-      showSuccess(`Sign up flow ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`)
+      await updateStatusMutation.mutateAsync({ signupFlowId, data: { status: newStatus } })
+      showSuccess(`Auth flow ${newStatus === "active" ? "activated" : "deactivated"} successfully`)
     } catch (error) {
       showError(error)
     }
   }
 
+  const attributes: DetailAttribute[] = [
+    {
+      icon: Fingerprint,
+      label: "Identifier",
+      value: <span className="font-mono text-xs">{signupFlow.identifier}</span>,
+    },
+    { icon: Box, label: "Client", value: client?.name ?? "—" },
+    {
+      icon: Palette,
+      label: "Branding",
+      value: branding?.name ?? (signupFlow.branding_id ? "—" : "Tenant's active branding"),
+    },
+    { icon: CalendarDays, label: "Created", value: format(new Date(signupFlow.created_at), "PP") },
+    { icon: CalendarDays, label: "Last updated", value: format(new Date(signupFlow.updated_at), "PP") },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{signupFlow.name}</h1>
-            <Badge className={getStatusColor(signupFlow.status)}>
-              {signupFlow.status.charAt(0).toUpperCase() + signupFlow.status.slice(1)}
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground font-mono">{signupFlow.identifier}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/signup-flows/${signupFlowId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Sign Up Flow
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleToggleStatus}>
-              {signupFlow.status === 'active' ? (
-                <>
-                  <PowerOff className="mr-2 h-4 w-4" />
-                  Deactivate
-                </>
-              ) : (
-                <>
-                  <Power className="mr-2 h-4 w-4" />
-                  Activate
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive focus:text-destructive"
+      <DetailHeaderCard
+        title={signupFlow.name}
+        badge={<StatusBadge status={signupFlow.status} />}
+        subtitle={signupFlow.description}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/auth-flows/${signupFlowId}/edit`, {
+                  state: {
+                    from: `/${tenantId}/auth-flows/${signupFlowId}`,
+                    backLabel: "Back to Auth Flow Details",
+                  },
+                })
+              }
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              <Edit className="size-4" />
+              Edit
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                  <span className="sr-only">Open actions</span>
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleToggleStatus}>
+                  {isActive ? (
+                    <>
+                      <PowerOff className="mr-2 size-4" />
+                      Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Power className="mr-2 size-4" />
+                      Activate
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Delete Auth Flow
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
-        title="Delete Sign Up Flow"
-        description={`Are you sure you want to delete "${signupFlow.name}"? This action cannot be undone.`}
-        confirmationText="This will permanently delete the sign up flow and all associated data."
+        title="Delete Auth Flow"
+        description="This action cannot be undone. This will permanently delete the auth flow and all associated data."
         itemName={signupFlow.name}
-        isDeleting={deleteSignupFlowMutation.isPending}
+        isDeleting={deleteMutation.isPending}
       />
     </>
   )

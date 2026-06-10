@@ -1,5 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Settings } from "lucide-react"
+import { InformationCard } from "@/components/card"
+import { ListSkeleton } from "@/components/details"
 import { useSignupFlow } from "@/hooks/useSignupFlows"
 
 interface SignupFlowConfigProps {
@@ -9,120 +10,77 @@ interface SignupFlowConfigProps {
 export function SignupFlowConfig({ signupFlowId }: SignupFlowConfigProps) {
   const { data: signupFlowData, isLoading, isError } = useSignupFlow(signupFlowId)
 
-  // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Up Flow Configuration</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Configuration settings for this sign up flow.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent mb-4" />
-              <p className="text-sm text-muted-foreground">Loading configuration...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <InformationCard
+        title="Configuration"
+        description="Core auth flow settings"
+        icon={Settings}
+      >
+        <ListSkeleton />
+      </InformationCard>
     )
   }
 
-  // Error state
   if (isError || !signupFlowData) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Up Flow Configuration</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Configuration settings for this sign up flow.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Settings className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Failed to load configuration</h3>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Unable to fetch sign up flow configuration. Please try again later.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <InformationCard
+        title="Configuration"
+        description="Core auth flow settings"
+        icon={Settings}
+      >
+        <p className="py-8 text-center text-sm text-destructive">Failed to load configuration</p>
+      </InformationCard>
     )
   }
 
   const config = signupFlowData.config || {}
-
-  // Separate custom config from known fields
-  const knownKeys = ['auto_approved']
-  const customConfig: Record<string, unknown> = {}
-
-  Object.entries(config).forEach(([key, value]) => {
-    if (!knownKeys.includes(key)) {
-      customConfig[key] = value
-    }
-  })
-
-  const customEntries = Object.entries(customConfig)
+  const knownKeys = ["auto_approved"]
+  const customEntries = Object.entries(config).filter(([key]) => !knownKeys.includes(key))
 
   return (
     <div className="space-y-6">
-      {/* Basic Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Basic Configuration</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Core sign up flow settings.
+      <InformationCard
+        title="Configuration"
+        description="Core auth flow settings"
+        icon={Settings}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Auto approved
           </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Auto Approved</p>
-              <p className="text-sm bg-muted p-2 rounded">
-                {config.auto_approved ? 'Enabled' : 'Disabled'}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <p className="text-sm">{config.auto_approved ? "Enabled" : "Disabled"}</p>
+        </div>
+      </InformationCard>
 
-      {/* Custom Configurations */}
       {customEntries.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Custom Configurations</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Additional custom configuration fields specific to this sign up flow.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {customEntries.map(([key, value]) => (
-                <div key={key} className="grid gap-3 md:grid-cols-2">
-                  <p className="text-sm bg-muted px-3 py-2 rounded font-mono break-all">
-                    {key}
-                  </p>
-                  <p className="text-sm bg-muted px-3 py-2 rounded font-mono break-all">
-                    {typeof value === 'boolean'
-                      ? (value ? 'true' : 'false')
-                      : Array.isArray(value)
-                      ? value.join(', ')
-                      : typeof value === 'object'
-                      ? JSON.stringify(value, null, 2)
-                      : String(value)
-                    }
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <InformationCard
+          title="Custom Configuration"
+          description="Additional configuration fields specific to this auth flow"
+          icon={Settings}
+        >
+          <div className="divide-y">
+            {customEntries.map(([key, value]) => (
+              <div
+                key={key}
+                className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-[240px_1fr] sm:items-start"
+              >
+                <span className="font-mono text-xs text-muted-foreground break-all">{key}</span>
+                <span className="font-mono text-sm break-all">
+                  {typeof value === "boolean"
+                    ? value
+                      ? "true"
+                      : "false"
+                    : Array.isArray(value)
+                      ? value.join(", ")
+                      : typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </InformationCard>
       )}
     </div>
   )

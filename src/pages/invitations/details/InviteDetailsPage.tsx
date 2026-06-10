@@ -1,0 +1,141 @@
+import { useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { Mail, Send, Ban, MoreVertical, Workflow, CalendarClock, CalendarDays, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ConfirmationDialog } from "@/components/dialog"
+import { DetailLayout, DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { useInvite, useResendInvite, useRevokeInvite } from "@/hooks/useInvites"
+import { useToast } from "@/hooks/useToast"
+import { format } from "date-fns"
+
+function formatDate(value?: string | null) {
+  if (!value) return "—"
+  try {
+    return format(new Date(value), "PP")
+  } catch {
+    return "—"
+  }
+}
+
+export default function InviteDetailsPage() {
+  const { tenantId, inviteId } = useParams<{ tenantId: string; inviteId: string }>()
+  const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
+  const resendMutation = useResendInvite()
+  const revokeMutation = useRevokeInvite()
+  const [showRevoke, setShowRevoke] = useState(false)
+
+  const { data: invite, isLoading, isError } = useInvite(inviteId)
+  const isPending = invite?.status === "pending"
+
+  const resend = async () => {
+    try {
+      await resendMutation.mutateAsync(inviteId!)
+      showSuccess("Invitation resent — a fresh link is on its way")
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const revoke = async () => {
+    try {
+      await revokeMutation.mutateAsync(inviteId!)
+      showSuccess("Invitation revoked")
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const attributes: DetailAttribute[] = invite
+    ? [
+        {
+          icon: Workflow,
+          label: "Auth flow",
+          value: invite.auth_flow_name ?? (invite.auth_flow_id ? "—" : "Default registration"),
+        },
+        { icon: CalendarDays, label: "Invited", value: formatDate(invite.created_at) },
+        { icon: CalendarClock, label: "Expires", value: formatDate(invite.expires_at) },
+        { icon: CheckCircle2, label: "Accepted", value: formatDate(invite.used_at) },
+      ]
+    : []
+
+  return (
+    <DetailLayout
+      backLabel="Back to Invitations"
+      onBack={() => navigate(`/${tenantId}/invites`)}
+      isLoading={isLoading}
+      isError={isError || !invite}
+      notFoundTitle="Invitation not found"
+      notFoundDescription="The invitation you're looking for doesn't exist or may have been removed."
+    >
+      {invite && (
+        <>
+          <DetailHeaderCard
+            leading={
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                <Mail className="size-6" />
+              </div>
+            }
+            title={invite.invited_email}
+            badge={<StatusBadge status={invite.status} />}
+            subtitle={
+              invite.auth_flow_name
+                ? `Onboards via the "${invite.auth_flow_name}" auth flow`
+                : "Onboards via default registration"
+            }
+            attributes={attributes}
+            actions={
+              isPending ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-2"
+                    onClick={resend}
+                    disabled={resendMutation.isPending}
+                  >
+                    <Send className="size-4" />
+                    Resend
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                        <span className="sr-only">Open actions</span>
+                        <MoreVertical className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => setShowRevoke(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Ban className="mr-2 size-4" />
+                        Revoke Invitation
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : undefined
+            }
+          />
+
+          <ConfirmationDialog
+            open={showRevoke}
+            onOpenChange={setShowRevoke}
+            onConfirm={revoke}
+            title="Revoke Invitation"
+            description={`Revoke the invitation to ${invite.invited_email}? Their sign-up link will stop working.`}
+            confirmText="Revoke"
+            isLoading={revokeMutation.isPending}
+          />
+        </>
+      )}
+    </DetailLayout>
+  )
+}

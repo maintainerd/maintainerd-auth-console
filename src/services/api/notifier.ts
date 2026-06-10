@@ -45,6 +45,19 @@ export async function updateEmailConfig(data: EmailConfigUpdate): Promise<EmailC
   return unwrap(r, "update email config")
 }
 
+// ── Delivery status (is the channel configured enough to send?) ──────────────
+
+export interface ConfigStatus {
+  configured: boolean
+  provider?: string
+  status?: string
+}
+
+export async function fetchEmailConfigStatus(): Promise<ConfigStatus> {
+  const r = await get<ApiResponse<ConfigStatus>>("/email-config/status")
+  return unwrap(r, "fetch email config status")
+}
+
 // ── SMS Config ───────────────────────────────────────────────────────────────
 
 export interface SMSConfig {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { DetailsContainer } from "@/components/container"
@@ -19,15 +20,27 @@ import {
   type SelectOption
 } from "@/components/form"
 import { signupFlowSchema, type SignupFlowFormData } from "@/lib/validations"
-import { useSignupFlow, useCreateSignupFlow, useUpdateSignupFlow } from "@/hooks/useSignupFlows"
-import { useClients, useClient } from "@/hooks/useClients"
+import {
+  useSignupFlow,
+  useCreateSignupFlow,
+  useUpdateSignupFlow,
+  useSignupFlowRoles,
+  useSignupFlowCallbackURIs,
+} from "@/hooks/useSignupFlows"
+import { useClients, useClient, useClientUris } from "@/hooks/useClients"
+import { useRoles } from "@/hooks/useRoles"
+import { useBrandings } from "@/hooks/useBranding"
 import { useToast } from "@/hooks/useToast"
+import { SelectableOptionRow } from "../components/SelectableOptionRow"
 
+// Backend only accepts active/inactive (DB CHECK enforces it) — no "draft".
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
-  { value: "draft", label: "Draft" },
 ]
+
+// Sentinel for "no specific branding" — the flow uses the tenant's active branding.
+const NO_BRANDING = "__none__"
 
 export default function SignupFlowAddOrUpdateForm() {
   const { tenantId, signupFlowId } = useParams<{ tenantId: string; signupFlowId?: string }>()
@@ -36,7 +49,7 @@ export default function SignupFlowAddOrUpdateForm() {
 
   const isEditing = Boolean(signupFlowId)
 
-  // Fetch existing signup flow if editing
+  // Fetch existing auth flow if editing
   const { data: signupFlowData, isLoading: isFetchingSignupFlow } = useSignupFlow(signupFlowId || '')
   const createSignupFlowMutation = useCreateSignupFlow()
   const updateSignupFlowMutation = useUpdateSignupFlow()
@@ -57,6 +70,29 @@ export default function SignupFlowAddOrUpdateForm() {
   // Auto approved state
   const [autoApproved, setAutoApproved] = useState<boolean>(true)
 
+  // Optional branding template applied to this flow (UUID, or the sentinel).
+  const [brandingId, setBrandingId] = useState<string>(NO_BRANDING)
+  const { data: brandings } = useBrandings()
+  const brandingOptions: SelectOption[] = [
+    { value: NO_BRANDING, label: "Use tenant's active branding" },
+    ...(brandings ?? []).map((b) => ({
+      value: b.branding_id,
+      label: b.is_active ? `${b.name} (active)` : b.name,
+    })),
+  ]
+
+  // Roles to auto-assign + callback URIs to attach (sent with create/update).
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([])
+  const [selectedCallbackUriIds, setSelectedCallbackUriIds] = useState<string[]>([])
+
+  const { data: rolesData, isLoading: isLoadingRoles } = useRoles({
+    page: 1,
+    limit: 100,
+    sort_by: "name",
+    sort_order: "asc",
+  })
+  const roleOptions = rolesData?.rows ?? []
+
   // Custom config fields state
   const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
   const [configError, setConfigError] = useState<string>("")
@@ -68,7 +104,7 @@ export default function SignupFlowAddOrUpdateForm() {
   useEffect(() => {
     if (!configLoaded) return
 
-    // For signup flows, we don't sync auto_approved to custom fields
+    // For auth flows, we don't sync auto_approved to custom fields
     // It's managed separately via checkbox
     // Custom fields are user-added only
     
@@ -93,6 +129,7 @@ export default function SignupFlowAddOrUpdateForm() {
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<SignupFlowFormData>({
     resolver: yupResolver(signupFlowSchema),
@@ -110,13 +147,53 @@ export default function SignupFlowAddOrUpdateForm() {
   const selectedClientId = control._formValues.clientId
   const { data: selectedClientData } = useClient(selectedClientId || '')
 
-  // Load existing signup flow data if editing
+  // The chosen client's registered redirect URIs — the eligible callback URIs.
+  const clientId = watch("clientId")
+  const { data: clientUrisData, isLoading: isLoadingUris } = useClientUris(clientId || "")
+  const redirectUris = (clientUrisData?.uris ?? []).filter((u) => u.type === "redirect-uri")
+
+  // Existing roles / callback URIs when editing (to diff on save).
+  const { data: existingRolesData } = useSignupFlowRoles(signupFlowId || "", { limit: 100 })
+  const { data: existingCallbacksData } = useSignupFlowCallbackURIs(signupFlowId || "", { limit: 100 })
+
+  // Initialize the selections from the existing data exactly once — depending on
+  // the query-result object directly would re-run on every reference change and
+  // can loop. We only need the initial population; further edits are user-driven.
+  const rolesInitialized = useRef(false)
+  const callbacksInitialized = useRef(false)
+
   useEffect(() => {
-    if (isEditing && signupFlowData) {
+    if (isEditing && existingRolesData && !rolesInitialized.current) {
+      rolesInitialized.current = true
+      setSelectedRoleIds(existingRolesData.rows.map((r) => r.role_id))
+    }
+  }, [isEditing, existingRolesData])
+
+  useEffect(() => {
+    if (isEditing && existingCallbacksData && !callbacksInitialized.current) {
+      callbacksInitialized.current = true
+      setSelectedCallbackUriIds(existingCallbacksData.rows.map((r) => r.client_uri_id))
+    }
+  }, [isEditing, existingCallbacksData])
+
+  const toggleRole = (id: string) =>
+    setSelectedRoleIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  const toggleCallback = (id: string) =>
+    setSelectedCallbackUriIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    )
+
+  // Load existing auth flow data if editing — once. Initializing on every
+  // signupFlowData reference change can loop (reset() re-renders).
+  const flowInitialized = useRef(false)
+  useEffect(() => {
+    if (isEditing && signupFlowData && !flowInitialized.current) {
+      flowInitialized.current = true
       reset({
         name: signupFlowData.name,
         description: signupFlowData.description,
-        status: signupFlowData.status,
+        // Backend only stores active/inactive; coerce any legacy value.
+        status: signupFlowData.status === "active" ? "active" : "inactive",
         clientId: signupFlowData.client_id,
       })
 
@@ -125,6 +202,9 @@ export default function SignupFlowAddOrUpdateForm() {
       
       // Set auto_approved
       setAutoApproved(config.auto_approved ?? true)
+
+      // Load optional branding
+      setBrandingId(signupFlowData.branding_id || NO_BRANDING)
 
       // Load custom fields from config
       const knownKeys = ['auto_approved']
@@ -199,26 +279,34 @@ export default function SignupFlowAddOrUpdateForm() {
         }
       })
 
+      // Only callback URIs belonging to the selected client are valid.
+      const availableUriIds = redirectUris.map((u) => u.uri_id)
+      const effectiveCallbacks = selectedCallbackUriIds.filter((id) => availableUriIds.includes(id))
+
       const requestData = {
         name: data.name,
         description: data.description,
         status: data.status,
         client_id: data.clientId,
         config,
+        // Optional — omit when using the tenant's active branding.
+        branding_id: brandingId !== NO_BRANDING ? brandingId : undefined,
+        // Roles + callback URIs are created/replaced in the same request.
+        role_ids: selectedRoleIds,
+        client_uri_ids: effectiveCallbacks,
       }
 
+      let flowId: string
       if (isEditing) {
-        await updateSignupFlowMutation.mutateAsync({
-          signupFlowId: signupFlowId!,
-          data: requestData
-        })
-        showSuccess("Sign up flow updated successfully")
-        navigate(`/${tenantId}/signup-flows/${signupFlowId}`)
+        await updateSignupFlowMutation.mutateAsync({ signupFlowId: signupFlowId!, data: requestData })
+        flowId = signupFlowId!
       } else {
         const createdFlow = await createSignupFlowMutation.mutateAsync(requestData)
-        showSuccess("Sign up flow created successfully")
-        navigate(`/${tenantId}/signup-flows/${createdFlow.signup_flow_id}`)
+        flowId = createdFlow.signup_flow_id
       }
+
+      showSuccess(isEditing ? "Auth flow updated successfully" : "Auth flow created successfully")
+      navigate(`/${tenantId}/auth-flows/${flowId}`)
     } catch (error) {
       showError(error)
     }
@@ -226,9 +314,9 @@ export default function SignupFlowAddOrUpdateForm() {
 
   const handleCancel = () => {
     if (isEditing && signupFlowId) {
-      navigate(`/${tenantId}/signup-flows/${signupFlowId}`)
+      navigate(`/${tenantId}/auth-flows/${signupFlowId}`)
     } else {
-      navigate(`/${tenantId}/signup-flows`)
+      navigate(`/${tenantId}/auth-flows`)
     }
   }
 
@@ -246,7 +334,7 @@ export default function SignupFlowAddOrUpdateForm() {
         <div className="text-center">
           <h2 className="text-2xl font-semibold">Loading...</h2>
           <p className="text-muted-foreground mt-2">
-            Fetching sign up flow details
+            Fetching auth flow details
           </p>
         </div>
       </div>
@@ -258,12 +346,12 @@ export default function SignupFlowAddOrUpdateForm() {
       <div className="flex flex-col gap-6">
         {/* Header */}
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/signup-flows/${signupFlowId}` : `/${tenantId}/signup-flows`}
-          backLabel="Back to Sign Up Flows"
-          title={isEditing ? "Edit Sign Up Flow" : "Create New Sign Up Flow"}
+          backUrl={isEditing ? `/${tenantId}/auth-flows/${signupFlowId}` : `/${tenantId}/auth-flows`}
+          backLabel="Back to Auth Flows"
+          title={isEditing ? "Edit Auth Flow" : "Create New Auth Flow"}
           description={isEditing
-            ? "Update sign up flow configuration and settings"
-            : "Configure a new sign up flow for user registration"
+            ? "Update auth flow configuration and settings"
+            : "Configure a new auth flow for user registration"
           }
         />
 
@@ -278,7 +366,7 @@ export default function SignupFlowAddOrUpdateForm() {
               <FormInputField
                 label="Name"
                 placeholder="e.g., seller-signup"
-                description="A descriptive name for this sign up flow"
+                description="A descriptive name for this auth flow"
                 disabled={isLoading}
                 error={errors.name?.message}
                 required
@@ -287,7 +375,7 @@ export default function SignupFlowAddOrUpdateForm() {
 
               <FormTextareaField
                 label="Description"
-                placeholder="Provide a detailed description of the sign up flow"
+                placeholder="Provide a detailed description of the auth flow"
                 rows={4}
                 disabled={isLoading}
                 error={errors.description?.message}
@@ -367,7 +455,7 @@ export default function SignupFlowAddOrUpdateForm() {
                     <p className="text-sm text-destructive">{errors.clientId.message}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    The client that this sign up flow belongs to
+                    The client that this auth flow belongs to
                   </p>
                 </div>
               </div>
@@ -379,29 +467,117 @@ export default function SignupFlowAddOrUpdateForm() {
             <CardHeader>
               <CardTitle>Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Configure sign up flow behavior and settings
+                Configure auth flow behavior and settings
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Branding (optional) */}
+              <FormSelectField
+                label="Branding template"
+                placeholder="Select branding"
+                options={brandingOptions}
+                value={brandingId}
+                onValueChange={setBrandingId}
+                disabled={isLoading}
+                description="Optional — the branding applied to this flow's auth experience. Defaults to the tenant's active branding."
+              />
+
               {/* Auto Approved */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+              <div className="flex items-start gap-3">
+                <Checkbox
                   id="autoApproved"
                   checked={autoApproved}
-                  onChange={(e) => setAutoApproved(e.target.checked)}
+                  onCheckedChange={(checked) => setAutoApproved(checked === true)}
                   disabled={isLoading}
-                  className="h-4 w-4 rounded border-gray-300"
+                  className="mt-0.5"
                 />
                 <div className="flex flex-col">
                   <Label htmlFor="autoApproved" className="cursor-pointer">
                     Auto Approved
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Automatically approve users after they complete this sign up flow
+                    Automatically approve users after they complete this auth flow
                   </p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Roles */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Roles</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Optional — roles automatically assigned to users who complete this auth flow.
+              </p>
+            </CardHeader>
+            <CardContent>
+              {isLoadingRoles ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">Loading roles...</div>
+              ) : roleOptions.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">No roles available</div>
+              ) : (
+                <div className="border rounded-md divide-y max-h-64 overflow-y-auto">
+                  {roleOptions.map((role) => (
+                    <SelectableOptionRow
+                      key={role.role_id}
+                      selected={selectedRoleIds.includes(role.role_id)}
+                      onToggle={() => toggleRole(role.role_id)}
+                      disabled={isLoading}
+                      title={role.name}
+                      description={role.description}
+                    />
+                  ))}
+                </div>
+              )}
+              {selectedRoleIds.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {selectedRoleIds.length} role{selectedRoleIds.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Callback URIs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Callback URIs</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Optional — redirect URIs this flow may return to, chosen from the selected client's
+                registered redirect URIs.
+              </p>
+            </CardHeader>
+            <CardContent>
+              {!clientId ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Select a client first to choose its callback URIs.
+                </div>
+              ) : isLoadingUris ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">Loading URIs...</div>
+              ) : redirectUris.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  This client has no registered redirect URIs.
+                </div>
+              ) : (
+                <div className="border rounded-md divide-y max-h-64 overflow-y-auto">
+                  {redirectUris.map((u) => (
+                    <SelectableOptionRow
+                      key={u.uri_id}
+                      selected={selectedCallbackUriIds.includes(u.uri_id)}
+                      onToggle={() => toggleCallback(u.uri_id)}
+                      disabled={isLoading}
+                      title={u.uri}
+                      mono
+                    />
+                  ))}
+                </div>
+              )}
+              {selectedCallbackUriIds.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {selectedCallbackUriIds.length} URI
+                  {selectedCallbackUriIds.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -483,7 +659,7 @@ export default function SignupFlowAddOrUpdateForm() {
             <FormSubmitButton
               isSubmitting={isSubmitting || isLoading}
               submittingText="Saving..."
-              submitText={isEditing ? "Update Sign Up Flow" : "Create Sign Up Flow"}
+              submitText={isEditing ? "Update Auth Flow" : "Create Auth Flow"}
             />
           </div>
         </form>

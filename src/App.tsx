@@ -22,6 +22,9 @@ import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
 import UserDetailsPage from './pages/users/details'
+import InvitationsPage from './pages/invitations'
+import InviteForm from './pages/invitations/form/InviteForm'
+import InviteDetailsPage from './pages/invitations/details/InviteDetailsPage'
 import UserAddOrUpdateForm from './pages/users/form'
 import RolesPage from './pages/roles'
 
@@ -60,6 +63,9 @@ import SignupFlowAddOrUpdateForm from './pages/signup-flows/form'
 import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
 import NotificationsPage from './pages/notifications'
+import BrandingTemplatesPage from './pages/branding/templates'
+import BrandingDetailsPage from './pages/branding/templates/details/BrandingDetailsPage'
+import BrandingForm from './pages/branding/templates/form/BrandingForm'
 import LoginBrandingPage from './pages/branding/login'
 import LoginTemplateDetailsPage from './pages/branding/login/details'
 import LoginTemplateForm from './pages/branding/login/form'
@@ -159,6 +165,9 @@ function App() {
           <Route path="users/create" element={<UserAddOrUpdateForm />} />
           <Route path="users/:userId" element={<UserDetailsPage />} />
           <Route path="users/:userId/edit" element={<UserAddOrUpdateForm />} />
+          <Route path="invites" element={<InvitationsPage />} />
+          <Route path="invites/create" element={<InviteForm />} />
+          <Route path="invites/:inviteId" element={<InviteDetailsPage />} />
           <Route path="roles" element={<RolesPage />} />
           <Route path="roles/create" element={<RoleAddOrUpdateForm />} />
           <Route path="roles/:roleId" element={<RoleDetailsPage />} />
@@ -192,14 +201,18 @@ function App() {
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
           <Route path="policies/:policyId/edit" element={<PolicyAddOrUpdateForm />} />
-					<Route path="signup-flows" element={<SignupFlowsPage />} />
-					<Route path="signup-flows/create" element={<SignupFlowAddOrUpdateForm />} />
-					<Route path="signup-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
-					<Route path="signup-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
+					<Route path="auth-flows" element={<SignupFlowsPage />} />
+					<Route path="auth-flows/create" element={<SignupFlowAddOrUpdateForm />} />
+					<Route path="auth-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
+					<Route path="auth-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
 					<Route path="events" element={<DashboardPage />} />
           <Route path="webhooks" element={<DashboardPage />} />
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="branding" element={<DashboardPage />} />
+          <Route path="branding/templates" element={<BrandingTemplatesPage />} />
+          <Route path="branding/templates/create" element={<BrandingForm />} />
+          <Route path="branding/templates/:brandingId" element={<BrandingDetailsPage />} />
+          <Route path="branding/templates/:brandingId/edit" element={<BrandingForm />} />
           <Route path="branding/login" element={<LoginBrandingPage />} />
           <Route path="branding/login/create" element={<LoginTemplateForm />} />
           <Route path="branding/login/:templateId" element={<LoginTemplateDetailsPage />} />

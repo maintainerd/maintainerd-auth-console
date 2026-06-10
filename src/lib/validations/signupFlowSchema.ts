@@ -19,7 +19,7 @@ export const signupFlowSchema = yup.object({
     .max(500, 'Description must not exceed 500 characters'),
   status: yup
     .string()
-    .oneOf(['active', 'inactive', 'draft'], 'Invalid status')
+    .oneOf(['active', 'inactive'], 'Invalid status')
     .required('Status is required'),
   clientId: yup
     .string()

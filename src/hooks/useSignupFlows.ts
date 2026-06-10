@@ -13,7 +13,10 @@ import {
   deleteSignupFlow,
   updateSignupFlowStatus,
   assignSignupFlowRoles,
-  removeSignupFlowRole
+  removeSignupFlowRole,
+  fetchSignupFlowCallbackURIs,
+  assignSignupFlowCallbackURIs,
+  removeSignupFlowCallbackURI
 } from '@/services/api/signup-flows'
 import type {
   SignupFlowQueryParams,
@@ -33,6 +36,8 @@ export const signupFlowKeys = {
   detail: (id: string) => [...signupFlowKeys.details(), id] as const,
   rolesList: (id: string) => [...signupFlowKeys.detail(id), 'roles'] as const,
   roles: (id: string, params?: SignupFlowQueryParams) => [...signupFlowKeys.rolesList(id), params] as const,
+  callbackURIsList: (id: string) => [...signupFlowKeys.detail(id), 'callback_uris'] as const,
+  callbackURIs: (id: string, params?: SignupFlowQueryParams) => [...signupFlowKeys.callbackURIsList(id), params] as const,
 }
 
 /**
@@ -159,6 +164,47 @@ export function useRemoveSignupFlowRole() {
     onSuccess: (_, variables) => {
       // Invalidate the roles list for this signup flow
       queryClient.invalidateQueries({ queryKey: signupFlowKeys.rolesList(variables.signupFlowId) })
+    },
+  })
+}
+
+/**
+ * Hook to fetch callback URIs attached to an auth flow
+ */
+export function useSignupFlowCallbackURIs(signupFlowId: string, params?: SignupFlowQueryParams) {
+  return useQuery({
+    queryKey: signupFlowKeys.callbackURIs(signupFlowId, params),
+    queryFn: () => fetchSignupFlowCallbackURIs(signupFlowId, params),
+    enabled: !!signupFlowId,
+  })
+}
+
+/**
+ * Hook to attach callback URIs to an auth flow
+ */
+export function useAssignSignupFlowCallbackURIs() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ signupFlowId, data }: { signupFlowId: string; data: { client_uri_uuids: string[] } }) =>
+      assignSignupFlowCallbackURIs(signupFlowId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: signupFlowKeys.callbackURIsList(variables.signupFlowId) })
+    },
+  })
+}
+
+/**
+ * Hook to detach a callback URI from an auth flow
+ */
+export function useRemoveSignupFlowCallbackURI() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ signupFlowId, clientUriId }: { signupFlowId: string; clientUriId: string }) =>
+      removeSignupFlowCallbackURI(signupFlowId, clientUriId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: signupFlowKeys.callbackURIsList(variables.signupFlowId) })
     },
   })
 }
