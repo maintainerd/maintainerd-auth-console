@@ -61,6 +61,11 @@ export function RoleHeader({ role, tenantId, roleId }: RoleHeaderProps) {
   return (
     <>
       <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Shield className="size-6" />
+          </div>
+        }
         title={role.name}
         badge={<StatusBadge status={role.status} />}
         subtitle={role.description}

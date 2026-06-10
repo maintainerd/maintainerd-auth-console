@@ -96,20 +96,25 @@ export function RoleUsers({ roleId }: RoleUsersProps) {
             return (
               <div
                 key={user.user_id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-4"
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  // Ignore clicks coming from the actions menu (its button and
+                  // portaled items), so only the row body navigates.
+                  const target = e.target as HTMLElement
+                  if (!e.currentTarget.contains(target) || target.closest("button, a")) return
+                  navigate(`/${tenantId}/users/${user.user_id}`)
+                }}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    navigate(`/${tenantId}/users/${user.user_id}`)
+                  }
+                }}
+                className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"
               >
-                <div
-                  className="flex min-w-0 items-start gap-3 flex-1 cursor-pointer"
-                  onClick={() => navigate(`/${tenantId}/users/${user.user_id}`)}
-                  tabIndex={0}
-                  role="button"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      navigate(`/${tenantId}/users/${user.user_id}`)
-                    }
-                  }}
-                >
+                <div className="flex min-w-0 items-start gap-3">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white shadow-sm shadow-blue-500/20">
                     {(user.fullname || user.username).slice(0, 2).toUpperCase()}
                   </div>

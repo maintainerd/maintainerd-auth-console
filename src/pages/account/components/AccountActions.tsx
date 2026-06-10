@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/useToast"
 import { useAuth } from "@/hooks/useAuth"
 import { changeEmail, verifyEmailChange, changeUsername, exportAccountData, deleteAccount } from "@/services/api/account"
 import { useMutation } from "@tanstack/react-query"
-import { StepUpDialog } from "./StepUpDialog"
+import { StepUpDialog } from "@/components/stepup/StepUpDialog"
 
 export function AccountActions() {
   const [emailOpen, setEmailOpen] = useState(false)

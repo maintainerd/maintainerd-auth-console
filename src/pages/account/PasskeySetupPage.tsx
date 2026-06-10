@@ -8,31 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ConfirmationDialog } from "@/components/dialog"
 import { useToast } from "@/hooks/useToast"
 import { beginWebAuthnRegistration, finishWebAuthnRegistration, deleteWebAuthnCredential, downloadWebAuthnCredential, fetchMFAStatus, type MFAWebAuthnKey } from "@/services/api/mfa"
+import { base64urlToBuffer, serializeCredential } from "@/lib/webauthn"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-
-function base64urlToBuffer(base64url: string): ArrayBuffer {
-  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/")
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4)
-  const binary = atob(base64 + padding)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return bytes.buffer
-}
-
-function arrayBufferToBase64url(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer)
-  let binary = ""
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
-}
-
-function serializeCredential(cred: PublicKeyCredential) {
-  const response = cred.response as AuthenticatorAttestationResponse
-  return {
-    id: cred.id, rawId: arrayBufferToBase64url(cred.rawId), type: cred.type,
-    response: { clientDataJSON: arrayBufferToBase64url(response.clientDataJSON), attestationObject: arrayBufferToBase64url(response.attestationObject) },
-  }
-}
 
 export default function PasskeySetupPage() {
   const { showSuccess, showError } = useToast()

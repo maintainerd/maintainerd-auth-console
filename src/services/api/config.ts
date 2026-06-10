@@ -39,6 +39,10 @@ export const API_ENDPOINTS = {
   },
   AUTH: {
     LOGIN: '/login',
+    // Login MFA second step (issues an acr=2 session on success).
+    LOGIN_MFA_VERIFY: '/login/mfa/verify',
+    LOGIN_MFA_SEND_SMS: '/login/mfa/send-sms',
+    LOGIN_MFA_WEBAUTHN_BEGIN: '/login/mfa/webauthn/begin',
     REGISTER: '/register',
     LOGOUT: '/logout',
     // POST /api/v1/refresh-token — rotates the session using the httpOnly

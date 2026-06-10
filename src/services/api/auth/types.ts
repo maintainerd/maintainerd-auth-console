@@ -33,13 +33,27 @@ export interface LoginRequest {
 }
 
 export type LoginResponse = ApiResponse<{
-  access_token: string
-  id_token: string
-  refresh_token: string
-  expires_in: number
-  token_type: string
-  issued_at: number
+  access_token?: string
+  id_token?: string
+  refresh_token?: string
+  expires_in?: number
+  token_type?: string
+  issued_at?: number
+  // Present when the account has MFA enrolled: the password step succeeded but
+  // a second factor is required to finish login (and elevate the session to acr=2).
+  mfa_required?: boolean
+  mfa_challenge_token?: string
+  mfa_allowed_methods?: string[]
 }>
+
+// MFALoginVerifyRequest completes the login MFA second step. Exactly one proof
+// is sent: `code` (totp/sms/backup_code) or `assertion` (passkey).
+export interface MFALoginVerifyRequest {
+  mfa_challenge_token: string
+  method: string
+  code?: string
+  assertion?: unknown
+}
 
 export interface RefreshTokenRequest {
   refresh_token: string

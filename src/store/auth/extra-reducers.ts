@@ -4,7 +4,7 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { loginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
+import { loginAsync, completeMFALoginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
 import type { AuthState } from './types'
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
@@ -16,13 +16,33 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     })
     .addCase(loginAsync.fulfilled, (state, action) => {
       state.isLoading = false
+      state.error = null
+      // MFA pending: the session is not yet established — stay unauthenticated
+      // until the second step (completeMFALoginAsync) completes.
+      if (action.payload.mfaRequired) {
+        return
+      }
       state.profile = action.payload.data
       state.isAuthenticated = true
-      state.error = null
     })
     .addCase(loginAsync.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.error.message || 'Login failed'
+    })
+    // Complete MFA login (second step → acr=2 session)
+    .addCase(completeMFALoginAsync.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    .addCase(completeMFALoginAsync.fulfilled, (state, action) => {
+      state.isLoading = false
+      state.error = null
+      state.profile = action.payload.data
+      state.isAuthenticated = true
+    })
+    .addCase(completeMFALoginAsync.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.error.message || 'MFA verification failed'
     })
     // Register
     .addCase(registerAsync.pending, (state) => {

@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { Key, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
+import { SystemBadge } from "@/components/badges"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { AddRolePermissionsDialog } from "./AddRolePermissionsDialog"
@@ -102,9 +102,7 @@ export function RolePermissionsTab({ roleId }: RolePermissionsTabProps) {
                       <div className="min-w-0 space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-sm font-medium">{permission.name}</span>
-                          {permission.is_system && (
-                            <Badge variant="secondary" className="text-xs">System</Badge>
-                          )}
+                          <SystemBadge isSystem={permission.is_system} />
                         </div>
                         <p className="text-sm text-muted-foreground">{permission.description}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">

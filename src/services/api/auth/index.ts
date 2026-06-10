@@ -5,7 +5,9 @@
 
 import { post, get } from '../client'
 import { API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from '../config'
-import type { ProfileEntity, LoginRequest, LoginResponse, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
+import type { ApiResponse } from '../types'
+import type { WebAuthnAssertionOptions } from '@/lib/webauthn'
+import type { ProfileEntity, LoginRequest, LoginResponse, MFALoginVerifyRequest, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
 
 /**
  * Login user with credentials
@@ -22,6 +24,35 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 		}
 	)
 	return response
+}
+
+/**
+ * Complete the login MFA second step. On success the backend Set-Cookies an
+ * acr=2 session (with X-Token-Delivery: cookie), so no token handling is needed
+ * client-side — callers just refresh the auth state afterwards.
+ */
+export async function verifyMFALogin(data: MFALoginVerifyRequest): Promise<LoginResponse> {
+  return post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY, data, {
+    headers: { ...TOKEN_DELIVERY_HEADER },
+  })
+}
+
+/** Send an SMS OTP for the in-flight login MFA challenge. */
+export async function sendMFALoginSMS(challengeToken: string): Promise<void> {
+  await post<ApiResponse<void>>(API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_SMS, {
+    mfa_challenge_token: challengeToken,
+  })
+}
+
+/** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */
+export async function beginMFALoginWebAuthn(challengeToken: string): Promise<WebAuthnAssertionOptions> {
+  const r = await post<ApiResponse<WebAuthnAssertionOptions>>(API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN, {
+    mfa_challenge_token: challengeToken,
+  })
+  if (!r.success || !r.data) {
+    throw new Error(typeof r.error === 'string' ? r.error : 'Failed to begin WebAuthn authentication')
+  }
+  return r.data
 }
 
 // Extended register request with optional query parameters
@@ -183,6 +214,9 @@ export async function resetPassword(
 // Export functions as an object for backward compatibility
 export const authService = {
   login,
+  verifyMFALogin,
+  sendMFALoginSMS,
+  beginMFALoginWebAuthn,
   register,
   logout,
   fetchProfile,

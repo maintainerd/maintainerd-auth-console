@@ -9,6 +9,7 @@ import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
+import { LoginMFAStep } from "./LoginMFAStep"
 
 const LoginForm = () => {
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ const LoginForm = () => {
   const { getCurrentTenant } = useTenant()
   const { showSuccess } = useToast()
   const [loginError, setLoginError] = useState<string | null>(null)
+  const [mfaChallenge, setMfaChallenge] = useState<{ token: string; methods: string[] } | null>(null)
 
   const {
     register,
@@ -31,24 +33,51 @@ const LoginForm = () => {
     reValidateMode: 'onSubmit'
   })
 
+  // Shared post-login navigation for both password-only and MFA logins.
+  const finishLogin = (requiresProfileSetup: boolean) => {
+    if (requiresProfileSetup) {
+      showSuccess("Login successful! Please complete your profile setup.")
+      navigate('/register/profile', { replace: true })
+      return
+    }
+    showSuccess("Login successful!")
+    const currentTenant = getCurrentTenant()
+    const tenantIdentifier = currentTenant?.identifier || 'default'
+    navigate(`/${tenantIdentifier}/dashboard`, { replace: true })
+  }
+
   const onSubmit = async (data: LoginFormData) => {
     setLoginError(null)
     try {
       const response = await login(data.email, data.password)
-      if (response.requiresProfileSetup) {
-				showSuccess("Login successful! Please complete your profile setup.")
-				navigate('/register/profile', { replace: true })
-			} else {
-				showSuccess("Login successful!")
-				const currentTenant = getCurrentTenant()
-				const tenantIdentifier = currentTenant?.identifier || 'default'
-				const redirectPath = `/${tenantIdentifier}/dashboard`
-				navigate(redirectPath, { replace: true })
-			}
+      // MFA enrolled — show the second step; the session is issued there.
+      if (response.mfaRequired) {
+        setMfaChallenge({ token: response.challengeToken ?? '', methods: response.allowedMethods ?? [] })
+        return
+      }
+      finishLogin(response.requiresProfileSetup)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Invalid email or password"
       setLoginError(errorMessage)
     }
+  }
+
+  if (mfaChallenge) {
+    return (
+      <div className="flex flex-col gap-6">
+        <FormLoginCard
+          title="Two-step verification"
+          description="Enter your second factor to finish signing in"
+        >
+          <LoginMFAStep
+            challengeToken={mfaChallenge.token}
+            allowedMethods={mfaChallenge.methods}
+            onVerified={(result) => finishLogin(result.requiresProfileSetup)}
+            onCancel={() => setMfaChallenge(null)}
+          />
+        </FormLoginCard>
+      </div>
+    )
   }
 
   return (
