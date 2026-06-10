@@ -3,7 +3,7 @@
  * Custom hook for fetching users using TanStack Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import {
   fetchUsers,
   fetchUserById,
@@ -24,6 +24,8 @@ import {
   verifyUserPhone,
   completeUserAccount,
   resetUserMfa,
+  resetUserMfaMethod,
+  type UserMfaMethod,
   fetchUserActivity,
   fetchRecentActivity,
   fetchUserSessions,
@@ -71,6 +73,8 @@ export function useUsers(params?: UserQueryParams) {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => fetchUsers(params),
+    // Keep the current page visible while the next loads (no skeleton flash).
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -157,6 +161,7 @@ export function useUserRoles(userId: string, params?: UserRolesQueryParams) {
     queryKey: userKeys.rolesList(userId, params),
     queryFn: () => fetchUserRoles(userId, params),
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -168,6 +173,7 @@ export function useUserIdentities(userId: string, params?: UserIdentitiesQueryPa
     queryKey: userKeys.identitiesList(userId, params),
     queryFn: () => fetchUserIdentities(userId, params),
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -179,6 +185,7 @@ export function useUserProfiles(userId: string, params?: UserProfilesQueryParams
     queryKey: userKeys.profilesList(userId, params),
     queryFn: () => fetchUserProfiles(userId, params),
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -329,11 +336,34 @@ export function useCompleteUserAccount() {
 }
 
 /**
- * Hook to reset a user's MFA enrollment (admin action)
+ * Hook to reset a user's MFA enrollment (admin action) — clears every factor.
  */
 export function useResetUserMfa() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (userId: string) => resetUserMfa(userId),
+    onSuccess: (_, userId) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.mfa(userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+    },
+  })
+}
+
+/**
+ * Hook to reset a single MFA factor for a user (admin action) — leaves the
+ * user's other factors intact.
+ */
+export function useResetUserMfaMethod() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userId, method }: { userId: string; method: UserMfaMethod }) =>
+      resetUserMfaMethod(userId, method),
+    onSuccess: (_, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.mfa(userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+    },
   })
 }
 
@@ -345,6 +375,7 @@ export function useUserActivity(userId: string, params?: UserActivityQueryParams
     queryKey: userKeys.activityList(userId, params),
     queryFn: () => fetchUserActivity(userId, params),
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   })
 }
 

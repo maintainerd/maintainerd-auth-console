@@ -4,9 +4,10 @@ import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/utils"
 import { UserMFA } from "./UserMFA"
 
-const { useUserMFAMock, resetMfaMutateAsync, showSuccessMock, showErrorMock } = vi.hoisted(() => ({
+const { useUserMFAMock, resetMfaMutateAsync, resetMethodMutateAsync, showSuccessMock, showErrorMock } = vi.hoisted(() => ({
   useUserMFAMock: vi.fn(),
   resetMfaMutateAsync: vi.fn(),
+  resetMethodMutateAsync: vi.fn(),
   showSuccessMock: vi.fn(),
   showErrorMock: vi.fn(),
 }))
@@ -14,6 +15,7 @@ const { useUserMFAMock, resetMfaMutateAsync, showSuccessMock, showErrorMock } = 
 vi.mock("@/hooks/useUsers", () => ({
   useUserMFA: () => useUserMFAMock(),
   useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
+  useResetUserMfaMethod: () => ({ mutateAsync: resetMethodMutateAsync, isPending: false }),
 }))
 
 vi.mock("@/hooks/useToast", () => ({
@@ -61,7 +63,7 @@ describe("UserMFA", () => {
     expect(screen.getByText("TOTP")).toBeInTheDocument()
     expect(screen.getByText("SMS")).toBeInTheDocument()
     expect(screen.getByText("Passkeys")).toBeInTheDocument()
-    expect(screen.getByText("5 unused")).toBeInTheDocument()
+    expect(screen.getByText("5 unused recovery codes remaining")).toBeInTheDocument()
   })
 
   it("shows the Reset MFA button when any method is enabled", () => {
@@ -79,6 +81,19 @@ describe("UserMFA", () => {
     await u.click(screen.getByRole("button", { name: "Reset MFA" }))
     await waitFor(() => expect(resetMfaMutateAsync).toHaveBeenCalledWith("u1"))
     expect(showSuccessMock).toHaveBeenCalledWith("MFA reset successfully")
+  })
+
+  it("resets a single method via the row action menu", async () => {
+    const u = userEvent.setup({ pointerEventsCheck: 0 })
+    setData({ data: { is_totp_enabled: true, is_webauthn_enabled: false, is_sms_enabled: false, backup_codes_count: 0 } })
+    resetMethodMutateAsync.mockResolvedValueOnce(undefined)
+    renderWithProviders(<UserMFA userId="u1" />)
+    // Open the TOTP row's actions menu (the first "Open menu" trigger), then reset.
+    await u.click(screen.getAllByRole("button", { name: "Open menu" })[0])
+    await u.click(screen.getByText("Reset TOTP"))
+    await u.click(screen.getByRole("button", { name: "Reset" }))
+    await waitFor(() => expect(resetMethodMutateAsync).toHaveBeenCalledWith({ userId: "u1", method: "totp" }))
+    expect(showSuccessMock).toHaveBeenCalledWith("TOTP reset for this user")
   })
 
   it("shows error when reset fails", async () => {

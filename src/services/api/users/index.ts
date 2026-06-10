@@ -115,8 +115,20 @@ export const completeUserAccount = (userId: string): Promise<User> =>
   patch<ApiResponse<User>>(`${base}/${userId}/complete-account`).then((r) => unwrap(r, 'complete account'))
 
 // Admin action: reset a user's MFA enrollment (POST /mfa/admin/users/{uuid}/reset).
+// Requires the "user:mfa:reset" permission + step-up; clears every factor at once.
 export const resetUserMfa = (userId: string): Promise<void> =>
   post<ApiResponse<void>>(`/mfa/admin/users/${userId}/reset`).then((r) => assertSuccess(r, 'reset MFA'))
+
+// The individual MFA factors an admin can reset for a user.
+export type UserMfaMethod = 'totp' | 'sms' | 'webauthn' | 'backup_code'
+
+// Admin action: reset a single MFA factor for a user
+// (POST /mfa/admin/users/{uuid}/reset/{method}). Same permission + step-up as the
+// full reset, but leaves the user's other factors intact.
+export const resetUserMfaMethod = (userId: string, method: UserMfaMethod): Promise<void> =>
+  post<ApiResponse<void>>(`/mfa/admin/users/${userId}/reset/${method}`).then((r) =>
+    assertSuccess(r, 'reset MFA method'),
+  )
 
 // Activity: the auth-events recorded against this user (read-only audit trail).
 export const fetchUserActivity = (userId: string, params?: UserActivityQueryParams): Promise<UserActivityResponse> =>

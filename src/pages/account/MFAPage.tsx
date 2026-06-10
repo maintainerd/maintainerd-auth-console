@@ -1,14 +1,18 @@
+import { useState } from "react"
 import { useParams, useNavigate, useLocation, useSearchParams, Outlet } from "react-router-dom"
-import { Key, Smartphone, MessageSquare, ShieldCheck, ShieldAlert, ChevronRight, KeyRound } from "lucide-react"
+import { Key, Smartphone, MessageSquare, ShieldCheck, ShieldAlert, ChevronRight, KeyRound, ShieldOff } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StatusBadge } from "@/components/details"
+import { ConfirmationDialog } from "@/components/dialog"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
-import { fetchMFAStatus } from "@/services/api/mfa"
-import { useQuery } from "@tanstack/react-query"
+import { fetchMFAStatus, resetAllMFA } from "@/services/api/mfa"
+import { useToast } from "@/hooks/useToast"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 // Where the user can arrive from, by `?from=` key. Determines where the hub's
 // "Back" returns to. Defaults to the dashboard when absent/unknown.
@@ -151,6 +155,61 @@ export function MFAIndex() {
           </Card>
         </div>
       )}
+
+      {/* ── Reset (self-service) ─────────────────────────────────── */}
+      {protected_ && <ResetAllMFA />}
+    </div>
+  )
+}
+
+// Lets the account owner clear all of their own MFA at once. Self-scoped on the
+// server (no target param), so this only ever resets the signed-in user's MFA.
+function ResetAllMFA() {
+  const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
+  const [open, setOpen] = useState(false)
+
+  const mutation = useMutation({
+    mutationFn: resetAllMFA,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mfa", "status"] })
+      showSuccess("All MFA methods have been removed")
+      setOpen(false)
+    },
+    onError: (e) => {
+      showError(e)
+      setOpen(false)
+    },
+  })
+
+  return (
+    <div>
+      <h2 className="text-sm font-medium text-muted-foreground px-1 mb-2">Reset</h2>
+      <Card className="shadow-xs border-destructive/30">
+        <CardContent className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Reset all methods</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Remove every MFA method from your account. You can set them up again at any time.
+            </p>
+          </div>
+          <Button variant="outline" className="shrink-0" onClick={() => setOpen(true)}>
+            <ShieldOff className="size-4 mr-2" />
+            Reset MFA
+          </Button>
+        </CardContent>
+      </Card>
+
+      <ConfirmationDialog
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={() => mutation.mutate()}
+        title="Reset your MFA"
+        description="This removes all of your multi-factor authentication methods — authenticator app, SMS, passkeys, and backup codes. You'll be asked to set up MFA again on your next sign-in. Continue?"
+        confirmText="Reset MFA"
+        variant="destructive"
+        isLoading={mutation.isPending}
+      />
     </div>
   )
 }
