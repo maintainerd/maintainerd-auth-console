@@ -83,6 +83,12 @@ export {
   type RoleFormData
 } from './roleSchema'
 
+// Branding schemas
+export {
+  brandingSchema,
+  type BrandingFormData
+} from './brandingSchema'
+
 // User schemas
 export {
   userSchema,

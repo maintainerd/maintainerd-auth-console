@@ -5,8 +5,8 @@ export default function SignupFlowsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Sign Up Flows"
-        description="Manage signup flows for your applications. Create custom signup experiences with automatic role assignments."
+        title="Auth Flows"
+        description="Define how users authenticate and onboard into your applications, with automatic role assignment per flow."
       />
       <SignupFlowListing />
     </PageContainer>

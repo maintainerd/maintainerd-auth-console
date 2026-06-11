@@ -53,7 +53,7 @@ export const data = {
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
             { title: "Social Connections", route: "/providers/social" },
-            { title: "Sign-up Flows", route: "/signup-flows" },
+            { title: "Auth Flows", route: "/auth-flows" },
             { title: "Multi-Factor Auth", route: "/mfa" },
           ],
         },
@@ -112,10 +112,10 @@ export const data = {
           route: "/branding",
           icon: Palette,
           items: [
+            { title: "Branding Templates", route: "/branding/templates" },
             { title: "Login Page", route: "/branding/login" },
             { title: "Email Templates", route: "/branding/email-templates" },
             { title: "SMS Templates", route: "/branding/sms-templates" },
-            { title: "Branding Settings", route: "/branding/settings" },
           ],
         },
         {

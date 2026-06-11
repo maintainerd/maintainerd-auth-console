@@ -1,0 +1,39 @@
+/**
+ * Branding API types
+ *
+ * Branding records are per-tenant themes. Exactly one is active (the loaded
+ * style). System records (seeded maintainerd-light / maintainerd-dark) can be
+ * edited and activated but never deleted. Theme tokens (colors, font) live in
+ * the freeform `metadata` JSON; only logo/favicon/support/legal URLs and
+ * company name are dedicated fields.
+ */
+
+/** A branding theme as returned by the admin endpoints.
+ *  Note: `branding_id` carries the record UUID — use it for update/activate/delete. */
+export interface Branding {
+  branding_id: string
+  name: string
+  is_system: boolean
+  is_active: boolean
+  company_name: string
+  logo_url: string
+  favicon_url: string
+  support_url: string
+  privacy_policy_url: string
+  terms_of_service_url: string
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+/** Payload to create or update a branding theme. */
+export interface BrandingRequest {
+  name: string
+  company_name: string
+  logo_url: string
+  favicon_url: string
+  support_url: string
+  privacy_policy_url: string
+  terms_of_service_url: string
+  metadata: Record<string, unknown>
+}
