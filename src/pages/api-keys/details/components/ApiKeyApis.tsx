@@ -223,7 +223,6 @@ function ApiKeyApiAccessItem({
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span className="font-mono">{api.name}</span>
               {api.identifier && <span className="font-mono">{api.identifier}</span>}
-              {api.api_type && <span>{api.api_type}</span>}
             </div>
           </div>
         </div>
@@ -308,11 +307,6 @@ function ApiKeyApiAccessItem({
                         <span className="font-mono text-sm font-medium">{permission.name}</span>
                         <StatusBadge status={permission.status as Status} />
                         <SystemBadge isSystem={permission.is_system} />
-                        {permission.is_default && (
-                          <Badge variant="outline" className="text-xs">
-                            Default
-                          </Badge>
-                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{permission.description}</p>
                     </div>

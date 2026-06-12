@@ -1,22 +1,6 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { useNavigate, useParams } from "react-router-dom"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Play,
-  Pause
-} from "lucide-react"
-import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { Edit, Eye, Trash2, Play, XCircle, type LucideIcon } from "lucide-react"
+import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteApi, useUpdateApiStatus } from "@/hooks/useApis"
 import { useToast } from "@/hooks/useToast"
 import type { Api, ApiStatus } from "@/services/api/api/types"
@@ -25,134 +9,111 @@ interface ApiActionsProps {
   api: Api
 }
 
-type StatusAction = {
+interface StatusAction {
   status: ApiStatus
+  label: string
   title: string
   description: string
+  icon: LucideIcon
+}
+
+const STATUS_ACTIONS: Record<ApiStatus, StatusAction> = {
+  active: {
+    status: "active",
+    label: "Activate API",
+    title: "Activate API",
+    description: "Are you sure you want to activate this API?",
+    icon: Play,
+  },
+  inactive: {
+    status: "inactive",
+    label: "Deactivate API",
+    title: "Deactivate API",
+    description: "Are you sure you want to deactivate this API?",
+    icon: XCircle,
+  },
 }
 
 export function ApiActions({ api }: ApiActionsProps) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showStatusDialog, setShowStatusDialog] = useState(false)
-  const [pendingStatusAction, setPendingStatusAction] = useState<StatusAction | null>(null)
-
   const deleteApiMutation = useDeleteApi()
-  const updateApiStatusMutation = useUpdateApiStatus()
+  const updateStatusMutation = useUpdateApiStatus()
 
-  const isActive = api.status === "active"
-  const isInactive = api.status === "inactive"
-
-  // Action handlers
-  const handleViewDetails = () => {
-    navigate(`/${tenantId}/apis/${api.api_id}`)
-  }
-
-  const handleUpdateApi = () => {
-    navigate(`/${tenantId}/apis/${api.api_id}/edit`)
-  }
-
-  const handleStatusChange = (status: ApiStatus, title: string, description: string) => {
-    setPendingStatusAction({ status, title, description })
-    setShowStatusDialog(true)
-  }
-
-  const handleConfirmStatusChange = async () => {
-    if (!pendingStatusAction) return
-
+  const changeStatus = async (status: ApiStatus) => {
     try {
-      await updateApiStatusMutation.mutateAsync({
+      await updateStatusMutation.mutateAsync({
         apiId: api.api_id,
-        data: { status: pendingStatusAction.status }
+        data: { status },
       })
-      showSuccess(`API status updated to ${pendingStatusAction.status}`)
+      showSuccess(`API status updated to ${status}`)
     } catch (error) {
       showError(error)
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteApiMutation.mutateAsync(api.api_id)
-      showSuccess("API deleted successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
+  const statusActions = Object.values(STATUS_ACTIONS)
+    .filter((action) => action.status !== api.status)
+    .map((action) => ({
+      key: `status-${action.status}`,
+      label: action.label,
+      icon: action.icon,
+      onSelect: () => changeStatus(action.status),
+      confirm: {
+        title: action.title,
+        description: action.description,
+        confirmText: action.status === "active" ? "Activate" : "Confirm",
+      },
+    }) satisfies RowActionItem)
 
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleViewDetails}>
-            <Eye className="mr-2 h-4 w-4" />
-            View Details
-          </DropdownMenuItem>
+  const items: RowActionItem[] = [
+    {
+      key: "view",
+      label: "View Details",
+      icon: Eye,
+      onSelect: () =>
+        navigate(`/${tenantId}/apis/${api.api_id}`, {
+          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        }),
+    },
+    {
+      key: "edit",
+      label: "Edit API",
+      icon: Edit,
+      onSelect: () =>
+        navigate(`/${tenantId}/apis/${api.api_id}/edit`, {
+          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        }),
+    },
+    ...statusActions,
+    ...(!api.is_system
+      ? [
+          {
+            key: "delete",
+            label: "Delete API",
+            icon: Trash2,
+            destructive: true,
+            separatorBefore: true,
+            onSelect: async () => {
+              try {
+                await deleteApiMutation.mutateAsync(api.api_id)
+                showSuccess("API deleted successfully")
+              } catch (error) {
+                showError(error)
+              }
+            },
+            confirm: {
+              title: "Delete API",
+              description:
+                "This will permanently delete this API and remove all associated permissions and configurations.",
+              destructive: true,
+              itemName: api.name,
+            },
+          } satisfies RowActionItem,
+        ]
+      : []),
+  ]
 
-          <DropdownMenuItem onClick={handleUpdateApi}>
-            <Edit className="mr-2 h-4 w-4" />
-            Update API
-          </DropdownMenuItem>
-
-          {!isActive && (
-            <DropdownMenuItem onClick={() => handleStatusChange("active", "Activate API", "Are you sure you want to activate this API?")}>
-              <Play className="mr-2 h-4 w-4" />
-              Activate API
-            </DropdownMenuItem>
-          )}
-
-          {!isInactive && (
-            <DropdownMenuItem onClick={() => handleStatusChange("inactive", "Deactivate API", "Are you sure you want to deactivate this API?")}>
-              <Pause className="mr-2 h-4 w-4" />
-              Deactivate API
-            </DropdownMenuItem>
-          )}
-
-          {!api.is_default && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete API
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
-        title="Delete API"
-        description="This action cannot be undone. This will permanently delete the API and all associated data."
-        confirmationText="This will permanently delete this API and remove all associated permissions and configurations."
-        itemName={api.name}
-        isDeleting={deleteApiMutation.isPending}
-      />
-
-      <ConfirmationDialog
-        open={showStatusDialog}
-        onOpenChange={setShowStatusDialog}
-        onConfirm={handleConfirmStatusChange}
-        title={pendingStatusAction?.title || "Change Status"}
-        description={pendingStatusAction?.description || "Are you sure you want to change the API status?"}
-        confirmText="Confirm"
-        cancelText="Cancel"
-        variant="default"
-        isLoading={updateApiStatusMutation.isPending}
-      />
-    </>
-  )
+  return <RowActions items={items} />
 }

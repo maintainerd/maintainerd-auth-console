@@ -25,17 +25,6 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
-// API Type options
-const API_TYPE_OPTIONS: SelectOption[] = [
-  { value: "rest", label: "REST" },
-  { value: "grpc", label: "gRPC" },
-  { value: "graphql", label: "GraphQL" },
-  { value: "soap", label: "SOAP" },
-  { value: "webhook", label: "Webhook" },
-  { value: "websocket", label: "WebSocket" },
-  { value: "rpc", label: "RPC" },
-]
-
 export default function ApiAddOrUpdateForm() {
   const { tenantId, apiId } = useParams<{ tenantId: string; apiId?: string }>()
   const navigate = useNavigate()
@@ -78,7 +67,6 @@ export default function ApiAddOrUpdateForm() {
       name: "",
       displayName: "",
       description: "",
-      apiType: "rest",
       status: "active",
       serviceId: "",
     },
@@ -99,7 +87,6 @@ export default function ApiAddOrUpdateForm() {
       name: apiData.name,
       displayName: apiData.display_name,
       description: apiData.description,
-      apiType: apiData.api_type,
       status: apiData.status,
       serviceId: serviceId,
     })
@@ -114,7 +101,6 @@ export default function ApiAddOrUpdateForm() {
         name: data.name,
         display_name: data.displayName,
         description: data.description,
-        api_type: data.apiType,
         status: data.status,
         service_id: data.serviceId,
       }
@@ -229,7 +215,7 @@ export default function ApiAddOrUpdateForm() {
                 {...register("description")}
               />
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 <Controller
                   name="serviceId"
                   control={control}
@@ -243,23 +229,6 @@ export default function ApiAddOrUpdateForm() {
                       onValueChange={field.onChange}
                       disabled={isLoading || isFetchingServices || (existingApi?.is_system && isEditing)}
                       error={errors.serviceId?.message}
-                      required
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="apiType"
-                  control={control}
-                  render={({ field }) => (
-                    <FormSelectField
-                      label="API Type"
-                      placeholder="Select API type"
-                      options={API_TYPE_OPTIONS}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isLoading || (existingApi?.is_system && isEditing)}
-                      error={errors.apiType?.message}
                       required
                     />
                   )}
@@ -306,4 +275,3 @@ export default function ApiAddOrUpdateForm() {
     </DetailsContainer>
   )
 }
-

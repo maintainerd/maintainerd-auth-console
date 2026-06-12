@@ -20,7 +20,6 @@ export interface PermissionEntity {
   description: string
   api: Api
   status: PermissionStatus
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -36,7 +35,6 @@ export interface PermissionQueryParams {
   role_id?: string
   client_id?: string
   is_active?: boolean
-  is_default?: boolean
   page?: number
   limit?: number
   sort_by?: string
@@ -86,4 +84,3 @@ export interface UpdatePermissionRequest {
 export interface UpdatePermissionStatusRequest {
   status: PermissionStatus
 }
-

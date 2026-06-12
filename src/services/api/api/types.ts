@@ -11,23 +11,16 @@ import type { Service } from '../services/types'
 export type ApiStatus = Extract<Status, 'active' | 'inactive'>
 
 /**
- * API type enum
- */
-export type ApiType = 'rest' | 'grpc' | 'graphql' | 'soap' | 'webhook' | 'websocket' | 'rpc'
-
-/**
- * API type
+ * API entity
  */
 export type Api = {
   api_id: string
   name: string
   display_name: string
   description: string
-  api_type: ApiType
   identifier: string
   service: Service
   status: ApiStatus
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -40,10 +33,9 @@ export interface ApiQueryParams {
   name?: string
   display_name?: string
   description?: string
-  api_type?: string
   identifier?: string
   service_id?: string
-  is_default?: boolean
+  is_system?: boolean
   status?: string
   page?: number
   limit?: number
@@ -69,7 +61,6 @@ export interface CreateApiRequest {
   name: string
   display_name: string
   description: string
-  api_type: ApiType
   service_id: string
   status: ApiStatus
 }
@@ -81,7 +72,6 @@ export interface UpdateApiRequest {
   name: string
   display_name: string
   description: string
-  api_type: ApiType
   status: ApiStatus
   service_id: string
 }
@@ -92,4 +82,3 @@ export interface UpdateApiRequest {
 export interface UpdateApiStatusRequest {
   status: ApiStatus
 }
-

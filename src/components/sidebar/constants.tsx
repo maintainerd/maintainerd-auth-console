@@ -76,7 +76,6 @@ export const data = {
           items: [
             { title: "Services", route: "/services" },
             { title: "APIs", route: "/apis" },
-            { title: "Permissions", route: "/permissions" },
             { title: "Policies", route: "/policies" },
           ],
         },

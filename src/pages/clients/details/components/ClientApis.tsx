@@ -149,7 +149,6 @@ export function ClientApis({ clientId }: ClientApisProps) {
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                             <span className="font-mono">{item.api.name}</span>
                             {item.api.identifier && <span className="font-mono">{item.api.identifier}</span>}
-                            {item.api.api_type && <span>{item.api.api_type}</span>}
                           </div>
                         </div>
                       </div>
@@ -228,11 +227,6 @@ export function ClientApis({ clientId }: ClientApisProps) {
                                       <span className="font-mono text-sm font-medium">{permission.name}</span>
                                       <StatusBadge status={permission.status} />
                                       <SystemBadge isSystem={permission.is_system} />
-                                      {permission.is_default && (
-                                        <Badge variant="outline" className="text-xs">
-                                          Default
-                                        </Badge>
-                                      )}
                                     </div>
                                     <p className="text-sm text-muted-foreground">{permission.description}</p>
                                   </div>

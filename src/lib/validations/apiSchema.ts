@@ -26,10 +26,6 @@ export const apiSchema = yup.object({
     .required('API description is required')
     .min(10, 'API description must be at least 10 characters')
     .max(500, 'API description must not exceed 500 characters'),
-  apiType: yup
-    .string()
-    .oneOf(['rest', 'grpc', 'graphql', 'soap', 'webhook', 'websocket', 'rpc'], 'Invalid API type')
-    .required('API type is required'),
   status: yup
     .string()
     .oneOf(['active', 'inactive'], 'Invalid status')
@@ -40,4 +36,3 @@ export const apiSchema = yup.object({
 })
 
 export type ApiFormData = yup.InferType<typeof apiSchema>
-
