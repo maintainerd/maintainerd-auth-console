@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +92,11 @@ export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) 
           <div className="flex items-center gap-2">
             <StatusBadge status={client.status} />
             <SystemBadge isSystem={client.is_system} />
+            {client.is_default && (
+              <Badge variant="outline" className="text-xs">
+                Default
+              </Badge>
+            )}
           </div>
         }
         subtitle={<span className="font-mono text-xs text-muted-foreground">{client.name}</span>}

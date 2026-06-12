@@ -21,6 +21,13 @@ export type ClientStatus = Extract<Status, 'active' | 'inactive'>
 export type ClientType = 'traditional' | 'spa' | 'mobile' | 'm2m'
 
 /**
+ * Required authentication context class (ACR) override.
+ * '1' = password / single factor, '2' = step-up / MFA.
+ * null/undefined = inherit the tenant security policy.
+ */
+export type RequiredAcr = '1' | '2'
+
+/**
  * Client URI type enum
  */
 export type ClientUriType = 'redirect-uri' | 'origin-uri' | 'logout-uri' | 'login-uri' | 'cors-origin-uri'
@@ -67,6 +74,11 @@ export type Client = {
   status: ClientStatus
   is_default: boolean
   is_system: boolean
+  // Security posture / per-client overrides. null = inherits the tenant default.
+  require_pkce?: boolean | null
+  required_acr?: RequiredAcr | null
+  session_idle_timeout?: number | null
+  session_absolute_timeout?: number | null
   created_at: string
   updated_at: string
 }
@@ -123,6 +135,11 @@ export interface ClientResponse {
   status: ClientStatus
   is_default: boolean
   is_system: boolean
+  // Security posture / per-client overrides. null = inherits the tenant default.
+  require_pkce?: boolean | null
+  required_acr?: RequiredAcr | null
+  session_idle_timeout?: number | null
+  session_absolute_timeout?: number | null
   created_at: string
   updated_at: string
 }

@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import { AppWindow, Building2 } from "lucide-react"
+import { Building2, ShieldCheck } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
@@ -11,11 +11,30 @@ interface ClientInformationProps {
   client: ClientResponse
 }
 
-const CLIENT_TYPE_LABELS: Record<string, string> = {
-  traditional: "Traditional Web Application",
-  mobile: "Native Mobile Application",
-  spa: "Single Page Application",
-  m2m: "Machine to Machine",
+const INHERIT_LABEL = "Inherits tenant default"
+
+const ACR_LABELS: Record<string, string> = {
+  "1": "Password / single factor (ACR 1)",
+  "2": "Step-up — MFA (ACR 2)",
+}
+
+function formatAcr(acr?: string | null): string {
+  if (!acr) return INHERIT_LABEL
+  return ACR_LABELS[acr] ?? acr
+}
+
+function formatPkce(requirePkce?: boolean | null): string {
+  if (requirePkce == null) return INHERIT_LABEL
+  return requirePkce ? "Required" : "Disabled"
+}
+
+// Render a seconds value as "1800s · 30 min" with the coarsest exact unit.
+function formatSeconds(value?: number | null): string {
+  if (value == null) return INHERIT_LABEL
+  if (value % 86400 === 0) return `${value}s · ${value / 86400} day${value / 86400 === 1 ? "" : "s"}`
+  if (value % 3600 === 0) return `${value}s · ${value / 3600} hour${value / 3600 === 1 ? "" : "s"}`
+  if (value % 60 === 0) return `${value}s · ${value / 60} min`
+  return `${value}s`
 }
 
 export function ClientInformation({ client }: ClientInformationProps) {
@@ -24,30 +43,15 @@ export function ClientInformation({ client }: ClientInformationProps) {
   return (
     <div className="space-y-4">
       <InformationCard
-        title="Client Overview"
-        description="Core client fields returned by the backend."
-        icon={AppWindow}
+        title="Security & Sessions"
+        description="Authentication assurance and session-lifetime overrides. Unset values inherit the tenant security policy."
+        icon={ShieldCheck}
       >
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <DetailField label="Display Name" value={client.display_name} />
-          <DetailField label="Name" value={client.name} mono />
-          <DetailField label="Client UUID" value={client.client_id} mono />
-          <DetailField label="Client Type" value={CLIENT_TYPE_LABELS[client.client_type] ?? client.client_type} />
-          <DetailField label="Domain" value={client.domain || "-"} mono />
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Status</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge status={client.status} />
-              <SystemBadge isSystem={client.is_system} />
-              {client.is_default && (
-                <Badge variant="outline" className="text-xs">
-                  Default
-                </Badge>
-              )}
-            </div>
-          </div>
-          <DetailField label="Created" value={format(new Date(client.created_at), "PPpp")} />
-          <DetailField label="Last Updated" value={format(new Date(client.updated_at), "PPpp")} />
+          <DetailField label="Require PKCE" value={formatPkce(client.require_pkce)} />
+          <DetailField label="Required Auth Level (ACR)" value={formatAcr(client.required_acr)} />
+          <DetailField label="Session Idle Timeout" value={formatSeconds(client.session_idle_timeout)} />
+          <DetailField label="Session Absolute Timeout" value={formatSeconds(client.session_absolute_timeout)} />
         </div>
       </InformationCard>
 
