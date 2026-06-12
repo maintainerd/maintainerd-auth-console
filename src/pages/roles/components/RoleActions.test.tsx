@@ -14,8 +14,8 @@ const { navigateMock, updateStatusMutateAsync, deleteMutateAsync, showSuccessMoc
     showErrorMock: vi.fn(),
   }))
 
-vi.mock("react-router-dom", async (importOriginal) => {
-  const actual: any = await importOriginal()
+vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("react-router-dom")>) => {
+  const actual = await importOriginal()
   return {
     ...actual,
     useParams: () => ({ tenantId: "t1" }),

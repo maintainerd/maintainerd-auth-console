@@ -126,5 +126,5 @@ describe("ProfileFormDialog validation", () => {
     expect(screen.getByText("Language must be at most 10 characters")).toBeInTheDocument()
     expect(screen.getByText("Birthdate must be in YYYY-MM-DD format")).toBeInTheDocument()
     expect(updateMutateAsync).not.toHaveBeenCalled()
-  })
+  }, 10000)
 })

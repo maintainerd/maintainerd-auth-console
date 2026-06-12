@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, type Resolver, type SubmitHandler } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Mail, Server, KeyRound, UserRound, Info, Lock } from "lucide-react"
@@ -127,7 +127,7 @@ export default function EmailConfigPage() {
     setError,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<FormData>,
     defaultValues: { provider: "smtp", from_address: "", encryption: "tls", test_mode: false },
     mode: "onSubmit",
   })
@@ -172,7 +172,7 @@ export default function EmailConfigPage() {
     onError: (e) => showError(e),
   })
 
-  const onSubmit = (formData: FormData) => {
+  const onSubmit: SubmitHandler<FormData> = (formData) => {
     if (providerChanged && !formData.password) {
       setError("password", {
         type: "manual",

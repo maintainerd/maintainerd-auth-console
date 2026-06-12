@@ -2,14 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { screen } from "@testing-library/react"
 import { renderWithProviders } from "@/test/utils"
 import RoleDetailsPage from "./RoleDetailsPage"
+import type { Role } from "@/services/api/roles/types"
 
 const { useRoleMock, navigateMock } = vi.hoisted(() => ({
   useRoleMock: vi.fn(),
   navigateMock: vi.fn(),
 }))
 
-vi.mock("react-router-dom", async (importOriginal) => {
-  const actual: any = await importOriginal()
+vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("react-router-dom")>) => {
+  const actual = await importOriginal()
   return {
     ...actual,
     useParams: () => ({ tenantId: "t1", roleId: "r1" }),
@@ -28,12 +29,12 @@ vi.mock("@/hooks/useToast", () => ({
 }))
 
 vi.mock("./components", () => ({
-  RoleHeader: ({ role }: any) => <div data-testid="role-header">{role.name}</div>,
+  RoleHeader: ({ role }: { role: Role }) => <div data-testid="role-header">{role.name}</div>,
   RolePermissionsTab: () => <div data-testid="permissions-tab" />,
   RoleUsers: () => <div data-testid="users-tab" />,
 }))
 
-function makeRole(overrides: Record<string, unknown> = {}) {
+function makeRole(overrides: Partial<Role> = {}): Role {
   return {
     role_id: "r1", name: "admin", description: "Admin role",
     is_default: false, is_system: false, status: "active",

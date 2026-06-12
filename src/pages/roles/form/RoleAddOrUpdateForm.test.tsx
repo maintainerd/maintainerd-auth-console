@@ -15,8 +15,8 @@ const { useRoleMock, createMutateAsync, updateMutateAsync, navigateMock, showSuc
     showErrorMock: vi.fn(),
   }))
 
-vi.mock("react-router-dom", async (importOriginal) => {
-  const actual: any = await importOriginal()
+vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("react-router-dom")>) => {
+  const actual = await importOriginal()
   return {
     ...actual,
     useParams: vi.fn(() => ({ tenantId: "t1" })),
@@ -148,8 +148,12 @@ describe("RoleAddOrUpdateForm", () => {
 
   it("back navigation honours location.state", async () => {
     vi.mocked(useLocation).mockReturnValue({
+      pathname: "/t1/roles/create",
+      search: "",
+      hash: "",
       state: { from: "/t1/roles/r1", backLabel: "Back to Details" },
-    } as any)
+      key: "test",
+    })
     createMutateAsync.mockResolvedValueOnce(undefined)
     renderWithProviders(<RoleAddOrUpdateForm />)
     await u().type(screen.getByLabelText(/name/i), "viewer")

@@ -7,7 +7,7 @@ interface SocialProviderTabsProps {
   setActiveTab: (tab: string) => void
   provider: {
     provider: string
-    config: Record<string, unknown>
+    config: Record<string, unknown> | null
   }
 }
 
@@ -27,4 +27,3 @@ export function SocialProviderTabs({ activeTab, setActiveTab, provider }: Social
     </Tabs>
   )
 }
-
