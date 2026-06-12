@@ -1,5 +1,4 @@
 export { IdentityProviderHeader } from './IdentityProviderHeader'
-export { IdentityProviderInformation } from './IdentityProviderInformation'
-export { IdentityProviderConfigTab } from './IdentityProviderConfigTab'
-export { IdentityProviderTabs } from './IdentityProviderTabs'
-
+export { IdentityProviderInformationTab } from './IdentityProviderInformationTab'
+export { IdentityProviderMetadataTab } from './IdentityProviderMetadataTab'
+export { IdentityProviderClients } from './IdentityProviderClients'

@@ -40,9 +40,6 @@ import RoleAddOrUpdateForm from './pages/roles/form'
 import IdentityProvidersPage from './pages/identity-providers'
 import IdentityProviderDetailsPage from './pages/identity-providers/details'
 import IdentityProviderAddOrUpdateForm from './pages/identity-providers/form'
-import SocialProvidersPage from './pages/social-providers'
-import SocialProviderDetailsPage from './pages/social-providers/details'
-import SocialProviderAddOrUpdateForm from './pages/social-providers/form'
 import ClientsPage from './pages/clients'
 import ClientDetailsPage from './pages/clients/details'
 import ClientAddOrUpdateForm from './pages/clients/form'
@@ -185,10 +182,6 @@ function App() {
           <Route path="providers/identity/create" element={<IdentityProviderAddOrUpdateForm />} />
           <Route path="providers/identity/:providerId" element={<IdentityProviderDetailsPage />} />
           <Route path="providers/identity/:providerId/edit" element={<IdentityProviderAddOrUpdateForm />} />
-          <Route path="providers/social" element={<SocialProvidersPage />} />
-          <Route path="providers/social/create" element={<SocialProviderAddOrUpdateForm />} />
-          <Route path="providers/social/:providerId" element={<SocialProviderDetailsPage />} />
-          <Route path="providers/social/:providerId/edit" element={<SocialProviderAddOrUpdateForm />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="clients/create" element={<ClientAddOrUpdateForm />} />
           <Route path="clients/:clientId" element={<ClientDetailsPage />} />

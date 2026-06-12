@@ -1,118 +1,88 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { ArrowLeft, Key, Settings, Server } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AppWindow, Braces, KeyRound, Link2, Server, Settings } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DetailsContainer } from "@/components/container"
+import { DetailLayout } from "@/components/details"
 import { useClient } from "@/hooks/useClients"
-import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientApis } from "./components"
-import { getStatusColor, getStatusText } from "./utils"
+import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris } from "./components"
+
+const TABS = [
+  { value: "overview", label: "Overview", icon: AppWindow },
+  { value: "credentials", label: "Credentials", icon: KeyRound },
+  { value: "config", label: "OAuth & Tokens", icon: Settings },
+  { value: "uris", label: "URIs & Origins", icon: Link2 },
+  { value: "apis", label: "API Permissions", icon: Server },
+  { value: "metadata", label: "Metadata", icon: Braces },
+] as const
+
+type ClientDetailsTab = typeof TABS[number]["value"]
+
+const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
 
 export default function ClientDetailsPage() {
   const { tenantId, clientId } = useParams<{ tenantId: string; clientId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Get active tab from URL or default to 'credentials'
-  const activeTab = searchParams.get('tab') || 'credentials'
+  const requestedTab = searchParams.get("tab")
+  const activeTab: ClientDetailsTab = TAB_VALUES.has(requestedTab || "")
+    ? requestedTab as ClientDetailsTab
+    : "overview"
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab })
   }
 
-  // Fetch client from API
   const { data: clientData, isLoading, isError } = useClient(clientId || '')
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching client details
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state
-  if (isError || !clientData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <h2 className="text-2xl font-semibold">Client Not Found</h2>
-        <p className="text-muted-foreground">The client you're looking for doesn't exist.</p>
-        <Button onClick={() => navigate(`/${tenantId}/clients`)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Clients
-        </Button>
-      </div>
-    )
-  }
-
-  const client = clientData
-
   return (
-    <DetailsContainer>
-      <div className="flex flex-col gap-6">
-        {/* Back Button */}
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/${tenantId}/clients`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Clients
-          </Button>
-        </div>
+    <DetailLayout
+      backLabel="Back to Clients"
+      onBack={() => navigate(`/${tenantId}/clients`)}
+      isLoading={isLoading}
+      isError={isError || !clientData}
+      notFoundTitle="Client not found"
+      notFoundDescription="The client you're looking for doesn't exist or may have been removed."
+    >
+      {clientData && (
+        <>
+          <ClientHeader client={clientData} tenantId={tenantId!} clientId={clientId!} />
 
-        {/* Header */}
-        <ClientHeader
-          client={client}
-          tenantId={tenantId!}
-          clientId={clientId!}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-        />
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">
+              {TABS.map(({ value, label, icon: Icon }) => (
+                <TabsTrigger key={value} value={value} className="h-8 flex-none gap-2 px-3">
+                  <Icon className="size-4" />
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        {/* Client Information */}
-        <ClientInformation client={client} />
+            <TabsContent value="overview" className="mt-4">
+              <ClientInformation client={clientData} />
+            </TabsContent>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList>
-            <TabsTrigger value="credentials" className="gap-2">
-              <Key className="h-4 w-4" />
-              Credentials
-            </TabsTrigger>
-            <TabsTrigger value="config" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Config
-            </TabsTrigger>
-            <TabsTrigger value="apis" className="gap-2">
-              <Server className="h-4 w-4" />
-              APIs
-            </TabsTrigger>
-          </TabsList>
+            <TabsContent value="credentials" className="mt-4">
+              <ClientCredentials client={clientData} />
+            </TabsContent>
 
-          {/* Credentials Tab */}
-          <TabsContent value="credentials" className="mt-6">
-            <ClientCredentials clientId={client.client_id} clientType={client.client_type} />
-          </TabsContent>
+            <TabsContent value="config" className="mt-4">
+              <ClientConfig clientId={clientId!} />
+            </TabsContent>
 
-          {/* Config Tab */}
-          <TabsContent value="config" className="mt-6">
-            <ClientConfig clientId={clientId!} />
-          </TabsContent>
+            <TabsContent value="uris" className="mt-4">
+              <ClientUris client={clientData} />
+            </TabsContent>
 
-          {/* APIs Tab */}
-          <TabsContent value="apis" className="mt-6">
-            <ClientApis clientId={clientId!} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DetailsContainer>
+            <TabsContent value="apis" className="mt-4">
+              <ClientApis clientId={clientId!} />
+            </TabsContent>
+
+            <TabsContent value="metadata" className="mt-4">
+              <ClientMetadata clientId={clientId!} />
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
+    </DetailLayout>
   )
 }

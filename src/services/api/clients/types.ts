@@ -5,19 +5,10 @@
 import type { Status } from '@/types/status'
 
 /**
- * Client secret response type
+ * Client config type. The backend returns the stored JSON object directly
+ * inside the API response envelope.
  */
-export type ClientSecret = {
-  client_id: string
-  client_secret: string
-}
-
-/**
- * Client config type (dynamic fields)
- */
-export type ClientConfig = {
-  config: Record<string, unknown>
-}
+export type ClientConfig = Record<string, unknown>
 
 /**
  * Client status type - defines valid statuses for clients only
@@ -70,14 +61,24 @@ export type Client = {
   name: string
   display_name: string
   client_type: ClientType
-  domain: string
+  domain?: string | null
   uris?: Uri[]
-  identity_provider: ClientIdentityProvider
+  identity_provider?: ClientIdentityProvider
   status: ClientStatus
   is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
+}
+
+export type RotateClientSecretRequest = {
+  grace_period_hours: number
+}
+
+export type RotateClientSecretResponse = {
+  client_id?: string
+  client_secret: string
+  previous_secret_expires_at?: string
 }
 
 /**
@@ -116,14 +117,27 @@ export interface ClientResponse {
   name: string
   display_name: string
   client_type: ClientType
-  domain: string
+  domain?: string | null
   uris?: Uri[]
-  identity_provider: ClientIdentityProvider
+  identity_provider?: ClientIdentityProvider
   status: ClientStatus
   is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
+}
+
+/**
+ * Create client response. The backend returns plaintext credentials exactly
+ * once at creation, alongside the created client resource.
+ */
+export interface ClientCreateResponse {
+  client: ClientResponse
+  credentials: {
+    client_uuid: string
+    client_id: string
+    client_secret: string
+  }
 }
 
 /**
@@ -136,7 +150,7 @@ export interface CreateClientRequest {
   domain: string
   identity_provider_id: string
   status: ClientStatus
-  config?: Record<string, unknown>
+  config: Record<string, unknown>
 }
 
 /**
@@ -147,9 +161,8 @@ export interface UpdateClientRequest {
   display_name: string
   client_type: ClientType
   domain: string
-  identity_provider_id?: string
   status: ClientStatus
-  config?: Record<string, unknown>
+  config: Record<string, unknown>
 }
 
 /**
@@ -216,8 +229,9 @@ export type ClientApi = {
   name: string
   display_name: string
   description: string
+  api_type?: string
+  identifier?: string
   status: 'active' | 'inactive'
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -227,7 +241,7 @@ export type ClientApi = {
  * Client API type (association between client and API with permissions)
  */
 export type ClientApiAssociation = {
-  auth_client_api_id: string
+  client_api_id: string
   api: ClientApi
   permissions: ClientApiPermission[]
   created_at: string

@@ -9,8 +9,8 @@ export const clientSchema = yup.object({
   name: yup
     .string()
     .required('Client name is required')
-    .min(2, 'Client name must be at least 2 characters')
-    .max(100, 'Client name must not exceed 100 characters')
+    .min(3, 'Client name must be at least 3 characters')
+    .max(50, 'Client name must not exceed 50 characters')
     .matches(
       /^[a-z0-9\-_]+$/,
       'Client name can only contain lowercase letters, numbers, hyphens, and underscores'
@@ -18,8 +18,8 @@ export const clientSchema = yup.object({
   displayName: yup
     .string()
     .required('Display name is required')
-    .min(2, 'Display name must be at least 2 characters')
-    .max(100, 'Display name must not exceed 100 characters'),
+    .min(8, 'Display name must be at least 8 characters')
+    .max(200, 'Display name must not exceed 200 characters'),
   clientType: yup
     .string()
     .required('Client type is required')
@@ -28,7 +28,7 @@ export const clientSchema = yup.object({
     .string()
     .required('Domain is required')
     .min(3, 'Domain must be at least 3 characters')
-    .max(255, 'Domain must not exceed 255 characters'),
+    .max(100, 'Domain must not exceed 100 characters'),
   identityProviderId: yup
     .string()
     .required('Identity provider is required'),
@@ -39,4 +39,3 @@ export const clientSchema = yup.object({
 })
 
 export type ClientFormData = yup.InferType<typeof clientSchema>
-

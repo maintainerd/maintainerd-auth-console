@@ -17,7 +17,18 @@ export type ProviderType = 'identity' | 'social'
 /**
  * Provider options
  */
-export type ProviderOption = 'internal' | 'cognito' | 'auth0' | 'google' | 'facebook' | 'github'
+export type ProviderOption =
+  | 'internal'
+  | 'cognito'
+  | 'auth0'
+  | 'google'
+  | 'facebook'
+  | 'github'
+  | 'gitlab'
+  | 'microsoft'
+  | 'apple'
+  | 'linkedin'
+  | 'twitter'
 
 /**
  * Identity Provider type
@@ -62,8 +73,8 @@ export type IdentityProviderDetail = {
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, unknown> // Dynamic config based on provider
-  tenant: Tenant
+  config: Record<string, unknown> | null
+  tenant: Tenant | null
   status: IdentityProviderStatus
   is_default: boolean
   is_system: boolean
@@ -128,8 +139,8 @@ export interface IdentityProviderDetailResponse {
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, unknown>
-  tenant: Tenant
+  config: Record<string, unknown> | null
+  tenant: Tenant | null
   status: IdentityProviderStatus
   is_default: boolean
   is_system: boolean

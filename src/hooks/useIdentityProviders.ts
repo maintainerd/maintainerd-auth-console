@@ -1,9 +1,4 @@
-/**
- * Identity Providers Hook
- * Custom hook for fetching identity providers using TanStack Query
- */
-
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { 
   fetchIdentityProviders, 
   fetchIdentityProviderById, 
@@ -31,12 +26,32 @@ export const identityProviderKeys = {
 }
 
 /**
+ * Hook to fetch identity providers for the listing page.
+ * Social connectors are identity providers too, so the listing covers every
+ * provider_type; it just maps the is_system filter from string to boolean.
+ */
+export function useIdentityProvidersList(params: Record<string, unknown>) {
+  const { is_system, ...rest } = params
+  const queryParams: IdentityProviderQueryParams = {
+    ...rest as IdentityProviderQueryParams,
+  }
+
+  if (typeof is_system === 'string') {
+    if (is_system === 'system') queryParams.is_system = true
+    else if (is_system === 'regular') queryParams.is_system = false
+  }
+
+  return useIdentityProviders(queryParams)
+}
+
+/**
  * Hook to fetch identity providers with optional filters and pagination
  */
 export function useIdentityProviders(params?: IdentityProviderQueryParams) {
   return useQuery({
     queryKey: identityProviderKeys.list(params),
     queryFn: () => fetchIdentityProviders(params),
+    placeholderData: keepPreviousData,
   })
 }
 

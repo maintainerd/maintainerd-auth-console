@@ -1,17 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Settings } from "lucide-react"
-import { useClient, useClientConfig } from "@/hooks/useClients"
+import { InformationCard } from "@/components/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/details"
+import { useClientConfig } from "@/hooks/useClients"
+import { formatClientConfigValue, getClientConfigSections } from "../../clientConfig"
 
 interface ClientConfigProps {
   clientId: string
 }
 
 export function ClientConfig({ clientId }: ClientConfigProps) {
-  const { data: clientData, isLoading: isLoadingClient, isError: isClientError } = useClient(clientId)
   const { data: configData, isLoading: isLoadingConfig, isError: isConfigError } = useClientConfig(clientId)
 
-  const isLoading = isLoadingClient || isLoadingConfig
-  const isError = isClientError || isConfigError
+  const isLoading = isLoadingConfig
+  const isError = isConfigError
 
   // Loading state
   if (isLoading) {
@@ -19,9 +21,9 @@ export function ClientConfig({ clientId }: ClientConfigProps) {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Client Configuration</CardTitle>
+            <CardTitle>OAuth & Token Configuration</CardTitle>
             <p className="text-sm text-muted-foreground">
-              OAuth 2.0 and OpenID Connect configuration settings for this client.
+              Standard OAuth, token, URI, CORS, and client security behavior stored for this client.
             </p>
           </CardHeader>
           <CardContent>
@@ -36,14 +38,14 @@ export function ClientConfig({ clientId }: ClientConfigProps) {
   }
 
   // Error state
-  if (isError || !configData) {
+  if (isError) {
     return (
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Client Configuration</CardTitle>
+            <CardTitle>OAuth & Token Configuration</CardTitle>
             <p className="text-sm text-muted-foreground">
-              OAuth 2.0 and OpenID Connect configuration settings for this client.
+              Standard OAuth, token, URI, CORS, and client security behavior stored for this client.
             </p>
           </CardHeader>
           <CardContent>
@@ -60,210 +62,44 @@ export function ClientConfig({ clientId }: ClientConfigProps) {
     )
   }
 
-  const config = configData.config || {}
-  const uris = clientData?.uris || []
-
-  // Separate config sections (URIs are now managed separately via client.uris)
-  const corsKeys = ['cors_enabled']
-  const tokenKeys = ['access_token_lifetime', 'refresh_token_lifetime', 'refresh_token_rotation', 'multi_resource_refresh_token']
-
-  // Group URIs by type
-  const loginUri = uris.find(u => u.type === 'login-uri')
-  const redirectUris = uris.filter(u => u.type === 'redirect-uri')
-  const allowedOrigins = uris.filter(u => u.type === 'origin-uri')
-  const allowedLogoutUrls = uris.filter(u => u.type === 'logout-uri')
-  const corsAllowedOrigins = uris.filter(u => u.type === 'cors-origin-uri')
-
-  const corsConfig: Record<string, unknown> = {}
-  const tokenConfig: Record<string, unknown> = {}
-  const customConfig: Record<string, unknown> = {}
-
-  Object.entries(config).forEach(([key, value]) => {
-    if (key === 'custom' && typeof value === 'object' && value !== null) {
-      // Extract custom fields from the "custom" key
-      Object.assign(customConfig, value)
-    } else if (corsKeys.includes(key)) {
-      corsConfig[key] = value
-    } else if (tokenKeys.includes(key)) {
-      tokenConfig[key] = value
-    }
-  })
-
-  const corsEntries = Object.entries(corsConfig)
-  const tokenEntries = Object.entries(tokenConfig)
-  const customEntries = Object.entries(customConfig)
-
-  // Check if there are any URIs to display
-  const hasApplicationUris = loginUri || redirectUris.length > 0 || allowedOrigins.length > 0 || allowedLogoutUrls.length > 0
+  const config = configData ?? {}
+  const sections = getClientConfigSections(config)
 
   return (
-    <div className="space-y-6">
-      {/* Application URIs */}
-      {hasApplicationUris && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Application URIs</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Application URLs and endpoints configuration.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {loginUri && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Login URI</p>
-                  <p className="text-sm bg-muted p-2 rounded break-all">{loginUri.uri}</p>
-                </div>
-              )}
-              {redirectUris.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Redirect URIs</p>
-                  <div className="space-y-2">
-                    {redirectUris.map((uri) => (
-                      <p key={uri.uri_id} className="text-sm bg-muted p-2 rounded break-all">{uri.uri}</p>
-                    ))}
+    <InformationCard
+      title="OAuth & Token Configuration"
+      description="Standard OAuth, OIDC, token, URI, CORS, and client security settings."
+      icon={Settings}
+    >
+      <div className="space-y-6">
+        {sections.length > 0 ? (
+          sections.map((section, sectionIndex) => (
+            <section key={section.title} className="space-y-4">
+              {sectionIndex > 0 && <div className="border-t" />}
+              <div className="space-y-0.5">
+                <h4 className="text-sm font-semibold">{section.title}</h4>
+                <p className="text-sm text-muted-foreground">{section.description}</p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {section.entries.map(([key, value]) => (
+                  <div key={key} className="space-y-1">
+                    <p className="font-mono text-sm font-medium text-muted-foreground">{key}</p>
+                    <p className="break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">
+                      {formatClientConfigValue(value) || "—"}
+                    </p>
                   </div>
-                </div>
-              )}
-              {allowedOrigins.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Allowed Origins</p>
-                  <div className="space-y-2">
-                    {allowedOrigins.map((uri) => (
-                      <p key={uri.uri_id} className="text-sm bg-muted p-2 rounded break-all">{uri.uri}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {allowedLogoutUrls.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Allowed Logout URLs</p>
-                  <div className="space-y-2">
-                    {allowedLogoutUrls.map((uri) => (
-                      <p key={uri.uri_id} className="text-sm bg-muted p-2 rounded break-all">{uri.uri}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Cross Origin Authentication */}
-      {(corsEntries.length > 0 || corsAllowedOrigins.length > 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Cross Origin Authentication</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              CORS settings for cross-origin authentication requests.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {corsEntries.map(([key, value]) => (
-                <div key={key}>
-                  <p className="text-sm font-medium text-muted-foreground capitalize">
-                    {key.replace(/_/g, ' ')}
-                  </p>
-                  <p className="text-sm bg-muted p-2 rounded break-all">
-                    {typeof value === 'boolean'
-                      ? (value ? 'Enabled' : 'Disabled')
-                      : String(value)
-                    }
-                  </p>
-                </div>
-              ))}
-              {corsAllowedOrigins.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">CORS Allowed Origins</p>
-                  <div className="space-y-2">
-                    {corsAllowedOrigins.map((uri) => (
-                      <p key={uri.uri_id} className="text-sm bg-muted p-2 rounded break-all">{uri.uri}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Token Configuration */}
-      {tokenEntries.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Token Configuration</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Token lifetime and security settings.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {tokenEntries.map(([key, value]) => (
-                <div key={key}>
-                  <p className="text-sm font-medium text-muted-foreground capitalize">
-                    {key.replace(/_/g, ' ')}
-                  </p>
-                  <p className="text-sm bg-muted p-2 rounded break-all">
-                    {typeof value === 'boolean'
-                      ? (value ? 'Enabled' : 'Disabled')
-                      : key.includes('lifetime')
-                      ? `${value} seconds (${Number(value) / 3600} hours)`
-                      : String(value)
-                    }
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Custom Configurations */}
-      {customEntries.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Custom Configurations</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Additional custom configuration fields specific to this client.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {customEntries.map(([key, value]) => (
-                <div key={key} className="grid gap-3 md:grid-cols-2">
-                  <p className="text-sm bg-muted px-3 py-2 rounded font-mono break-all">
-                    {key}
-                  </p>
-                  <p className="text-sm bg-muted px-3 py-2 rounded font-mono break-all">
-                    {typeof value === 'boolean'
-                      ? (value ? 'true' : 'false')
-                      : Array.isArray(value)
-                      ? value.join(', ')
-                      : typeof value === 'object'
-                      ? JSON.stringify(value, null, 2)
-                      : String(value)
-                    }
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Empty state */}
-      {!hasApplicationUris && corsEntries.length === 0 && tokenEntries.length === 0 && customEntries.length === 0 && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center text-muted-foreground">
-              No configuration settings available
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <EmptyState
+            icon={Settings}
+            title="No configuration"
+            description="This client has no standard OAuth, token, URI, CORS, or security configuration stored yet."
+          />
+        )}
+      </div>
+    </InformationCard>
   )
 }
-

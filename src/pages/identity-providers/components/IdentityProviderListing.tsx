@@ -1,103 +1,32 @@
-import * as React from "react"
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { IdentityProviderToolbar } from "./IdentityProviderToolbar"
+import { useNavigate, useParams } from "react-router-dom"
+import type { SortingState } from "@tanstack/react-table"
+import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { identityProviderColumns } from "./IdentityProviderColumns"
-import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
-import { useIdentityProviderQuery } from "../hooks/useIdentityProviderQuery"
+import { useIdentityProvidersList } from "@/hooks/useIdentityProviders"
+
+const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
+const SEARCH_FIELDS = ["name", "display_name", "identifier"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "inactive"] },
+  { key: "provider", label: "Provider", options: ["internal", "cognito", "auth0", "google", "facebook", "github"] },
+  { key: "is_system", label: "Type", options: ["system", "regular"] },
+]
 
 export function IdentityProviderListing() {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-
-  const columns = React.useMemo(() => identityProviderColumns, [])
-
-  const {
-    identityProviders,
-    rowCount,
-    isLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    sorting,
-    setSorting,
-    pagination,
-    setPagination,
-  } = useIdentityProviderQuery()
-
-  const table = useReactTable({
-    data: identityProviders,
-    columns,
-    pageCount: Math.ceil(rowCount / pagination.pageSize),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    manualSorting: true, // Server-side sorting
-    manualPagination: true, // Server-side pagination
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-  })
-
-  // Get active filters for display
-  const activeFilters = React.useMemo(() => {
-    const filterLabels: string[] = []
-    if (filters.status.length > 0) {
-      filterLabels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    if (filters.provider.length > 0) {
-      filterLabels.push(`Provider: ${filters.provider.join(", ")}`)
-    }
-    if (filters.isSystem !== "all") {
-      const typeLabel = filters.isSystem === "system" ? "System" : "Regular"
-      filterLabels.push(`Type: ${typeLabel}`)
-    }
-    return filterLabels
-  }, [filters])
-
-  const clearAllFilters = React.useCallback(() => {
-    setFilters({
-      status: [],
-      provider: [],
-      isSystem: "all"
-    })
-  }, [setFilters])
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
-    <div className="space-y-4">
-      <IdentityProviderToolbar
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        table={table}
-      />
-      <DataTableActiveFilters
-        activeFilters={activeFilters}
-        onClearAll={clearAllFilters}
-      />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-      />
-      <DataTablePagination table={table} />
-    </div>
+    <ResourceListing
+      columns={identityProviderColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search identity providers by name, display name, or identifier..."
+      useData={useIdentityProvidersList}
+      filterGroups={FILTER_GROUPS}
+      onRowClick={(provider) => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}`)}
+      onCreate={() => navigate(`/${tenantId}/providers/identity/create`)}
+      createLabel="New Provider"
+    />
   )
 }
-

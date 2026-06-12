@@ -3,7 +3,7 @@
  * Custom hook for fetching clients using TanStack Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import {
   fetchClients,
   fetchClientById,
@@ -11,7 +11,7 @@ import {
   updateClient,
   deleteClient,
   updateClientStatus,
-  fetchClientSecret,
+  rotateClientSecret,
   fetchClientConfig,
   fetchClientUris,
   createClientUri,
@@ -28,6 +28,7 @@ import type {
   CreateClientRequest,
   UpdateClientRequest,
   UpdateClientStatusRequest,
+  RotateClientSecretRequest,
   CreateClientUriRequest,
   UpdateClientUriRequest,
   AddClientApisRequest,
@@ -43,7 +44,6 @@ export const clientKeys = {
   list: (params?: ClientQueryParams) => [...clientKeys.lists(), params] as const,
   details: () => [...clientKeys.all, 'detail'] as const,
   detail: (id: string) => [...clientKeys.details(), id] as const,
-  secret: (id: string) => [...clientKeys.all, 'secret', id] as const,
   config: (id: string) => [...clientKeys.all, 'config', id] as const,
   uris: (id: string) => [...clientKeys.all, 'uris', id] as const,
   apis: (id: string) => [...clientKeys.all, 'apis', id] as const,
@@ -56,7 +56,27 @@ export function useClients(params?: ClientQueryParams) {
   return useQuery({
     queryKey: clientKeys.list(params),
     queryFn: () => fetchClients(params),
+    placeholderData: keepPreviousData,
   })
+}
+
+/**
+ * Hook to fetch clients for the standard listing page.
+ * The shared listing filter uses human labels for system/regular, while the
+ * API expects an `is_system` boolean.
+ */
+export function useClientsList(params: Record<string, unknown>) {
+  const { is_system, ...rest } = params
+  const queryParams: ClientQueryParams = {
+    ...rest as ClientQueryParams,
+  }
+
+  if (typeof is_system === 'string') {
+    if (is_system === 'system') queryParams.is_system = true
+    else if (is_system === 'regular') queryParams.is_system = false
+  }
+
+  return useClients(queryParams)
 }
 
 /**
@@ -135,13 +155,17 @@ export function useUpdateClientStatus() {
 }
 
 /**
- * Hook to fetch client secret
+ * Hook to rotate a client secret. The returned secret is shown only once.
  */
-export function useClientSecret(clientId: string, enabled: boolean = false) {
-  return useQuery({
-    queryKey: clientKeys.secret(clientId),
-    queryFn: () => fetchClientSecret(clientId),
-    enabled: enabled && !!clientId,
+export function useRotateClientSecret() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ clientId, data }: { clientId: string; data?: RotateClientSecretRequest }) =>
+      rotateClientSecret(clientId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) })
+    },
   })
 }
 
@@ -289,4 +313,3 @@ export function useRemoveClientApiPermission() {
     },
   })
 }
-

@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -14,6 +12,7 @@ import {
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { ProviderConfigSection, useProviderConfig } from "@/components/provider-config"
 import { socialProviderSchema, type SocialProviderFormData } from "@/lib/validations"
 import { useAppSelector } from "@/store/hooks"
 import { useIdentityProvider, useCreateIdentityProvider, useUpdateIdentityProvider } from "@/hooks/useIdentityProviders"
@@ -44,29 +43,13 @@ export default function SocialProviderAddOrUpdateForm() {
   const createProviderMutation = useCreateIdentityProvider()
   const updateProviderMutation = useUpdateIdentityProvider()
 
-  // Custom config fields state
-  const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
-  const [configError, setConfigError] = useState<string>("")
-
-  // Check for duplicate keys whenever custom fields change
-  useEffect(() => {
-    const keys = customFields.map(field => field.key.trim()).filter(key => key !== '')
-    const duplicateKeys = keys.filter((key, index) => keys.indexOf(key) !== index)
-
-    if (duplicateKeys.length > 0) {
-      const uniqueDuplicates = [...new Set(duplicateKeys)]
-      setConfigError(`Duplicate configuration keys: ${uniqueDuplicates.join(', ')}`)
-    } else {
-      setConfigError("")
-    }
-  }, [customFields])
-
   // React Hook Form setup
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<SocialProviderFormData>({
     resolver: yupResolver(socialProviderSchema),
@@ -80,6 +63,12 @@ export default function SocialProviderAddOrUpdateForm() {
     reValidateMode: 'onSubmit'
   })
 
+  // Dynamic, provider-aware configuration. Re-renders its fields whenever the
+  // selected provider changes; both the well-known and additional fields are
+  // merged into a single `config` JSON on save.
+  const selectedProvider = watch("provider")
+  const providerConfig = useProviderConfig(selectedProvider)
+
   // Load existing provider data if editing
   useEffect(() => {
     if (isEditing && providerData) {
@@ -90,37 +79,11 @@ export default function SocialProviderAddOrUpdateForm() {
         status: providerData.status as 'active' | 'inactive',
       })
 
-      // Load config fields
-      if (providerData.config) {
-        const fields = Object.entries(providerData.config).map(([key, value], index) => ({
-          id: `${Date.now()}-${index}`,
-          key,
-          value: String(value)
-        }))
-        setCustomFields(fields)
-      }
+      providerConfig.load(providerData.config, providerData.provider)
     }
+    // providerConfig.load is stable; intentionally keyed to the fetched record
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, providerData, reset])
-
-  // Custom config field management functions
-  const addCustomField = () => {
-    const newField = {
-      id: Date.now().toString(),
-      key: "",
-      value: ""
-    }
-    setCustomFields([...customFields, newField])
-  }
-
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter(field => field.id !== id))
-  }
-
-  const updateCustomField = (id: string, key: string, value: string) => {
-    setCustomFields(customFields.map(field =>
-      field.id === id ? { ...field, key, value } : field
-    ))
-  }
 
   const onSubmit = async (formData: SocialProviderFormData) => {
     if (!currentTenant) {
@@ -128,20 +91,13 @@ export default function SocialProviderAddOrUpdateForm() {
       return
     }
 
-    // Check for duplicate keys in custom fields
-    if (configError) {
-      showError(configError)
+    if (!providerConfig.validate()) {
+      showError("Please complete the required provider configuration fields.")
       return
     }
 
     try {
-      // Build config object from custom fields
-      const config = customFields.reduce((acc, field) => {
-        if (field.key.trim()) {
-          acc[field.key] = field.value
-        }
-        return acc
-      }, {} as Record<string, string>)
+      const config = providerConfig.buildConfig()
 
       if (isEditing && providerId) {
         const updateData = {
@@ -179,6 +135,7 @@ export default function SocialProviderAddOrUpdateForm() {
   }
 
   const isLoading = createProviderMutation.isPending || updateProviderMutation.isPending || isFetchingProvider
+  const fieldsDisabled = providerData?.is_system || isLoading
 
   // Loading state
   if (isEditing && isFetchingProvider) {
@@ -213,16 +170,16 @@ export default function SocialProviderAddOrUpdateForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormInputField
                 label="Name"
-                placeholder="e.g., corporate-auth0, aws-cognito"
+                placeholder="e.g., google-workspace, github-oauth"
                 description="Lowercase letters, numbers, and hyphens only"
-                disabled={providerData?.is_system || isLoading}
+                disabled={fieldsDisabled}
                 error={errors.name?.message}
                 required
                 {...register("name")}
@@ -230,9 +187,9 @@ export default function SocialProviderAddOrUpdateForm() {
 
               <FormInputField
                 label="Display Name"
-                placeholder="e.g., Corporate Auth0, AWS Cognito"
+                placeholder="e.g., Sign in with Google, GitHub"
                 description="This will be the display name shown to users"
-                disabled={providerData?.is_system || isLoading}
+                disabled={fieldsDisabled}
                 error={errors.displayName?.message}
                 required
                 {...register("displayName")}
@@ -250,8 +207,9 @@ export default function SocialProviderAddOrUpdateForm() {
                       options={PROVIDER_OPTIONS}
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={providerData?.is_system || isLoading}
+                      disabled={fieldsDisabled}
                       error={errors.provider?.message}
+                      description="Changing the provider updates the configuration fields below"
                       required
                     />
                   )}
@@ -268,7 +226,7 @@ export default function SocialProviderAddOrUpdateForm() {
                       options={STATUS_OPTIONS}
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={providerData?.is_system || isLoading}
+                      disabled={fieldsDisabled}
                       error={errors.status?.message}
                       required
                     />
@@ -278,69 +236,12 @@ export default function SocialProviderAddOrUpdateForm() {
             </CardContent>
           </Card>
 
-          {/* Custom Configuration Fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Custom Configuration</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Add provider-specific configuration fields (e.g., Client ID, Client Secret, Redirect URI, Scopes)
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Error Message for Duplicate Keys */}
-              {configError && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {configError}
-                </div>
-              )}
-
-              {/* Existing Custom Fields */}
-              {customFields.length > 0 && (
-                <div className="space-y-3">
-                  {customFields.map((field) => (
-                    <div key={field.id} className="flex gap-3 items-start">
-                      <div className="flex-1 grid gap-3 md:grid-cols-2">
-                        <Input
-                          value={field.key}
-                          onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
-                          placeholder="Field name (e.g., client_id, client_secret, redirect_uri)"
-                          disabled={providerData?.is_system || isLoading}
-                        />
-                        <Input
-                          value={field.value}
-                          onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
-                          placeholder="Field value"
-                          disabled={providerData?.is_system || isLoading}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCustomField(field.id)}
-                        className="text-destructive hover:text-destructive"
-                        disabled={providerData?.is_system || isLoading}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Add New Custom Field Button */}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addCustomField}
-                disabled={providerData?.is_system || isLoading}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Custom Field
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Provider-aware configuration */}
+          <ProviderConfigSection
+            provider={selectedProvider}
+            controller={providerConfig}
+            disabled={fieldsDisabled}
+          />
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3">

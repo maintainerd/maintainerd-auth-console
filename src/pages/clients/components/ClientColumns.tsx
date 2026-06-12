@@ -1,34 +1,12 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Monitor, Smartphone, Globe, Cog } from "lucide-react"
+import { AppWindow, Monitor, Smartphone, Globe, Cog } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ClientActions } from "./ClientActions"
-import { SystemBadge } from "@/components/badges"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge, SystemBadge } from "@/components/badges"
+import { ProviderLogo } from "@/components/provider-config"
 import type { Client, ClientStatus, ClientType } from "@/services/api/clients/types"
-
-const getStatusBadge = (status: ClientStatus) => {
-  const statusConfig = {
-    active: {
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-    },
-    inactive: {
-      icon: AlertTriangle,
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
-    }
-  }
-
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant="outline" className={config.className}>
-      <Icon className="w-3 h-3 mr-1" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
-}
 
 const getTypeBadge = (type: ClientType) => {
   const typeConfig = {
@@ -55,7 +33,7 @@ const getTypeBadge = (type: ClientType) => {
   }
 
   // Fallback for unknown types or legacy "native" type
-  const config = typeConfig[type] || typeConfig.mobile || {
+  const config = typeConfig[type] || {
     icon: Monitor,
     label: type,
     className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
@@ -73,46 +51,56 @@ const getTypeBadge = (type: ClientType) => {
 
 export const clientColumns: ColumnDef<Client>[] = [
   {
-    id: "Client",
+    id: "display_name",
     accessorKey: "display_name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Client
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Client" />,
     cell: ({ row }) => {
       const client = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{client.display_name}</span>
-            <SystemBadge isSystem={client.is_default} />
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <AppWindow className="size-5" />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{client.name}</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium truncate">{client.display_name}</span>
+              <SystemBadge isSystem={client.is_system} />
+            </div>
+            <span className="text-sm text-muted-foreground truncate">{client.name}</span>
+            <span className="text-xs text-muted-foreground font-mono truncate">{client.client_id}</span>
+          </div>
         </div>
       )
     },
   },
   {
-    id: "Type",
-    accessorKey: "client_type",
-    header: ({ column }) => {
+    id: "identity_provider",
+    accessorKey: "identity_provider.display_name",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Identity Provider" />,
+    cell: ({ row }) => {
+      const client = row.original
+      const provider = client.identity_provider
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2 px-3 py-1">
+          {provider ? (
+            <>
+              <ProviderLogo provider={provider.provider} className="size-8" iconClassName="size-4" />
+              <div className="flex min-w-0 flex-col">
+                <span className="text-sm font-medium truncate">{provider.display_name}</span>
+                <span className="text-xs text-muted-foreground truncate">{provider.identifier}</span>
+              </div>
+            </>
+          ) : (
+            <span className="text-sm text-muted-foreground">Unassigned</span>
+          )}
+        </div>
       )
     },
+  },
+  {
+    id: "client_type",
+    accessorKey: "client_type",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
@@ -122,85 +110,38 @@ export const clientColumns: ColumnDef<Client>[] = [
     },
   },
   {
-    id: "Status",
+    id: "status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(row.original.status)}
+          <StatusBadge status={row.original.status as ClientStatus} />
         </div>
       )
     },
   },
   {
-    id: "Identity Provider",
-    accessorKey: "identity_provider.display_name",
-    enableHiding: true,
-    meta: {
-      defaultHidden: true,
-    },
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Identity Provider
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const client = row.original
-      return (
-        <div className="px-3 py-1">
-          <span className="text-sm">{client.identity_provider.display_name}</span>
-        </div>
-      )
-    },
-  },
-  {
-    id: "Domain",
+    id: "domain",
     accessorKey: "domain",
     enableHiding: true,
     meta: {
       defaultHidden: true,
     },
-    header: "Domain",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Domain" />,
     cell: ({ row }) => {
       const client = row.original
       return (
         <div className="px-3 py-1">
-          <span className="text-sm font-mono text-muted-foreground">{client.domain}</span>
+          <span className="text-sm font-mono text-muted-foreground">{client.domain || "None"}</span>
         </div>
       )
     },
   },
   {
-    id: "Created",
+    id: "created_at",
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const client = row.original
       return (

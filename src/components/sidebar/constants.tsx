@@ -52,7 +52,6 @@ export const data = {
           icon: KeyRound,
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
-            { title: "Social Connections", route: "/providers/social" },
             { title: "Auth Flows", route: "/auth-flows" },
             { title: "Multi-Factor Auth", route: "/mfa" },
           ],

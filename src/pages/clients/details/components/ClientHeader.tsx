@@ -1,34 +1,35 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Shield, Trash2, MoreVertical } from "lucide-react"
+import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Trash2 } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeleteClient } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ClientStatus } from "@/services/api/clients/types"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
+import type { ClientResponse } from "@/services/api/clients/types"
 
 interface ClientHeaderProps {
-  client: {
-    display_name: string
-    name: string
-    status: ClientStatus
-    is_system: boolean
-  }
+  client: ClientResponse
   tenantId: string
   clientId: string
-  getStatusColor: (status: ClientStatus) => string
-  getStatusText: (status: ClientStatus) => string
 }
 
-export function ClientHeader({ client, tenantId, clientId, getStatusColor, getStatusText }: ClientHeaderProps) {
+const CLIENT_TYPE_LABELS: Record<string, string> = {
+  traditional: "Traditional Web",
+  mobile: "Native Mobile",
+  spa: "Single Page App",
+  m2m: "Machine to Machine",
+}
+
+export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteClientMutation = useDeleteClient()
@@ -45,48 +46,92 @@ export function ClientHeader({ client, tenantId, clientId, getStatusColor, getSt
     }
   }
 
+  const attributes: DetailAttribute[] = [
+    {
+      icon: KeyRound,
+      label: "Client UUID",
+      value: <span className="font-mono text-xs">{client.client_id}</span>,
+    },
+    {
+      icon: AppWindow,
+      label: "Client Type",
+      value: CLIENT_TYPE_LABELS[client.client_type] ?? client.client_type,
+    },
+    {
+      icon: Globe,
+      label: "Domain",
+      value: client.domain ? (
+        <span className="font-mono text-xs break-all">{client.domain}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+    },
+    {
+      icon: CalendarDays,
+      label: "Created",
+      value: format(new Date(client.created_at), "PP"),
+    },
+    {
+      icon: CalendarDays,
+      label: "Last updated",
+      value: format(new Date(client.updated_at), "PP"),
+    },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{client.display_name}</h1>
-            <Badge className={getStatusColor(client.status)}>
-              {getStatusText(client.status)}
-            </Badge>
-            {client.is_system && (
-              <Badge variant="secondary" className="gap-1">
-                <Shield className="h-3 w-3" />
-                System
-              </Badge>
-            )}
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <AppWindow className="size-6" />
           </div>
-          <p className="text-sm text-muted-foreground font-mono">{client.name}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
+        }
+        title={client.display_name}
+        badge={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={client.status} />
+            <SystemBadge isSystem={client.is_system} />
+          </div>
+        }
+        subtitle={<span className="font-mono text-xs text-muted-foreground">{client.name}</span>}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/clients/${clientId}/edit`, {
+                  state: { from: `/${tenantId}/clients/${clientId}`, backLabel: "Back to Client Details" },
+                })
+              }
+            >
+              <Edit className="size-4" />
+              Edit
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/clients/${clientId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Client
-            </DropdownMenuItem>
             {!client.is_system && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Client
-                </DropdownMenuItem>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Delete Client
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
@@ -94,11 +139,9 @@ export function ClientHeader({ client, tenantId, clientId, getStatusColor, getSt
         onConfirm={handleDelete}
         title="Delete Client"
         description="This action cannot be undone. This will permanently delete the client and all associated data."
-        confirmationText="This will permanently delete this client and remove all associated configurations and credentials."
         itemName={client.name}
         isDeleting={deleteClientMutation.isPending}
       />
     </>
   )
 }
-
