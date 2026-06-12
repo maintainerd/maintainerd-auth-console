@@ -1,105 +1,63 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CheckCircle, AlertTriangle, Clock } from "lucide-react"
+import { KeyRound, TimerReset } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiKeyActions } from "./ApiKeyActions"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge } from "@/components/badges"
 import type { ApiKey } from "@/services/api/api-keys/types"
-
-type ApiKeyStatus = 'active' | 'inactive' | 'expired'
-
-const getStatusBadge = (status: ApiKeyStatus) => {
-  const statusConfig = {
-    active: {
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-    },
-    inactive: {
-      icon: AlertTriangle,
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
-    },
-    expired: {
-      icon: Clock,
-      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-    }
-  }
-
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant="outline" className={config.className}>
-      <Icon className="w-3 h-3 mr-1" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
-}
-
-
 
 export const apiKeyColumns: ColumnDef<ApiKey>[] = [
   {
-    id: "API Key",
+    id: "name",
     accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          API Key
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="API Key" />,
     cell: ({ row }) => {
       const apiKey = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <span className="font-medium">{apiKey.name}</span>
-          <span className="text-sm text-muted-foreground truncate">{apiKey.description}</span>
-          <span className="text-xs text-muted-foreground font-mono">{apiKey.key_prefix}</span>
+        <div className="flex items-center gap-3 px-3 py-1 max-w-sm">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+            <KeyRound className="size-4 text-muted-foreground" />
+          </div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="font-medium truncate">{apiKey.name}</span>
+            <span className="text-sm text-muted-foreground truncate">{apiKey.description || "No description"}</span>
+            <span className="text-xs text-muted-foreground font-mono truncate">{apiKey.key_prefix}</span>
+          </div>
         </div>
       )
     },
   },
   {
-    id: "Status",
+    id: "status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
-      const apiKey = row.original
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(apiKey.status)}
+          <StatusBadge status={row.original.status} />
         </div>
       )
     },
   },
   {
-    id: "Expires",
-    accessorKey: "expires_at",
-    header: ({ column }) => {
+    id: "rate_limit",
+    accessorKey: "rate_limit",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Rate Limit" />,
+    cell: ({ row }) => {
+      const apiKey = row.original
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Expires
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2 px-3 py-1 text-sm">
+          <TimerReset className="size-4 text-muted-foreground" />
+          <span className="font-medium">{apiKey.rate_limit.toLocaleString()}</span>
+          <span className="text-muted-foreground">req/hour</span>
+        </div>
       )
     },
+  },
+  {
+    id: "expires_at",
+    accessorKey: "expires_at",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Expires" />,
     cell: ({ row }) => {
       const apiKey = row.original
       if (!apiKey.expires_at) {
@@ -115,7 +73,7 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
 
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
-          <span className={`text-sm font-medium ${isExpired ? 'text-red-600' : ''}`}>
+          <span className={`text-sm font-medium ${isExpired ? "text-destructive" : ""}`}>
             {formatDistanceToNow(expiresAt, { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
@@ -126,19 +84,9 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
     },
   },
   {
-    id: "Created",
+    id: "created_at",
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const apiKey = row.original
       return (
@@ -155,7 +103,6 @@ export const apiKeyColumns: ColumnDef<ApiKey>[] = [
   },
   {
     id: "actions",
-    enableHiding: false,
     cell: ({ row }) => {
       const apiKey = row.original
       return (

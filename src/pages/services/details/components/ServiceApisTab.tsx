@@ -1,123 +1,122 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Server, Search } from "lucide-react"
-import { TabsContent } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
+import { Server, Eye } from "lucide-react"
 import { InformationCard } from "@/components/card"
-import { DataTablePagination } from "@/components/data-table"
-import { ApiItem } from "./ApiItem"
+import { EmptyState, ListSkeleton } from "@/components/details"
+import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { useServiceApis } from "../hooks/useServiceApis"
-import {
-  getCoreRowModel,
-  useReactTable,
-  type PaginationState,
-} from "@tanstack/react-table"
+import { type PaginationState } from "@tanstack/react-table"
+import type { Api } from "@/services/api/api/types"
 
 interface ServiceApisTabProps {
   tenantId: string
   serviceId: string
 }
 
+const navState = (tenantId: string, serviceId: string) => ({
+  from: `/${tenantId}/services/${serviceId}`,
+  backLabel: "Back to Service Details",
+})
+
 export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
   const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState("")
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
 
-  const { data, isLoading, error } = useServiceApis({
+  const { data, isLoading, isError } = useServiceApis({
     serviceId,
     limit: pagination.pageSize,
     page: pagination.pageIndex + 1,
-    name: searchQuery || undefined,
-    displayName: searchQuery || undefined,
-    description: searchQuery || undefined,
+    sortBy: "name",
+    sortOrder: "asc",
   })
 
-  // Create a simple table instance for pagination
-  const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
-
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    pageCount: data?.total_pages || 0,
-    state: {
-      pagination,
-    },
+  const table = usePaginationTable({
+    pagination,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    pageCount: data?.total_pages ?? 0,
   })
+
+  const apiActions = (api: Api): RowActionItem[] => [
+    {
+      key: "view",
+      label: "View Details",
+      icon: Eye,
+      onSelect: () => navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) }),
+    },
+  ]
 
   return (
-    <TabsContent value="apis" className="space-y-6">
-      <InformationCard
-        title="Service APIs"
-        description="Manage APIs and their permissions for this service"
-        icon={Server}
-      >
-        <div className="space-y-4">
-          {/* Search filter */}
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search APIs..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setPagination({ pageIndex: 0, pageSize: 10 }) // Reset to first page on search
-              }}
-              className="pl-8"
-            />
+    <InformationCard
+      title="Service APIs"
+      description="APIs registered under this service"
+      icon={Server}
+    >
+      <div className="space-y-4">
+        {isLoading && <ListSkeleton />}
+
+        {isError && (
+          <p className="py-8 text-center text-sm text-destructive">Failed to load APIs</p>
+        )}
+
+        {data && data.rows.length === 0 && (
+          <EmptyState
+            icon={Server}
+            title="No APIs"
+            description="This service has no APIs registered yet."
+          />
+        )}
+
+        {data && data.rows.length > 0 && (
+          <div className="space-y-3">
+            {data.rows.map((api) => (
+              <div
+                key={api.api_id}
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement
+                  if (!e.currentTarget.contains(target) || target.closest("button, a")) return
+                  navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) })
+                }}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                  navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) })
+                  }
+                }}
+                className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <Server className="size-4" />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium">{api.display_name}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{api.description}</p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span className="font-mono">{api.name}</span>
+                      {api.identifier && <span className="font-mono">{api.identifier}</span>}
+                    </div>
+                  </div>
+                </div>
+                <RowActions items={apiActions(api)} />
+              </div>
+            ))}
           </div>
+        )}
 
-          {/* Horizontal line */}
-          <div className="border-t" />
-
-          {/* Scrollable content area */}
-          <div className="max-h-[600px] overflow-y-auto pr-2">
-            {isLoading && (
-              <div className="text-center py-8 text-muted-foreground">
-                Loading APIs...
-              </div>
-            )}
-
-            {error && (
-              <div className="text-center py-8 text-destructive">
-                Failed to load APIs
-              </div>
-            )}
-
-            {data && data.rows.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? "No APIs found matching your search" : "No APIs found for this service"}
-              </div>
-            )}
-
-            {data && data.rows.length > 0 && (
-              <>
-                {data.rows.map((api) => (
-                  <ApiItem
-                    key={api.api_id}
-                    api={api}
-                    onView={() => navigate(`/${tenantId}/apis/${api.api_id}`)}
-                  />
-                ))}
-              </>
-            )}
+        {data && data.total > 0 && (
+          <div className="border-t pt-4">
+            <DataTablePagination table={table} rowCount={data.total} />
           </div>
-
-          {/* Pagination controls */}
-          {data && data.total > 0 && (
-            <div className="pt-4 border-t">
-              <DataTablePagination table={table} rowCount={data.total} />
-            </div>
-          )}
-        </div>
-      </InformationCard>
-    </TabsContent>
+        )}
+      </div>
+    </InformationCard>
   )
 }
-

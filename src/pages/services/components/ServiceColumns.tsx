@@ -1,138 +1,90 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, FileText, Server } from "lucide-react"
+import { FileText, Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ServiceActions } from "./ServiceActions"
-import { SystemBadge, StatusBadge } from "@/components/badges"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge, SystemBadge } from "@/components/badges"
 import type { Service } from "@/services/api/services/types"
 
 export const serviceColumns: ColumnDef<Service>[] = [
   {
+    id: "display_name",
     accessorKey: "display_name",
-    id: "service",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
-        >
-          Service
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service" />,
     cell: ({ row }) => {
       const service = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{service.display_name}</span>
-            <SystemBadge isSystem={service.is_system} />
+        <div className="flex max-w-sm items-center gap-3 px-3 py-1">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <Server className="size-5" />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{service.description}</span>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Name: <span className="font-mono">{service.name}</span></span>
-            <span>•</span>
-            <span>Version: <span className="font-mono">{service.version}</span></span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate font-medium">{service.display_name}</span>
+              <SystemBadge isSystem={service.is_system} />
+            </div>
+            <span className="truncate text-sm text-muted-foreground">{service.description}</span>
+            <span className="truncate font-mono text-xs text-muted-foreground">{service.name}</span>
           </div>
         </div>
       )
     },
   },
   {
+    id: "status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const service = row.original
-      return (
-        <div className="px-3 py-1">
-          <StatusBadge status={service.status} />
-        </div>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <StatusBadge status={row.original.status} />
+      </div>
+    ),
   },
   {
+    id: "version",
+    accessorKey: "version",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Version" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <span className="font-mono text-sm">{row.original.version}</span>
+      </div>
+    ),
+  },
+  {
+    id: "api_count",
     accessorKey: "api_count",
-    id: "apis",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          APIs
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const service = row.original
-      return (
-        <div className="flex items-center gap-1 px-3 py-1">
-          <Server className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{service.api_count}</span>
-        </div>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="APIs" />,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2 px-3 py-1 text-sm">
+        <Server className="size-4 text-muted-foreground" />
+        <span className="font-medium">{row.original.api_count}</span>
+      </div>
+    ),
   },
   {
+    id: "policy_count",
     accessorKey: "policy_count",
-    id: "policies",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Policies
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const service = row.original
-      return (
-        <div className="flex items-center gap-1 px-3 py-1">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{service.policy_count}</span>
-        </div>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Policies" />,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2 px-3 py-1 text-sm">
+        <FileText className="size-4 text-muted-foreground" />
+        <span className="font-medium">{row.original.policy_count}</span>
+      </div>
+    ),
   },
   {
+    id: "created_at",
     accessorKey: "created_at",
-    id: "created",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
-      const service = row.original
+      const createdAt = new Date(row.original.created_at)
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(service.created_at), { addSuffix: true })}
+            {formatDistanceToNow(createdAt, { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(service.created_at).toLocaleDateString()}
+            {createdAt.toLocaleDateString()}
           </span>
         </div>
       )
@@ -141,9 +93,10 @@ export const serviceColumns: ColumnDef<Service>[] = [
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
-      const service = row.original
-      return <ServiceActions service={service} />
-    },
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <ServiceActions service={row.original} />
+      </div>
+    ),
   },
 ]

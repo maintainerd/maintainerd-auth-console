@@ -1,36 +1,51 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { useNavigate, useParams } from "react-router-dom"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Play,
-  Pause,
-  Archive,
-  XCircle
-} from "lucide-react"
-import type { Service, ServiceStatus } from "@/services/api/services/types"
+import { Archive, Edit, Eye, Pause, Play, Trash2, XCircle, type LucideIcon } from "lucide-react"
+import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteService, useUpdateServiceStatus } from "@/hooks/useServices"
 import { useToast } from "@/hooks/useToast"
-import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import type { Service, ServiceStatus } from "@/services/api/services/types"
 
 interface ServiceActionsProps {
   service: Service
 }
 
-type StatusAction = {
+interface StatusAction {
   status: ServiceStatus
+  label: string
   title: string
   description: string
+  icon: LucideIcon
+}
+
+const STATUS_ACTIONS: Record<ServiceStatus, StatusAction> = {
+  active: {
+    status: "active",
+    label: "Activate Service",
+    title: "Activate Service",
+    description: "Are you sure you want to activate this service? Its APIs and policies will be available for use.",
+    icon: Play,
+  },
+  maintenance: {
+    status: "maintenance",
+    label: "Set Maintenance",
+    title: "Set Maintenance Mode",
+    description: "Are you sure you want to put this service into maintenance mode?",
+    icon: Pause,
+  },
+  deprecated: {
+    status: "deprecated",
+    label: "Deprecate Service",
+    title: "Deprecate Service",
+    description: "Are you sure you want to mark this service as deprecated?",
+    icon: Archive,
+  },
+  inactive: {
+    status: "inactive",
+    label: "Deactivate Service",
+    title: "Deactivate Service",
+    description: "Are you sure you want to deactivate this service? Its APIs and policies will no longer be available.",
+    icon: XCircle,
+  },
 }
 
 export function ServiceActions({ service }: ServiceActionsProps) {
@@ -39,134 +54,84 @@ export function ServiceActions({ service }: ServiceActionsProps) {
   const { showSuccess, showError } = useToast()
   const deleteServiceMutation = useDeleteService()
   const updateStatusMutation = useUpdateServiceStatus()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showStatusDialog, setShowStatusDialog] = useState(false)
-  const [pendingStatusAction, setPendingStatusAction] = useState<StatusAction | null>(null)
 
-  const isActive = service.status === "active"
-  const isMaintenance = service.status === "maintenance"
-  const isDeprecated = service.status === "deprecated"
-  const isInactive = service.status === "inactive"
-
-  // Action handlers
-  const handleViewDetails = () => {
-    navigate(`/${tenantId}/services/${service.service_id}`)
-  }
-
-  const handleUpdateService = () => {
-    navigate(`/${tenantId}/services/${service.service_id}/edit`)
-  }
-
-  const handleStatusChange = (status: ServiceStatus, title: string, description: string) => {
-    setPendingStatusAction({ status, title, description })
-    setShowStatusDialog(true)
-  }
-
-  const handleConfirmStatusChange = async () => {
-    if (!pendingStatusAction) return
-
+  const changeStatus = async (status: ServiceStatus) => {
     try {
       await updateStatusMutation.mutateAsync({
         serviceId: service.service_id,
-        data: { status: pendingStatusAction.status }
+        data: { status },
       })
-      showSuccess(`Service status updated to ${pendingStatusAction.status}`)
+      showSuccess(`Service status updated to ${status}`)
     } catch (error) {
       showError(error)
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteServiceMutation.mutateAsync(service.service_id)
-      showSuccess("Service deleted successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
+  const statusActions = Object.values(STATUS_ACTIONS)
+    .filter((action) => action.status !== service.status)
+    .map((action) => ({
+      key: `status-${action.status}`,
+      label: action.label,
+      icon: action.icon,
+      onSelect: () => changeStatus(action.status),
+      confirm: {
+        title: action.title,
+        description: action.description,
+        confirmText: action.status === "active" ? "Activate" : "Confirm",
+      },
+    }) satisfies RowActionItem)
 
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleViewDetails}>
-            <Eye className="mr-2 h-4 w-4" />
-            View Details
-          </DropdownMenuItem>
+  const items: RowActionItem[] = [
+    {
+      key: "view",
+      label: "View Details",
+      icon: Eye,
+      onSelect: () =>
+        navigate(`/${tenantId}/services/${service.service_id}`, {
+          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        }),
+    },
+    ...(!service.is_system
+      ? [
+          {
+            key: "edit",
+            label: "Edit Service",
+            icon: Edit,
+            onSelect: () =>
+              navigate(`/${tenantId}/services/${service.service_id}/edit`, {
+                state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+              }),
+          } satisfies RowActionItem,
+        ]
+      : []),
+    ...statusActions,
+    ...(!service.is_system
+      ? [
+          {
+            key: "delete",
+            label: "Delete Service",
+            icon: Trash2,
+            destructive: true,
+            separatorBefore: true,
+            onSelect: async () => {
+              try {
+                await deleteServiceMutation.mutateAsync(service.service_id)
+                showSuccess("Service deleted successfully")
+              } catch (error) {
+                showError(error)
+              }
+            },
+            confirm: {
+              title: "Delete Service",
+              description:
+                "This will permanently delete this service and remove all associated APIs, policies, and relationships.",
+              destructive: true,
+              itemName: service.name,
+            },
+          } satisfies RowActionItem,
+        ]
+      : []),
+  ]
 
-          <DropdownMenuItem onClick={handleUpdateService}>
-            <Edit className="mr-2 h-4 w-4" />
-            Update Service
-          </DropdownMenuItem>
-
-          {!isActive && (
-            <DropdownMenuItem onClick={() => handleStatusChange("active", "Activate Service", "Are you sure you want to activate this service?")}>
-              <Play className="mr-2 h-4 w-4" />
-              Activate Service
-            </DropdownMenuItem>
-          )}
-
-          {!isMaintenance && (
-            <DropdownMenuItem onClick={() => handleStatusChange("maintenance", "Set Maintenance Mode", "Are you sure you want to set this service to maintenance mode?")}>
-              <Pause className="mr-2 h-4 w-4" />
-              Set Maintenance
-            </DropdownMenuItem>
-          )}
-
-          {!isDeprecated && (
-            <DropdownMenuItem onClick={() => handleStatusChange("deprecated", "Deprecate Service", "Are you sure you want to deprecate this service?")}>
-              <Archive className="mr-2 h-4 w-4" />
-              Deprecate Service
-            </DropdownMenuItem>
-          )}
-
-          {!isInactive && (
-            <DropdownMenuItem onClick={() => handleStatusChange("inactive", "Deactivate Service", "Are you sure you want to deactivate this service?")}>
-              <XCircle className="mr-2 h-4 w-4" />
-              Deactivate Service
-            </DropdownMenuItem>
-          )}
-
-          {!service.is_system && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Service
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
-        title="Delete Service"
-        description="This action cannot be undone. This will permanently delete the service and all associated data."
-        confirmationText="This will permanently delete this service and remove all associated APIs, policies, and configurations."
-        itemName={service.name}
-        isDeleting={deleteServiceMutation.isPending}
-      />
-
-      <ConfirmationDialog
-        open={showStatusDialog}
-        onOpenChange={setShowStatusDialog}
-        onConfirm={handleConfirmStatusChange}
-        title={pendingStatusAction?.title || "Change Status"}
-        description={pendingStatusAction?.description || "Are you sure you want to change the service status?"}
-        confirmText="Confirm"
-        cancelText="Cancel"
-        variant="default"
-        isLoading={updateStatusMutation.isPending}
-      />
-    </>
-  )
+  return <RowActions items={items} />
 }

@@ -1,134 +1,159 @@
-import { useState, useMemo } from "react"
-import { FileText, Search, Plus } from "lucide-react"
-import { TabsContent } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { FileText, Plus, Eye, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
-import { DataTablePagination } from "@/components/data-table"
-import { PolicyItem } from "./PolicyItem"
+import { EmptyState, ListSkeleton } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
+import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { PolicyAssignDialog } from "./PolicyAssignDialog"
 import { useServicePolicies } from "../hooks/useServicePolicies"
-import {
-  getCoreRowModel,
-  useReactTable,
-  type PaginationState,
-} from "@tanstack/react-table"
+import { useServicePolicyMutations } from "../hooks/useServicePolicyMutations"
+import { type PaginationState } from "@tanstack/react-table"
+import type { Policy } from "@/services/api/policies/types"
 
 interface ServicePoliciesTabProps {
   serviceId: string
+  tenantId: string
 }
 
-export function ServicePoliciesTab({ serviceId }: ServicePoliciesTabProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+export function ServicePoliciesTab({ serviceId, tenantId }: ServicePoliciesTabProps) {
+  const navigate = useNavigate()
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const { data, isLoading, error } = useServicePolicies({
+  const { data, isLoading, isError } = useServicePolicies({
     serviceId,
     limit: pagination.pageSize,
     page: pagination.pageIndex + 1,
-    name: searchQuery || undefined
+    sortBy: "name",
+    sortOrder: "asc",
   })
 
-  // Create a simple table instance for pagination
-  const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
-
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    pageCount: data?.total_pages || 0,
-    state: {
-      pagination,
-    },
+  const table = usePaginationTable({
+    pagination,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    pageCount: data?.total_pages ?? 0,
   })
+
+  const { removePolicy } = useServicePolicyMutations(serviceId)
+
+  const navState = { from: `/${tenantId}/services/${serviceId}`, backLabel: "Back to Service Details" }
+  const existingPolicyIds = data?.rows.map((p) => p.policy_id) ?? []
+
+  const policyActions = (policy: Policy): RowActionItem[] => {
+    const items: RowActionItem[] = [
+      {
+        key: "view",
+        label: "View Details",
+        icon: Eye,
+        onSelect: () => navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState }),
+      },
+    ]
+
+    if (!policy.is_system) {
+      items.push({
+        key: "remove",
+        label: "Remove from Service",
+        icon: Trash2,
+        destructive: true,
+        separatorBefore: true,
+        onSelect: () => removePolicy.mutateAsync(policy.policy_id),
+        confirm: {
+          title: "Remove Policy from Service",
+          description: "This removes the policy from this service. The policy itself will not be deleted.",
+          confirmText: "Remove",
+        },
+      })
+    }
+
+    return items
+  }
 
   return (
-    <TabsContent value="policies" className="space-y-6">
+    <>
       <InformationCard
         title="Applied Policies"
         description="Policies applied to this service for access control and permissions management"
         icon={FileText}
+        action={
+          <Button size="sm" className="gap-2" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add Policy
+          </Button>
+        }
       >
         <div className="space-y-4">
-          {/* Search filter and Add button */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search policies..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  setPagination({ pageIndex: 0, pageSize: 10 }) // Reset to first page on search
-                }}
-                className="pl-8"
-              />
+          {isLoading && <ListSkeleton />}
+
+          {isError && (
+            <p className="py-8 text-center text-sm text-destructive">Failed to load policies</p>
+          )}
+
+          {data && data.rows.length === 0 && (
+            <EmptyState
+              icon={FileText}
+              title="No policies"
+              description="This service has no policies assigned yet. Add a policy to control access and permissions."
+            />
+          )}
+
+          {data && data.rows.length > 0 && (
+            <div className="space-y-3">
+              {data.rows.map((policy) => (
+                <div
+                  key={policy.policy_id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement
+                    if (!e.currentTarget.contains(target) || target.closest("button, a")) return
+                    navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState })
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState })
+                    }
+                  }}
+                  className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <FileText className="size-4" />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium">{policy.name}</span>
+                        <SystemBadge isSystem={policy.is_system} />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{policy.description}</p>
+                    </div>
+                  </div>
+                  <RowActions items={policyActions(policy)} />
+                </div>
+              ))}
             </div>
-            <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Policy
-            </Button>
-          </div>
+          )}
 
-          {/* Horizontal line */}
-          <div className="border-t" />
-
-          {/* Scrollable content area */}
-          <div className="max-h-[600px] overflow-y-auto pr-2">
-            {isLoading && (
-              <div className="text-center py-8 text-muted-foreground">
-                Loading policies...
-              </div>
-            )}
-
-            {error && (
-              <div className="text-center py-8 text-destructive">
-                Failed to load policies
-              </div>
-            )}
-
-            {data && data.rows.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? "No policies found matching your search" : "No policies applied to this service"}
-              </div>
-            )}
-
-            {data && data.rows.length > 0 && (
-              <>
-                {data.rows.map((policy) => (
-                  <PolicyItem
-                    key={policy.policy_id}
-                    policy={policy}
-                    serviceId={serviceId}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-
-          {/* Pagination controls */}
           {data && data.total > 0 && (
-            <div className="pt-4 border-t">
+            <div className="border-t pt-4">
               <DataTablePagination table={table} rowCount={data.total} />
             </div>
           )}
         </div>
       </InformationCard>
 
-      {/* Policy Assign Dialog */}
       <PolicyAssignDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         serviceId={serviceId}
+        existingPolicyIds={existingPolicyIds}
       />
-    </TabsContent>
+    </>
   )
 }
-

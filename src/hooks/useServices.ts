@@ -3,7 +3,7 @@
  * Custom hook for fetching services using TanStack Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { fetchServices, fetchServiceById, createService, updateService, deleteService, updateServiceStatus } from '@/services/api/services'
 import type {
   ServiceQueryParams,
@@ -30,7 +30,27 @@ export function useServices(params?: ServiceQueryParams) {
   return useQuery({
     queryKey: serviceKeys.list(params),
     queryFn: () => fetchServices(params),
+    placeholderData: keepPreviousData,
   })
+}
+
+/**
+ * Hook to fetch services for the standard listing page.
+ * The shared listing filter uses human labels for system/regular, while the
+ * service API expects an `is_system` boolean.
+ */
+export function useServicesList(params: Record<string, unknown>) {
+  const { is_system, ...rest } = params
+  const queryParams: ServiceQueryParams = {
+    ...rest as ServiceQueryParams,
+  }
+
+  if (typeof is_system === 'string') {
+    if (is_system === 'system') queryParams.is_system = true
+    else if (is_system === 'regular') queryParams.is_system = false
+  }
+
+  return useServices(queryParams)
 }
 
 /**
