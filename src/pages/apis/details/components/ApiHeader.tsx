@@ -1,35 +1,28 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Shield, Trash2, MoreVertical } from "lucide-react"
+import { Edit, Trash2, MoreVertical, Server, CalendarDays, KeyRound } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteConfirmationDialog } from "@/components/dialog"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
 import { useDeleteApi } from "@/hooks/useApis"
 import { useToast } from "@/hooks/useToast"
-import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ApiStatus } from "@/services/api/api/types"
+import type { Api } from "@/services/api/api/types"
 
 interface ApiHeaderProps {
-  api: {
-    name: string
-    displayName: string
-    description: string
-    status: ApiStatus
-    isSystem: boolean
-  }
+  api: Api
   tenantId: string
   apiId: string
-  getStatusColor: (status: ApiStatus) => string
-  getStatusText: (status: ApiStatus) => string
 }
 
-export function ApiHeader({ api, tenantId, apiId, getStatusColor, getStatusText }: ApiHeaderProps) {
+export function ApiHeader({ api, tenantId, apiId }: ApiHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteApiMutation = useDeleteApi()
@@ -39,55 +32,99 @@ export function ApiHeader({ api, tenantId, apiId, getStatusColor, getStatusText 
     try {
       await deleteApiMutation.mutateAsync(apiId)
       showSuccess("API deleted successfully")
-      // Navigate back to APIs list
       navigate(`/${tenantId}/apis`)
     } catch (error) {
       showError(error)
     }
   }
 
+  const attributes: DetailAttribute[] = [
+    {
+      icon: Server,
+      label: "API Name",
+      value: <span className="font-mono text-xs">{api.name}</span>,
+    },
+    {
+      icon: KeyRound,
+      label: "Identifier",
+      value: <span className="font-mono text-xs">{api.identifier}</span>,
+    },
+    {
+      icon: Server,
+      label: "Service",
+      value: api.service?.display_name ?? <span className="text-muted-foreground">&mdash;</span>,
+    },
+    {
+      icon: CalendarDays,
+      label: "Created",
+      value: format(new Date(api.created_at), "PP"),
+    },
+    {
+      icon: CalendarDays,
+      label: "Last updated",
+      value: format(new Date(api.updated_at), "PP"),
+    },
+    {
+      icon: Server,
+      label: "Type",
+      value: api.is_system ? "System API" : "Custom API",
+    },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{api.displayName}</h1>
-            <Badge className={getStatusColor(api.status)}>
-              {getStatusText(api.status)}
-            </Badge>
-            {api.isSystem && (
-              <Badge variant="secondary" className="gap-1">
-                <Shield className="h-3 w-3" />
-                System
-              </Badge>
-            )}
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Server className="size-6" />
           </div>
-          <p className="text-muted-foreground">{api.description}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
+        }
+        title={api.display_name}
+        badge={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={api.status} />
+            <SystemBadge isSystem={api.is_system} />
+          </div>
+        }
+        subtitle={api.description}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/apis/${apiId}/edit`, {
+                  state: { from: `/${tenantId}/apis/${apiId}`, backLabel: "Back to API Details" },
+                })
+              }
+            >
+              <Edit className="size-4" />
+              Edit
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/apis/${apiId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit API
-            </DropdownMenuItem>
-            {!api.isSystem && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete API
-                </DropdownMenuItem>
-              </>
+            {!api.is_system && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Delete API
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
@@ -95,11 +132,9 @@ export function ApiHeader({ api, tenantId, apiId, getStatusColor, getStatusText 
         onConfirm={handleDelete}
         title="Delete API"
         description="This action cannot be undone. This will permanently delete the API and all associated data."
-        confirmationText="This will permanently delete this API and remove all associated permissions and configurations."
         itemName={api.name}
         isDeleting={deleteApiMutation.isPending}
       />
     </>
   )
 }
-

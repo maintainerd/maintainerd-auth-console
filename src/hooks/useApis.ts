@@ -45,6 +45,25 @@ export function useApi(apiId: string) {
 }
 
 /**
+ * Hook to fetch APIs for the standard listing page.
+ * The shared listing filter uses human labels for system/regular, while the
+ * API service expects an `is_system` boolean.
+ */
+export function useApisList(params: Record<string, unknown>) {
+  const { is_system, ...rest } = params
+  const queryParams: ApiQueryParams = {
+    ...rest as ApiQueryParams,
+  }
+
+  if (typeof is_system === 'string') {
+    if (is_system === 'system') queryParams.is_system = true
+    else if (is_system === 'regular') queryParams.is_system = false
+  }
+
+  return useApis(queryParams)
+}
+
+/**
  * Hook to create a new API
  */
 export function useCreateApi() {
@@ -107,4 +126,3 @@ export function useUpdateApiStatus() {
     },
   })
 }
-

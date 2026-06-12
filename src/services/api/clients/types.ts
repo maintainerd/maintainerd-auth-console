@@ -215,21 +215,19 @@ export type ClientApiPermission = {
   name: string
   description: string
   status: 'active' | 'inactive'
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
 }
 
 /**
- * API type (simplified for client API context)
+ * API entity (simplified for client API context)
  */
 export type ClientApi = {
   api_id: string
   name: string
   display_name: string
   description: string
-  api_type?: string
   identifier?: string
   status: 'active' | 'inactive'
   is_system: boolean
@@ -238,7 +236,7 @@ export type ClientApi = {
 }
 
 /**
- * Client API type (association between client and API with permissions)
+ * Client API association with permissions
  */
 export type ClientApiAssociation = {
   client_api_id: string

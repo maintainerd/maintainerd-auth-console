@@ -1,146 +1,153 @@
-import { useState, useMemo } from "react"
-import { Key, Search, Plus } from "lucide-react"
+import { useState } from "react"
+import { Key, Plus, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { TabsContent } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
 import { InformationCard } from "@/components/card"
-import { DataTablePagination } from "@/components/data-table"
-import { PermissionItem } from "./PermissionItem"
+import { SystemBadge } from "@/components/badges"
+import { EmptyState, ListSkeleton, StatusBadge } from "@/components/details"
+import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { PermissionFormDialog } from "./PermissionFormDialog"
 import { useApiPermissions } from "../hooks/useApiPermissions"
+import { useDeletePermission } from "@/hooks/usePermissions"
+import { useToast } from "@/hooks/useToast"
+import { type PaginationState } from "@tanstack/react-table"
 import type { PermissionEntity } from "@/services/api/permissions/types"
-import {
-  getCoreRowModel,
-  useReactTable,
-  type PaginationState,
-} from "@tanstack/react-table"
 
 interface ApiPermissionsTabProps {
-  tenantId: string
   apiId: string
 }
 
 export function ApiPermissionsTab({ apiId }: ApiPermissionsTabProps) {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPermission, setEditingPermission] = useState<PermissionEntity | null>(null)
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
 
-  const { data, isLoading, error } = useApiPermissions({
+  const { data, isLoading, isError } = useApiPermissions({
     apiId,
     limit: pagination.pageSize,
     page: pagination.pageIndex + 1,
-    name: searchQuery || undefined
   })
 
-  // Create a simple table instance for pagination
-  const columns = useMemo(() => [], [])
-  const tableData = data?.rows || []
+  const deletePermissionMutation = useDeletePermission()
+  const { showSuccess, showError } = useToast()
 
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    pageCount: data?.total_pages || 0,
-    state: {
-      pagination,
-    },
+  const table = usePaginationTable({
+    pagination,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    pageCount: data?.total_pages ?? 0,
   })
+
+  const removePermission = async (permissionId: string) => {
+    try {
+      await deletePermissionMutation.mutateAsync(permissionId)
+      showSuccess("Permission deleted successfully")
+    } catch (error) {
+      showError(error)
+    }
+  }
 
   return (
-    <TabsContent value="permissions" className="space-y-6">
+    <>
       <InformationCard
         title="Permissions"
-        description="Manage permissions for this API"
+        description="Permissions assigned to this API"
         icon={Key}
+        action={
+          <Button size="sm" className="gap-2" onClick={() => { setEditingPermission(null); setIsDialogOpen(true) }}>
+            <Plus className="h-4 w-4" />
+            Add Permission
+          </Button>
+        }
       >
         <div className="space-y-4">
-          {/* Search filter and Add button */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search permissions..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  setPagination({ pageIndex: 0, pageSize: 10 }) // Reset to first page on search
-                }}
-                className="pl-8"
-              />
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Permission
-            </Button>
-          </div>
+          {isLoading && <ListSkeleton />}
 
-          {/* Horizontal line */}
-          <div className="border-t" />
+          {isError && (
+            <p className="py-8 text-center text-sm text-destructive">Failed to load permissions</p>
+          )}
 
-          {/* Scrollable content area */}
-          <div className="max-h-[600px] overflow-y-auto pr-2">
-            {isLoading && (
-              <div className="text-center py-8 text-muted-foreground">
-                Loading permissions...
-              </div>
-            )}
+          {data && data.rows.length === 0 && (
+            <EmptyState
+              icon={Key}
+              title="No permissions"
+              description="This API has no permissions yet. Add some to control what clients and roles can access."
+            />
+          )}
 
-            {error && (
-              <div className="text-center py-8 text-destructive">
-                Failed to load permissions
-              </div>
-            )}
+          {data && data.rows.length > 0 && (
+            <div className="space-y-3">
+              {data.rows.map((permission) => {
+                const actions: RowActionItem[] = []
 
-            {data && data.rows.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? "No permissions found matching your search" : "No permissions found for this API"}
-              </div>
-            )}
-
-            {data && data.rows.length > 0 && (
-              <>
-                {data.rows.map((permission) => (
-                  <PermissionItem
-                    key={permission.permission_id}
-                    permission={permission}
-                    onEdit={() => {
+                if (!permission.is_system) {
+                  actions.push({
+                    key: "edit",
+                    label: "Edit Permission",
+                    icon: Edit,
+                    onSelect: () => {
                       setEditingPermission(permission)
                       setIsDialogOpen(true)
-                    }}
-                  />
-                ))}
-              </>
-            )}
-          </div>
+                    },
+                  })
+                }
 
-          {/* Pagination controls */}
+                if (!permission.is_system) {
+                  actions.push({
+                    key: "remove",
+                    label: "Delete Permission",
+                    icon: Trash2,
+                    destructive: true,
+                    separatorBefore: actions.length > 0,
+                    onSelect: () => removePermission(permission.permission_id),
+                    confirm: {
+                      title: "Delete Permission",
+                      description: `This will permanently delete the permission "${permission.name}" and remove it from all roles and policies.`,
+                      confirmText: "Delete",
+                    },
+                  })
+                }
+
+                return (
+                  <div
+                    key={permission.permission_id}
+                    className="flex items-start justify-between gap-3 rounded-lg border p-4"
+                  >
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <Key className="size-4" />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-sm font-medium">{permission.name}</span>
+                          <StatusBadge status={permission.status} />
+                          <SystemBadge isSystem={permission.is_system} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{permission.description}</p>
+                      </div>
+                    </div>
+                    {actions.length > 0 && <RowActions items={actions} />}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           {data && data.total > 0 && (
-            <div className="pt-4 border-t">
+            <div className="border-t pt-4">
               <DataTablePagination table={table} rowCount={data.total} />
             </div>
           )}
         </div>
       </InformationCard>
 
-      {/* Permission Form Dialog */}
       <PermissionFormDialog
         open={isDialogOpen}
         onOpenChange={(open) => {
           setIsDialogOpen(open)
-          if (!open) {
-            setEditingPermission(null)
-          }
+          if (!open) setEditingPermission(null)
         }}
         apiId={apiId}
         permission={editingPermission || undefined}
       />
-    </TabsContent>
+    </>
   )
 }
-

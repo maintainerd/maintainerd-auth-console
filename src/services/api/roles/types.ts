@@ -111,7 +111,6 @@ export interface RolePermissionEntity {
     name: string
     display_name: string
     description: string
-    api_type: string
     identifier: string
     status: string
     is_default: boolean
@@ -120,7 +119,6 @@ export interface RolePermissionEntity {
     updated_at: string
   }
   status: string
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string

@@ -1,145 +1,73 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Server } from "lucide-react"
+import { Server, Key } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiActions } from "./ApiActions"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
 import type { Api } from "@/services/api/api/types"
 
-
-
 export const apiColumns: ColumnDef<Api>[] = [
   {
+    id: "display_name",
     accessorKey: "display_name",
-    id: "api",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-semibold"
-        >
-          API
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="API" />,
     cell: ({ row }) => {
       const api = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{api.display_name}</span>
-            <SystemBadge isSystem={api.is_default} />
+        <div className="flex max-w-sm items-center gap-3 px-3 py-1">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <Server className="size-5" />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{api.description}</span>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Name: <span className="font-mono">{api.name}</span></span>
-            <span>•</span>
-            <span>ID: <span className="font-mono">{api.identifier}</span></span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate font-medium">{api.display_name}</span>
+              <SystemBadge isSystem={api.is_system} />
+            </div>
+            <span className="truncate text-sm text-muted-foreground">{api.description}</span>
+            <span className="truncate font-mono text-xs text-muted-foreground">{api.name}</span>
           </div>
         </div>
       )
     },
   },
   {
-    accessorKey: "service.display_name",
     id: "service",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Service
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    accessorKey: "service",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service" />,
     cell: ({ row }) => {
       const api = row.original
       return (
         <div className="flex items-center gap-2 px-3 py-1">
-          <Server className="h-4 w-4 text-muted-foreground" />
+          <Key className="size-4 text-muted-foreground" />
           <span className="font-medium">{api.service.display_name}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "api_type",
-    id: "type",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const api = row.original
-      return (
-        <div className="px-3 py-1">
-          <Badge variant="outline" className="uppercase font-mono">
-            {api.api_type}
-          </Badge>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "status",
     id: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const api = row.original
-      return (
-        <div className="px-3 py-1">
-          <Badge variant={api.status === "active" ? "secondary" : "outline"} className="capitalize">
-            {api.status}
-          </Badge>
-        </div>
-      )
-    },
+    accessorKey: "status",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <StatusBadge status={row.original.status} />
+      </div>
+    ),
   },
   {
+    id: "created_at",
     accessorKey: "created_at",
-    id: "created",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
-      const api = row.original
+      const createdAt = new Date(row.original.created_at)
       return (
         <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
-            {formatDistanceToNow(new Date(api.created_at), { addSuffix: true })}
+            {formatDistanceToNow(createdAt, { addSuffix: true })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {new Date(api.created_at).toLocaleDateString()}
+            {createdAt.toLocaleDateString()}
           </span>
         </div>
       )
@@ -148,9 +76,10 @@ export const apiColumns: ColumnDef<Api>[] = [
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
-      const api = row.original
-      return <ApiActions api={api} />
-    },
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <ApiActions api={row.original} />
+      </div>
+    ),
   },
 ]

@@ -31,7 +31,7 @@ function makePermission(overrides: Record<string, unknown> = {}) {
     description: "Read users",
     is_system: false,
     status: "active",
-    api: { display_name: "Users API", api_type: "REST" },
+    api: { display_name: "Users API" },
     created_at: "2024-01-01T00:00:00Z",
     ...overrides,
   }
