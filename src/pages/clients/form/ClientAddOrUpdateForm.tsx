@@ -59,6 +59,16 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
+// Required authentication level (ACR) override. "inherit" is the sentinel for
+// "no override" — the client follows the tenant security policy. It maps to an
+// absent required_acr in the persisted config.
+const REQUIRED_ACR_INHERIT = "inherit"
+const REQUIRED_ACR_OPTIONS: SelectOption[] = [
+  { value: REQUIRED_ACR_INHERIT, label: "Inherit tenant default" },
+  { value: "1", label: "Password / single factor (ACR 1)" },
+  { value: "2", label: "Require step-up — MFA (ACR 2)" },
+]
+
 export default function ClientAddOrUpdateForm() {
   const { tenantId, clientId } = useParams<{ tenantId: string; clientId?: string }>()
   const navigate = useNavigate()
@@ -123,6 +133,12 @@ export default function ClientAddOrUpdateForm() {
   const [refreshTokenLifetime, setRefreshTokenLifetime] = useState<number>(604800)
   const [refreshTokenRotation, setRefreshTokenRotation] = useState<boolean>(false)
   const [multiResourceRefreshToken, setMultiResourceRefreshToken] = useState<boolean>(false)
+
+  // Per-client security overrides. Empty / "inherit" means follow the tenant
+  // security policy (persisted as an absent key, resolved server-side).
+  const [requiredAcr, setRequiredAcr] = useState<string>(REQUIRED_ACR_INHERIT)
+  const [sessionIdleTimeout, setSessionIdleTimeout] = useState<string>("")
+  const [sessionAbsoluteTimeout, setSessionAbsoluteTimeout] = useState<string>("")
 
   // Custom config fields state
   const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
@@ -280,6 +296,16 @@ export default function ClientAddOrUpdateForm() {
         setMultiResourceRefreshToken(parseBooleanConfigValue(config.multi_resource_refresh_token))
       }
 
+      // Security overrides — absent keys fall back to the inherit sentinel / blank.
+      const loadedAcr = parseStringConfigValue(config.required_acr, "")
+      setRequiredAcr(loadedAcr === "1" || loadedAcr === "2" ? loadedAcr : REQUIRED_ACR_INHERIT)
+      setSessionIdleTimeout(
+        config.session_idle_timeout != null ? String(parseNumberConfigValue(config.session_idle_timeout, 0) || "") : ""
+      )
+      setSessionAbsoluteTimeout(
+        config.session_absolute_timeout != null ? String(parseNumberConfigValue(config.session_absolute_timeout, 0) || "") : ""
+      )
+
       const metadataEntries = Object.entries(getClientMetadata(config)).map(([key, value], index) => ({
         id: `custom-${Date.now()}-${index}`,
         key,
@@ -353,6 +379,22 @@ export default function ClientAddOrUpdateForm() {
       return
     }
 
+    // Validate the optional session-timeout overrides before building config.
+    const idleTimeout = sessionIdleTimeout.trim() === "" ? null : Number(sessionIdleTimeout)
+    const absoluteTimeout = sessionAbsoluteTimeout.trim() === "" ? null : Number(sessionAbsoluteTimeout)
+    if (idleTimeout !== null && (!Number.isFinite(idleTimeout) || idleTimeout <= 0)) {
+      showError("Session idle timeout must be a positive number of seconds")
+      return
+    }
+    if (absoluteTimeout !== null && (!Number.isFinite(absoluteTimeout) || absoluteTimeout <= 0)) {
+      showError("Session absolute timeout must be a positive number of seconds")
+      return
+    }
+    if (idleTimeout !== null && absoluteTimeout !== null && absoluteTimeout < idleTimeout) {
+      showError("Session absolute timeout must be greater than or equal to the idle timeout")
+      return
+    }
+
     try {
       const normalizedScopes = allowedScopes
         .split(",")
@@ -377,6 +419,17 @@ export default function ClientAddOrUpdateForm() {
       config.refresh_token_lifetime = refreshTokenLifetime
       config.refresh_token_rotation = refreshTokenRotation
       config.multi_resource_refresh_token = multiResourceRefreshToken
+
+      // Security overrides — only persisted when set; absent = inherit tenant policy.
+      if (requiredAcr !== REQUIRED_ACR_INHERIT) {
+        config.required_acr = requiredAcr
+      }
+      if (idleTimeout !== null) {
+        config.session_idle_timeout = idleTimeout
+      }
+      if (absoluteTimeout !== null) {
+        config.session_absolute_timeout = absoluteTimeout
+      }
 
       const customConfig: Record<string, string> = {}
       customFields.forEach(field => {
@@ -798,6 +851,62 @@ export default function ClientAddOrUpdateForm() {
                 onCheckedChange={setMultiResourceRefreshToken}
                 disabled={isLoading}
               />
+            </CardContent>
+          </Card>
+
+          {/* Step-up & Session Security */}
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle>Step-up &amp; Session Security</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Per-client overrides for authentication assurance and session lifetimes.
+                Leave blank to inherit the tenant security policy.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FormSelectField
+                label="Required Authentication Level (ACR)"
+                placeholder="Inherit tenant default"
+                options={REQUIRED_ACR_OPTIONS}
+                value={requiredAcr}
+                onValueChange={setRequiredAcr}
+                disabled={clientData?.is_system || isLoading}
+                description="Minimum assurance required to access this client. Step-up forces MFA at sign-in even when the tenant default does not."
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="sessionIdleTimeout">Session Idle Timeout (seconds)</Label>
+                  <Input
+                    id="sessionIdleTimeout"
+                    type="number"
+                    min="1"
+                    value={sessionIdleTimeout}
+                    onChange={(e) => setSessionIdleTimeout(e.target.value)}
+                    placeholder="Inherit tenant default"
+                    disabled={clientData?.is_system || isLoading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Sliding window of inactivity before the session expires.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sessionAbsoluteTimeout">Session Absolute Timeout (seconds)</Label>
+                  <Input
+                    id="sessionAbsoluteTimeout"
+                    type="number"
+                    min="1"
+                    value={sessionAbsoluteTimeout}
+                    onChange={(e) => setSessionAbsoluteTimeout(e.target.value)}
+                    placeholder="Inherit tenant default"
+                    disabled={clientData?.is_system || isLoading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Hard cap on total session lifetime regardless of activity.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

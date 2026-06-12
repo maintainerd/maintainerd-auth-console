@@ -33,8 +33,11 @@ export const COMMON_CLIENT_CONFIG_KEYS = new Set([
   "refresh_token_rotation",
   "refresh_token_ttl",
   "require_consent",
+  "required_acr",
   "response_types",
   "scope_claim_mappings",
+  "session_absolute_timeout",
+  "session_idle_timeout",
   "token_endpoint_auth_method",
 ])
 
@@ -71,6 +74,12 @@ const URI_AND_CORS_KEYS = new Set([
   "redirect_uris",
 ])
 
+const SECURITY_KEYS = new Set([
+  "required_acr",
+  "session_idle_timeout",
+  "session_absolute_timeout",
+])
+
 const ADVANCED_KEYS = new Set([
   "jwks",
   "jwks_uri",
@@ -96,6 +105,11 @@ export function getClientConfigSections(config: Record<string, unknown>): Config
       title: "Token Settings",
       description: "Token lifetimes, rotation, and related security behavior.",
       entries: collectEntries(commonConfig, TOKEN_KEYS),
+    },
+    {
+      title: "Step-up & Session Security",
+      description: "Per-client authentication-assurance and session-lifetime overrides. Blank values inherit the tenant security policy.",
+      entries: collectEntries(commonConfig, SECURITY_KEYS),
     },
     {
       title: "Application URI & CORS Settings",
