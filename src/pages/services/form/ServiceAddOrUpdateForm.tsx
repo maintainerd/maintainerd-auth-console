@@ -1,17 +1,17 @@
 import { useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
   FormInputField,
   FormTextareaField,
   FormSelectField,
-  FormCheckboxField,
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
@@ -30,9 +30,17 @@ const STATUS_OPTIONS: SelectOption[] = [
 export default function ServiceAddOrUpdateForm() {
   const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { showSuccess, showError } = useToast()
-  const isEditing = !!serviceId
+
+  const isEditing = Boolean(serviceId)
   const isCreating = !isEditing
+
+  // Honour where the user came from so the back button and post-submit
+  // navigation return there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/${tenantId}/services`
+  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/services` ? "Back to Services" : "Back")
 
   // Fetch existing service if editing
   const { data: serviceData, isLoading: isFetchingService } = useService(serviceId || '')
@@ -54,7 +62,6 @@ export default function ServiceAddOrUpdateForm() {
       description: "",
       version: "v0.1.0",
       status: "active",
-      isPublic: false,
     },
     mode: 'onSubmit',
     reValidateMode: 'onSubmit'
@@ -69,7 +76,6 @@ export default function ServiceAddOrUpdateForm() {
         description: serviceData.description,
         version: serviceData.version,
         status: serviceData.status,
-        isPublic: serviceData.is_public,
       })
     }
   }, [isEditing, serviceData, reset])
@@ -85,7 +91,6 @@ export default function ServiceAddOrUpdateForm() {
         description: data.description,
         version: data.version,
         status: data.status,
-        is_public: data.isPublic,
       }
 
       if (isCreating) {
@@ -99,8 +104,7 @@ export default function ServiceAddOrUpdateForm() {
         showSuccess("Service updated successfully")
       }
 
-      // Navigate back to services list
-      navigate(`/${tenantId}/services`)
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
@@ -112,32 +116,60 @@ export default function ServiceAddOrUpdateForm() {
   // Show loading state while fetching service data
   if (isEditing && isFetchingService) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching service details
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Service"
+            description="Update service settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </DetailsContainer>
     )
   }
 
   // Show error if service not found
   if (isEditing && !isFetchingService && !serviceData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Service Not Found</h2>
-          <p className="text-muted-foreground mt-2">
-            The service you're looking for doesn't exist or has been removed.
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Service"
+            description="Update service settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Service not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The service you're looking for doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => navigate(backTo)}>
+                <ArrowLeft className="mr-2 size-4" />
+                {backLabel}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Button onClick={() => navigate(`/${tenantId}/services`)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Services
-        </Button>
-      </div>
+      </DetailsContainer>
     )
   }
 
@@ -145,8 +177,8 @@ export default function ServiceAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={`/${tenantId}/services`}
-          backLabel="Back to Services"
+          backUrl={backTo}
+          backLabel={backLabel}
           title={pageTitle}
           description={
             isCreating
@@ -158,12 +190,13 @@ export default function ServiceAddOrUpdateForm() {
           warningMessage="This is a system service. Some settings may be restricted to prevent system instability."
         />
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information */}
-          <Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={serviceId || "create"}>
+          <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                The service name, status, and description.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -214,7 +247,6 @@ export default function ServiceAddOrUpdateForm() {
                   control={control}
                   render={({ field }) => (
                     <FormSelectField
-                      key={`status-${field.value || 'empty'}`}
                       label="Status"
                       placeholder="Select status"
                       options={STATUS_OPTIONS}
@@ -227,28 +259,14 @@ export default function ServiceAddOrUpdateForm() {
                   )}
                 />
               </div>
-
-              <Controller
-                name="isPublic"
-                control={control}
-                render={({ field }) => (
-                  <FormCheckboxField
-                    label="Make this service publicly accessible"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                )}
-              />
             </CardContent>
           </Card>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/${tenantId}/services`)}
+              onClick={() => navigate(backTo)}
               disabled={isLoading}
             >
               Cancel

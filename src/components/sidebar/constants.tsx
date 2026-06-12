@@ -53,7 +53,6 @@ export const data = {
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
             { title: "Auth Flows", route: "/auth-flows" },
-            { title: "Multi-Factor Auth", route: "/mfa" },
           ],
         },
       ],

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useForm, Controller, type Resolver, type SubmitHandler } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { Plus, X, ArrowLeft, Copy, Check, AlertTriangle, Download } from "lucide-react"
+import { Plus, X, ArrowLeft, Copy, Check, AlertTriangle, Download, AlertCircle, KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
 import { apiKeySchema, type ApiKeyFormData } from "@/lib/validations"
 import { useApiKey, useCreateApiKey, useUpdateApiKey, useApiKeyConfig } from "@/hooks/useApiKeys"
 import { useToast } from "@/hooks/useToast"
+import { useMetadataFields } from "@/hooks/useMetadataFields"
 import type {
   CreateApiKeyRequest,
   UpdateApiKeyRequest,
@@ -36,14 +38,31 @@ import type {
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
+  { value: "expired", label: "Expired", disabled: true },
 ]
 
 export default function ApiKeyAddOrUpdateForm() {
   const { tenantId, id } = useParams<{ tenantId: string; id?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { showSuccess, showError } = useToast()
 
   const isEditing = Boolean(id)
+  const isCreating = !isEditing
+
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? (isEditing && id ? `/${tenantId}/api-keys/${id}` : `/${tenantId}/api-keys`)
+  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/api-keys` ? "Back to API Keys" : "Back")
+
+  const {
+    customFields,
+    metadataError,
+    addCustomField,
+    removeCustomField,
+    updateCustomField,
+    buildPayload,
+    resetFields,
+  } = useMetadataFields()
 
   // Fetch existing API key if editing
   const { data: apiKeyData, isLoading: isFetchingApiKey } = useApiKey(id || '')
@@ -52,10 +71,6 @@ export default function ApiKeyAddOrUpdateForm() {
 
   // Fetch API key config if editing
   const { data: apiKeyConfigData } = useApiKeyConfig(id || '')
-
-  // Custom config fields state
-  const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
-  const [configError, setConfigError] = useState<string>("")
 
   // API key display state (only shown after creation)
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
@@ -70,8 +85,7 @@ export default function ApiKeyAddOrUpdateForm() {
     reset,
     formState: { errors, isSubmitting }
   } = useForm<ApiKeyFormData>({
-    // @ts-expect-error - Yup resolver type inference issue with optional nullable fields
-    resolver: yupResolver(apiKeySchema),
+    resolver: yupResolver(apiKeySchema) as Resolver<ApiKeyFormData>,
     defaultValues: {
       name: "",
       description: "",
@@ -103,71 +117,23 @@ export default function ApiKeyAddOrUpdateForm() {
     }
   }, [isEditing, apiKeyData, reset])
 
-  // Load config fields when editing
   useEffect(() => {
-    if (isEditing && apiKeyConfigData) {
-      // API returns config directly, not wrapped in a config property
-      const config = apiKeyConfigData
-
-      // Load custom configuration fields
-      const customConfigEntries = Object.entries(config).map(([key, value], index) => ({
-        id: `custom-${Date.now()}-${index}`,
-        key,
-        value: String(value)
-      }))
-
-      setCustomFields(customConfigEntries)
+    if (isEditing) {
+      resetFields(apiKeyConfigData)
     }
-  }, [isEditing, apiKeyConfigData])
+  }, [isEditing, apiKeyConfigData, resetFields])
 
-  // Check for duplicate keys whenever custom fields change
-  useEffect(() => {
-    const keys = customFields.map(field => field.key.trim()).filter(key => key !== '')
-    const duplicateKeys = keys.filter((key, index) => keys.indexOf(key) !== index)
+  const configError = metadataError.replace("metadata", "configuration")
 
-    if (duplicateKeys.length > 0) {
-      const uniqueDuplicates = [...new Set(duplicateKeys)]
-      setConfigError(`Duplicate configuration keys: ${uniqueDuplicates.join(', ')}`)
-    } else {
-      setConfigError("")
-    }
-  }, [customFields])
-
-  // Custom config field management functions
-  const addCustomField = () => {
-    const newField = {
-      id: Date.now().toString(),
-      key: "",
-      value: ""
-    }
-    setCustomFields([...customFields, newField])
-  }
-
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter(field => field.id !== id))
-  }
-
-  const updateCustomField = (id: string, key: string, value: string) => {
-    setCustomFields(customFields.map(field =>
-      field.id === id ? { ...field, key, value } : field
-    ))
-  }
-
-  const onSubmit = async (formData: ApiKeyFormData) => {
+  const onSubmit: SubmitHandler<ApiKeyFormData> = async (formData) => {
     // Check for duplicate keys in custom fields
-    if (configError) {
+    if (metadataError) {
       showError(configError)
       return
     }
 
     try {
-      // Build config object from custom fields
-      const config: Record<string, string> = {}
-      customFields.forEach(field => {
-        if (field.key.trim()) {
-          config[field.key] = field.value
-        }
-      })
+      const config = buildPayload()
 
       // Convert date to ISO 8601 format with time if provided
       let expiresAt: string | null = null
@@ -186,12 +152,12 @@ export default function ApiKeyAddOrUpdateForm() {
           expires_at: expiresAt,
           rate_limit: formData.rateLimit,
           status: formData.status as ApiKeyStatus,
-          config: Object.keys(config).length > 0 ? config : undefined,
+          config,
         }
 
         await updateApiKeyMutation.mutateAsync({ apiKeyId: id, data: updatePayload })
         showSuccess("API key updated successfully")
-        navigate(`/${tenantId}/api-keys/${id}`)
+        navigate(backTo)
       } else {
         // Create payload
         const createPayload: CreateApiKeyRequest = {
@@ -200,7 +166,7 @@ export default function ApiKeyAddOrUpdateForm() {
           expires_at: expiresAt,
           rate_limit: formData.rateLimit,
           status: formData.status as ApiKeyStatus,
-          config: Object.keys(config).length > 0 ? config : undefined,
+          config,
         }
 
         const response = await createApiKeyMutation.mutateAsync(createPayload)
@@ -212,7 +178,7 @@ export default function ApiKeyAddOrUpdateForm() {
         } else {
           // Fallback if key is not in response
           showSuccess("API key created successfully")
-          navigate(`/${tenantId}/api-keys`)
+          navigate(backTo)
         }
       }
     } catch (error: unknown) {
@@ -221,11 +187,7 @@ export default function ApiKeyAddOrUpdateForm() {
   }
 
   const handleCancel = () => {
-    if (isEditing && id) {
-      navigate(`/${tenantId}/api-keys/${id}`)
-    } else {
-      navigate(`/${tenantId}/api-keys`)
-    }
+    navigate(backTo)
   }
 
   const handleCopyApiKey = async () => {
@@ -257,96 +219,105 @@ export default function ApiKeyAddOrUpdateForm() {
 
   const handleCloseApiKeyDialog = () => {
     setShowApiKeyDialog(false)
-    navigate(`/${tenantId}/api-keys`)
+    navigate(backTo)
   }
 
   const isLoading = isFetchingApiKey || createApiKeyMutation.isPending || updateApiKeyMutation.isPending
 
+  const pageTitle = isCreating ? "Create API Key" : `Edit ${apiKeyData?.name || "API Key"}`
+  const submitButtonText = isCreating ? "Create API Key" : "Update API Key"
+
   // Show loading state while fetching API key data
   if (isEditing && isFetchingApiKey) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching API key details
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit API Key"
+            description="Update API key access settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </DetailsContainer>
     )
   }
 
   // Show error if API key not found
   if (isEditing && !isFetchingApiKey && !apiKeyData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">API Key Not Found</h2>
-          <p className="text-muted-foreground mt-2">
-            The API key you're looking for doesn't exist or has been removed.
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit API Key"
+            description="Update API key access settings and configuration"
+          />
+          <Card className="shadow-xs">
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">API key not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The API key you're looking for doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => navigate(`/${tenantId}/api-keys`)}>
+                <ArrowLeft className="mr-2 size-4" />
+                Back to API Keys
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Button onClick={() => navigate(`/${tenantId}/api-keys`)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to API Keys
-        </Button>
-      </div>
+      </DetailsContainer>
     )
   }
 
   return (
     <DetailsContainer>
       <div className="flex flex-col gap-6">
-        {/* Header */}
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/api-keys/${id}` : `/${tenantId}/api-keys`}
-          backLabel="Back to API Keys"
-          title={isEditing ? "Edit API Key" : "Create New API Key"}
+          backUrl={backTo}
+          backLabel={backLabel}
+          title={pageTitle}
           description={isEditing
-            ? "Update API key configuration and settings"
-            : "Create a new API key for programmatic access to your authentication system"
+            ? "Update API key access settings and configuration"
+            : "Create a scoped API key for programmatic access"
           }
         />
 
-        {/* Form */}
-        {/* @ts-expect-error - Form type inference issue */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information */}
-          <Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={id || "create"}>
+          <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Name, status, expiration, and request limits for this key.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormInputField
-                label="Name"
-                placeholder="e.g., api-key1, production-key"
-                description="Lowercase letters, numbers, and hyphens only"
-                disabled={isLoading}
-                error={errors.name?.message}
-                required
-                {...register("name")}
-              />
-
-              <FormTextareaField
-                label="Description"
-                placeholder="Enter API key description"
-                rows={3}
-                disabled={isLoading}
-                error={errors.description?.message}
-                required
-                {...register("description")}
-              />
-
               <div className="grid gap-4 md:grid-cols-2">
                 <FormInputField
-                  label="Rate Limit (requests/hour)"
-                  type="number"
-                  placeholder="e.g., 1000"
-                  description="Maximum number of requests per hour"
+                  label="Name"
+                  placeholder="e.g., production-webhook"
+                  description="Lowercase letters, numbers, and hyphens only"
                   disabled={isLoading}
-                  error={errors.rateLimit?.message}
+                  error={errors.name?.message}
                   required
-                  {...register("rateLimit")}
+                  {...register("name")}
                 />
 
                 <Controller
@@ -360,86 +331,127 @@ export default function ApiKeyAddOrUpdateForm() {
                       options={STATUS_OPTIONS}
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={isLoading}
+                      disabled={isLoading || apiKeyData?.status === "expired"}
                       error={errors.status?.message}
+                      description={apiKeyData?.status === "expired" ? "Expired keys cannot be reactivated from this form" : undefined}
                       required
                     />
                   )}
                 />
               </div>
 
-              <FormInputField
-                label="Expiration Date"
-                type="date"
-                placeholder="Select expiration date"
-                description="Leave empty for no expiration"
+              <FormTextareaField
+                label="Description"
+                placeholder="Describe where this key is used and who owns it"
+                rows={4}
                 disabled={isLoading}
-                error={errors.expiresAt?.message}
-                {...register("expiresAt")}
+                error={errors.description?.message}
+                required
+                {...register("description")}
               />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField
+                  label="Rate Limit"
+                  type="number"
+                  min={1}
+                  max={1000000}
+                  placeholder="e.g., 1000"
+                  description="Maximum requests per hour"
+                  disabled={isLoading}
+                  error={errors.rateLimit?.message}
+                  required
+                  {...register("rateLimit", { valueAsNumber: true })}
+                />
+
+                <FormInputField
+                  label="Expiration Date"
+                  type="date"
+                  placeholder="Select expiration date"
+                  description="Leave empty when the key should not expire"
+                  disabled={isLoading}
+                  error={errors.expiresAt?.message}
+                  {...register("expiresAt")}
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Custom Configuration */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Custom Configuration</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Add additional custom configuration fields
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base">Custom Configuration</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1.5">
+                    Optional key-value pairs stored with this API key.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addCustomField}
+                  disabled={isLoading}
+                  className="h-9 shrink-0 gap-2"
+                >
+                  <Plus className="size-4" />
+                  Add Field
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Error Message for Duplicate Keys */}
               {configError && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {configError}
                 </div>
               )}
 
-              {/* Existing Custom Fields */}
-              {customFields.length > 0 && (
-                <div className="space-y-3">
+              {customFields.length === 0 ? (
+                <div className="rounded-lg border border-dashed py-10 text-center">
+                  <p className="text-sm text-muted-foreground">No custom configuration yet.</p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={addCustomField}
+                    disabled={isLoading}
+                    className="h-auto p-0 text-sm"
+                  >
+                    Add your first field
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
                   {customFields.map((field) => (
-                    <div key={field.id} className="flex gap-3 items-start">
-                      <div className="flex-1 grid gap-3 md:grid-cols-2">
-                        <Input
-                          value={field.key}
-                          onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
-                          placeholder="Field name (e.g., environment, application)"
-                          disabled={isLoading}
-                        />
-                        <Input
-                          value={field.value}
-                          onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
-                          placeholder="Field value"
-                          disabled={isLoading}
-                        />
-                      </div>
+                    <div key={field.id} className="flex items-center gap-2">
+                      <Input
+                        aria-label="Configuration key"
+                        value={field.key}
+                        onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
+                        placeholder="Key (e.g., environment)"
+                        disabled={isLoading}
+                      />
+                      <Input
+                        aria-label="Configuration value"
+                        value={field.value}
+                        onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
+                        placeholder="Value (e.g., production)"
+                        disabled={isLoading}
+                      />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => removeCustomField(field.id)}
                         disabled={isLoading}
+                        className="size-9 shrink-0 p-0 text-muted-foreground"
                       >
-                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove field</span>
+                        <X className="size-4" />
                       </Button>
                     </div>
                   ))}
                 </div>
               )}
-
-              {/* Add Field Button */}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addCustomField}
-                disabled={isLoading}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Custom Field
-              </Button>
             </CardContent>
           </Card>
 
@@ -456,32 +468,41 @@ export default function ApiKeyAddOrUpdateForm() {
             <FormSubmitButton
               isSubmitting={isSubmitting || isLoading}
               submittingText="Saving..."
-              submitText={isEditing ? "Update API Key" : "Create API Key"}
+              submitText={submitButtonText}
             />
           </div>
         </form>
 
-        {/* API Key Display Dialog - Only shown after creation */}
-        <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <Dialog
+          open={showApiKeyDialog}
+          onOpenChange={(open) => {
+            if (open) setShowApiKeyDialog(true)
+            else handleCloseApiKeyDialog()
+          }}
+        >
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>API Key Created Successfully</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="size-5" />
+                API Key Created
+              </DialogTitle>
               <DialogDescription>
-                Your API key has been created. Make sure to copy it now as you won't be able to see it again.
+                Store this secret now. The full key is only returned once.
               </DialogDescription>
             </DialogHeader>
 
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Secret value visible once</AlertTitle>
               <AlertDescription>
-                This is the only time you will see the full API key. Make sure to copy and store it securely.
+                Copy or download the key before leaving this dialog.
               </AlertDescription>
             </Alert>
 
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">API Key</label>
-                <div className="flex gap-2">
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
                   <Input
                     value={createdApiKey}
                     readOnly

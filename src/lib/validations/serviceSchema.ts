@@ -33,11 +33,7 @@ export const serviceSchema = yup.object({
   status: yup
     .string()
     .oneOf(['active', 'maintenance', 'deprecated', 'inactive'], 'Invalid status')
-    .required('Status is required'),
-  isPublic: yup
-    .boolean()
-    .default(false)
+    .required('Status is required')
 })
 
 export type ServiceFormData = yup.InferType<typeof serviceSchema>
-

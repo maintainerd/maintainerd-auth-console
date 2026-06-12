@@ -1,99 +1,39 @@
-import * as React from "react"
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { ServiceToolbar } from "./ServiceToolbar"
+import { useNavigate, useParams } from "react-router-dom"
+import type { SortingState } from "@tanstack/react-table"
+import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { serviceColumns } from "./ServiceColumns"
-import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
-import { useServiceQuery } from "../hooks/useServiceQuery"
+import { useServicesList } from "@/hooks/useServices"
+
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const SEARCH_FIELDS = ["name", "display_name", "description", "version"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "maintenance", "deprecated", "inactive"] },
+  { key: "is_system", label: "Type", options: ["system", "regular"] },
+]
 
 export function ServiceListing() {
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-
-	const columns = React.useMemo(() => serviceColumns, [])
-
-  const {
-    services,
-    rowCount,
-    isLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    sorting,
-    setSorting,
-    pagination,
-    setPagination,
-  } = useServiceQuery()
-
-  const table = useReactTable({
-    data: services,
-    columns,
-    pageCount: Math.ceil(rowCount / pagination.pageSize),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    manualSorting: true, // Server-side sorting
-    manualPagination: true, // Server-side pagination
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-  })
-
-  // Get active filters for display
-  const activeFilters = React.useMemo(() => {
-    const filterLabels: string[] = []
-    if (filters.status.length > 0) {
-      filterLabels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    if (filters.isSystem !== "all") {
-      const typeLabel = filters.isSystem === "system" ? "System" : "Regular"
-      filterLabels.push(`Type: ${typeLabel}`)
-    }
-    return filterLabels
-  }, [filters])
-
-  const clearAllFilters = React.useCallback(() => {
-    setFilters({
-      status: [],
-      isSystem: "all"
-    })
-  }, [setFilters])
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
-    <div className="space-y-4">
-      <ServiceToolbar
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        table={table}
-      />
-      <DataTableActiveFilters
-        activeFilters={activeFilters}
-        onClearAll={clearAllFilters}
-      />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-      />
-      <DataTablePagination table={table} />
-    </div>
+    <ResourceListing
+      columns={serviceColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search services by name, display name, description, or version..."
+      useData={useServicesList}
+      filterGroups={FILTER_GROUPS}
+      onRowClick={(service) =>
+        navigate(`/${tenantId}/services/${service.service_id}`, {
+          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        })
+      }
+      onCreate={() =>
+        navigate(`/${tenantId}/services/create`, {
+          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        })
+      }
+      createLabel="New Service"
+    />
   )
 }
-

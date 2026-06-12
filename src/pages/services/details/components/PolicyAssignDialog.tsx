@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { FileText, Search } from "lucide-react"
+import { FileText, Search, Plus } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { policyKeys } from "@/hooks/usePolicies"
 import { fetchPolicies } from "@/services/api/policies"
@@ -20,15 +20,17 @@ interface PolicyAssignDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   serviceId: string
+  existingPolicyIds: string[]
 }
 
 export function PolicyAssignDialog({
   open,
   onOpenChange,
   serviceId,
+  existingPolicyIds,
 }: PolicyAssignDialogProps) {
-  const [searchQuery, setSearchQuery] = useState("")
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Only fetch policies when dialog is open
   const params = {
@@ -40,7 +42,7 @@ export function PolicyAssignDialog({
   const { data: policiesData, isLoading } = useQuery({
     queryKey: policyKeys.list(params),
     queryFn: () => fetchPolicies(params),
-    enabled: open, // Only fetch when dialog is open
+    enabled: open,
   })
 
   const { assignPolicy } = useServicePolicyMutations(serviceId)
@@ -62,20 +64,25 @@ export function PolicyAssignDialog({
 
   const isAssigning = assignPolicy.isPending
 
+  // Filter out policies that are already assigned to this service
+  const availablePolicies = (policiesData?.rows ?? []).filter(
+    (policy) => !existingPolicyIds.includes(policy.policy_id)
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
             Assign Policy to Service
           </DialogTitle>
           <DialogDescription>
-            Search and select a policy to assign to this service.
+            Search and select a policy to assign to this service. Already assigned policies are not shown.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 py-4">
           {/* Search Input */}
           <div className="space-y-2">
             <Label htmlFor="policy-search">Search Policies</Label>
@@ -95,25 +102,27 @@ export function PolicyAssignDialog({
           {/* Policy List */}
           <div className="space-y-2">
             <Label>Available Policies</Label>
-            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+            <div className="border rounded-lg max-h-[300px] overflow-y-auto">
               {isLoading && (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground text-sm">
                   Loading policies...
                 </div>
               )}
 
-              {!isLoading && policiesData && policiesData.rows.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No policies found matching your search" : "No policies available"}
+              {!isLoading && availablePolicies.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  {searchQuery
+                    ? "No policies found matching your search"
+                    : "All available policies are already assigned to this service"}
                 </div>
               )}
 
-              {!isLoading && policiesData && policiesData.rows.length > 0 && (
+              {!isLoading && availablePolicies.length > 0 && (
                 <div className="divide-y">
-                  {policiesData.rows.map((policy) => (
+                  {availablePolicies.map((policy) => (
                     <div
                       key={policy.policy_id}
-                      className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
+                      className={`p-4 cursor-pointer hover:bg-accent/50 transition-colors ${
                         selectedPolicyId === policy.policy_id ? "bg-accent" : ""
                       }`}
                       onClick={() => setSelectedPolicyId(policy.policy_id)}
@@ -123,17 +132,14 @@ export function PolicyAssignDialog({
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-medium">{policy.name}</h4>
                             {policy.is_system && (
-                              <Badge variant="outline" className="text-xs">
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
                                 System
-                              </Badge>
+                              </span>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">{policy.description}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant={policy.status === "active" ? "secondary" : "outline"} className="capitalize">
-                            {policy.status}
-                          </Badge>
                           {selectedPolicyId === policy.policy_id && (
                             <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                               <div className="w-2 h-2 bg-white rounded-full" />
@@ -147,28 +153,34 @@ export function PolicyAssignDialog({
               )}
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isAssigning}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleAssign}
-              disabled={!selectedPolicyId || isAssigning}
-            >
-              {isAssigning ? "Assigning..." : "Assign Policy"}
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isAssigning}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleAssign}
+            disabled={!selectedPolicyId || isAssigning}
+            className="gap-2"
+          >
+            {isAssigning ? (
+              "Assigning..."
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                Assign Policy
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

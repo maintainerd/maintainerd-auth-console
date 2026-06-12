@@ -1,34 +1,30 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical } from "lucide-react"
+import { CalendarDays, Edit, KeyRound, MoreVertical, TimerReset, Trash2 } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeleteApiKey } from "@/hooks/useApiKeys"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { ApiKey, ApiKeyStatus } from "@/services/api/api-keys/types"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import type { ApiKey } from "@/services/api/api-keys/types"
 
 interface ApiKeyHeaderProps {
   apiKey: ApiKey
   tenantId: string
   apiKeyId: string
-  getStatusColor: (status: ApiKeyStatus) => string
-  getStatusText: (status: ApiKeyStatus) => string
 }
 
 export function ApiKeyHeader({
   apiKey,
   tenantId,
   apiKeyId,
-  getStatusColor,
-  getStatusText,
 }: ApiKeyHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
@@ -46,38 +42,83 @@ export function ApiKeyHeader({
     }
   }
 
+  const attributes: DetailAttribute[] = [
+    {
+      icon: KeyRound,
+      label: "Key Prefix",
+      value: <span className="font-mono text-xs break-all">{apiKey.key_prefix}</span>,
+    },
+    {
+      icon: TimerReset,
+      label: "Rate Limit",
+      value: `${apiKey.rate_limit.toLocaleString()} requests/hour`,
+    },
+    {
+      icon: CalendarDays,
+      label: "Expires",
+      value: apiKey.expires_at ? format(new Date(apiKey.expires_at), "PP") : "Never",
+    },
+    {
+      icon: CalendarDays,
+      label: "Created",
+      value: format(new Date(apiKey.created_at), "PP"),
+    },
+    {
+      icon: CalendarDays,
+      label: "Last updated",
+      value: format(new Date(apiKey.updated_at), "PP"),
+    },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{apiKey.name}</h1>
-            <Badge className={getStatusColor(apiKey.status)}>
-              {getStatusText(apiKey.status)}
-            </Badge>
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <KeyRound className="size-6" />
           </div>
-          <p className="text-muted-foreground">{apiKey.description}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/api-keys/${apiKeyId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit API Key
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete API Key
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+        }
+        title={apiKey.name}
+        badge={<StatusBadge status={apiKey.status} />}
+        subtitle={apiKey.description}
+        attributes={attributes}
+        actions={
+          <>
+            {apiKey.status !== "expired" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-2"
+                onClick={() =>
+                  navigate(`/${tenantId}/api-keys/${apiKeyId}/edit`, {
+                    state: { from: `/${tenantId}/api-keys/${apiKeyId}`, backLabel: "Back to API Key Details" },
+                  })
+                }
+              >
+                <Edit className="size-4" />
+                Edit
+              </Button>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                  <span className="sr-only">Open actions</span>
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Delete API Key
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}

@@ -19,8 +19,6 @@ export type Service = {
   description: string
   version: string
   status: ServiceStatus
-  is_public: boolean
-  is_default: boolean
   is_system: boolean
   api_count: number
   policy_count: number
@@ -37,7 +35,6 @@ export interface ServiceQueryParams {
   description?: string
   version?: string
   status?: string
-  is_default?: boolean
   is_system?: boolean
   page?: number
   limit?: number
@@ -66,8 +63,6 @@ export interface ServiceResponse {
   description: string
   version: string
   status: ServiceStatus
-  is_public: boolean
-  is_default: boolean
   is_system: boolean
   api_count: number
   policy_count: number
@@ -84,7 +79,6 @@ export interface CreateServiceRequest {
   description: string
   version: string
   status: ServiceStatus
-  is_public: boolean
 }
 
 /**
@@ -96,7 +90,6 @@ export interface UpdateServiceRequest {
   description: string
   version: string
   status: ServiceStatus
-  is_public: boolean
 }
 
 /**
