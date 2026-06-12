@@ -10,10 +10,12 @@ import type {
   ClientQueryParams,
   ClientListResponse,
   ClientResponse,
+  ClientCreateResponse,
   CreateClientRequest,
   UpdateClientRequest,
   UpdateClientStatusRequest,
-  ClientSecret,
+  RotateClientSecretRequest,
+  RotateClientSecretResponse,
   ClientConfig,
   ClientUrisResponse,
   ClientUri,
@@ -65,9 +67,9 @@ export async function fetchClientById(clientId: string): Promise<ClientResponse>
 /**
  * Create a new client
  */
-export async function createClient(data: CreateClientRequest): Promise<ClientResponse> {
+export async function createClient(data: CreateClientRequest): Promise<ClientCreateResponse> {
   const endpoint = API_ENDPOINTS.CLIENT
-  const response = await post<ApiResponse<ClientResponse>>(endpoint, data)
+  const response = await post<ApiResponse<ClientCreateResponse>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
@@ -117,17 +119,20 @@ export async function updateClientStatus(clientId: string, data: UpdateClientSta
 }
 
 /**
- * Fetch client secret by ID
+ * Rotate client secret by ID. The plaintext secret is returned exactly once.
  */
-export async function fetchClientSecret(clientId: string): Promise<ClientSecret> {
-  const endpoint = `${API_ENDPOINTS.CLIENT}/${clientId}/secret`
-  const response = await get<ApiResponse<ClientSecret>>(endpoint)
+export async function rotateClientSecret(
+  clientId: string,
+  data: RotateClientSecretRequest = { grace_period_hours: 24 },
+): Promise<RotateClientSecretResponse> {
+  const endpoint = `${API_ENDPOINTS.CLIENT}/${clientId}/rotate-secret`
+  const response = await post<ApiResponse<RotateClientSecretResponse>>(endpoint, data)
 
   if (response.success && response.data) {
     return response.data
   }
 
-  throw new Error(response.message || 'Failed to fetch client secret')
+  throw new Error(response.message || 'Failed to rotate client secret')
 }
 
 /**
@@ -283,7 +288,7 @@ export const clientService = {
   updateClient,
   deleteClient,
   updateClientStatus,
-  fetchClientSecret,
+  rotateClientSecret,
   fetchClientConfig,
   fetchClientUris,
   createClientUri,
@@ -295,4 +300,3 @@ export const clientService = {
   addClientApiPermissions,
   removeClientApiPermission,
 }
-

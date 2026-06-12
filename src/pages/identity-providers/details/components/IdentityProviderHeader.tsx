@@ -1,39 +1,29 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Shield, Trash2, MoreVertical } from "lucide-react"
+import { Edit, Trash2, MoreVertical, KeyRound, Building2, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteConfirmationDialog } from "@/components/dialog"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
 import { useDeleteIdentityProvider } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { format } from "date-fns"
+import { getProviderDisplayName } from "../utils"
+import type { IdentityProviderDetail } from "@/services/api/identity-providers/types"
 
 interface IdentityProviderHeaderProps {
-  provider: {
-    display_name: string
-    name: string
-    status: string
-    is_system: boolean
-  }
+  provider: IdentityProviderDetail
   tenantId: string
   providerId: string
-  getStatusColor: (status: string) => string
-  getStatusText: (status: string) => string
 }
 
-export function IdentityProviderHeader({ 
-  provider, 
-  tenantId, 
-  providerId, 
-  getStatusColor, 
-  getStatusText 
-}: IdentityProviderHeaderProps) {
+export function IdentityProviderHeader({ provider, tenantId, providerId }: IdentityProviderHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteProviderMutation = useDeleteIdentityProvider()
@@ -43,58 +33,113 @@ export function IdentityProviderHeader({
     try {
       await deleteProviderMutation.mutateAsync(providerId)
       showSuccess("Identity provider deleted successfully")
-      // Navigate back to identity providers list
       navigate(`/${tenantId}/providers/identity`)
     } catch (error) {
       showError(error)
     }
   }
 
+  const tenantName = provider.tenant?.name
+  const tenantIdentifier = provider.tenant?.identifier
+
+  const attributes: DetailAttribute[] = [
+    {
+      icon: KeyRound,
+      label: "System Name",
+      value: <span className="font-mono text-xs">{provider.name}</span>,
+    },
+    {
+      icon: KeyRound,
+      label: "Identifier",
+      value: <span className="font-mono text-xs">{provider.identifier}</span>,
+    },
+    {
+      icon: Building2,
+      label: "Provider Type",
+      value: getProviderDisplayName(provider.provider, provider.is_system),
+    },
+    {
+      icon: Building2,
+      label: "Tenant",
+      value: tenantName ? (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-medium">{tenantName}</span>
+          {tenantIdentifier && (
+            <span className="font-mono text-xs text-muted-foreground">{tenantIdentifier}</span>
+          )}
+        </div>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+    },
+    {
+      icon: CalendarDays,
+      label: "Created",
+      value: format(new Date(provider.created_at), "PP"),
+    },
+    {
+      icon: CalendarDays,
+      label: "Last updated",
+      value: format(new Date(provider.updated_at), "PP"),
+    },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{provider.display_name}</h1>
-            <Badge className={getStatusColor(provider.status)}>
-              {getStatusText(provider.status)}
-            </Badge>
-            {provider.is_system && (
-              <Badge variant="secondary" className="gap-1">
-                <Shield className="h-3 w-3" />
-                System
-              </Badge>
-            )}
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <KeyRound className="size-6" />
           </div>
-          <p className="text-muted-foreground">{provider.name}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem 
-              onClick={() => navigate(`/${tenantId}/providers/identity/${providerId}/edit`)}
-              disabled={provider.is_system}
+        }
+        title={provider.display_name}
+        badge={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={provider.status} />
+            <SystemBadge isSystem={provider.is_system} />
+          </div>
+        }
+        subtitle={
+          <span className="font-mono text-xs text-muted-foreground">{provider.identifier}</span>
+        }
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/providers/identity/${providerId}/edit`, {
+                  state: { from: `/${tenantId}/providers/identity/${providerId}`, backLabel: "Back to Provider Details" },
+                })
+              }
             >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Provider
-            </DropdownMenuItem>
+              <Edit className="size-4" />
+              Edit
+            </Button>
             {!provider.is_system && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Provider
-                </DropdownMenuItem>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Delete Provider
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
@@ -102,11 +147,9 @@ export function IdentityProviderHeader({
         onConfirm={handleDelete}
         title="Delete Identity Provider"
         description="This action cannot be undone. This will permanently delete the identity provider and all associated data."
-        confirmationText="This will permanently delete this identity provider and remove all associated configurations."
         itemName={provider.name}
         isDeleting={deleteProviderMutation.isPending}
       />
     </>
   )
 }
-

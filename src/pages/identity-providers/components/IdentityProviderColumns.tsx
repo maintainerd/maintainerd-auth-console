@@ -1,10 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Cloud, Key, Shield } from "lucide-react"
+import { Cloud, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
+import { DataTableColumnHeader } from "@/components/data-table"
 import { SystemBadge, StatusBadge } from "@/components/badges"
+import { PROVIDER_LABELS, ProviderLogo, getProviderBrand } from "@/components/provider-config"
 import type { IdentityProvider, ProviderOption } from "@/services/api/identity-providers/types"
 
 const getInternalExternalBadge = (isSystem: boolean) => {
@@ -26,7 +27,6 @@ const getInternalExternalBadge = (isSystem: boolean) => {
 }
 
 const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
-  // For system provider, show "Built-in" instead of type
   if (isSystem) {
     return (
       <Badge variant="secondary" className="text-xs">
@@ -36,55 +36,35 @@ const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
     )
   }
 
-  const typeConfig: Record<ProviderOption, { label: string; icon: typeof Cloud }> = {
-    internal: { label: "Internal", icon: Shield },
-    cognito: { label: "AWS Cognito", icon: Cloud },
-    auth0: { label: "Auth0", icon: Shield },
-    google: { label: "Google", icon: Cloud },
-    facebook: { label: "Facebook", icon: Cloud },
-    github: { label: "GitHub", icon: Key }
-  }
-
-  const config = typeConfig[provider]
-  const Icon = config.icon
+  const { Icon, color } = getProviderBrand(provider)
+  const label = PROVIDER_LABELS[provider] ?? provider
 
   return (
     <Badge variant="secondary" className="text-xs">
-      <Icon className="h-3 w-3 mr-1" />
-      {config.label}
+      <Icon className={`h-3 w-3 mr-1 ${color}`} />
+      {label}
     </Badge>
   )
 }
 
-
-
-
-
 export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
-    id: "Identity Provider",
+    id: "display_name",
     accessorKey: "display_name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Identity Provider
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Identity Provider" />,
     cell: ({ row }) => {
       const provider = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{provider.display_name}</span>
-            <SystemBadge isSystem={provider.is_system} />
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
+          <ProviderLogo provider={provider.provider} className="size-10" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium truncate">{provider.display_name}</span>
+              <SystemBadge isSystem={provider.is_system} />
+            </div>
+            <span className="text-sm text-muted-foreground truncate">{provider.name}</span>
+            <span className="text-xs text-muted-foreground font-mono truncate">{provider.identifier}</span>
           </div>
-          <span className="text-sm text-muted-foreground truncate">{provider.name}</span>
-          <span className="text-xs text-muted-foreground font-mono">{provider.identifier}</span>
         </div>
       )
     },
@@ -92,17 +72,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
     id: "Type",
     accessorKey: "is_system",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: () => <div className="px-4">Type</div>,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
@@ -112,19 +82,9 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "Provider",
+    id: "provider",
     accessorKey: "provider",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Provider
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Provider" />,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
@@ -134,19 +94,9 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "Status",
+    id: "status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
@@ -156,19 +106,9 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "Created",
+    id: "created_at",
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const provider = row.original
       return (
@@ -185,7 +125,6 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   },
   {
     id: "actions",
-    enableHiding: false,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">

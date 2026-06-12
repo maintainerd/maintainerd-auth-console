@@ -1,63 +1,111 @@
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import { Globe, Smartphone, Monitor, Cog } from "lucide-react"
-import type { ClientType } from "@/services/api/clients/types"
+import { AppWindow, Building2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
+import { ProviderLogo } from "@/components/provider-config"
+import type { ClientResponse } from "@/services/api/clients/types"
 
 interface ClientInformationProps {
-  client: {
-    name: string
-    client_type: ClientType
-    domain: string
-    identity_provider: {
-      display_name: string
-    }
-    created_at: string
-  }
+  client: ClientResponse
 }
 
-const getClientTypeConfig = (type: ClientType) => {
-  const config = {
-    traditional: { label: "Traditional Web Application", icon: Globe },
-    spa: { label: "Single Page Application", icon: Monitor },
-    mobile: { label: "Native Mobile Application", icon: Smartphone },
-    m2m: { label: "Machine to Machine", icon: Cog }
-  }
-  // Fallback for unknown types or legacy "native" type
-  return config[type] || config.mobile || { label: type, icon: Monitor }
+const CLIENT_TYPE_LABELS: Record<string, string> = {
+  traditional: "Traditional Web Application",
+  mobile: "Native Mobile Application",
+  spa: "Single Page Application",
+  m2m: "Machine to Machine",
 }
 
 export function ClientInformation({ client }: ClientInformationProps) {
-  const typeConfig = getClientTypeConfig(client.client_type)
-  const TypeIcon = typeConfig.icon
+  const provider = client.identity_provider
 
   return (
-    <InformationCard title="Client Information">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Client Name</p>
-          <p className="text-sm font-mono">{client.name}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Client Type</p>
-          <div className="flex items-center gap-2">
-            <TypeIcon className="h-4 w-4" />
-            <p className="text-sm">{typeConfig.label}</p>
+    <div className="space-y-4">
+      <InformationCard
+        title="Client Overview"
+        description="Core client fields returned by the backend."
+        icon={AppWindow}
+      >
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <DetailField label="Display Name" value={client.display_name} />
+          <DetailField label="Name" value={client.name} mono />
+          <DetailField label="Client UUID" value={client.client_id} mono />
+          <DetailField label="Client Type" value={CLIENT_TYPE_LABELS[client.client_type] ?? client.client_type} />
+          <DetailField label="Domain" value={client.domain || "-"} mono />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Status</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={client.status} />
+              <SystemBadge isSystem={client.is_system} />
+              {client.is_default && (
+                <Badge variant="outline" className="text-xs">
+                  Default
+                </Badge>
+              )}
+            </div>
           </div>
+          <DetailField label="Created" value={format(new Date(client.created_at), "PPpp")} />
+          <DetailField label="Last Updated" value={format(new Date(client.updated_at), "PPpp")} />
         </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Domain</p>
-          <p className="text-sm font-mono break-all">{client.domain}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Identity Provider</p>
-          <p className="text-sm">{client.identity_provider.display_name}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Created</p>
-          <p className="text-sm">{format(new Date(client.created_at), "MMM d, yyyy")}</p>
-        </div>
-      </div>
-    </InformationCard>
+      </InformationCard>
+
+      <InformationCard
+        title="Identity Provider"
+        description="The provider pool this client authenticates through."
+        icon={Building2}
+      >
+        {provider ? (
+          <div className="space-y-5">
+            <div className="flex items-start gap-3">
+              <ProviderLogo provider={provider.provider} className="size-10" />
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold">{provider.display_name}</p>
+                  <Badge variant="secondary" className="text-xs capitalize">{provider.provider}</Badge>
+                  <StatusBadge status={provider.status} />
+                  <SystemBadge isSystem={provider.is_system} />
+                  {provider.is_default && (
+                    <Badge variant="outline" className="text-xs">
+                      Default
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">{provider.name}</p>
+                <p className="text-xs font-mono text-muted-foreground break-all">{provider.identifier}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-5 border-t pt-5 md:grid-cols-2 xl:grid-cols-3">
+              <DetailField label="Provider UUID" value={provider.identity_provider_id} mono />
+              <DetailField label="Provider Type" value={provider.provider_type} />
+              <DetailField label="Provider" value={provider.provider} />
+              <DetailField label="Created" value={format(new Date(provider.created_at), "PPpp")} />
+              <DetailField label="Last Updated" value={format(new Date(provider.updated_at), "PPpp")} />
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No identity provider is attached to this client.</p>
+        )}
+      </InformationCard>
+    </div>
   )
 }
 
+function DetailField({
+  label,
+  value,
+  mono,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+}) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className={mono ? "break-all font-mono text-sm" : "break-words text-sm"}>{value}</p>
+    </div>
+  )
+}

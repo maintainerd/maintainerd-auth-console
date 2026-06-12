@@ -31,7 +31,22 @@ export const identityProviderSchema = yup.object({
     .max(100, 'Display name must not exceed 100 characters'),
   provider: yup
     .string()
-    .oneOf(['internal', 'cognito', 'auth0'], 'Invalid provider')
+    .oneOf(
+      [
+        'internal',
+        'cognito',
+        'auth0',
+        'google',
+        'facebook',
+        'github',
+        'gitlab',
+        'microsoft',
+        'apple',
+        'linkedin',
+        'twitter',
+      ],
+      'Invalid provider'
+    )
     .required('Provider is required'),
   status: yup
     .string()
