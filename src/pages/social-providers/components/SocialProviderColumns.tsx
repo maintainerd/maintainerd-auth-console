@@ -14,7 +14,12 @@ const getProviderBadge = (provider: ProviderOption) => {
     auth0: { label: "Auth0", icon: Cloud },
     google: { label: "Google", icon: Cloud },
     facebook: { label: "Facebook", icon: Facebook },
-    github: { label: "GitHub", icon: Github }
+    github: { label: "GitHub", icon: Github },
+    gitlab: { label: "GitLab", icon: Cloud },
+    microsoft: { label: "Microsoft", icon: Cloud },
+    apple: { label: "Apple", icon: Cloud },
+    linkedin: { label: "LinkedIn", icon: Cloud },
+    twitter: { label: "Twitter", icon: Cloud },
   }
 
   const config = typeConfig[provider]

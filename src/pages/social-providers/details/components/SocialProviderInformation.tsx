@@ -11,7 +11,7 @@ interface SocialProviderInformationProps {
     tenant: {
       name: string
       identifier: string
-    }
+    } | null
   }
 }
 
@@ -37,10 +37,9 @@ export function SocialProviderInformation({ provider }: SocialProviderInformatio
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground">Tenant</p>
-          <p className="text-sm">{provider.tenant.name}</p>
+          <p className="text-sm">{provider.tenant?.name ?? "-"}</p>
         </div>
       </div>
     </InformationCard>
   )
 }
-

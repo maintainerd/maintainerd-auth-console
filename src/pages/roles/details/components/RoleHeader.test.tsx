@@ -12,8 +12,8 @@ const { navigateMock, deleteMutateAsync, showSuccessMock, showErrorMock } = vi.h
   showErrorMock: vi.fn(),
 }))
 
-vi.mock("react-router-dom", async (importOriginal) => {
-  const actual: any = await importOriginal()
+vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("react-router-dom")>) => {
+  const actual = await importOriginal()
   return {
     ...actual,
     useNavigate: () => navigateMock,

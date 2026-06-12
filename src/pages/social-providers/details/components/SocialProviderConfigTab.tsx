@@ -4,7 +4,7 @@ import { Settings } from "lucide-react"
 interface SocialProviderConfigTabProps {
   provider: {
     provider: string
-    config: Record<string, unknown>
+    config: Record<string, unknown> | null
   }
 }
 
@@ -62,4 +62,3 @@ export function SocialProviderConfigTab({ provider }: SocialProviderConfigTabPro
     </div>
   )
 }
-

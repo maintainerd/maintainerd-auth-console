@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, type Resolver, type SubmitHandler } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { Button } from "@/components/ui/button"
 import {
@@ -58,7 +58,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
     reset,
     formState: { errors, isSubmitting },
   } = useForm<UserProfileFormData>({
-    resolver: yupResolver(userProfileSchema),
+    resolver: yupResolver(userProfileSchema) as Resolver<UserProfileFormData>,
     defaultValues: toDefaults(profile),
     mode: "onSubmit",
   })
@@ -94,6 +94,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
   })
 
   const isLoading = mutation.isPending || isSubmitting
+  const onSubmit: SubmitHandler<UserProfileFormData> = (data) => mutation.mutate(data)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,7 +104,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
           <DialogDescription>Update your personal information below.</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="font-medium">Basic Information</h3>
