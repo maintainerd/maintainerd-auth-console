@@ -80,7 +80,7 @@ export function ListingToolbar<TRow>({
         {filterGroups.length > 0 && (
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="relative bg-background">
+              <Button variant="outline" className="relative bg-background">
                 <Filter className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Filters</span>
                 {activeFilterCount > 0 && (
@@ -129,7 +129,7 @@ export function ListingToolbar<TRow>({
       <div className="flex flex-wrap items-center gap-2">
         <DataTableViewOptions table={table} />
         {onCreate && (
-          <Button size="sm" onClick={onCreate}>
+          <Button onClick={onCreate}>
             <Plus className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{createLabel}</span>
           </Button>
