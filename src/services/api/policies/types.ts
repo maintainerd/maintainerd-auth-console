@@ -32,10 +32,9 @@ export type PolicyDocument = {
 export type Policy = {
   policy_id: string
   name: string
-  description: string
+  description: string | null
   version: string
   status: PolicyStatus
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -47,11 +46,10 @@ export type Policy = {
 export type PolicyDetail = {
   policy_id: string
   name: string
-  description: string
+  description: string | null
   document: PolicyDocument
   version: string
   status: PolicyStatus
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -69,7 +67,6 @@ export interface PolicyQueryParams {
   description?: string
   version?: string
   status?: string
-  is_default?: boolean
   is_system?: boolean
   service_id?: string
 }
@@ -91,10 +88,9 @@ export interface PolicyListResponse {
 export interface PolicyResponse {
   policy_id: string
   name: string
-  description: string
+  description: string | null
   version: string
   status: PolicyStatus
-  is_default: boolean
   is_system: boolean
   created_at: string
   updated_at: string
@@ -128,4 +124,3 @@ export interface UpdatePolicyRequest {
 export interface UpdatePolicyStatusRequest {
   status: PolicyStatus
 }
-

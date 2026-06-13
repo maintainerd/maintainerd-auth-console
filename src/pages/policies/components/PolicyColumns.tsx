@@ -28,7 +28,9 @@ export const policyColumns: ColumnDef<Policy>[] = [
             <span className="font-medium">{policy.name}</span>
             <SystemBadge isSystem={policy.is_system} />
           </div>
-          <span className="text-sm text-muted-foreground truncate">{policy.description}</span>
+          <span className="truncate text-sm text-muted-foreground">
+            {policy.description || "No description"}
+          </span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Version: <span className="font-mono">{policy.version}</span></span>
           </div>

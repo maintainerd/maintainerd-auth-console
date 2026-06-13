@@ -35,7 +35,10 @@ export async function fetchPolicies(params?: PolicyQueryParams): Promise<PolicyL
   const response = await get<ApiResponse<PolicyListResponse>>(endpoint)
 
   if (response.success && response.data) {
-    return response.data
+    return {
+      ...response.data,
+      rows: response.data.rows ?? [],
+    }
   }
 
   throw new Error(response.message || 'Failed to fetch policies')
@@ -127,7 +130,10 @@ export async function fetchServicesByPolicy(policyId: string, params?: ServiceQu
   const response = await get<ApiResponse<ServiceListResponse>>(endpoint)
 
   if (response.success && response.data) {
-    return response.data
+    return {
+      ...response.data,
+      rows: response.data.rows ?? [],
+    }
   }
 
   throw new Error(response.message || 'Failed to fetch services')
@@ -143,4 +149,3 @@ export const policyService = {
   updatePolicyStatus,
   fetchServicesByPolicy,
 }
-

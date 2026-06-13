@@ -1,112 +1,73 @@
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DetailsContainer } from "@/components/container"
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
+import { FileText, Server } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailLayout } from "@/components/details"
 import { usePolicy } from "@/hooks/usePolicies"
 import { useServicesByPolicy } from "./hooks/useServicesByPolicy"
-import { PolicyHeader, PolicyInformation, PolicyTabs } from "./components"
-import { getStatusColor, getStatusText } from "./utils"
+import { PolicyHeader, PolicyStatementsTab, PolicyServicesTab } from "./components"
+
+const TABS = [
+  { value: "statements", label: "Statements", icon: FileText },
+  { value: "services", label: "Services", icon: Server },
+] as const
 
 export default function PolicyDetailsPage() {
   const { tenantId, policyId } = useParams<{ tenantId: string; policyId: string }>()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState("statements")
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Fetch policy from API
-  const { data: policyData, isLoading, isError } = usePolicy(policyId || '')
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/${tenantId}/policies`
+  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/policies` ? "Back to Policies" : "Back")
 
-  // Fetch services count for the tab
+  const activeTab = searchParams.get("tab") || "statements"
+  const handleTabChange = (tab: string) => setSearchParams({ tab })
+
+  const { data: policy, isLoading, isError } = usePolicy(policyId || "")
+
   const { data: servicesData } = useServicesByPolicy({
-    policyId: policyId || '',
+    policyId: policyId || "",
     page: 1,
-    limit: 1, // We only need the total count
+    limit: 1,
   })
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching policy details
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Error or not found state
-  if (isError || !policyData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Policy Not Found</h2>
-          <p className="text-muted-foreground mt-2">
-            The policy you're looking for doesn't exist or has been removed.
-          </p>
-        </div>
-        <Button onClick={() => navigate(`/${tenantId}/policies`)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Policies
-        </Button>
-      </div>
-    )
-  }
-
-  // Map API response to component data
-  const policy = {
-    policy_id: policyData.policy_id,
-    name: policyData.name,
-    description: policyData.description,
-    version: policyData.version,
-    status: policyData.status,
-    is_default: policyData.is_default,
-    is_system: policyData.is_system,
-    created_at: policyData.created_at,
-    updated_at: policyData.updated_at,
-    document: policyData.document,
-  }
-
   return (
-    <DetailsContainer>
-      <div className="flex flex-col gap-6">
-        {/* Back Button */}
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/${tenantId}/policies`)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Policies
-          </Button>
-        </div>
+    <DetailLayout
+      backLabel={backLabel}
+      onBack={() => navigate(backTo)}
+      isLoading={isLoading}
+      isError={isError || !policy}
+      notFoundTitle="Policy not found"
+      notFoundDescription="The policy you're looking for doesn't exist or may have been removed."
+    >
+      {policy && (
+        <>
+          <PolicyHeader policy={policy} tenantId={tenantId!} policyId={policyId!} afterDeleteTo={backTo} />
 
-        {/* Header */}
-        <PolicyHeader
-          policy={policy}
-          tenantId={tenantId!}
-          policyId={policyId!}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-        />
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList>
+              {TABS.map(({ value, label, icon: Icon }) => (
+                <TabsTrigger key={value} value={value} className="gap-2">
+                  <Icon className="size-4" />
+                  {label}
+                  {value === "services" && servicesData?.total ? ` (${servicesData.total})` : ""}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        {/* Policy Information */}
-        <PolicyInformation policy={policy} />
-
-        {/* Tabs */}
-        <PolicyTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          statements={policy.document.statement}
-          tenantId={tenantId!}
-          policyId={policyId!}
-          serviceCount={servicesData?.total || 0}
-        />
-      </div>
-    </DetailsContainer>
+            <TabsContent value="statements" className="mt-4">
+              <PolicyStatementsTab
+                documentVersion={policy.document.version}
+                statements={policy.document.statement}
+              />
+            </TabsContent>
+            <TabsContent value="services" className="mt-4">
+              <PolicyServicesTab policyId={policyId!} />
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
+    </DetailLayout>
   )
 }

@@ -1,34 +1,29 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Shield, Trash2, MoreVertical } from "lucide-react"
+import { CalendarDays, Edit, FileText, MoreVertical, Shield, Trash2 } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeletePolicy } from "@/hooks/usePolicies"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
-import type { PolicyStatus } from "@/services/api/policies/types"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
+import type { PolicyDetail } from "@/services/api/policies/types"
 
 interface PolicyHeaderProps {
-  policy: {
-    name: string
-    description: string
-    status: PolicyStatus
-    is_system: boolean
-  }
+  policy: PolicyDetail
   tenantId: string
   policyId: string
-  getStatusColor: (status: PolicyStatus) => string
-  getStatusText: (status: PolicyStatus) => string
+  afterDeleteTo?: string
 }
 
-export function PolicyHeader({ policy, tenantId, policyId, getStatusColor, getStatusText }: PolicyHeaderProps) {
+export function PolicyHeader({ policy, tenantId, policyId, afterDeleteTo }: PolicyHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deletePolicyMutation = useDeletePolicy()
@@ -38,55 +33,94 @@ export function PolicyHeader({ policy, tenantId, policyId, getStatusColor, getSt
     try {
       await deletePolicyMutation.mutateAsync(policyId)
       showSuccess("Policy deleted successfully")
-      // Navigate back to policies list
-      navigate(`/${tenantId}/policies`)
+      navigate(afterDeleteTo ?? `/${tenantId}/policies`)
     } catch (error) {
       showError(error)
     }
   }
 
+  const attributes: DetailAttribute[] = [
+    {
+      icon: Shield,
+      label: "Type",
+      value: policy.is_system ? "System Policy" : "Custom Policy",
+    },
+    {
+      icon: FileText,
+      label: "Policy Version",
+      value: <span className="font-mono text-xs">{policy.version}</span>,
+    },
+    {
+      icon: FileText,
+      label: "Document Version",
+      value: <span className="font-mono text-xs">{policy.document.version}</span>,
+    },
+    {
+      icon: CalendarDays,
+      label: "Created",
+      value: format(new Date(policy.created_at), "PP"),
+    },
+    {
+      icon: CalendarDays,
+      label: "Last updated",
+      value: format(new Date(policy.updated_at), "PP"),
+    },
+  ]
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{policy.name}</h1>
-            <Badge className={getStatusColor(policy.status)}>
-              {getStatusText(policy.status)}
-            </Badge>
-            {policy.is_system && (
-              <Badge variant="secondary" className="gap-1">
-                <Shield className="h-3 w-3" />
-                System
-              </Badge>
-            )}
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Shield className="size-6" />
           </div>
-          <p className="text-muted-foreground">{policy.description}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/policies/${policyId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
+        }
+        title={policy.name}
+        badge={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={policy.status} />
+            <SystemBadge isSystem={policy.is_system} />
+          </div>
+        }
+        subtitle={policy.description}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() =>
+                navigate(`/${tenantId}/policies/${policyId}/edit`, {
+                  state: { from: `/${tenantId}/policies/${policyId}`, backLabel: "Back to Policy Details" },
+                })
+              }
+            >
+              <Edit className="size-4" />
               Edit Policy
-            </DropdownMenuItem>
+            </Button>
             {!policy.is_system && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Policy
-                </DropdownMenuItem>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Delete Policy
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </>
+        }
+      />
 
       <DeleteConfirmationDialog
         open={showDeleteDialog}
@@ -94,11 +128,9 @@ export function PolicyHeader({ policy, tenantId, policyId, getStatusColor, getSt
         onConfirm={handleDelete}
         title="Delete Policy"
         description="This action cannot be undone. This will permanently delete the policy and all associated data."
-        confirmationText="This will permanently delete this policy and remove it from all services where it's applied."
         itemName={policy.name}
         isDeleting={deletePolicyMutation.isPending}
       />
     </>
   )
 }
-
