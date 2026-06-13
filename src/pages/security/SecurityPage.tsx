@@ -22,45 +22,68 @@ export default function SecurityPage() {
 
   const securityModules = [
     {
-      title: "Security Settings",
-      description: "Configure global security settings and authentication requirements",
-      icon: Shield,
-      route: "/security/settings",
-      status: "configured",
-      items: ["Multi-factor authentication", "Login requirements", "Account lockout policies"]
-    },
-    {
-      title: "Password Policies",
-      description: "Manage password complexity, expiration, and history requirements",
+      title: "Password Policy",
+      description: "Configure password length, complexity, breach checks, history, expiry, and hashing algorithm",
       icon: Lock,
-      route: "/security/password-policies",
+      route: "/security/password",
       status: "configured",
-      items: ["Minimum length: 8 characters", "Complexity requirements", "90-day expiration"]
+      items: ["Min length: 12 chars", "HIBP breach screening", "Argon2id hashing"]
     },
     {
-      title: "Session Management",
-      description: "Control user session timeouts, concurrent sessions, and device management",
+      title: "Multi-Factor Auth",
+      description: "Configure MFA enforcement mode, allowed methods, TOTP parameters, and trusted devices",
+      icon: Shield,
+      route: "/security/mfa",
+      status: "configured",
+      items: ["TOTP, WebAuthn, recovery codes", "Trusted device period", "Sensitive action step-up"]
+    },
+    {
+      title: "Sessions",
+      description: "Configure token lifetimes, idle/absolute timeouts, concurrency, refresh rotation, and cookie flags",
       icon: Clock,
-      route: "/security/sessions",
+      route: "/security/session",
       status: "attention",
-      items: ["Session timeout: 30 minutes", "Max concurrent sessions: 3", "Device tracking enabled"]
+      items: ["Access token TTL: 15 min", "Refresh token TTL: 30 days", "Max concurrent: 5"]
+    },
+    {
+      title: "Token Configuration",
+      description: "Configure JWT signing algorithm, clock skew, additional claims, and PKCE requirement",
+      icon: Key,
+      route: "/security/token",
+      status: "configured",
+      items: ["RS256 signing", "30s clock skew", "PKCE required"]
+    },
+    {
+      title: "Account Lockout",
+      description: "Configure failed-login lockout, progressive escalation, auto-unlock, and notifications",
+      icon: Ban,
+      route: "/security/lockout",
+      status: "configured",
+      items: ["5 max attempts", "30-min lockout", "Progressive escalation"]
+    },
+    {
+      title: "Registration",
+      description: "Configure self-registration, email/phone verification, domain allow/block, captcha, and default role",
+      icon: CheckCircle,
+      route: "/security/registration",
+      status: "configured",
+      items: ["Self-registration enabled", "Email verification required", "CAPTCHA on signup"]
     },
     {
       title: "Threat Detection",
-      description: "Monitor and respond to suspicious activities and security threats",
+      description: "Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring",
       icon: AlertTriangle,
-      route: "/security/threats",
+      route: "/security/threat",
       status: "active",
-      items: ["Brute force protection", "Anomaly detection", "Real-time alerts"]
+      items: ["Brute force protection", "Velocity checking", "Compromised credential monitoring"]
     },
-
     {
       title: "IP Restrictions",
-      description: "Configure IP allowlists, blocklists, and geographic restrictions",
+      description: "Configure IP allow/deny rules, rate limiting, and geographic blocking",
       icon: Ban,
       route: "/security/ip-restrictions",
       status: "not-configured",
-      items: ["IP allowlist", "Geographic restrictions", "VPN detection"]
+      items: ["IP allow/deny rules", "Rate limiting", "Geo-blocking"]
     }
   ]
 
@@ -172,15 +195,15 @@ export default function SecurityPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/settings")}>
+            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/mfa")}>
               <Eye className="mr-2 h-4 w-4" />
-              Security Settings
+              MFA Settings
             </Button>
-            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/sessions")}>
+            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/session")}>
               <Clock className="mr-2 h-4 w-4" />
               Active Sessions
             </Button>
-            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/threats")}>
+            <Button variant="outline" size="sm" onClick={() => handleNavigate("/security/threat")}>
               <AlertTriangle className="mr-2 h-4 w-4" />
               Threat Alerts
             </Button>

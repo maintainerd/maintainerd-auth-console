@@ -10,6 +10,31 @@ import type { ApiResponse, PaginatedResponse } from '../types'
  */
 export type TenantStatus = 'active' | 'inactive' | 'suspended'
 
+export interface RegistrationConfigPublic {
+  self_registration_enabled: boolean
+  require_email_verification: boolean
+  captcha_on_signup: boolean
+}
+
+export interface PasswordConfigPublic {
+  min_length: number
+  max_length: number
+  require_uppercase: boolean
+  require_lowercase: boolean
+  require_number: boolean
+  require_symbol: boolean
+}
+
+export interface BrandingPublic {
+  company_name: string
+  logo_url: string
+  favicon_url: string
+  support_url: string
+  privacy_policy_url: string
+  terms_of_service_url: string
+  metadata: Record<string, unknown>
+}
+
 /**
  * Tenant entity from API
  */
@@ -25,6 +50,9 @@ export interface TenantEntity {
   is_system: boolean
   created_at: string
   updated_at: string
+  password_config?: PasswordConfigPublic
+  registration_config?: RegistrationConfigPublic
+  branding?: BrandingPublic
 }
 
 /**

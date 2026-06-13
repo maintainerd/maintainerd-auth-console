@@ -1,12 +1,9 @@
-/**
- * Protected Route Component
- * Handles authentication checks for protected routes
- */
-
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
+
+const PROFILE_ROUTE = '/register/profile'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -15,9 +12,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const location = useLocation()
-  const { isAuthenticated, isInitialized } = useAuth()
+  const { isAuthenticated, isInitialized, profile } = useAuth()
 
-  // Show loading spinner while auth is being initialized
   if (!isInitialized) {
     return (
       fallback || (
@@ -31,12 +27,14 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     )
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // Render protected content
+  if (!profile && location.pathname !== PROFILE_ROUTE) {
+    return <Navigate to={PROFILE_ROUTE} replace />
+  }
+
   return <>{children}</>
 }
 

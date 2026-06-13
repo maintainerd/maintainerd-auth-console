@@ -1,198 +1,128 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react"
-import { useSearchParams } from "react-router-dom"
-import { MultiStepForm, type MultiStepFormStep } from "@/components/form"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from 'yup'
+import { AlertCircle } from "lucide-react"
+import { FieldGroup } from "@/components/ui/field"
+import { FormInputField, FormSelectField, FormSubmitButton } from "@/components/form"
 import { useProfile } from "@/hooks/useProfile"
+import { genderOptions } from "@/lib/constants"
 import type { CreateProfileRequest } from "@/services/api/auth/types"
-import PersonalInfoStep from "./steps/PersonalInfoStep"
-import ContactInfoStep from "./steps/ContactInfoStep"
-import LocationPreferencesStep from "./steps/LocationPreferencesStep"
-import ProfileSummaryStep from "./steps/ProfileSummaryStep"
 import RegisterProfileSuccess from "./RegisterProfileSuccess"
 
+const profileSchema = yup.object({
+  first_name: yup.string().required('First name is required').min(1).max(100),
+  last_name: yup.string().required('Last name is required').min(1).max(100),
+  gender: yup.string().required('Please select a gender'),
+})
+
+type ProfileFormData = yup.InferType<typeof profileSchema>
+
 const RegisterProfileForm = () => {
-  const [searchParams, setSearchParams] = useSearchParams()
   const { isLoading, createProfileForRegister } = useProfile()
-  const [isNavigating, setIsNavigating] = useState(false)
   const [isProfileCreated, setIsProfileCreated] = useState(false)
-  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const stepMap = {
-    'personal': 0,
-    'contact': 1,
-    'location': 2,
-    'summary': 3
-  }
-  const stepNames = useMemo(() => ['personal', 'contact', 'location', 'summary'], [])
-  const currentStepParam = searchParams.get('step') || 'personal'
-  const currentStep = stepMap[currentStepParam as keyof typeof stepMap] ?? 0
+  const savedEmail = localStorage.getItem('register_email') || ''
 
-  useEffect(() => {
-    if (!searchParams.get('step')) {
-      setSearchParams({ step: 'personal' }, { replace: true })
-    }
-  }, [searchParams, setSearchParams])
-
-  const [formData, setFormData] = useState<Partial<CreateProfileRequest>>({})
-  const [stepValidation, setStepValidation] = useState({
-    personal: false,
-    contact: false,
-    location: false,
-    summary: true
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm<ProfileFormData>({
+    resolver: yupResolver(profileSchema),
+    defaultValues: { first_name: "", last_name: "", gender: "" },
+    mode: 'onSubmit',
   })
 
-  const updateFormData = useCallback((stepData: Partial<CreateProfileRequest>) => {
-    setFormData(prev => ({ ...prev, ...stepData }))
-  }, [])
+  const watchedValues = watch()
 
-  const updateStepValidation = useCallback((step: string, isValid: boolean) => {
-    setStepValidation(prev => ({ ...prev, [step]: isValid }))
-  }, [])
-
-  const handleEditStep = useCallback((stepIndex: number) => {
-    const stepName = stepNames[stepIndex]
-    if (stepName) {
-      setSearchParams({ step: stepName }, { replace: true })
-    }
-  }, [stepNames, setSearchParams])
-
-  const handleStepChange = useCallback((stepIndex: number) => {
-    const stepName = stepNames[stepIndex]
-    if (stepName && stepName !== searchParams.get('step')) {
-      setSearchParams({ step: stepName })
-    }
-  }, [stepNames, searchParams, setSearchParams])
-
-  const handleNext = useCallback(async () => {
-    if (isNavigating) return
-
-    setIsNavigating(true)
-
-    if (navigationTimeoutRef.current) {
-      clearTimeout(navigationTimeoutRef.current)
-    }
-
+  const onSubmit = async (data: ProfileFormData) => {
+    setError(null)
     try {
-      const nextStepIndex = currentStep + 1
-      if (nextStepIndex < stepNames.length) {
-        handleStepChange(nextStepIndex)
+      const firstName = data.first_name.trim()
+      const lastName = data.last_name.trim()
+      const displayName = `${firstName} ${lastName}`
+
+      const profileData = {
+        first_name: firstName,
+        last_name: lastName,
+        display_name: displayName,
+        gender: data.gender,
+        email: savedEmail || undefined,
+      } as CreateProfileRequest
+
+      const result = await createProfileForRegister(profileData)
+      if (result.success) {
+        localStorage.removeItem('register_email')
+        setIsProfileCreated(true)
       }
-    } finally {
-      navigationTimeoutRef.current = setTimeout(() => setIsNavigating(false), 100)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create profile')
     }
-  }, [isNavigating, currentStep, stepNames, handleStepChange, navigationTimeoutRef])
-
-  const handleComplete = async () => {
-    if (!formData.first_name || !formData.last_name || !formData.email) {
-      return // Form validation should prevent this
-    }
-
-    // Generate display name from first and last name
-    const displayName = `${formData.first_name} ${formData.last_name}`
-
-    const profileData = {
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      display_name: displayName,
-      bio: formData.bio || undefined,
-      birthdate: formData.birthdate || undefined,
-      gender: formData.gender || undefined,
-      phone: formData.phone || undefined,
-      email: formData.email,
-      address: formData.address || undefined,
-      city: formData.city || undefined,
-      country: formData.country || undefined,
-      timezone: formData.timezone || undefined,
-      language: formData.language || undefined
-    }
-
-    const result = await createProfileForRegister(profileData)
-    if (result.success) {
-      // Set success state to show the success page
-      setIsProfileCreated(true)
-    }
-    // Error handling is done in the hook
   }
 
-  const steps: MultiStepFormStep[] = [
-    {
-      id: "personal",
-      title: "Personal Information",
-      description: "Tell us about yourself",
-      content: (
-        <PersonalInfoStep
-          data={formData}
-          onDataChange={updateFormData}
-          onValidationChange={(isValid) => updateStepValidation('personal', isValid)}
-        />
-      ),
-      isValid: stepValidation.personal
-    },
-    {
-      id: "contact",
-      title: "Contact Information",
-      description: "How can we reach you?",
-      content: (
-        <ContactInfoStep
-          data={formData}
-          onDataChange={updateFormData}
-          onValidationChange={(isValid) => updateStepValidation('contact', isValid)}
-        />
-      ),
-      isValid: stepValidation.contact,
-      isOptional: true
-    },
-    {
-      id: "location",
-      title: "Complete Your Profile",
-      description: "Customize your experience",
-      content: (
-        <LocationPreferencesStep
-          data={formData}
-          onDataChange={updateFormData}
-          onValidationChange={(isValid) => updateStepValidation('location', isValid)}
-        />
-      ),
-      isValid: stepValidation.location,
-      isOptional: true
-    },
-    {
-      id: "summary",
-      title: "Review & Create Profile",
-      description: "Review your information and create your profile",
-      content: (
-        <ProfileSummaryStep
-          data={formData}
-          onEditStep={handleEditStep}
-        />
-      ),
-      isValid: stepValidation.summary
-    }
-  ]
-
-  const currentStepData = steps[currentStep]
-  const canGoNext = currentStepData?.isValid || currentStepData?.isOptional || false
-
-  // Show success page if profile was created successfully
   if (isProfileCreated) {
     return <RegisterProfileSuccess />
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <MultiStepForm
-        steps={steps}
-        currentStep={currentStep}
-        onStepChange={handleStepChange}
-        onNext={handleNext}
-        onComplete={handleComplete}
-        isSubmitting={isLoading}
-        canGoNext={canGoNext}
-        nextButtonText="Continue"
-        completeButtonText="Create Profile"
-        showStepNumbers={false}
-        showProgress={false}
-        className="max-w-2xl mx-auto"
-      />
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Complete your profile</h1>
+        <p className="text-sm text-muted-foreground">
+          Just a few details to get started.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
+      >
+        <FieldGroup>
+          {error && (
+            <div role="alert" className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+          <FormInputField
+            label="First Name"
+            placeholder="John"
+            autoComplete="given-name"
+            disabled={isSubmitting}
+            error={errors.first_name?.message}
+            required
+            {...register("first_name")}
+          />
+          <FormInputField
+            label="Last Name"
+            placeholder="Doe"
+            autoComplete="family-name"
+            disabled={isSubmitting}
+            error={errors.last_name?.message}
+            required
+            {...register("last_name")}
+          />
+          <FormSelectField
+            label="Gender"
+            placeholder="Select gender"
+            options={genderOptions}
+            value={watchedValues.gender || ""}
+            onValueChange={(v) => setValue("gender", v, { shouldValidate: true })}
+            error={errors.gender?.message}
+            required
+          />
+          <FormSubmitButton
+            isSubmitting={isSubmitting || isLoading}
+            submitText="Create Profile"
+            submittingText="Creating..."
+            className="mt-1 h-11 w-full font-medium shadow-sm"
+          />
+        </FieldGroup>
+      </form>
     </div>
   )
 }

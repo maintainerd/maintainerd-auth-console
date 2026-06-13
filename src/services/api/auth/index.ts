@@ -168,7 +168,11 @@ export async function validateAuthentication(): Promise<ProfileEntity | null> {
     }
 
     return null
-  } catch {
+  } catch (err: unknown) {
+    const apiErr = err as { status?: number }
+    if (apiErr?.status === 401 || apiErr?.status === 403) {
+      throw err
+    }
     return null
   }
 }

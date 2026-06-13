@@ -1,19 +1,19 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { useNavigate } from "react-router-dom"
-import { FormLoginCard, FormSubmitButton, FormInputField, FormPasswordField } from "@/components/form"
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-} from "@/components/ui/field"
-import { Link } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
+import { AlertCircle } from "lucide-react"
+import { FormSubmitButton, FormInputField, FormPasswordField } from "@/components/form"
+import { FieldGroup } from "@/components/ui/field"
 import { registerSchema, type RegisterFormData } from "@/lib/validations"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 
-const RegisterForm = () => {
+type Props = {
+  requireEmailVerification?: boolean
+}
+
+const RegisterForm = ({ requireEmailVerification = false }: Props) => {
   const navigate = useNavigate()
   const { register: registerUser } = useAuth()
   const { showSuccess } = useToast()
@@ -26,7 +26,6 @@ const RegisterForm = () => {
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
     defaultValues: {
-      fullname: "",
       email: "",
       password: "",
       confirmPassword: ""
@@ -38,14 +37,17 @@ const RegisterForm = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setRegisterError(null)
     try {
-      await registerUser(
-        data.fullname,
-        data.email,
-        data.password
-      )
+      const fallbackName = data.email.split('@')[0] || 'User'
+      await registerUser(fallbackName, data.email, data.password)
 
-      showSuccess('Account created successfully! Please complete your profile.')
-      navigate('/register/profile', { replace: true })
+      localStorage.setItem('register_email', data.email)
+      showSuccess('Account created successfully!')
+
+      if (requireEmailVerification) {
+        navigate('/email-verification', { replace: true })
+      } else {
+        navigate('/register/profile', { replace: true })
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again."
       setRegisterError(errorMessage)
@@ -53,67 +55,72 @@ const RegisterForm = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <FormLoginCard
-        title="Create your account"
-        description="Enter your email below to create your account"
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+        <p className="text-sm text-muted-foreground">
+          Sign up to get started.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            {registerError && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {registerError}
-              </div>
-            )}
-            <FormInputField
-              label="Full Name"
-              placeholder="John Doe"
-              disabled={isSubmitting}
-              error={errors.fullname?.message}
-              required
-              {...register("fullname")}
-            />
-            <FormInputField
-              label="Email"
-              type="email"
-              placeholder="johndoe@example.com"
-              disabled={isSubmitting}
-              error={errors.email?.message}
-              description="We'll use this to contact you. We will not share your email with anyone else."
-              required
-              {...register("email")}
-            />
-            <FormPasswordField
-              label="Password"
-              placeholder="Enter a strong password"
-              disabled={isSubmitting}
-              error={errors.password?.message}
-              description="Must be at least 8 characters long."
-              required
-              {...register("password")}
-            />
-            <FormPasswordField
-              label="Confirm Password"
-              placeholder="Confirm your password"
-              disabled={isSubmitting}
-              error={errors.confirmPassword?.message}
-              description="Please confirm your password."
-              required
-              {...register("confirmPassword")}
-            />
-            <FormSubmitButton
-              isSubmitting={isSubmitting}
-              submitText="Create Account"
-              submittingText="Creating Account..."
-            />
-            <Field>
-              <FieldDescription className="text-center">
-                Already have an account? <Link to="/login">Sign in</Link>
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
-        </form>
-      </FormLoginCard>
+        <FieldGroup>
+          {registerError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+            >
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span>{registerError}</span>
+            </div>
+          )}
+          <FormInputField
+            label="Email"
+            type="email"
+            placeholder="you@company.com"
+            autoComplete="email"
+            disabled={isSubmitting}
+            error={errors.email?.message}
+            required
+            {...register("email")}
+          />
+          <FormPasswordField
+            label="Password"
+            placeholder="Enter a strong password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            error={errors.password?.message}
+            description="Must be at least 8 characters long."
+            required
+            {...register("password")}
+          />
+          <FormPasswordField
+            label="Confirm password"
+            placeholder="Re-enter your password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            error={errors.confirmPassword?.message}
+            required
+            {...register("confirmPassword")}
+          />
+          <FormSubmitButton
+            isSubmitting={isSubmitting}
+            submitText="Create account"
+            submittingText="Creating account..."
+            className="mt-1 h-11 w-full font-medium shadow-sm"
+          />
+        </FieldGroup>
+      </form>
+
+      <div className="text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          Sign in
+        </Link>
+      </div>
     </div>
   )
 }

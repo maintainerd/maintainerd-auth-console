@@ -1,94 +1,37 @@
-/**
- * Threat Detection Settings API Types
- */
-
-/**
- * Threat detection settings configuration
- */
 export interface ThreatDetectionSettings {
-  // Brute Force Protection
-  bruteForceEnabled?: boolean
-  maxFailedAttempts?: number
-  bruteForceWindow?: number
-  accountLockoutDuration?: number
-  
-  // Anomaly Detection
-  anomalyDetectionEnabled?: boolean
-  behaviorAnalysis?: boolean
-  velocityChecking?: boolean
-  geoAnomalyDetection?: boolean
-  deviceAnomalyDetection?: boolean
-  
-  // Bot Protection
-  botProtectionEnabled?: boolean
-  captchaEnabled?: boolean
-  userAgentFiltering?: boolean
-  honeypotEnabled?: boolean
-  
-  // Real-time Monitoring
-  realTimeAlertsEnabled?: boolean
-  suspiciousActivityThreshold?: string
-  autoBlockSuspiciousIPs?: boolean
-  alertAdminsEnabled?: boolean
-  logSuspiciousActivity?: boolean
-  
-  // Machine Learning
-  mlThreatDetection?: boolean
-  adaptiveLearning?: boolean
-  riskScoring?: boolean
-  behaviorBaselines?: boolean
-  
-  // Response Actions
-  autoResponseEnabled?: boolean
-  escalationEnabled?: boolean
-  quarantineEnabled?: boolean
-  notificationChannels?: string[]
+  brute_force_detection_enabled: boolean
+  impossible_travel_detection_enabled: boolean
+  new_device_notification_enabled: boolean
+  velocity_check_enabled: boolean
+  risk_based_step_up_enabled: boolean
+  compromised_credential_monitoring_enabled: boolean
+  ip_reputation_check_enabled: boolean
+  block_tor_exit_nodes: boolean
+  risk_step_up_threshold: number
+  risk_block_threshold: number
+  velocity_failures_per_ip_per_hour: number
 }
 
-/**
- * API payload with snake_case fields for backend
- */
 export interface ThreatDetectionSettingsPayload {
-  brute_force_enabled?: boolean
-  max_failed_attempts?: number
-  brute_force_window?: number
-  account_lockout_duration?: number
-  anomaly_detection_enabled?: boolean
-  behavior_analysis?: boolean
-  velocity_checking?: boolean
-  geo_anomaly_detection?: boolean
-  device_anomaly_detection?: boolean
-  bot_protection_enabled?: boolean
-  captcha_enabled?: boolean
-  user_agent_filtering?: boolean
-  honeypot_enabled?: boolean
-  real_time_alerts_enabled?: boolean
-  suspicious_activity_threshold?: string
-  auto_block_suspicious_ips?: boolean
-  alert_admins_enabled?: boolean
-  log_suspicious_activity?: boolean
-  ml_threat_detection?: boolean
-  adaptive_learning?: boolean
-  risk_scoring?: boolean
-  behavior_baselines?: boolean
-  auto_response_enabled?: boolean
-  escalation_enabled?: boolean
-  quarantine_enabled?: boolean
-  notification_channels?: string[]
+  brute_force_detection_enabled?: boolean
+  impossible_travel_detection_enabled?: boolean
+  new_device_notification_enabled?: boolean
+  velocity_check_enabled?: boolean
+  risk_based_step_up_enabled?: boolean
+  compromised_credential_monitoring_enabled?: boolean
+  ip_reputation_check_enabled?: boolean
+  block_tor_exit_nodes?: boolean
+  risk_step_up_threshold?: number
+  risk_block_threshold?: number
+  velocity_failures_per_ip_per_hour?: number
 }
 
-/**
- * API Response for threat detection settings (backend returns snake_case)
- */
 export interface ThreatDetectionSettingsResponse {
   success: boolean
-  data: ThreatDetectionSettingsPayload
+  data: ThreatDetectionSettings
   message: string
 }
 
-/**
- * Generic API Response
- */
 export interface ApiResponse<T> {
   success: boolean
   data: T

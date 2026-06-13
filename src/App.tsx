@@ -18,6 +18,7 @@ import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
 import SetupProfilePage from './pages/setup/profile'
 import RegisterProfilePage from './pages/register/profile'
+import VerifyEmailPage from './pages/register/verify-email/VerifyEmailPage'
 import DashboardPage from './pages/dashboard'
 import { PrivateLayout } from './components/layout/PrivateLayout'
 import UsersPage from './pages/users'
@@ -49,9 +50,13 @@ import ApiKeyAddOrUpdateForm from './pages/api-keys/form'
 import PoliciesPage from './pages/policies'
 import PolicyDetailsPage from './pages/policies/details'
 import PolicyAddOrUpdateForm from './pages/policies/form'
-import SecuritySettingsPage from './pages/security/settings'
+import SecurityPage from './pages/security'
+import MfaConfigPage from './pages/security/mfa/MfaConfigPage'
 import PasswordPoliciesPage from './pages/security/password-policies'
 import SessionManagementPage from './pages/security/session-management'
+import TokenConfigPage from './pages/security/token/TokenConfigPage'
+import LockoutConfigPage from './pages/security/lockout/LockoutConfigPage'
+import RegistrationConfigPage from './pages/security/registration/RegistrationConfigPage'
 import ThreatDetectionPage from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
 import SignupFlowsPage from './pages/signup-flows'
@@ -140,6 +145,7 @@ function App() {
 				<Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/email-verification" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
@@ -153,10 +159,14 @@ function App() {
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="security/settings" element={<SecuritySettingsPage />} />
-          <Route path="security/password-policies" element={<PasswordPoliciesPage />} />
-          <Route path="security/sessions" element={<SessionManagementPage />} />
-          <Route path="security/threats" element={<ThreatDetectionPage />} />
+          <Route path="security" element={<SecurityPage />} />
+          <Route path="security/mfa" element={<MfaConfigPage />} />
+          <Route path="security/password" element={<PasswordPoliciesPage />} />
+          <Route path="security/session" element={<SessionManagementPage />} />
+          <Route path="security/token" element={<TokenConfigPage />} />
+          <Route path="security/lockout" element={<LockoutConfigPage />} />
+          <Route path="security/registration" element={<RegistrationConfigPage />} />
+          <Route path="security/threat" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/create" element={<UserAddOrUpdateForm />} />
