@@ -18,6 +18,7 @@ export interface FormSwitchFieldProps {
   labelClassName?: string
   errorClassName?: string
   descriptionClassName?: string
+  switchClassName?: string
   id?: string
   layout?: "horizontal" | "vertical"
 }
@@ -33,6 +34,7 @@ export function FormSwitchField({
   labelClassName,
   errorClassName,
   descriptionClassName,
+  switchClassName,
   id,
   layout = "horizontal",
 }: FormSwitchFieldProps) {
@@ -63,6 +65,7 @@ export function FormSwitchField({
           checked={checked}
           onCheckedChange={onCheckedChange}
           disabled={disabled}
+          className={switchClassName}
         />
       </div>
 

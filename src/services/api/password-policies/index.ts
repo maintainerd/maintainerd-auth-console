@@ -1,22 +1,14 @@
-/**
- * Password Policies API Service
- */
-
 import { get, put } from '@/services'
 import type {
   PasswordPolicies,
   PasswordPoliciesPayload,
   PasswordPoliciesResponse,
-  ApiResponse
 } from './types'
 
 const API_ENDPOINTS = {
   PASSWORD_POLICIES: '/security-settings/password',
 }
 
-/**
- * Fetch password policies
- */
 export async function fetchPasswordPolicies(): Promise<PasswordPolicies> {
   const response = await get<PasswordPoliciesResponse>(API_ENDPOINTS.PASSWORD_POLICIES)
 
@@ -24,46 +16,13 @@ export async function fetchPasswordPolicies(): Promise<PasswordPolicies> {
     throw new Error(response.message || 'Failed to fetch password policies')
   }
 
-  // Transform snake_case response to camelCase
-  const data = response.data
-  
-  const transformed: PasswordPolicies = {
-    minLength: data.min_length,
-    maxLength: data.max_length,
-    requireUppercase: data.require_uppercase,
-    requireLowercase: data.require_lowercase,
-    requireNumbers: data.require_numbers,
-    requireSpecialChars: data.require_special_chars,
-    allowedSpecialChars: data.allowed_special_chars,
-    preventCommonPasswords: data.prevent_common_passwords,
-    preventUserInfoInPassword: data.prevent_user_info_in_password,
-    preventSequentialChars: data.prevent_sequential_chars,
-    preventRepeatingChars: data.prevent_repeating_chars,
-    maxRepeatingChars: data.max_repeating_chars,
-    passwordExpiration: data.password_expiration,
-    expirationDays: data.expiration_days,
-    expirationWarningDays: data.expiration_warning_days,
-    passwordHistory: data.password_history,
-    historyCount: data.history_count,
-    allowSelfReset: data.allow_self_reset,
-    resetTokenExpiry: data.reset_token_expiry,
-    maxResetAttempts: data.max_reset_attempts,
-    resetCooldown: data.reset_cooldown,
-    minimumStrengthScore: data.minimum_strength_score,
-    showStrengthMeter: data.show_strength_meter,
-    blockWeakPasswords: data.block_weak_passwords
-  }
-  
-  return transformed
+  return response.data
 }
 
-/**
- * Update password policies
- */
 export async function updatePasswordPolicies(
   data: PasswordPoliciesPayload
 ): Promise<PasswordPolicies> {
-  const response = await put<ApiResponse<PasswordPolicies>>(
+  const response = await put<PasswordPoliciesResponse>(
     API_ENDPOINTS.PASSWORD_POLICIES,
     data
   )

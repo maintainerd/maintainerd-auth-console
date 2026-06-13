@@ -14,7 +14,8 @@ export function getTenantIdentifierFromPath(pathname: string): string | null {
       pathname.startsWith('/register') ||
       pathname.startsWith('/setup') ||
       pathname.startsWith('/forgot-password') ||
-      pathname.startsWith('/reset-password')) {
+      pathname.startsWith('/reset-password') ||
+      pathname.startsWith('/email-verification')) {
     return null
   }
 

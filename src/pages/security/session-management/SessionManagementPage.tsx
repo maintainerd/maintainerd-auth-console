@@ -1,130 +1,86 @@
-/**
- * Session Management Page
- */
-
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
 import { DetailsContainer } from '@/components/container'
-import { Save } from 'lucide-react'
+import { Save, Clock } from 'lucide-react'
+import { FormSwitchField, FormInputField, FormSelectField } from '@/components/form'
+import { SettingsCard } from '@/components/card'
 import { useSessionSettings, useUpdateSessionSettings } from '@/hooks/useSessionSettings'
 import { useToast } from '@/hooks/useToast'
-import { sessionSettingsSchema, type SessionSettingsFormData } from '@/lib/validations/sessionSettingsSchema'
-import type { SessionSettingsPayload } from '@/services/api/session-settings/types'
-import { SessionTimeouts } from './components/SessionTimeouts'
-import { SessionSecurity } from './components/SessionSecurity'
-import { SessionMonitoring } from './components/SessionMonitoring'
-import { SessionTermination } from './components/SessionTermination'
-import { AdvancedSessionSettings } from './components/AdvancedSessionSettings'
+import { sessionSettingsSchema, type SessionSettingsFormData } from '@/lib/validations'
+
+const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
+
+const SAME_SITE_OPTIONS = [
+  { value: 'Strict', label: 'Strict' },
+  { value: 'Lax', label: 'Lax' },
+  { value: 'None', label: 'None (requires Secure)' },
+]
 
 export default function SessionManagementPage() {
   const { showSuccess, showError } = useToast()
-  const { data: sessionSettings, isLoading } = useSessionSettings()
-  const updateSettingsMutation = useUpdateSessionSettings()
+  const { data: saved, isLoading } = useSessionSettings()
+  const updateMutation = useUpdateSessionSettings()
 
-  const { control, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm<SessionSettingsFormData>({
+  const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<SessionSettingsFormData>({
     resolver: yupResolver(sessionSettingsSchema),
     defaultValues: {
-      sessionTimeout: 30,
-      idleTimeout: 15,
-      absoluteTimeout: 480,
-      rememberMeEnabled: true,
-      rememberMeDuration: 30,
-      concurrentSessionsEnabled: true,
-      maxConcurrentSessions: 3,
-      sessionBindingEnabled: true,
-      ipBindingEnabled: false,
-      deviceBindingEnabled: true,
-      sessionLoggingEnabled: true,
-      suspiciousSessionDetection: true,
-      geoLocationTracking: true,
-      deviceFingerprintingEnabled: true,
-      forceLogoutOnPasswordChange: true,
-      forceLogoutOnRoleChange: true,
-      adminCanTerminateSessions: true,
-      userCanViewActiveSessions: true,
-      sessionTokenRotation: true,
-      tokenRotationInterval: 60,
-      secureSessionCookies: true,
-      sameSiteCookies: 'strict',
+      access_token_ttl_minutes: 15,
+      refresh_token_ttl_days: 30,
+      max_concurrent_sessions: 5,
+      idle_timeout_minutes: 30,
+      absolute_timeout_hours: 24,
+      rotate_refresh_tokens: true,
+      refresh_token_reuse_interval_seconds: 10,
+      cookie_secure: true,
+      cookie_http_only: true,
+      cookie_same_site: 'Lax',
+      revoke_sessions_on_password_change: true,
     },
+    mode: 'onSubmit',
   })
 
+  const formValues = watch()
+
   useEffect(() => {
-    if (sessionSettings) {
+    if (saved) {
       reset({
-        sessionTimeout: sessionSettings.sessionTimeout ?? 30,
-        idleTimeout: sessionSettings.idleTimeout ?? 15,
-        absoluteTimeout: sessionSettings.absoluteTimeout ?? 480,
-        rememberMeEnabled: sessionSettings.rememberMeEnabled ?? true,
-        rememberMeDuration: sessionSettings.rememberMeDuration ?? 30,
-        concurrentSessionsEnabled: sessionSettings.concurrentSessionsEnabled ?? true,
-        maxConcurrentSessions: sessionSettings.maxConcurrentSessions ?? 3,
-        sessionBindingEnabled: sessionSettings.sessionBindingEnabled ?? true,
-        ipBindingEnabled: sessionSettings.ipBindingEnabled ?? false,
-        deviceBindingEnabled: sessionSettings.deviceBindingEnabled ?? true,
-        sessionLoggingEnabled: sessionSettings.sessionLoggingEnabled ?? true,
-        suspiciousSessionDetection: sessionSettings.suspiciousSessionDetection ?? true,
-        geoLocationTracking: sessionSettings.geoLocationTracking ?? true,
-        deviceFingerprintingEnabled: sessionSettings.deviceFingerprintingEnabled ?? true,
-        forceLogoutOnPasswordChange: sessionSettings.forceLogoutOnPasswordChange ?? true,
-        forceLogoutOnRoleChange: sessionSettings.forceLogoutOnRoleChange ?? true,
-        adminCanTerminateSessions: sessionSettings.adminCanTerminateSessions ?? true,
-        userCanViewActiveSessions: sessionSettings.userCanViewActiveSessions ?? true,
-        sessionTokenRotation: sessionSettings.sessionTokenRotation ?? true,
-        tokenRotationInterval: sessionSettings.tokenRotationInterval ?? 60,
-        secureSessionCookies: sessionSettings.secureSessionCookies ?? true,
-        sameSiteCookies: sessionSettings.sameSiteCookies ?? 'strict',
+        access_token_ttl_minutes: saved.access_token_ttl_minutes ?? 15,
+        refresh_token_ttl_days: saved.refresh_token_ttl_days ?? 30,
+        max_concurrent_sessions: saved.max_concurrent_sessions ?? 5,
+        idle_timeout_minutes: saved.idle_timeout_minutes ?? 30,
+        absolute_timeout_hours: saved.absolute_timeout_hours ?? 24,
+        rotate_refresh_tokens: saved.rotate_refresh_tokens ?? true,
+        refresh_token_reuse_interval_seconds: saved.refresh_token_reuse_interval_seconds ?? 10,
+        cookie_secure: saved.cookie_secure ?? true,
+        cookie_http_only: saved.cookie_http_only ?? true,
+        cookie_same_site: saved.cookie_same_site ?? 'Lax',
+        revoke_sessions_on_password_change: saved.revoke_sessions_on_password_change ?? true,
       })
     }
-  }, [sessionSettings, reset])
+  }, [saved, reset])
+
+  const handleUpdate = (updates: Partial<SessionSettingsFormData>) => {
+    Object.entries(updates).forEach(([key, value]) => {
+      setValue(key as keyof SessionSettingsFormData, value, { shouldValidate: false, shouldDirty: true })
+    })
+  }
 
   const onSubmit = async (data: SessionSettingsFormData) => {
     try {
-      const payload: SessionSettingsPayload = {
-        session_timeout: data.sessionTimeout,
-        idle_timeout: data.idleTimeout,
-        absolute_timeout: data.absoluteTimeout,
-        remember_me_enabled: data.rememberMeEnabled,
-        remember_me_duration: data.rememberMeDuration,
-        concurrent_sessions_enabled: data.concurrentSessionsEnabled,
-        max_concurrent_sessions: data.maxConcurrentSessions,
-        session_binding_enabled: data.sessionBindingEnabled,
-        ip_binding_enabled: data.ipBindingEnabled,
-        device_binding_enabled: data.deviceBindingEnabled,
-        session_logging_enabled: data.sessionLoggingEnabled,
-        suspicious_session_detection: data.suspiciousSessionDetection,
-        geo_location_tracking: data.geoLocationTracking,
-        device_fingerprinting_enabled: data.deviceFingerprintingEnabled,
-        force_logout_on_password_change: data.forceLogoutOnPasswordChange,
-        force_logout_on_role_change: data.forceLogoutOnRoleChange,
-        admin_can_terminate_sessions: data.adminCanTerminateSessions,
-        user_can_view_active_sessions: data.userCanViewActiveSessions,
-        session_token_rotation: data.sessionTokenRotation,
-        token_rotation_interval: data.tokenRotationInterval,
-        secure_session_cookies: data.secureSessionCookies,
-        same_site_cookies: data.sameSiteCookies,
-      }
-
-      await updateSettingsMutation.mutateAsync(payload)
+      await updateMutation.mutateAsync(data)
       showSuccess('Session settings saved successfully')
     } catch (error) {
       showError(error)
     }
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <DetailsContainer>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">Loading...</h2>
-            <p className="text-muted-foreground mt-2">
-              Fetching session settings
-            </p>
-          </div>
+          <p className="text-muted-foreground">Loading session settings...</p>
         </div>
       </DetailsContainer>
     )
@@ -134,27 +90,131 @@ export default function SessionManagementPage() {
     <DetailsContainer>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Session Management</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Sessions</h1>
           <p className="text-muted-foreground">
-            Configure user session timeouts, security policies, and monitoring to protect against unauthorized access.
+            Configure token lifetimes, idle/absolute timeouts, concurrency, refresh rotation, and cookie flags.
           </p>
         </div>
 
         <div className="grid gap-6">
-          <SessionTimeouts control={control} watch={watch} />
-          <SessionSecurity control={control} watch={watch} />
-          <SessionMonitoring control={control} watch={watch} />
-          <SessionTermination control={control} watch={watch} />
-          <AdvancedSessionSettings control={control} watch={watch} />
+          <SettingsCard
+            title="Token Lifetimes"
+            description="Set how long access and refresh tokens remain valid."
+            icon={Clock}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormInputField
+                label="Access Token TTL (minutes)"
+                description="1–60 minutes"
+                type="number"
+                value={formValues.access_token_ttl_minutes.toString()}
+                onChange={(e) => handleUpdate({ access_token_ttl_minutes: parseInt(e.target.value) || 1 })}
+                error={errors.access_token_ttl_minutes?.message}
+              />
+              <FormInputField
+                label="Refresh Token TTL (days)"
+                description="1–365 days"
+                type="number"
+                value={formValues.refresh_token_ttl_days.toString()}
+                onChange={(e) => handleUpdate({ refresh_token_ttl_days: parseInt(e.target.value) || 1 })}
+                error={errors.refresh_token_ttl_days?.message}
+              />
+            </div>
+          </SettingsCard>
+
+          <SettingsCard
+            title="Timeouts & Concurrency"
+            description="Idle and absolute session limits. Set concurrency to 0 for unlimited."
+          >
+            <div className="grid gap-4 md:grid-cols-3">
+              <FormInputField
+                label="Idle Timeout (minutes)"
+                type="number"
+                value={formValues.idle_timeout_minutes.toString()}
+                onChange={(e) => handleUpdate({ idle_timeout_minutes: parseInt(e.target.value) || 1 })}
+                error={errors.idle_timeout_minutes?.message}
+              />
+              <FormInputField
+                label="Absolute Timeout (hours)"
+                type="number"
+                value={formValues.absolute_timeout_hours.toString()}
+                onChange={(e) => handleUpdate({ absolute_timeout_hours: parseInt(e.target.value) || 1 })}
+                error={errors.absolute_timeout_hours?.message}
+              />
+              <FormInputField
+                label="Max Concurrent Sessions"
+                description="0 = unlimited"
+                type="number"
+                value={formValues.max_concurrent_sessions.toString()}
+                onChange={(e) => handleUpdate({ max_concurrent_sessions: parseInt(e.target.value) || 0 })}
+                error={errors.max_concurrent_sessions?.message}
+              />
+            </div>
+          </SettingsCard>
+
+          <SettingsCard
+            title="Refresh Rotation"
+            description="Single-use refresh tokens with reuse detection and family revocation."
+          >
+            <div className="space-y-4">
+              <FormSwitchField
+                label="Rotate Refresh Tokens"
+                description="Issue a new refresh token on every refresh; replaying a consumed token revokes the entire token family"
+                checked={formValues.rotate_refresh_tokens}
+                onCheckedChange={(v) => handleUpdate({ rotate_refresh_tokens: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormInputField
+                label="Reuse Grace (seconds)"
+                description="Replay window before family revocation (0 = instant)"
+                type="number"
+                value={formValues.refresh_token_reuse_interval_seconds.toString()}
+                onChange={(e) => handleUpdate({ refresh_token_reuse_interval_seconds: parseInt(e.target.value) || 0 })}
+                error={errors.refresh_token_reuse_interval_seconds?.message}
+              />
+            </div>
+          </SettingsCard>
+
+          <SettingsCard
+            title="Cookie Settings"
+            description="Security flags applied to authentication cookies."
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FormSwitchField
+                label="Secure"
+                description="Only transmit cookies over HTTPS"
+                checked={formValues.cookie_secure}
+                onCheckedChange={(v) => handleUpdate({ cookie_secure: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSwitchField
+                label="HttpOnly"
+                description="Block JavaScript access to cookies"
+                checked={formValues.cookie_http_only}
+                onCheckedChange={(v) => handleUpdate({ cookie_http_only: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSwitchField
+                label="Revoke on Password Change"
+                description="Terminate all other sessions when password is changed"
+                checked={formValues.revoke_sessions_on_password_change}
+                onCheckedChange={(v) => handleUpdate({ revoke_sessions_on_password_change: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSelectField
+                label="SameSite"
+                options={SAME_SITE_OPTIONS}
+                value={formValues.cookie_same_site}
+                onValueChange={(v) => handleUpdate({ cookie_same_site: v as SessionSettingsFormData['cookie_same_site'] })}
+                error={errors.cookie_same_site?.message}
+              />
+            </div>
+          </SettingsCard>
 
           <div className="flex justify-end">
-            <Button 
-              type="submit" 
-              className="min-w-[140px] px-6"
-              disabled={updateSettingsMutation.isPending || isSubmitting}
-            >
+            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
               <Save className="mr-2 h-4 w-4" />
-              {updateSettingsMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>

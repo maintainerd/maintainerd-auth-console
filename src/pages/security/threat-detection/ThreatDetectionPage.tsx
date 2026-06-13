@@ -1,146 +1,80 @@
-/**
- * Threat Detection Settings Page
- */
-
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
 import { DetailsContainer } from '@/components/container'
+import { Save, AlertTriangle } from 'lucide-react'
+import { FormSwitchField, FormInputField } from '@/components/form'
+import { SettingsCard } from '@/components/card'
 import { useThreatDetectionSettings, useUpdateThreatDetectionSettings } from '@/hooks/useThreatDetectionSettings'
 import { useToast } from '@/hooks/useToast'
-import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } from '@/lib/validations/threatDetectionSettingsSchema'
-import { BruteForceProtection } from './components/BruteForceProtection'
-import { AnomalyDetection } from './components/AnomalyDetection'
-import { BotProtection } from './components/BotProtection'
-import { RealTimeMonitoring } from './components/RealTimeMonitoring'
-import { MachineLearning } from './components/MachineLearning'
-import { ResponseActions } from './components/ResponseActions'
+import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } from '@/lib/validations'
+
+const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 export default function ThreatDetectionPage() {
-  const { data: savedSettings, isLoading, error } = useThreatDetectionSettings()
-  const { mutateAsync: updateSettings, isPending } = useUpdateThreatDetectionSettings()
   const { showSuccess, showError } = useToast()
+  const { data: savedSettings, isLoading } = useThreatDetectionSettings()
+  const updateMutation = useUpdateThreatDetectionSettings()
 
-  const { control, handleSubmit, watch, formState, reset } = useForm<ThreatDetectionSettingsFormData>({
+  const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<ThreatDetectionSettingsFormData>({
     resolver: yupResolver(threatDetectionSettingsSchema),
     defaultValues: {
-      bruteForceEnabled: true,
-      maxFailedAttempts: 5,
-      bruteForceWindow: 15,
-      accountLockoutDuration: 30,
-      anomalyDetectionEnabled: true,
-      behaviorAnalysis: true,
-      velocityChecking: true,
-      geoAnomalyDetection: true,
-      deviceAnomalyDetection: true,
-      botProtectionEnabled: true,
-      captchaEnabled: true,
-      userAgentFiltering: true,
-      honeypotEnabled: false,
-      realTimeAlertsEnabled: true,
-      suspiciousActivityThreshold: 'medium',
-      autoBlockSuspiciousIPs: false,
-      alertAdminsEnabled: true,
-      logSuspiciousActivity: true,
-      mlThreatDetection: true,
-      adaptiveLearning: true,
-      riskScoring: true,
-      behaviorBaselines: true,
-      autoResponseEnabled: true,
-      escalationEnabled: true,
-      quarantineEnabled: false,
-      notificationChannels: ['email', 'webhook'],
+      brute_force_detection_enabled: true,
+      impossible_travel_detection_enabled: true,
+      new_device_notification_enabled: true,
+      velocity_check_enabled: true,
+      risk_based_step_up_enabled: false,
+      compromised_credential_monitoring_enabled: true,
+      ip_reputation_check_enabled: false,
+      block_tor_exit_nodes: false,
+      risk_step_up_threshold: 21,
+      risk_block_threshold: 81,
+      velocity_failures_per_ip_per_hour: 50,
     },
+    mode: 'onSubmit',
   })
 
-  // Load saved settings when data is fetched
+  const formValues = watch()
+
   useEffect(() => {
     if (savedSettings) {
-      const formData: ThreatDetectionSettingsFormData = {
-        bruteForceEnabled: savedSettings.bruteForceEnabled ?? true,
-        maxFailedAttempts: savedSettings.maxFailedAttempts ?? 5,
-        bruteForceWindow: savedSettings.bruteForceWindow ?? 15,
-        accountLockoutDuration: savedSettings.accountLockoutDuration ?? 30,
-        anomalyDetectionEnabled: savedSettings.anomalyDetectionEnabled ?? true,
-        behaviorAnalysis: savedSettings.behaviorAnalysis ?? true,
-        velocityChecking: savedSettings.velocityChecking ?? true,
-        geoAnomalyDetection: savedSettings.geoAnomalyDetection ?? true,
-        deviceAnomalyDetection: savedSettings.deviceAnomalyDetection ?? true,
-        botProtectionEnabled: savedSettings.botProtectionEnabled ?? true,
-        captchaEnabled: savedSettings.captchaEnabled ?? true,
-        userAgentFiltering: savedSettings.userAgentFiltering ?? true,
-        honeypotEnabled: savedSettings.honeypotEnabled ?? false,
-        realTimeAlertsEnabled: savedSettings.realTimeAlertsEnabled ?? true,
-        suspiciousActivityThreshold: savedSettings.suspiciousActivityThreshold ?? 'medium',
-        autoBlockSuspiciousIPs: savedSettings.autoBlockSuspiciousIPs ?? false,
-        alertAdminsEnabled: savedSettings.alertAdminsEnabled ?? true,
-        logSuspiciousActivity: savedSettings.logSuspiciousActivity ?? true,
-        mlThreatDetection: savedSettings.mlThreatDetection ?? true,
-        adaptiveLearning: savedSettings.adaptiveLearning ?? true,
-        riskScoring: savedSettings.riskScoring ?? true,
-        behaviorBaselines: savedSettings.behaviorBaselines ?? true,
-        autoResponseEnabled: savedSettings.autoResponseEnabled ?? true,
-        escalationEnabled: savedSettings.escalationEnabled ?? true,
-        quarantineEnabled: savedSettings.quarantineEnabled ?? false,
-        notificationChannels: savedSettings.notificationChannels ?? ['email', 'webhook'],
-      }
-      
-      reset(formData)
+      reset({
+        brute_force_detection_enabled: savedSettings.brute_force_detection_enabled ?? true,
+        impossible_travel_detection_enabled: savedSettings.impossible_travel_detection_enabled ?? true,
+        new_device_notification_enabled: savedSettings.new_device_notification_enabled ?? true,
+        velocity_check_enabled: savedSettings.velocity_check_enabled ?? true,
+        risk_based_step_up_enabled: savedSettings.risk_based_step_up_enabled ?? false,
+        compromised_credential_monitoring_enabled: savedSettings.compromised_credential_monitoring_enabled ?? true,
+        ip_reputation_check_enabled: savedSettings.ip_reputation_check_enabled ?? false,
+        block_tor_exit_nodes: savedSettings.block_tor_exit_nodes ?? false,
+        risk_step_up_threshold: savedSettings.risk_step_up_threshold ?? 21,
+        risk_block_threshold: savedSettings.risk_block_threshold ?? 81,
+        velocity_failures_per_ip_per_hour: savedSettings.velocity_failures_per_ip_per_hour ?? 50,
+      })
     }
   }, [savedSettings, reset])
 
+  const handleUpdate = (updates: Partial<ThreatDetectionSettingsFormData>) => {
+    Object.entries(updates).forEach(([key, value]) => {
+      setValue(key as keyof ThreatDetectionSettingsFormData, value, { shouldValidate: false, shouldDirty: true })
+    })
+  }
+
   const onSubmit = async (data: ThreatDetectionSettingsFormData) => {
     try {
-      await updateSettings({
-        brute_force_enabled: data.bruteForceEnabled,
-        max_failed_attempts: data.maxFailedAttempts,
-        brute_force_window: data.bruteForceWindow,
-        account_lockout_duration: data.accountLockoutDuration,
-        anomaly_detection_enabled: data.anomalyDetectionEnabled,
-        behavior_analysis: data.behaviorAnalysis,
-        velocity_checking: data.velocityChecking,
-        geo_anomaly_detection: data.geoAnomalyDetection,
-        device_anomaly_detection: data.deviceAnomalyDetection,
-        bot_protection_enabled: data.botProtectionEnabled,
-        captcha_enabled: data.captchaEnabled,
-        user_agent_filtering: data.userAgentFiltering,
-        honeypot_enabled: data.honeypotEnabled,
-        real_time_alerts_enabled: data.realTimeAlertsEnabled,
-        suspicious_activity_threshold: data.suspiciousActivityThreshold,
-        auto_block_suspicious_ips: data.autoBlockSuspiciousIPs,
-        alert_admins_enabled: data.alertAdminsEnabled,
-        log_suspicious_activity: data.logSuspiciousActivity,
-        ml_threat_detection: data.mlThreatDetection,
-        adaptive_learning: data.adaptiveLearning,
-        risk_scoring: data.riskScoring,
-        behavior_baselines: data.behaviorBaselines,
-        auto_response_enabled: data.autoResponseEnabled,
-        escalation_enabled: data.escalationEnabled,
-        quarantine_enabled: data.quarantineEnabled,
-        notification_channels: data.notificationChannels,
-      })
-      showSuccess('Threat detection settings updated successfully')
-    } catch {
-      showError('Failed to update threat detection settings')
+      await updateMutation.mutateAsync(data)
+      showSuccess('Threat detection settings saved successfully')
+    } catch (error) {
+      showError(error)
     }
   }
 
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex h-64 items-center justify-center">
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <p className="text-muted-foreground">Loading threat detection settings...</p>
-        </div>
-      </DetailsContainer>
-    )
-  }
-
-  if (error) {
-    return (
-      <DetailsContainer>
-        <div className="flex h-64 items-center justify-center">
-          <p className="text-destructive">Failed to load threat detection settings</p>
         </div>
       </DetailsContainer>
     )
@@ -148,35 +82,131 @@ export default function ThreatDetectionPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Threat Detection</h1>
           <p className="text-muted-foreground">
-            Configure advanced threat detection, anomaly monitoring, and automated response systems to protect against security attacks.
+            Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring.
           </p>
         </div>
 
         <div className="grid gap-6">
-          <BruteForceProtection control={control} watch={watch} />
-          <AnomalyDetection control={control} watch={watch} />
-          <BotProtection control={control} watch={watch} />
-          <RealTimeMonitoring control={control} watch={watch} />
-          <MachineLearning control={control} watch={watch} />
-          <ResponseActions control={control} watch={watch} />
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => reset()}
-            disabled={isPending || formState.isSubmitting}
+          <SettingsCard
+            title="Detection Engines"
+            description="Enable threat detection subsystems that run before credential checks on every login."
+            icon={AlertTriangle}
           >
-            Reset
-          </Button>
-          <Button type="submit" disabled={isPending || formState.isSubmitting}>
-            {isPending || formState.isSubmitting ? 'Saving...' : 'Save Changes'}
-          </Button>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FormSwitchField
+                label="Brute Force Detection"
+                description="Detect repeated failed login attempts per account"
+                checked={formValues.brute_force_detection_enabled}
+                onCheckedChange={(v) => handleUpdate({ brute_force_detection_enabled: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSwitchField
+                label="Impossible Travel Detection"
+                description="Flag logins from geographically impossible locations"
+                checked={formValues.impossible_travel_detection_enabled}
+                onCheckedChange={(v) => handleUpdate({ impossible_travel_detection_enabled: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSwitchField
+                label="New Device Notification"
+                description="Alert users when a login occurs from a new device"
+                checked={formValues.new_device_notification_enabled}
+                onCheckedChange={(v) => handleUpdate({ new_device_notification_enabled: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+              <FormSwitchField
+                label="Velocity Check"
+                description="Rate-limit login attempts per IP address"
+                checked={formValues.velocity_check_enabled}
+                onCheckedChange={(v) => handleUpdate({ velocity_check_enabled: v })}
+                switchClassName={SWITCH_CLASS}
+              />
+            </div>
+          </SettingsCard>
+
+          <SettingsCard
+            title="Risk-Based Controls"
+            description="Step-up and blocking based on a cumulative risk score (0–100)."
+          >
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormSwitchField
+                  label="Risk-Based Step-Up"
+                  description="Force MFA when risk score reaches the step-up threshold"
+                  checked={formValues.risk_based_step_up_enabled}
+                  onCheckedChange={(v) => handleUpdate({ risk_based_step_up_enabled: v })}
+                  switchClassName={SWITCH_CLASS}
+                />
+                <FormSwitchField
+                  label="Compromised Credential Monitoring"
+                  description="Check credentials against known breach databases"
+                  checked={formValues.compromised_credential_monitoring_enabled}
+                  onCheckedChange={(v) => handleUpdate({ compromised_credential_monitoring_enabled: v })}
+                  switchClassName={SWITCH_CLASS}
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField
+                  label="Step-Up Threshold"
+                  description="Risk score ≥ this value forces MFA"
+                  type="number"
+                  value={formValues.risk_step_up_threshold.toString()}
+                  onChange={(e) => handleUpdate({ risk_step_up_threshold: parseInt(e.target.value) || 0 })}
+                  error={errors.risk_step_up_threshold?.message}
+                />
+                <FormInputField
+                  label="Block Threshold"
+                  description="Risk score ≥ this value blocks the login entirely"
+                  type="number"
+                  value={formValues.risk_block_threshold.toString()}
+                  onChange={(e) => handleUpdate({ risk_block_threshold: parseInt(e.target.value) || 0 })}
+                  error={errors.risk_block_threshold?.message}
+                />
+              </div>
+            </div>
+          </SettingsCard>
+
+          <SettingsCard
+            title="Network & IP"
+            description="IP reputation checks, Tor blocking, and per-IP velocity limits."
+          >
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormSwitchField
+                  label="IP Reputation Check"
+                  description="Query external IP reputation feeds"
+                  checked={formValues.ip_reputation_check_enabled}
+                  onCheckedChange={(v) => handleUpdate({ ip_reputation_check_enabled: v })}
+                  switchClassName={SWITCH_CLASS}
+                />
+                <FormSwitchField
+                  label="Block Tor Exit Nodes"
+                  description="Reject logins originating from known Tor exit nodes"
+                  checked={formValues.block_tor_exit_nodes}
+                  onCheckedChange={(v) => handleUpdate({ block_tor_exit_nodes: v })}
+                  switchClassName={SWITCH_CLASS}
+                />
+              </div>
+              <FormInputField
+                label="Velocity Limit (failures/IP/hour)"
+                type="number"
+                value={formValues.velocity_failures_per_ip_per_hour.toString()}
+                onChange={(e) => handleUpdate({ velocity_failures_per_ip_per_hour: parseInt(e.target.value) || 1 })}
+                error={errors.velocity_failures_per_ip_per_hour?.message}
+              />
+            </div>
+          </SettingsCard>
+
+          <div className="flex justify-end">
+            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
+              <Save className="mr-2 h-4 w-4" />
+              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </div>
       </form>
     </DetailsContainer>
