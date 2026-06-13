@@ -47,11 +47,21 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
       onUpload,
       uploading = false,
       ...props
-    }
+    },
+    ref
   ) => {
     const [dragActive, setDragActive] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(value || null)
     const inputRef = useRef<HTMLInputElement>(null)
+
+    const setInputRef = useCallback((node: HTMLInputElement | null) => {
+      inputRef.current = node
+      if (typeof ref === "function") {
+        ref(node)
+      } else if (ref) {
+        ref.current = node
+      }
+    }, [ref])
 
     const handleFiles = useCallback(async (files: FileList | null) => {
       if (!files || files.length === 0) return
@@ -169,7 +179,7 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
             onDrop={handleDrop}
           >
             <input
-              ref={inputRef}
+              ref={setInputRef}
               type="file"
               accept={accept}
               onChange={handleChange}

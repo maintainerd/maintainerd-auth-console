@@ -26,9 +26,14 @@ export function StatementField({
   const statementErrors = errors.document?.statement?.[statementIndex]
 
   return (
-    <div className="border rounded-lg p-4 space-y-4">
+    <div className="space-y-4 rounded-lg border bg-background p-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium">Statement {statementIndex + 1}</h4>
+        <div>
+          <h4 className="text-sm font-medium">Statement {statementIndex + 1}</h4>
+          <p className="text-sm text-muted-foreground">
+            Match resources first, then define which actions are allowed or denied.
+          </p>
+        </div>
         {canRemove && (
           <Button
             type="button"
@@ -69,67 +74,6 @@ export function StatementField({
           <p className="text-sm text-destructive">{statementErrors.effect.message}</p>
         )}
       </div>
-
-      <Controller
-        name={`document.statement.${statementIndex}.action` as const}
-        control={control}
-        render={({ field }) => (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Actions *</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => field.onChange([...field.value, ""])}
-                className="gap-1 text-xs"
-                disabled={isLoading}
-              >
-                <Plus className="h-3 w-3" />
-                Add Action
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {field.value.map((action, actionIndex) => (
-                <div key={actionIndex} className="flex gap-2">
-                  <Input
-                    value={action}
-                    onChange={(e) => {
-                      const newActions = [...field.value]
-                      newActions[actionIndex] = e.target.value
-                      field.onChange(newActions)
-                    }}
-                    placeholder="e.g., users:read, users:write, users:*"
-                    className="flex-1"
-                    disabled={isLoading}
-                  />
-                  {field.value.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const newActions = field.value.filter((_, i) => i !== actionIndex)
-                        field.onChange(newActions)
-                      }}
-                      className="px-2"
-                      disabled={isLoading}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Format: permission (e.g., "users:read", "users:write", "users:*")
-            </p>
-            {statementErrors?.action && (
-              <p className="text-sm text-destructive">{statementErrors.action.message}</p>
-            )}
-          </div>
-        )}
-      />
 
       <Controller
         name={`document.statement.${statementIndex}.resource` as const}
@@ -191,7 +135,67 @@ export function StatementField({
           </div>
         )}
       />
+
+      <Controller
+        name={`document.statement.${statementIndex}.action` as const}
+        control={control}
+        render={({ field }) => (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Actions *</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => field.onChange([...field.value, ""])}
+                className="gap-1 text-xs"
+                disabled={isLoading}
+              >
+                <Plus className="h-3 w-3" />
+                Add Action
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {field.value.map((action, actionIndex) => (
+                <div key={actionIndex} className="flex gap-2">
+                  <Input
+                    value={action}
+                    onChange={(e) => {
+                      const newActions = [...field.value]
+                      newActions[actionIndex] = e.target.value
+                      field.onChange(newActions)
+                    }}
+                    placeholder="e.g., users:read, users:write, users:*"
+                    className="flex-1"
+                    disabled={isLoading}
+                  />
+                  {field.value.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const newActions = field.value.filter((_, i) => i !== actionIndex)
+                        field.onChange(newActions)
+                      }}
+                      className="px-2"
+                      disabled={isLoading}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Format: permission (e.g., "users:read", "users:write", "users:*")
+            </p>
+            {statementErrors?.action && (
+              <p className="text-sm text-destructive">{statementErrors.action.message}</p>
+            )}
+          </div>
+        )}
+      />
     </div>
   )
 }
-
