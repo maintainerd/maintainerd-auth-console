@@ -1,10 +1,21 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, AlertTriangle, User as UserIcon } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
 import { DataTableColumnHeader } from "@/components/data-table"
 import type { User, UserStatus } from "@/services/api/users/types"
+
+// First letters of the name (max two) for the avatar fallback.
+const initials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "?"
 
 const getStatusBadge = (status: UserStatus) => {
   const statusConfig = {
@@ -37,64 +48,37 @@ const getStatusBadge = (status: UserStatus) => {
   )
 }
 
-const getVerificationBadge = (isVerified: boolean, label: string) => {
-  if (isVerified) {
-    return (
-      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        {label}
-      </Badge>
-    )
-  }
-  return (
-    <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
-      <XCircle className="w-3 h-3 mr-1" />
-      {label}
-    </Badge>
-  )
-}
-
 export const userColumns: ColumnDef<User>[] = [
+  {
+    id: "Name",
+    accessorKey: "fullname",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    cell: ({ row }) => {
+      const user = row.original
+      const name = user.fullname?.trim()
+      return (
+        <div className="flex items-center gap-3 py-1">
+          <Avatar className="size-9">
+            <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
+              {initials(name || user.username)}
+            </AvatarFallback>
+          </Avatar>
+          {name ? (
+            <span className="font-medium">{name}</span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </div>
+      )
+    },
+  },
   {
     id: "Username",
     accessorKey: "username",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="flex items-center gap-2 px-3 py-1">
-          <UserIcon className="size-4 text-muted-foreground shrink-0" />
-          <span className="font-medium">{user.username}</span>
-        </div>
-      )
-    },
-  },
-  {
-    id: "Email",
-    accessorKey: "email",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="px-3 py-1">
-          <span className="text-sm text-muted-foreground">{user.email}</span>
-        </div>
-      )
-    },
-  },
-  {
-    id: "Verification",
-    accessorKey: "is_email_verified",
-    header: () => <div className="px-4">Verification</div>,
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          {getVerificationBadge(user.is_email_verified, "Email")}
-          {getVerificationBadge(user.is_phone_verified, "Phone")}
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <div className="py-1 text-muted-foreground">{row.original.username}</div>
+    ),
   },
   {
     id: "Status",
@@ -103,36 +87,8 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="px-3 py-1">
+        <div className="py-1">
           {getStatusBadge(user.status)}
-        </div>
-      )
-    },
-  },
-  {
-    id: "Profile Status",
-    accessorKey: "is_profile_completed",
-    header: () => <div className="px-4">Profile Status</div>,
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="flex flex-col gap-1 px-3 py-1">
-          <div className="flex items-center gap-2 text-sm">
-            {user.is_profile_completed ? (
-              <CheckCircle className="w-4 h-4 text-green-600" />
-            ) : (
-              <XCircle className="w-4 h-4 text-gray-400" />
-            )}
-            <span className="text-muted-foreground">Profile</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            {user.is_account_completed ? (
-              <CheckCircle className="w-4 h-4 text-green-600" />
-            ) : (
-              <XCircle className="w-4 h-4 text-gray-400" />
-            )}
-            <span className="text-muted-foreground">Account</span>
-          </div>
         </div>
       )
     },
@@ -144,7 +100,7 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1">
+        <div className="flex flex-col gap-1 py-1">
           <span className="text-sm font-medium">
             {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
           </span>
@@ -160,7 +116,7 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="px-3 py-1">
+        <div className="py-1">
           <UserActions user={user} />
         </div>
       )

@@ -67,13 +67,18 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
         createLabel={createLabel}
       />
       <DataTableActiveFilters activeFilters={activeFilters} onClearAll={clearFilters} />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-        onRowClick={onRowClick}
-      />
+      {/* The table bleeds past the card's px-8 to touch its side edges (-mx-8),
+          while the first/last columns re-pad to the same 32px gutter so cell
+          content stays aligned with the toolbar and pagination above/below. */}
+      <div className="-mx-6 md:[&_td:first-child]:pl-6 md:[&_td:last-child]:pr-6 md:[&_th:first-child]:pl-6 md:[&_th:last-child]:pr-6">
+        <DataTable
+          table={table}
+          columnCount={columns.length}
+          isLoading={isLoading}
+          error={error}
+          onRowClick={onRowClick}
+        />
+      </div>
       <DataTablePagination table={table} />
     </div>
   )

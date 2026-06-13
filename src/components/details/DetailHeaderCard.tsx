@@ -43,7 +43,7 @@ export function DetailHeaderCard({
             {leading}
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+                <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
                 {badge}
               </div>
               {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
