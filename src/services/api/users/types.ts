@@ -124,6 +124,7 @@ export interface UserQueryParams {
   username?: string
   email?: string
   phone?: string
+  fullname?: string
   status?: string
   tenant_id?: string
   role_id?: string
