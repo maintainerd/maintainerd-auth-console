@@ -11,6 +11,7 @@ import {
   validateAuthAsync,
   initializeAuthAsync,
   fetchProfileAsync,
+  refreshAccountAsync,
   forgotPasswordAsync,
   resetPasswordAsync,
   type ResetPasswordAsyncRequest
@@ -25,7 +26,7 @@ export function useAuth() {
   const dispatch = useAppDispatch()
   const [searchParams] = useSearchParams()
   const { showError } = useToast()
-  const { profile, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
+  const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await dispatch(loginAsync({ username: email, password })).unwrap()
@@ -40,9 +41,8 @@ export function useAuth() {
       }
     }
 
-    // Check if profile exists
-    const userProfile = result.data
-    return { requiresProfileSetup: !userProfile, mfaRequired: false }
+    const account = result.data
+    return { account, mfaRequired: false }
   }, [dispatch])
 
   // completeMFALogin finishes the login MFA second step (acr=2 session) and
@@ -58,7 +58,7 @@ export function useAuth() {
       code: proof.code,
       assertion: proof.assertion,
     })).unwrap()
-    return { requiresProfileSetup: !result.data }
+    return { account: result.data }
   }, [dispatch])
 
   const register = useCallback(async (
@@ -131,6 +131,17 @@ export function useAuth() {
     }
   }, [dispatch])
 
+  // refreshAccount re-syncs auth state with the live cookie session and returns
+  // the fresh account (or null). Use after register / verify email / create
+  // profile so routing reflects the current email_verified + profiles state.
+  const refreshAccount = useCallback(async () => {
+    try {
+      return await dispatch(refreshAccountAsync()).unwrap()
+    } catch {
+      return null
+    }
+  }, [dispatch])
+
   const updateProfile = useCallback((profileData: ProfileEntity | null) => {
     dispatch(setProfile(profileData))
   }, [dispatch])
@@ -146,6 +157,7 @@ export function useAuth() {
   return {
     // State
     profile,
+    account,
     isAuthenticated,
     isLoading,
     isInitialized,
@@ -160,6 +172,7 @@ export function useAuth() {
     clearAuthError,
     getProfile,
     fetchProfile,
+    refreshAccount,
     updateProfile,
     forgotPassword,
     resetPassword

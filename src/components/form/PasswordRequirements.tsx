@@ -1,0 +1,45 @@
+/**
+ * Live password requirements checklist.
+ *
+ * Renders the tenant's password policy as a checklist that ticks off in real
+ * time as the user types. Rule evaluation lives in passwordRules.ts and mirrors
+ * buildPasswordValidation() in authSchema.ts, so what the user sees matches what
+ * the schema enforces — and both follow the tenant's password_config.
+ */
+import { Check, X } from 'lucide-react'
+import type { PasswordConfigPublic } from '@/services/api/tenants/types'
+import { cn } from '@/lib/utils'
+import { buildPasswordRules } from './passwordRules'
+
+export interface PasswordRequirementsProps {
+  password: string
+  config?: PasswordConfigPublic
+  className?: string
+}
+
+export function PasswordRequirements({ password, config, className }: PasswordRequirementsProps) {
+  const rules = buildPasswordRules(password, config)
+
+  return (
+    <ul className={cn('mt-1 flex flex-col gap-1', className)}>
+      {rules.map((rule) => (
+        <li
+          key={rule.label}
+          className={cn(
+            'flex items-center gap-2 text-xs transition-colors',
+            rule.met ? 'text-emerald-600' : 'text-muted-foreground',
+          )}
+        >
+          {rule.met ? (
+            <Check className="size-3.5 shrink-0" />
+          ) : (
+            <X className="size-3.5 shrink-0 text-muted-foreground/60" />
+          )}
+          <span>{rule.label}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export default PasswordRequirements

@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import LoginLayout from "@/components/layout/LoginLayout"
 import LoginForm from "./components/LoginForm"
-import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import { useTenant } from '@/hooks/useTenant'
 
 const LoginPage = () => {
@@ -14,11 +13,9 @@ const LoginPage = () => {
   }, [currentTenant, fetchDefault])
 
   return (
-    <RedirectIfAuthenticated>
-      <LoginLayout branding={currentTenant?.branding}>
-        <LoginForm />
-      </LoginLayout>
-    </RedirectIfAuthenticated>
+    <LoginLayout branding={currentTenant?.branding}>
+      <LoginForm />
+    </LoginLayout>
   )
 }
 

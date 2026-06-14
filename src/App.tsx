@@ -1,22 +1,18 @@
 import { Route, Routes, Navigate } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { StepUpProvider } from './components/stepup/StepUpProvider'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import '@/styles/toast.css'
 import { queryClient } from '@/lib/queryClient'
-import { useTenant } from '@/hooks/useTenant'
-import { useAuth } from '@/hooks/useAuth'
-import { determineTenantIdentifier } from '@/utils/tenant'
+import { AppBootstrap } from './components/auth/AppBootstrap'
+import NoAccessPage from './pages/no-access/NoAccessPage'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import ForgotPasswordPage from './pages/forgot-password'
 import ResetPasswordPage from './pages/reset-password'
 import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
-import SetupProfilePage from './pages/setup/profile'
 import RegisterProfilePage from './pages/register/profile'
 import VerifyEmailPage from './pages/register/verify-email/VerifyEmailPage'
 import DashboardPage from './pages/dashboard'
@@ -88,61 +84,15 @@ import ProfilePage from './pages/account/ProfilePage'
 import SettingsPage from './pages/account/SettingsPage'
 
 function App() {
-  const location = useLocation()
-  const { initializeFromLocation } = useTenant()
-  const { initializeAuth } = useAuth()
-  const authInitializedRef = useRef(false)
-  const lastTenantIdentifierRef = useRef<string | null | undefined>(undefined)
-
-  // Initialize auth once on app load
-  useEffect(() => {
-    const initializeAuthOnce = async () => {
-      if (authInitializedRef.current) {
-        return
-      }
-      authInitializedRef.current = true
-
-      try {
-        // Initialize auth first (this will fetch profile from backend if authenticated)
-        await initializeAuth()
-      } catch {
-        // Error already handled in initializeAuth
-      }
-    }
-    initializeAuthOnce()
-  }, [initializeAuth]) // Only run once on mount
-
-  // Initialize tenant data based on current URL (separate from auth)
-  useEffect(() => {
-    const initializeTenant = async () => {
-      // Determine the tenant identifier from the current location
-      const searchParams = new URLSearchParams(location.search)
-      const tenantIdentifier = determineTenantIdentifier(location.pathname, searchParams)
-
-      // Skip re-initialization if the tenant identifier hasn't changed
-      // This prevents unnecessary API calls when navigating between public routes (login, forgot-password, etc.)
-      if (lastTenantIdentifierRef.current === tenantIdentifier) {
-        return
-      }
-
-      lastTenantIdentifierRef.current = tenantIdentifier
-
-      // Initialize tenant based on current location
-      // Error handling is done in initializeFromLocation, so we don't need to catch here
-      try {
-        await initializeFromLocation(location.pathname, location.search)
-      } catch {
-        // Error already shown in initializeFromLocation, just continue
-      }
-    }
-    initializeTenant()
-  }, [location.pathname, location.search, initializeFromLocation]) // Run on location changes for tenant switching
-
+  // Auth + tenant initialization and all redirect gating now live in
+  // AppBootstrap → RouteGuard, which wrap the route tree below.
   return (
     <QueryClientProvider client={queryClient}>
       <StepUpProvider>
+      <AppBootstrap>
       <Routes>
 				<Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/email-verification" element={<VerifyEmailPage />} />
@@ -150,7 +100,6 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
-        <Route path="/setup/profile" element={<SetupProfilePage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
           <Route path="analytics" element={<AnalyticsPage />} />
@@ -241,6 +190,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
+      </AppBootstrap>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}

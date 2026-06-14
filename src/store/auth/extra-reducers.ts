@@ -4,8 +4,25 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { loginAsync, completeMFALoginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
+import { loginAsync, completeMFALoginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, refreshAccountAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
 import type { AuthState } from './types'
+import type { AccountEntity, ProfileEntity } from '@/services/api/auth/types'
+
+function populateAccount(state: AuthState, account: AccountEntity | null) {
+  state.account = account
+  state.profile = account?.profiles?.[0] ? ({
+    profile_id: account.profiles[0].profile_id,
+    email: account.email,
+    first_name: account.profiles[0].first_name,
+    last_name: account.profiles[0].last_name || '',
+    display_name: account.profiles[0].display_name || '',
+    phone: account.phone,
+    created_at: '',
+    updated_at: '',
+  } as ProfileEntity) : null
+  state.roles = account?.roles ?? []
+  state.permissions = account?.permissions ?? []
+}
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
   builder
@@ -22,7 +39,7 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
       if (action.payload.mfaRequired) {
         return
       }
-      state.profile = action.payload.data
+      populateAccount(state, action.payload.data)
       state.isAuthenticated = true
     })
     .addCase(loginAsync.rejected, (state, action) => {
@@ -37,7 +54,7 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     .addCase(completeMFALoginAsync.fulfilled, (state, action) => {
       state.isLoading = false
       state.error = null
-      state.profile = action.payload.data
+      populateAccount(state, action.payload.data)
       state.isAuthenticated = true
     })
     .addCase(completeMFALoginAsync.rejected, (state, action) => {
@@ -65,23 +82,23 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     })
     .addCase(logoutAsync.fulfilled, (state) => {
       state.isLoading = false
-      state.profile = null
+      populateAccount(state, null)
       state.isAuthenticated = false
       state.error = null
     })
     .addCase(logoutAsync.rejected, (state, action) => {
       state.isLoading = false
-      state.profile = null
+      populateAccount(state, null)
       state.isAuthenticated = false
       state.error = action.error.message || 'Logout failed'
     })
     // Validate
     .addCase(validateAuthAsync.fulfilled, (state, action) => {
-      state.profile = action.payload
+      populateAccount(state, action.payload)
       state.isAuthenticated = true
     })
     .addCase(validateAuthAsync.rejected, (state) => {
-      state.profile = null
+      populateAccount(state, null)
       state.isAuthenticated = false
     })
     // Initialize
@@ -91,7 +108,7 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     .addCase(initializeAuthAsync.fulfilled, (state, action) => {
       state.isLoading = false
       state.isInitialized = true
-      state.profile = action.payload
+      populateAccount(state, action.payload)
       state.isAuthenticated = true
     })
     .addCase(initializeAuthAsync.rejected, (state) => {
@@ -102,11 +119,21 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     })
     // Fetch Profile
     .addCase(fetchProfileAsync.fulfilled, (state, action) => {
-      state.profile = action.payload
+      populateAccount(state, action.payload)
       state.isAuthenticated = true
     })
     .addCase(fetchProfileAsync.rejected, (state) => {
-      state.profile = null
+      populateAccount(state, null)
+      state.isAuthenticated = false
+    })
+    // Refresh Account (sync auth state with the live cookie session)
+    .addCase(refreshAccountAsync.fulfilled, (state, action) => {
+      state.isInitialized = true
+      populateAccount(state, action.payload)
+      state.isAuthenticated = !!action.payload
+    })
+    .addCase(refreshAccountAsync.rejected, (state) => {
+      populateAccount(state, null)
       state.isAuthenticated = false
     })
     // Forgot Password

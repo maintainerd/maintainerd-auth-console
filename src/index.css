@@ -118,3 +118,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: oklch(0.145 0 0) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px oklch(0.205 0 0) inset !important;
+  box-shadow: 0 0 0 1000px oklch(0.205 0 0) inset !important;
+  -webkit-text-fill-color: oklch(0.985 0 0) !important;
+}

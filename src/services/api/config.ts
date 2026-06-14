@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
     // when called with `X-Token-Delivery: cookie`.
     REFRESH: '/refresh-token',
     PROFILE: '/profile',
+    ACCOUNT: '/account',
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
   },

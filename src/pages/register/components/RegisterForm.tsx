@@ -1,27 +1,32 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useNavigate, Link } from "react-router-dom"
 import { AlertCircle } from "lucide-react"
-import { FormSubmitButton, FormInputField, FormPasswordField } from "@/components/form"
+import { FormSubmitButton, FormInputField, FormPasswordField, PasswordRequirements } from "@/components/form"
 import { FieldGroup } from "@/components/ui/field"
-import { registerSchema, type RegisterFormData } from "@/lib/validations"
+import { buildRegisterSchema, type RegisterFormData } from "@/lib/validations"
 import { useAuth } from "@/hooks/useAuth"
+import { useTenant } from "@/hooks/useTenant"
 import { useToast } from "@/hooks/useToast"
+import { resolvePostAuthRoute } from "@/utils/postAuthRoute"
 
-type Props = {
-  requireEmailVerification?: boolean
-}
-
-const RegisterForm = ({ requireEmailVerification = false }: Props) => {
+const RegisterForm = () => {
   const navigate = useNavigate()
-  const { register: registerUser } = useAuth()
+  const { register: registerUser, refreshAccount } = useAuth()
+  const { getCurrentTenant } = useTenant()
   const { showSuccess } = useToast()
   const [registerError, setRegisterError] = useState<string | null>(null)
+
+  // Password rules follow the tenant policy, so build the schema from the
+  // tenant's password_config (same source the live checklist below reads).
+  const passwordConfig = getCurrentTenant()?.password_config
+  const registerSchema = useMemo(() => buildRegisterSchema(passwordConfig), [passwordConfig])
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
@@ -34,6 +39,15 @@ const RegisterForm = ({ requireEmailVerification = false }: Props) => {
     reValidateMode: 'onSubmit'
   })
 
+  const passwordValue = watch("password") || ""
+
+  // Reveal the requirements checklist once the user starts typing a password,
+  // then keep it visible even if they clear the field.
+  const [passwordTyped, setPasswordTyped] = useState(false)
+  useEffect(() => {
+    if (passwordValue.length > 0) setPasswordTyped(true)
+  }, [passwordValue])
+
   const onSubmit = async (data: RegisterFormData) => {
     setRegisterError(null)
     try {
@@ -43,11 +57,12 @@ const RegisterForm = ({ requireEmailVerification = false }: Props) => {
       localStorage.setItem('register_email', data.email)
       showSuccess('Account created successfully!')
 
-      if (requireEmailVerification) {
-        navigate('/email-verification', { replace: true })
-      } else {
-        navigate('/register/profile', { replace: true })
-      }
+      // Registration issues an httpOnly session cookie, so sync the auth state
+      // and route based on the live account (email verification → profile →
+      // dashboard). This keeps the user in a single authenticated session
+      // through the rest of the sign-up flow.
+      const account = await refreshAccount()
+      navigate(resolvePostAuthRoute(account, getCurrentTenant()), { replace: true })
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again."
       setRegisterError(errorMessage)
@@ -87,16 +102,18 @@ const RegisterForm = ({ requireEmailVerification = false }: Props) => {
             required
             {...register("email")}
           />
-          <FormPasswordField
-            label="Password"
-            placeholder="Enter a strong password"
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            error={errors.password?.message}
-            description="Must be at least 8 characters long."
-            required
-            {...register("password")}
-          />
+          <div className="flex flex-col gap-2">
+            <FormPasswordField
+              label="Password"
+              placeholder="Enter a strong password"
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              error={errors.password?.message}
+              required
+              {...register("password")}
+            />
+            {passwordTyped && <PasswordRequirements password={passwordValue} config={passwordConfig} />}
+          </div>
           <FormPasswordField
             label="Confirm password"
             placeholder="Re-enter your password"

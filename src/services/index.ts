@@ -65,6 +65,7 @@ export {
   register,
   logout,
   fetchProfile,
+  fetchAccount,
   createUserProfile,
   createRegisterProfile,
   validateAuthentication,

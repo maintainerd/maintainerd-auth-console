@@ -10,7 +10,10 @@ import type { AuthState } from './types'
 import type { ProfileEntity } from '@/services/api/auth/types'
 
 const initialState: AuthState = {
+  account: null,
   profile: null,
+  roles: [],
+  permissions: [],
   isAuthenticated: false,
   isLoading: false,
   isInitialized: false,
@@ -29,7 +32,10 @@ const authSlice = createSlice({
       state.isAuthenticated = !!action.payload
     },
     clearAuth: (state: AuthState) => {
+      state.account = null
       state.profile = null
+      state.roles = []
+      state.permissions = []
       state.isAuthenticated = false
       state.error = null
     }
