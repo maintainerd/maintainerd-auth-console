@@ -35,7 +35,7 @@ export function DataTablePagination<TData>({
               table.setPageSize(Number(value))
             }}
           >
-            <SelectTrigger className="h-9 w-[72px] bg-background text-sm">
+            <SelectTrigger className="w-[72px] bg-background text-sm">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -67,39 +67,41 @@ export function DataTablePagination<TData>({
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"
-          className="hidden h-9 w-9 p-0 lg:flex"
+          size="icon"
+          className="hidden lg:flex"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
           <span className="sr-only">Go to first page</span>
-          <ChevronsLeft className="h-4 w-4" />
+          <ChevronsLeft />
         </Button>
         <Button
           variant="outline"
-          className="h-9 w-9 p-0"
+          size="icon"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           <span className="sr-only">Go to previous page</span>
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft />
         </Button>
         <Button
           variant="outline"
-          className="h-9 w-9 p-0"
+          size="icon"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           <span className="sr-only">Go to next page</span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight />
         </Button>
         <Button
           variant="outline"
-          className="hidden h-9 w-9 p-0 lg:flex"
+          size="icon"
+          className="hidden lg:flex"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
           <span className="sr-only">Go to last page</span>
-          <ChevronsRight className="h-4 w-4" />
+          <ChevronsRight />
         </Button>
       </div>
     </div>
