@@ -115,11 +115,7 @@ export const userColumns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original
-      return (
-        <div className="py-1">
-          <UserActions user={user} />
-        </div>
-      )
+      return <UserActions user={user} />
     },
   },
 ];
