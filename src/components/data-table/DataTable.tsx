@@ -31,6 +31,11 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   return (
     <Table className="border-b text-sm">
+      <colgroup>
+        {table.getAllLeafColumns().map((col) => (
+          <col key={col.id} style={col.id === "actions" ? { width: 56 } : undefined} />
+        ))}
+      </colgroup>
       {/* On mobile the header is hidden and each row stacks into one column;
           the normal table layout returns at md+. The header carries a single
           bottom rule (2px) — a touch heavier than the 1px row separators. */}
