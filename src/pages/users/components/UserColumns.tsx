@@ -57,7 +57,7 @@ export const userColumns: ColumnDef<User>[] = [
       const user = row.original
       const name = user.fullname?.trim()
       return (
-        <div className="flex items-center gap-3 py-1">
+        <div className="flex items-center gap-3 px-3 py-1">
           <Avatar className="size-9">
             <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
               {initials(name || user.username)}
@@ -77,7 +77,7 @@ export const userColumns: ColumnDef<User>[] = [
     accessorKey: "username",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
     cell: ({ row }) => (
-      <div className="py-1 text-muted-foreground">{row.original.username}</div>
+      <div className="px-3 py-1 text-muted-foreground">{row.original.username}</div>
     ),
   },
   {
@@ -87,7 +87,7 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="py-1">
+        <div className="px-3 py-1">
           {getStatusBadge(user.status)}
         </div>
       )
@@ -100,7 +100,7 @@ export const userColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       return (
-        <div className="flex flex-col gap-1 py-1">
+        <div className="flex flex-col gap-1 px-3 py-1">
           <span className="text-sm font-medium">
             {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
           </span>
@@ -115,7 +115,11 @@ export const userColumns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original
-      return <UserActions user={user} />
+      return (
+        <div className="px-3 py-1">
+          <UserActions user={user} />
+        </div>
+      )
     },
   },
 ];
