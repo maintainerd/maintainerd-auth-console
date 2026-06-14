@@ -15,7 +15,7 @@ export function DataTableActiveFilters({
   }
 
   return (
-    <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
+    <div className="flex flex-wrap items-center gap-2 p-3 bg-muted/50 rounded-lg">
       <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
       {activeFilters.map((filter, index) => (
         <Badge key={index} variant="secondary" className="text-xs">

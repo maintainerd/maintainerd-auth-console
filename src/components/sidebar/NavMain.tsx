@@ -93,7 +93,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
       {sections.map((section, index) => (
         <SidebarGroup key={section.label ?? index} className="py-1">
           {section.label && (
-            <SidebarGroupLabel className="h-7">{section.label}</SidebarGroupLabel>
+            <SidebarGroupLabel className="h-7 text-xs">{section.label}</SidebarGroupLabel>
           )}
           <SidebarGroupContent className="flex flex-col gap-1">
             <SidebarMenu className="gap-0.5">
@@ -104,12 +104,12 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                       <SidebarMenuButton
                         onClick={() => toggleItem(item.title)}
                         tooltip={item.title}
-                        className={`text-sm ${isParentActive(item) ? "font-bold text-blue-600 hover:text-blue-600" : ""}`}
+                        className={`h-8 px-3 text-sm [&>svg]:size-4 ${isParentActive(item) ? "font-bold text-blue-600 hover:text-blue-600" : ""}`}
                       >
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                         <ChevronRight
-                          className={`ml-auto h-4 w-4 transition-transform ${
+                          className={`ml-auto h-5 w-5 transition-transform ${
                             openItems.has(item.title) ? "rotate-90" : ""
                           }`}
                         />
@@ -121,7 +121,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive(subItem.route)}
-                                className={isActive(subItem.route) ? "text-blue-600 hover:text-blue-600" : ""}
+                                className={`h-8 px-3 text-sm ${isActive(subItem.route) ? "bg-blue-50 text-blue-600 font-medium hover:bg-blue-50 hover:text-blue-600 data-[active=true]:bg-blue-50" : ""}`}
                               >
                                 <Link to={buildRoute(subItem.route)}>
                                   <span>{subItem.title}</span>
@@ -136,7 +136,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
-                      className={`${isActive(item.route) ? "font-bold text-blue-600 hover:text-blue-600 text-sm" : "text-sm"}`}
+                      className={`h-8 px-3 text-sm [&>svg]:size-4 ${isActive(item.route) ? "bg-blue-50 font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-600" : ""}`}
                     >
                       <Link to={buildRoute(item.route)}>
                         {item.icon && <item.icon />}

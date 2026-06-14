@@ -74,13 +74,13 @@ export function ListingToolbar<TRow>({
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full bg-background sm:w-80"
+          className="h-10 w-full bg-background sm:w-80"
         />
 
         {filterGroups.length > 0 && (
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="relative h-9 bg-background">
+              <Button variant="outline" size="sm" className="relative h-10 bg-background">
                 <Filter className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Filters</span>
                 {activeFilterCount > 0 && (
@@ -129,7 +129,7 @@ export function ListingToolbar<TRow>({
       <div className="flex flex-wrap items-center gap-2">
         <DataTableViewOptions table={table} />
         {onCreate && (
-          <Button size="sm" className="h-9" onClick={onCreate}>
+          <Button size="sm" className="h-10" onClick={onCreate}>
             <Plus className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{createLabel}</span>
           </Button>

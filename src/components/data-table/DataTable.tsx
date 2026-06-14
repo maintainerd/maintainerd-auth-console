@@ -30,16 +30,16 @@ export function DataTable<TData>({
   onRowClick,
 }: DataTableProps<TData>) {
   return (
-    <div className="overflow-hidden rounded-md border bg-background">
-      <Table>
-        {/* On mobile the header is hidden and each row stacks into one column;
-            the normal table layout returns at md+. */}
-        <TableHeader className="hidden md:table-header-group">
+    <Table className="border-b text-sm">
+      {/* On mobile the header is hidden and each row stacks into one column;
+          the normal table layout returns at md+. The header carries a single
+          bottom rule (2px) — a touch heavier than the 1px row separators. */}
+      <TableHeader className="hidden md:table-header-group [&_tr]:border-b-2 [&_tr]:hover:bg-transparent">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="h-11 text-xs">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -104,7 +104,7 @@ export function DataTable<TData>({
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        "md:table-cell md:px-2 md:py-2",
+                        "md:table-cell md:px-3 md:py-2.5",
                         isActions
                           ? // Mobile: pinned to the card's top-right, level with the name.
                             "absolute right-3 top-3 p-0 md:static"
@@ -130,7 +130,6 @@ export function DataTable<TData>({
           )}
         </TableBody>
       </Table>
-    </div>
   )
 }
 
