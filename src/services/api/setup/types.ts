@@ -38,7 +38,7 @@ export type CreateTenantResponse = ApiResponse<TenantData>
 
 export interface CreateAdminRequest {
   username: string
-  fullname: string
+  fullname?: string
   password: string
   email: string
 }

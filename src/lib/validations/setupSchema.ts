@@ -21,24 +21,10 @@ export const setupTenantSchema = yup.object({
     .required('Display name is required')
     .min(2, 'Display name must be at least 2 characters')
     .max(100, 'Display name must not exceed 100 characters'),
-  description: yup
-    .string()
-    .required('Description is required')
-    .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description must not exceed 500 characters')
 })
 
 // Setup Admin Form Schema
 export const setupAdminSchema = yup.object({
-  fullname: yup
-    .string()
-    .required('Full name is required')
-    .min(2, 'Full name must be at least 2 characters')
-    .max(100, 'Full name must not exceed 100 characters')
-    .matches(
-      /^[a-zA-Z\s\-'.]+$/,
-      'Full name can only contain letters, spaces, hyphens, apostrophes, and periods'
-    ),
   email: yup
     .string()
     .required('Email is required')

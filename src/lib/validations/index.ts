@@ -23,6 +23,7 @@ export {
 export {
   buildLoginSchema,
   buildPasswordValidation,
+  buildRegisterSchema,
   registerSchema,
   forgotPasswordSchema,
   resetPasswordSchema,

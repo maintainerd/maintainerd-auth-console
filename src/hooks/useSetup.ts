@@ -76,18 +76,18 @@ export function useSetupAdmin() {
   const [isLoading, setIsLoading] = useState(false)
 
   const createAdminAccount = useCallback(
-    async (data: { fullname: string; email: string; password: string }) => {
+    async (data: { email: string; password: string }) => {
       setIsLoading(true)
       try {
         const adminData: CreateAdminRequest = {
           username: data.email,
-          fullname: data.fullname,
+          fullname: data.email.split('@')[0],
           password: data.password,
           email: data.email,
         }
         await createAdmin(adminData)
         showSuccess('Admin account created successfully!')
-        navigate('/setup/profile')
+        navigate('/register/profile')
         return { success: true }
       } catch (error: unknown) {
         if (error instanceof Error) {

@@ -10,6 +10,8 @@ import { FormInputField, FormSubmitButton } from "@/components/form"
 import { post } from "@/services/api/client"
 import LoginLayout from "@/components/layout/LoginLayout"
 import { useTenant } from "@/hooks/useTenant"
+import { useAuth } from "@/hooks/useAuth"
+import { resolvePostAuthRoute } from "@/utils/postAuthRoute"
 
 const schema = yup.object({
   code: yup.string().required('Code is required').min(6).max(6),
@@ -20,6 +22,7 @@ type FormData = yup.InferType<typeof schema>
 export default function VerifyEmailPage() {
   const navigate = useNavigate()
   const { currentTenant, fetchDefault } = useTenant()
+  const { isAuthenticated, refreshAccount } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [resending, setResending] = useState(false)
   const [verified, setVerified] = useState(false)
@@ -29,6 +32,9 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (!currentTenant) fetchDefault()
   }, [currentTenant, fetchDefault])
+
+  // Note: the already-verified / wrong-step redirect is handled centrally by
+  // RouteGuard before this page renders.
 
   const {
     register,
@@ -43,6 +49,15 @@ export default function VerifyEmailPage() {
     setError(null)
     try {
       await post('/email-verification/verify', { email, otp: data.code })
+
+      // Active sign-up session: continue to profile registration / dashboard
+      // without forcing a re-login. Otherwise (verified from a login redirect
+      // with no session yet) show the success screen and send them to sign in.
+      if (isAuthenticated) {
+        const fresh = await refreshAccount()
+        navigate(resolvePostAuthRoute(fresh, currentTenant), { replace: true })
+        return
+      }
       setVerified(true)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Verification failed'

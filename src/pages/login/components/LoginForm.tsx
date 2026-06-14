@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { LoginMFAStep } from "./LoginMFAStep"
+import { resolvePostAuthRoute, dashboardRoute } from "@/utils/postAuthRoute"
+import type { AccountEntity } from '@/services/api/auth/types'
 
 const LoginForm = () => {
   const navigate = useNavigate()
@@ -38,17 +40,14 @@ const LoginForm = () => {
     reValidateMode: 'onSubmit'
   })
 
-  // Shared post-login navigation for both password-only and MFA logins.
-  const finishLogin = (requiresProfileSetup: boolean) => {
-    if (requiresProfileSetup) {
-      showSuccess("Login successful! Please complete your profile setup.")
-      navigate('/register/profile', { replace: true })
-      return
+const finishLogin = (account: AccountEntity | null | undefined) => {
+    const dest = resolvePostAuthRoute(account, currentTenant)
+    // Only celebrate a completed sign-in; the verify/profile detours are
+    // continuations of an incomplete registration, not a finished login.
+    if (dest === dashboardRoute(currentTenant)) {
+      showSuccess("Login successful!")
     }
-    showSuccess("Login successful!")
-    const currentTenant = getCurrentTenant()
-    const tenantIdentifier = currentTenant?.identifier || 'default'
-    navigate(`/${tenantIdentifier}/dashboard`, { replace: true })
+    navigate(dest, { replace: true })
   }
 
   const onSubmit = async (data: LoginFormData) => {
@@ -60,7 +59,7 @@ const LoginForm = () => {
         setMfaChallenge({ token: response.challengeToken ?? '', methods: response.allowedMethods ?? [] })
         return
       }
-      finishLogin(response.requiresProfileSetup)
+      finishLogin(response.account)
     } catch (err: unknown) {
       const errorMessage = (err instanceof Error ? err.message : (err as { message?: string })?.message) || "Invalid email or password"
 
@@ -86,7 +85,7 @@ const LoginForm = () => {
         <LoginMFAStep
           challengeToken={mfaChallenge.token}
           allowedMethods={mfaChallenge.methods}
-          onVerified={(result) => finishLogin(result.requiresProfileSetup)}
+          onVerified={(result) => finishLogin(result.account)}
           onCancel={() => setMfaChallenge(null)}
         />
       </div>

@@ -7,7 +7,9 @@ import { post, get } from '../client'
 import { API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from '../config'
 import type { ApiResponse } from '../types'
 import type { WebAuthnAssertionOptions } from '@/lib/webauthn'
-import type { ProfileEntity, LoginRequest, LoginResponse, MFALoginVerifyRequest, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
+import type { ProfileEntity, AccountEntity, LoginRequest, LoginResponse, MFALoginVerifyRequest, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
+
+type AccountResponse = ApiResponse<AccountEntity>
 
 /**
  * Login user with credentials
@@ -159,22 +161,24 @@ export async function createRegisterProfile(data: CreateProfileRequest): Promise
  * This checks if the backend cookie is still valid by calling the profile endpoint
  * @returns Promise<ProfileEntity | null> - Returns profile if authenticated, null otherwise
  */
-export async function validateAuthentication(): Promise<ProfileEntity | null> {
+export async function validateAuthentication(): Promise<AccountEntity | null> {
   try {
-    const response = await get<ProfileResponse>(API_ENDPOINTS.AUTH.PROFILE)
-
-    if (response.success && response.data) {
-      return response.data
-    }
-
+    const response = await get<AccountResponse>(API_ENDPOINTS.AUTH.ACCOUNT)
+    if (response.success && response.data) return response.data
     return null
   } catch (err: unknown) {
     const apiErr = err as { status?: number }
-    if (apiErr?.status === 401 || apiErr?.status === 403) {
-      throw err
-    }
+    if (apiErr?.status === 401 || apiErr?.status === 403) throw err
     return null
   }
+}
+
+export async function fetchAccount(): Promise<AccountEntity | null> {
+  try {
+    const response = await get<AccountResponse>(API_ENDPOINTS.AUTH.ACCOUNT)
+    if (response.success && response.data) return response.data
+    return null
+  } catch { return null }
 }
 
 /**
@@ -224,6 +228,7 @@ export const authService = {
   register,
   logout,
   fetchProfile,
+  fetchAccount,
   createUserProfile,
   createRegisterProfile,
   validateAuthentication,

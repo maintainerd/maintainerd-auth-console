@@ -25,7 +25,7 @@ export function buildPasswordValidation(cfg?: PasswordConfigPublic) {
     schema = schema.matches(/[0-9]/, 'Password must contain at least one digit')
   }
   if (cfg?.require_symbol) {
-    schema = schema.matches(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password must contain at least one special character')
+    schema = schema.matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'Password must contain at least one special character')
   }
   return schema
 }
@@ -46,7 +46,25 @@ export interface LoginFormData {
   password: string
 }
 
-// Register Form Schema
+// Register Form Schema (config-driven)
+// Mirrors buildLoginSchema: the password rules come from the tenant's
+// password_config so registration enforces the same policy the backend does.
+export function buildRegisterSchema(cfg?: PasswordConfigPublic) {
+  return yup.object({
+    email: yup
+      .string()
+      .required('Email is required')
+      .email('Please enter a valid email address')
+      .max(255, 'Email must not exceed 255 characters'),
+    password: buildPasswordValidation(cfg),
+    confirmPassword: yup
+      .string()
+      .required('Please confirm your password')
+      .oneOf([yup.ref('password')], 'Passwords must match'),
+  })
+}
+
+// Register Form Schema (static fallback — kept for back-compat / typing)
 export const registerSchema = yup.object({
   email: yup
     .string()

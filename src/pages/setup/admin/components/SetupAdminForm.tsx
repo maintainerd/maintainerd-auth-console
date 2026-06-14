@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FieldGroup } from "@/components/ui/field"
-import { FormInputField, FormPasswordField, FormSubmitButton, FormLoginCard } from "@/components/form"
+import { FormInputField, FormPasswordField, FormSubmitButton } from "@/components/form"
 import { setupAdminSchema, type SetupAdminFormData } from "@/lib/validations"
 import { useSetupAdmin } from "@/hooks/useSetup"
 
@@ -14,8 +14,8 @@ const SetupAdminForm = () => {
     formState: { errors }
   } = useForm<SetupAdminFormData>({
     resolver: yupResolver(setupAdminSchema),
+    mode: 'onChange',
     defaultValues: {
-      fullname: "",
       email: "",
       password: "",
       confirmPassword: ""
@@ -24,66 +24,63 @@ const SetupAdminForm = () => {
 
   const onSubmit = async (data: SetupAdminFormData) => {
     await createAdminAccount({
-      fullname: data.fullname,
       email: data.email,
       password: data.password
     })
   }
-	
+
   return (
-    <div className="flex flex-col gap-6">
-      <FormLoginCard
-        title="Create Admin Account"
-        description="Create your administrator account to complete the setup"
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Create admin account</h1>
+        <p className="text-sm text-muted-foreground">
+          Set up your administrator account to complete the setup.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <FormInputField
-              label="Full Name"
-              placeholder="John Doe"
-              disabled={isLoading}
-              error={errors.fullname?.message}
-              required
-              {...register("fullname")}
-            />
-            <FormInputField
-              label="Email Address"
-              type="email"
-              placeholder="admin@acme.com"
-              disabled={isLoading}
-              error={errors.email?.message}
-              description="This will be used as your username"
-              required
-              {...register("email")}
-            />
-            <FormPasswordField
-              label="Password"
-              placeholder="Enter a strong password"
-              disabled={isLoading}
-              error={errors.password?.message}
-              description="Must contain uppercase, lowercase, number, and special character"
-              required
-              {...register("password")}
-            />
-            <FormPasswordField
-              label="Confirm Password"
-              placeholder="Confirm your password"
-              disabled={isLoading}
-              error={errors.confirmPassword?.message}
-              description="Please confirm your password"
-              required
-              {...register("confirmPassword")}
-            />
-            <FormSubmitButton
-              isSubmitting={isLoading}
-              submitText="Complete Setup"
-              submittingText="Creating Admin..."
-            />
-          </FieldGroup>
-        </form>
-      </FormLoginCard>
+        <FieldGroup>
+          <FormInputField
+            label="Email"
+            type="email"
+            placeholder="admin@acme.com"
+            autoComplete="email"
+            disabled={isLoading}
+            error={errors.email?.message}
+            required
+            {...register("email")}
+          />
+          <FormPasswordField
+            label="Password"
+            placeholder="Enter a strong password"
+            autoComplete="new-password"
+            disabled={isLoading}
+            error={errors.password?.message}
+            required
+            {...register("password")}
+          />
+          <FormPasswordField
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            autoComplete="new-password"
+            disabled={isLoading}
+            error={errors.confirmPassword?.message}
+            required
+            {...register("confirmPassword")}
+          />
+          <FormSubmitButton
+            isSubmitting={isLoading}
+            submitText="Complete Setup"
+            submittingText="Creating Admin..."
+            className="mt-1 h-11 w-full font-medium shadow-sm"
+          />
+        </FieldGroup>
+      </form>
     </div>
   )
 }
 
-export default SetupAdminForm;
+export default SetupAdminForm

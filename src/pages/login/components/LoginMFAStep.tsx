@@ -9,13 +9,14 @@ import { MFA_METHOD_META as METHOD_META, extractMFACode } from "@/lib/mfaMethods
 import { useToast } from "@/hooks/useToast"
 import { useAuth } from "@/hooks/useAuth"
 import { sendMFALoginSMS, beginMFALoginWebAuthn } from "@/services/api/auth"
+import type { AccountEntity } from "@/services/api/auth/types"
 import { useMutation } from "@tanstack/react-query"
 
 interface LoginMFAStepProps {
   challengeToken: string
   allowedMethods: string[]
   /** Called after the MFA step succeeds and the session is established. */
-  onVerified: (result: { requiresProfileSetup: boolean }) => void
+  onVerified: (result: { account: AccountEntity | null }) => void
   /** Return to the username/password form. */
   onCancel: () => void
 }

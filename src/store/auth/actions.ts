@@ -4,18 +4,18 @@ import {
   verifyMFALogin,
   register as authRegister,
   logout as authLogout,
-  fetchProfile,
-  validateAuthentication,
+  fetchAccount,
+  validateAuthentication as validateAuth,
   forgotPassword as authForgotPassword,
   resetPassword as authResetPassword,
-	type LoginRequest,
-	type MFALoginVerifyRequest,
-	type RegisterRequest,
-	type ForgotPasswordRequest,
-	type ResetPasswordRequest,
-	type ResetPasswordQueryParams
+ 	type LoginRequest,
+ 	type MFALoginVerifyRequest,
+ 	type RegisterRequest,
+ 	type ForgotPasswordRequest,
+ 	type ResetPasswordRequest,
+ 	type ResetPasswordQueryParams
 } from '@/services'
-import type { ProfileEntity } from '@/services/api/auth/types'
+import type { AccountEntity } from '@/services/api/auth/types'
 
 // Extended register request with optional query parameters
 export interface RegisterAsyncRequest extends Omit<RegisterRequest, 'username'> {
@@ -27,7 +27,7 @@ export interface RegisterAsyncRequest extends Omit<RegisterRequest, 'username'> 
 // login thunks. When mfaRequired is set, the session is NOT yet established —
 // the UI must complete the second step.
 export interface LoginThunkResult {
-  data: ProfileEntity | null
+  data: AccountEntity | null
   message?: string
   mfaRequired?: boolean
   mfaChallengeToken?: string
@@ -50,8 +50,8 @@ export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest>(
 					mfaAllowedMethods: response.data.mfa_allowed_methods ?? [],
 				}
 			}
-			const userProfile = await fetchProfile()
-			return { data: userProfile, message: response.message }
+			const account = await fetchAccount()
+			return { data: account, message: response.message }
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Login failed'
 			return thunkAPI.rejectWithValue({ message: errorMessage })
@@ -67,8 +67,8 @@ export const completeMFALoginAsync = createAsyncThunk<LoginThunkResult, MFALogin
   async (data: MFALoginVerifyRequest, thunkAPI) => {
     try {
       const response = await verifyMFALogin(data)
-      const userProfile = await fetchProfile()
-      return { data: userProfile, message: response.message }
+      const account = await fetchAccount()
+      return { data: account, message: response.message }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'MFA verification failed'
       return thunkAPI.rejectWithValue({ message: errorMessage })
@@ -99,9 +99,9 @@ export const logoutAsync = createAsyncThunk(
 export const validateAuthAsync = createAsyncThunk(
   'auth/validate',
   async (_, thunkAPI) => {
-    const userProfile = await validateAuthentication()
-    if (userProfile) {
-      return userProfile
+    const account = await validateAuth()
+    if (account) {
+      return account
     }
     return thunkAPI.rejectWithValue({ message: 'Authentication validation failed' })
   }
@@ -110,19 +110,28 @@ export const validateAuthAsync = createAsyncThunk(
 export const initializeAuthAsync = createAsyncThunk(
   'auth/initialize',
   async () => {
-    const userProfile = await validateAuthentication()
-    return userProfile
+    const account = await validateAuth()
+    return account
   }
 )
 
 export const fetchProfileAsync = createAsyncThunk(
   'auth/fetchProfile',
   async () => {
-    const userProfile = await fetchProfile()
-    if (userProfile) {
-      return userProfile
-    }
-    throw new Error('No profile found')
+    const account = await fetchAccount()
+    if (account) return account
+    throw new Error('No account found')
+  }
+)
+
+// refreshAccountAsync re-reads /account using the current (cookie) session and
+// syncs the full auth state. Used after register / email verification / profile
+// creation — events that change the account but happen outside login — so the
+// app's routing reflects the live email_verified + profiles state.
+export const refreshAccountAsync = createAsyncThunk(
+  'auth/refreshAccount',
+  async () => {
+    return await fetchAccount()
   }
 )
 

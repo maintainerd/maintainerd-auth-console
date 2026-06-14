@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react"
 import { FieldGroup } from "@/components/ui/field"
 import { FormInputField, FormSelectField, FormSubmitButton } from "@/components/form"
 import { useProfile } from "@/hooks/useProfile"
+import { useAuth } from "@/hooks/useAuth"
 import { genderOptions } from "@/lib/constants"
 import type { CreateProfileRequest } from "@/services/api/auth/types"
 import RegisterProfileSuccess from "./RegisterProfileSuccess"
@@ -20,6 +21,7 @@ type ProfileFormData = yup.InferType<typeof profileSchema>
 
 const RegisterProfileForm = () => {
   const { isLoading, createProfileForRegister } = useProfile()
+  const { refreshAccount } = useAuth()
   const [isProfileCreated, setIsProfileCreated] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -57,6 +59,9 @@ const RegisterProfileForm = () => {
       const result = await createProfileForRegister(profileData)
       if (result.success) {
         localStorage.removeItem('register_email')
+        // Sync auth state so the now-complete account (profile present) clears
+        // the RouteGuard check when the success screen routes to dashboard.
+        await refreshAccount()
         setIsProfileCreated(true)
       }
     } catch (err: unknown) {
@@ -79,7 +84,7 @@ const RegisterProfileForm = () => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
+        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25 [&_[data-slot=select-trigger]]:h-11 [&_[data-slot=select-trigger]]:rounded-lg [&_[data-slot=select-trigger]]:bg-white [&_[data-slot=select-trigger]:focus-visible]:border-blue-500 [&_[data-slot=select-trigger]:focus-visible]:ring-blue-500/25"
       >
         <FieldGroup>
           {error && (
