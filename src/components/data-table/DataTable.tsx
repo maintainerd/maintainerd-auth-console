@@ -38,8 +38,9 @@ export function DataTable<TData>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
+                const isActionsHeader = header.column.id === "actions"
                 return (
-                  <TableHead key={header.id} className="h-11 text-xs">
+                  <TableHead key={header.id} className={cn("h-11 text-xs", isActionsHeader && "w-12")}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -107,7 +108,7 @@ export function DataTable<TData>({
                         "md:table-cell md:px-3 md:py-2.5",
                         isActions
                           ? // Mobile: pinned to the card's top-right, level with the name.
-                            "absolute right-3 top-3 p-0 md:static"
+                            "absolute right-3 top-3 p-0 md:static md:w-12 md:px-0"
                           : // Mobile: stacked, compact, card padding handles the gutters.
                             "block px-0 py-1",
                       )}
