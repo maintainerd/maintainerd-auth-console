@@ -1,11 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { UserActions } from "./UserActions"
 import { DataTableColumnHeader } from "@/components/data-table"
-import type { User, UserStatus } from "@/services/api/users/types"
+import { StatusBadge } from "@/components/details/StatusBadge"
+import type { User } from "@/services/api/users/types"
 
 // First letters of the name (max two) for the avatar fallback.
 const initials = (name: string) =>
@@ -16,37 +15,6 @@ const initials = (name: string) =>
     .slice(0, 2)
     .join("")
     .toUpperCase() || "?"
-
-const getStatusBadge = (status: UserStatus) => {
-  const statusConfig = {
-    active: {
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-    },
-    inactive: {
-      icon: XCircle,
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
-    },
-    pending: {
-      icon: AlertTriangle,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
-    suspended: {
-      icon: AlertTriangle,
-      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-    }
-  }
-
-  const config = statusConfig[status]
-  const Icon = config.icon
-
-  return (
-    <Badge variant="outline" className={config.className}>
-      <Icon className="w-3 h-3 mr-1" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
-}
 
 export const userColumns: ColumnDef<User>[] = [
   {
@@ -88,7 +56,7 @@ export const userColumns: ColumnDef<User>[] = [
       const user = row.original
       return (
         <div className="px-3 py-1">
-          {getStatusBadge(user.status)}
+          <StatusBadge status={user.status} />
         </div>
       )
     },

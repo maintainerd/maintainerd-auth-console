@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button"
 import type { ColumnDef, SortingState } from "@tanstack/react-table"
 import { DataTable } from "./DataTable"
+import { DataTableEmpty } from "./DataTableEmpty"
 import { DataTablePagination } from "./DataTablePagination"
 import { DataTableActiveFilters } from "./DataTableActiveFilters"
 import { ListingToolbar } from "./ListingToolbar"
@@ -23,6 +25,10 @@ interface ResourceListingProps<TRow, TParams> {
   onCreate?: () => void
   createLabel?: string
   defaultPageSize?: number
+  /** Empty-state headline shown when no rows exist yet (before any search/filter). */
+  emptyTitle?: string
+  /** Empty-state supporting copy shown alongside `emptyTitle`. */
+  emptyDescription?: string
 }
 
 /**
@@ -42,6 +48,8 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
   onCreate,
   createLabel,
   defaultPageSize,
+  emptyTitle = "Nothing here yet",
+  emptyDescription,
 }: ResourceListingProps<TRow, TParams>) {
   const { table, isLoading, error, search, setSearch, filters, setFilters, activeFilters, clearFilters } =
     useServerDataTable<TRow, TParams>({
@@ -52,6 +60,36 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
       useData,
       defaultPageSize,
     })
+
+  // A search term or applied filter means rows may exist but are hidden — offer
+  // a reset rather than a create CTA, which wouldn't help the user here.
+  const isFiltered = search.trim() !== "" || activeFilters.length > 0
+  const emptyState = isFiltered ? (
+    <DataTableEmpty
+      variant="no-results"
+      title="No results found"
+      description="No records match your current search and filters."
+    >
+      <Button
+        variant="outline"
+        size="sm"
+        className="mt-1"
+        onClick={() => {
+          setSearch("")
+          clearFilters()
+        }}
+      >
+        Clear search & filters
+      </Button>
+    </DataTableEmpty>
+  ) : (
+    <DataTableEmpty
+      title={emptyTitle}
+      description={emptyDescription}
+      onAction={onCreate}
+      actionLabel={createLabel}
+    />
+  )
 
   return (
     <div className="space-y-4">
@@ -76,6 +114,7 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
           columnCount={columns.length}
           isLoading={isLoading}
           error={error}
+          emptyState={emptyState}
           onRowClick={onRowClick}
         />
       </div>

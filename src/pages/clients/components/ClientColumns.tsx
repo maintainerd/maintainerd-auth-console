@@ -4,9 +4,9 @@ import { AppWindow, Monitor, Smartphone, Globe, Cog } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ClientActions } from "./ClientActions"
 import { DataTableColumnHeader } from "@/components/data-table"
-import { StatusBadge, SystemBadge } from "@/components/badges"
-import { ProviderLogo } from "@/components/provider-config"
-import type { Client, ClientStatus, ClientType } from "@/services/api/clients/types"
+import { SystemBadge } from "@/components/badges"
+import { StatusBadge } from "@/components/details/StatusBadge"
+import type { Client, ClientType } from "@/services/api/clients/types"
 
 const getTypeBadge = (type: ClientType) => {
   const typeConfig = {
@@ -74,30 +74,6 @@ export const clientColumns: ColumnDef<Client>[] = [
     },
   },
   {
-    id: "identity_provider",
-    accessorKey: "identity_provider.display_name",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Identity Provider" />,
-    cell: ({ row }) => {
-      const client = row.original
-      const provider = client.identity_provider
-      return (
-        <div className="flex items-center gap-2 px-3 py-1">
-          {provider ? (
-            <>
-              <ProviderLogo provider={provider.provider} className="size-8" iconClassName="size-4" />
-              <div className="flex min-w-0 flex-col">
-                <span className="text-sm font-medium truncate">{provider.display_name}</span>
-                <span className="text-xs text-muted-foreground truncate">{provider.identifier}</span>
-              </div>
-            </>
-          ) : (
-            <span className="text-sm text-muted-foreground">Unassigned</span>
-          )}
-        </div>
-      )
-    },
-  },
-  {
     id: "client_type",
     accessorKey: "client_type",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
@@ -116,24 +92,7 @@ export const clientColumns: ColumnDef<Client>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">
-          <StatusBadge status={row.original.status as ClientStatus} />
-        </div>
-      )
-    },
-  },
-  {
-    id: "domain",
-    accessorKey: "domain",
-    enableHiding: true,
-    meta: {
-      defaultHidden: true,
-    },
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Domain" />,
-    cell: ({ row }) => {
-      const client = row.original
-      return (
-        <div className="px-3 py-1">
-          <span className="text-sm font-mono text-muted-foreground">{client.domain || "None"}</span>
+          <StatusBadge status={row.original.status} />
         </div>
       )
     },

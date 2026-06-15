@@ -40,6 +40,11 @@ import IdentityProviderAddOrUpdateForm from './pages/identity-providers/form'
 import ClientsPage from './pages/clients'
 import ClientDetailsPage from './pages/clients/details'
 import ClientAddOrUpdateForm from './pages/clients/form'
+import WebhooksPage from './pages/webhooks'
+import WebhookDetailsPage from './pages/webhooks/details'
+import WebhookAddOrUpdateForm from './pages/webhooks/form'
+import EventTypesPage from './pages/event-types'
+import { EventRoutesPage } from './pages/event-routes'
 import ApiKeysPage from './pages/api-keys'
 import ApiKeyDetailsPage from './pages/api-keys/details'
 import ApiKeyAddOrUpdateForm from './pages/api-keys/form'
@@ -158,7 +163,12 @@ function App() {
 					<Route path="auth-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
 					<Route path="auth-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
 					<Route path="events" element={<DashboardPage />} />
-          <Route path="webhooks" element={<DashboardPage />} />
+          <Route path="webhooks" element={<WebhooksPage />} />
+          <Route path="webhooks/create" element={<WebhookAddOrUpdateForm />} />
+          <Route path="webhooks/:webhookId" element={<WebhookDetailsPage />} />
+          <Route path="webhooks/:webhookId/edit" element={<WebhookAddOrUpdateForm />} />
+          <Route path="events/types" element={<EventTypesPage />} />
+          <Route path="events/routes" element={<EventRoutesPage />} />
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/templates" element={<BrandingTemplatesPage />} />

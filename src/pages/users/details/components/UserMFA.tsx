@@ -59,7 +59,7 @@ function MethodRow({ icon: Icon, title, description, enabled, actions }: MethodR
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium">{title}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1">

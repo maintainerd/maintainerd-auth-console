@@ -4,7 +4,8 @@ import { Cloud, Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
 import { DataTableColumnHeader } from "@/components/data-table"
-import { SystemBadge, StatusBadge } from "@/components/badges"
+import { SystemBadge } from "@/components/badges"
+import { StatusBadge } from "@/components/details/StatusBadge"
 import { PROVIDER_LABELS, ProviderLogo, getProviderBrand } from "@/components/provider-config"
 import type { IdentityProvider, ProviderOption } from "@/services/api/identity-providers/types"
 
@@ -72,7 +73,8 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
     id: "Type",
     accessorKey: "is_system",
-    header: () => <div className="px-4">Type</div>,
+    enableSorting: false,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
     cell: ({ row }) => {
       return (
         <div className="px-3 py-1">

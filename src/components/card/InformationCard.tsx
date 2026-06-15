@@ -14,8 +14,8 @@ export function InformationCard({ title, description, icon: Icon, action, childr
   return (
     <Card className="shadow-xs">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
             <CardTitle className={Icon ? "flex items-center gap-2 text-base" : "text-base"}>
               {Icon && <Icon className="size-4" />}
               {title}

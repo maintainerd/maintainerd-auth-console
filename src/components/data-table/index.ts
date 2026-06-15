@@ -1,4 +1,5 @@
 export { DataTable } from './DataTable'
+export { DataTableEmpty } from './DataTableEmpty'
 export { DataTableColumnHeader } from './DataTableColumnHeader'
 export { DataTablePagination } from './DataTablePagination'
 export { DataTableActiveFilters } from './DataTableActiveFilters'

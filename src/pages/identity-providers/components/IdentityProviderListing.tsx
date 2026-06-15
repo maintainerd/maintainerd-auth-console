@@ -27,6 +27,8 @@ export function IdentityProviderListing() {
       onRowClick={(provider) => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}`)}
       onCreate={() => navigate(`/${tenantId}/providers/identity/create`)}
       createLabel="New Provider"
+      emptyTitle="No identity providers yet"
+      emptyDescription="Add an identity provider to let users authenticate through the built-in system or an external service like Cognito, Auth0, or Google."
     />
   )
 }

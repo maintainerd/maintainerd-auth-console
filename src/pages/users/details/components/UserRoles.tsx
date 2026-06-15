@@ -133,7 +133,7 @@ export function UserRoles({ userId }: UserRolesProps) {
                   </div>
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">{role.name}</p>
+                      <p className="text-sm font-medium">{role.name}</p>
                       {role.status && <StatusBadge status={role.status} />}
                       {role.is_system && (
                         <Badge variant="secondary" className="text-xs">

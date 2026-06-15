@@ -162,3 +162,9 @@ export {
   threatDetectionSettingsSchema,
   type ThreatDetectionSettingsFormData
 } from './threatDetectionSettingsSchema'
+
+// Webhook schemas
+export {
+  webhookSchema,
+  type WebhookFormData
+} from './webhookSchema'

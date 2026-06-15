@@ -47,7 +47,7 @@ export function TopNav() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-slate-900 text-slate-100">
       <div className="flex h-14 items-center px-4">
         {/* Mobile Sidebar Trigger */}
-        <SidebarTrigger className="md:hidden mr-2" />
+        <SidebarTrigger className="md:hidden mr-2 size-9" />
 
         {/* Logo */}
         <div className="flex items-center gap-2">

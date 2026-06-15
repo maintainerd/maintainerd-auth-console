@@ -70,7 +70,7 @@ export function TenantSwitcher({ className }: { className?: string }) {
   }
 
   return (
-    <div className={className}>
+    <div className={cn("min-w-0", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -91,7 +91,7 @@ export function TenantSwitcher({ className }: { className?: string }) {
                   name={label}
                   className="bg-primary-foreground/15 text-primary-foreground"
                 />
-                <span className="max-w-[10rem] truncate text-sm font-medium">{label}</span>
+                <span className="max-w-[7rem] truncate text-sm font-medium sm:max-w-[10rem]">{label}</span>
               </>
             )}
             <ChevronsUpDown className="size-4 shrink-0 opacity-60" />

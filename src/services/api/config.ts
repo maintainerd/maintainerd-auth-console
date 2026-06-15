@@ -72,4 +72,9 @@ export const API_ENDPOINTS = {
   SMS_TEMPLATE: '/sms_templates',
   LOGIN_TEMPLATE: '/login_templates',
   AUTH_EVENTS: '/auth-events',
+  WEBHOOK_ENDPOINT: '/webhook-endpoints',
+  WEBHOOK_REPLAY: '/webhook-replay',
+  EVENT_TYPE: '/event-types',
+  TENANT_EVENT_TYPE: '/tenant-event-types',
+  EVENT_ROUTE: '/event-routes',
 } as const

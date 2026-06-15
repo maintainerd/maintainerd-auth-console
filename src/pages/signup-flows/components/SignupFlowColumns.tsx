@@ -1,10 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Workflow } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { SignupFlow } from "@/services/api/signup-flows/types"
 import { SignupFlowActions } from "./SignupFlowActions"
 import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge } from "@/components/details/StatusBadge"
 
 export const signupFlowColumns: ColumnDef<SignupFlow>[] = [
   {
@@ -43,19 +43,9 @@ export const signupFlowColumns: ColumnDef<SignupFlow>[] = [
     cell: ({ row }) => {
       const status = row.getValue("Status") as string
       if (!status) return null
-      const isActive = status === "active"
       return (
         <div className="px-3 py-1">
-          <Badge
-            variant="outline"
-            className={
-              isActive
-                ? "bg-green-100 text-green-800 border-green-200"
-                : "bg-gray-100 text-gray-800 border-gray-200"
-            }
-          >
-            <span className="capitalize">{status}</span>
-          </Badge>
+          <StatusBadge status={status} />
         </div>
       )
     },

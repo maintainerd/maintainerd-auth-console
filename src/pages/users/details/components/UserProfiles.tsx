@@ -186,7 +186,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                         )}
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-sm font-semibold">{name}</h4>
+                            <h4 className="text-sm font-medium">{name}</h4>
                             {profile.is_default && (
                               <Badge variant="secondary" className="gap-1 font-normal">
                                 <Check className="size-3" />

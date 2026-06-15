@@ -10,7 +10,7 @@ interface PageContainerProps {
 // to line up with the detail pages.
 export function PageContainer({ children }: PageContainerProps) {
   return (
-    <Card className="mx-auto w-full max-w-6xl py-6">
+    <Card className="mx-auto w-full max-w-6xl py-6 shadow-xs">
       <CardContent className="flex flex-col gap-6 px-6">
         {children}
       </CardContent>

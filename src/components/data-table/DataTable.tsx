@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import type { Table as TableType } from "@tanstack/react-table"
 import { flexRender } from "@tanstack/react-table"
 import {
@@ -15,6 +16,8 @@ interface DataTableProps<TData> {
   table: TableType<TData>
   columnCount: number
   emptyMessage?: string
+  /** Rich empty state rendered in the no-rows cell; falls back to `emptyMessage`. */
+  emptyState?: ReactNode
   isLoading?: boolean
   error?: Error | null
   /** When provided, rows are clickable (except clicks on interactive controls). */
@@ -25,6 +28,7 @@ export function DataTable<TData>({
   table,
   columnCount,
   emptyMessage = "No results.",
+  emptyState,
   isLoading = false,
   error = null,
   onRowClick,
@@ -125,12 +129,12 @@ export function DataTable<TData>({
               </TableRow>
             ))
           ) : (
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <TableCell
                 colSpan={columnCount}
                 className="h-24 text-center"
               >
-                {emptyMessage}
+                {emptyState ?? emptyMessage}
               </TableCell>
             </TableRow>
           )}
