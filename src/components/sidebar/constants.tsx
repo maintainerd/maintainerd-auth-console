@@ -110,7 +110,6 @@ export const data = {
           icon: Palette,
           items: [
             { title: "Branding Templates", route: "/branding/templates" },
-            { title: "Login Page", route: "/branding/login" },
             { title: "Email Templates", route: "/branding/email-templates" },
             { title: "SMS Templates", route: "/branding/sms-templates" },
           ],
@@ -141,12 +140,8 @@ export const data = {
         },
         {
           title: "Monitoring",
-          route: "/monitoring",
+          route: "/logs",
           icon: TrendingUp,
-          items: [
-            { title: "Analytics", route: "/analytics" },
-            { title: "Audit Logs", route: "/logs" },
-          ],
         },
       ],
     },

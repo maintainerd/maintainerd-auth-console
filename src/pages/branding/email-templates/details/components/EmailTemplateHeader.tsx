@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Play, Pause } from "lucide-react"
+import { Edit, Trash2, MoreVertical, Play, Pause, Mail, Activity, CalendarDays } from "lucide-react"
+import { format, formatDistanceToNow } from "date-fns"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -10,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { useUpdateEmailTemplateStatus, useDeleteEmailTemplate } from "@/hooks/useEmailTemplates"
 import { useToast } from "@/hooks/useToast"
 import type { EmailTemplate, EmailTemplateStatus } from "@/services/api/email-templates/types"
@@ -39,7 +41,6 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
   const handleDelete = async () => {
     try {
       await deleteTemplateMutation.mutateAsync(templateId)
-      // Navigate back to list after deletion
       navigate(`/${tenantId}/branding/email-templates`)
     } catch (error) {
       showError(error)
@@ -53,7 +54,6 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
 
   const handleConfirmStatusChange = async () => {
     if (!pendingStatusAction) return
-
     try {
       await updateStatusMutation.mutateAsync({
         id: templateId,
@@ -69,60 +69,73 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
   const canDelete = !template.isSystem
   const canEditStatus = !template.isSystem
 
+  const attributes: DetailAttribute[] = [
+    { icon: Activity, label: "Type", value: template.isSystem ? "System" : template.isDefault ? "Default" : "Custom" },
+    { icon: Activity, label: "Subject", value: template.subject },
+    { icon: CalendarDays, label: "Created", value: formatDistanceToNow(new Date(template.createdAt), { addSuffix: true }) },
+    { icon: CalendarDays, label: "Updated", value: formatDistanceToNow(new Date(template.updatedAt), { addSuffix: true }) },
+  ]
+
   return (
     <>
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold tracking-tight">{template.name}</h1>
-          <p className="text-muted-foreground">{template.subject}</p>
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <MoreVertical className="h-4 w-4" />
-              Actions
+      <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Mail className="size-6" />
+          </div>
+        }
+        title={template.name}
+        badge={<StatusBadge status={template.status} />}
+        subtitle={template.subject}
+        attributes={attributes}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() => navigate(`/${tenantId}/branding/email-templates/${templateId}/edit`)}
+            >
+              <Edit className="size-4" />
+              Edit
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/${tenantId}/branding/email-templates/${templateId}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Template
-            </DropdownMenuItem>
-
-            {canEditStatus && (
-              <>
-                <DropdownMenuSeparator />
-                {template.status === 'inactive' ? (
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange('active', 'Activate Email Template', 'Are you sure you want to activate this email template? It will be available for use immediately.')}
-                  >
-                    <Play className="mr-2 h-4 w-4" />
-                    Activate Template
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange('inactive', 'Deactivate Email Template', 'Are you sure you want to deactivate this email template? It will no longer be available for use.')}
-                  >
-                    <Pause className="mr-2 h-4 w-4" />
-                    Deactivate Template
-                  </DropdownMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                  <span className="sr-only">Open actions</span>
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {canEditStatus && (
+                  <>
+                    {template.status === 'inactive' ? (
+                      <DropdownMenuItem onClick={() => handleStatusChange('active', 'Activate Email Template', 'Are you sure you want to activate this email template?')}>
+                        <Play className="mr-2 size-4" />
+                        Activate
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => handleStatusChange('inactive', 'Deactivate Email Template', 'Are you sure you want to deactivate this email template?')}>
+                        <Pause className="mr-2 size-4" />
+                        Deactivate
+                      </DropdownMenuItem>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-
-            {canDelete && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Template
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+                {canDelete && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive focus:text-destructive">
+                      <Trash2 className="mr-2 size-4" />
+                      Delete Template
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       <ConfirmationDialog
         open={showStatusDialog}
@@ -141,8 +154,7 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
         title="Delete Email Template"
-        description={`Are you sure you want to delete the email template "${template.name}"?`}
-        confirmationText="This action cannot be undone. This will permanently delete the email template."
+        description="This action cannot be undone. This will permanently delete the email template."
         itemName={template.name}
         isDeleting={deleteTemplateMutation.isPending}
       />

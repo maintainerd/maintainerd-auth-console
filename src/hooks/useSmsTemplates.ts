@@ -38,8 +38,12 @@ export function useSmsTemplates(params?: SmsTemplateQueryParams) {
   return useQuery({
     queryKey: smsTemplateKeys.list(params),
     queryFn: () => fetchSmsTemplates(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   })
+}
+
+export function useSmsTemplatesList(params: Record<string, unknown>) {
+  return useSmsTemplates(params as SmsTemplateQueryParams)
 }
 
 /**

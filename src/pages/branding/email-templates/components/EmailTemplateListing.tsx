@@ -1,92 +1,32 @@
-import * as React from "react"
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { EmailTemplateToolbar } from "./EmailTemplateToolbar"
+import { useNavigate, useParams } from "react-router-dom"
+import type { SortingState } from "@tanstack/react-table"
+import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { emailTemplateColumns } from "./EmailTemplateColumns"
-import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
-import { useEmailTemplateQuery } from "../hooks/useEmailTemplateQuery"
+import { useEmailTemplatesList } from "@/hooks/useEmailTemplates"
+
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const SEARCH_FIELDS = ["name", "subject"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "inactive"] },
+]
 
 export function EmailTemplateListing() {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-
-  const columns = React.useMemo(() => emailTemplateColumns, [])
-
-  const {
-    emailTemplates,
-    rowCount,
-    isLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    sorting,
-    setSorting,
-    pagination,
-    setPagination,
-  } = useEmailTemplateQuery()
-
-  const table = useReactTable({
-    data: emailTemplates,
-    columns,
-    pageCount: Math.ceil(rowCount / pagination.pageSize),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    manualSorting: true,
-    manualPagination: true,
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-  })
-
-  const activeFilters = React.useMemo(() => {
-    const filterLabels: string[] = []
-    if (filters.status.length > 0) {
-      filterLabels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    return filterLabels
-  }, [filters])
-
-  const clearAllFilters = React.useCallback(() => {
-    setFilters({
-      status: []
-    })
-  }, [setFilters])
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
-    <div className="space-y-4">
-      <EmailTemplateToolbar
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        table={table}
-      />
-      <DataTableActiveFilters
-        activeFilters={activeFilters}
-        onClearAll={clearAllFilters}
-      />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-      />
-      <DataTablePagination table={table} />
-    </div>
+    <ResourceListing
+      columns={emailTemplateColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search templates by name or subject..."
+      useData={useEmailTemplatesList}
+      filterGroups={FILTER_GROUPS}
+      onRowClick={(template) => navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}`)}
+      onCreate={() => navigate(`/${tenantId}/branding/email-templates/create`)}
+      createLabel="New Template"
+      emptyTitle="No email templates yet"
+      emptyDescription="Create your first email template to customize authentication and notification emails."
+    />
   )
 }

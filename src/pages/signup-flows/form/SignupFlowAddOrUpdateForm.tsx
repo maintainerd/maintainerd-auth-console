@@ -358,7 +358,7 @@ export default function SignupFlowAddOrUpdateForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
@@ -463,7 +463,7 @@ export default function SignupFlowAddOrUpdateForm() {
           </Card>
 
           {/* Configuration */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -504,7 +504,7 @@ export default function SignupFlowAddOrUpdateForm() {
           </Card>
 
           {/* Roles */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Roles</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -539,7 +539,7 @@ export default function SignupFlowAddOrUpdateForm() {
           </Card>
 
           {/* Callback URIs */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Callback URIs</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -582,7 +582,7 @@ export default function SignupFlowAddOrUpdateForm() {
           </Card>
 
           {/* Custom Configuration */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Custom Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">

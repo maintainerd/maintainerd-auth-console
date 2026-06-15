@@ -1,77 +1,93 @@
-import type { ColumnDef } from '@tanstack/react-table'
-import { formatDistanceToNow } from 'date-fns'
-import { StatusBadge } from '@/components/badges'
-import { Badge } from '@/components/ui/badge'
-import { SmsTemplateActions } from './SmsTemplateActions'
-import type { SmsTemplate } from '@/services/api/sms-templates/types'
+import type { ColumnDef } from "@tanstack/react-table"
+import { MessageSquare } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+import { Badge } from "@/components/ui/badge"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge } from "@/components/details/StatusBadge"
+import { SmsTemplateActions } from "./SmsTemplateActions"
+import type { SmsTemplate } from "@/services/api/sms-templates/types"
 
 export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
   {
-    accessorKey: 'name',
-    header: 'Name',
+    id: "name",
+    accessorKey: "name",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    cell: ({ row }) => {
+      const template = row.original
+      return (
+        <div className="flex items-center gap-3 px-3 py-1 max-w-md">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <MessageSquare className="size-5" />
+          </div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="font-medium truncate">{template.name}</span>
+            {template.description && (
+              <span className="text-xs text-muted-foreground truncate">{template.description}</span>
+            )}
+          </div>
+        </div>
+      )
+    },
+  },
+  {
+    id: "sender_id",
+    accessorKey: "senderId",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Sender ID" />,
     cell: ({ row }) => (
-      <div className="flex flex-col gap-1">
-        <span className="font-medium">{row.original.name}</span>
-        <span className="text-sm text-muted-foreground">{row.original.description}</span>
+      <div className="px-3 py-1">
+        <span className="font-mono text-sm">{row.original.senderId || "—"}</span>
       </div>
     ),
   },
   {
-    accessorKey: 'senderId',
-    header: 'Sender ID',
-    cell: ({ row }) => (
-      <span className="font-mono text-sm">{row.original.senderId}</span>
-    ),
+    id: "type",
+    accessorKey: "isSystem",
+    enableSorting: false,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+    cell: ({ row }) => {
+      const template = row.original
+      const badges: React.ReactNode[] = []
+      if (template.isSystem) badges.push(<Badge key="sys" variant="secondary" className="text-xs font-normal">System</Badge>)
+      if (template.isDefault) badges.push(<Badge key="def" variant="outline" className="text-xs font-normal">Default</Badge>)
+      if (badges.length === 0) badges.push(<Badge key="cus" variant="outline" className="text-xs font-normal">Custom</Badge>)
+      return <div className="flex gap-1 px-3 py-1">{badges}</div>
+    },
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
-  },
-  {
-    accessorKey: 'type',
-    header: 'Type',
+    id: "status",
+    accessorKey: "status",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <div className="flex gap-1">
-        {row.original.isSystem && (
-          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-            System
-          </Badge>
-        )}
-        {row.original.isDefault && (
-          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-            Default
-          </Badge>
-        )}
-        {!row.original.isSystem && !row.original.isDefault && (
-          <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
-            Custom
-          </Badge>
-        )}
+      <div className="px-3 py-1">
+        <StatusBadge status={row.original.status} />
       </div>
     ),
   },
   {
-    accessorKey: 'createdAt',
-    header: 'Created',
-    cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">
-        {formatDistanceToNow(new Date(row.original.createdAt), { addSuffix: true })}
-      </span>
-    ),
+    id: "created_at",
+    accessorKey: "createdAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+    cell: ({ row }) => {
+      const template = row.original
+      return (
+        <div className="flex flex-col gap-1 px-3 py-1">
+          <span className="text-sm font-medium">
+            {formatDistanceToNow(new Date(template.createdAt), { addSuffix: true })}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(template.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+      )
+    },
   },
   {
-    accessorKey: 'updatedAt',
-    header: 'Updated',
-    cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">
-        {formatDistanceToNow(new Date(row.original.updatedAt), { addSuffix: true })}
-      </span>
-    ),
-  },
-  {
-    id: 'actions',
+    id: "actions",
     enableHiding: false,
-    cell: ({ row }) => <SmsTemplateActions template={row.original} />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <SmsTemplateActions template={row.original} />
+      </div>
+    ),
   },
 ]
