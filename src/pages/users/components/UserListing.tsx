@@ -25,6 +25,8 @@ export function UserListing() {
       onRowClick={(user) => navigate(`/${tenantId}/users/${user.user_id}`)}
       onCreate={() => navigate(`/${tenantId}/users/create`)}
       createLabel="New User"
+      emptyTitle="No users yet"
+      emptyDescription="Add your first user to start managing accounts, authentication, and security settings."
     />
   )
 }

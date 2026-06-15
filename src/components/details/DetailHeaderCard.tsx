@@ -39,14 +39,14 @@ export function DetailHeaderCard({
     <Card className="shadow-xs">
       <CardContent>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             {leading}
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
                 {badge}
               </div>
-              {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
+              {subtitle && <div className="text-sm text-muted-foreground break-words">{subtitle}</div>}
             </div>
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}

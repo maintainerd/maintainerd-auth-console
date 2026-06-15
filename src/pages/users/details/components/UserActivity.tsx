@@ -82,7 +82,7 @@ export function UserActivity({ userId }: UserActivityProps) {
                   </div>
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">{humanizeEventType(event.event_type)}</p>
+                      <p className="text-sm font-medium">{humanizeEventType(event.event_type)}</p>
                       <ResultBadge result={event.result} />
                       {event.severity && event.severity.toUpperCase() !== "INFO" && (
                         <Badge variant="secondary" className="font-normal capitalize">

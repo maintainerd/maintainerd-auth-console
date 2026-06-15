@@ -21,7 +21,7 @@ export function PrivateLayout({ fullWidth = false }: PrivateLayoutProps) {
           <AppSidebar variant="sidebar" className="top-14" />
           <SidebarInset className="bg-slate-50 min-w-0">
             <main className={cn(
-              "flex-1 px-6 py-8",
+              "flex-1 px-4 py-6 sm:px-6 sm:py-8",
               !fullWidth && "max-w-6xl mx-auto"
             )}>
               <Outlet />

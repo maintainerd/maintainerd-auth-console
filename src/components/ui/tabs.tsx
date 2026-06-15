@@ -24,7 +24,11 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
+        // max-w-full + overflow-x-auto lets a wide tab strip (e.g. 7 tabs on a
+        // phone) scroll horizontally instead of overflowing the viewport; the
+        // scrollbar is hidden so it reads as a swipeable strip. Small tab sets
+        // fit and never scroll, so desktop is unchanged.
+        "bg-muted text-muted-foreground inline-flex h-9 w-fit max-w-full items-center justify-center overflow-x-auto rounded-lg p-[3px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
       {...props}

@@ -25,6 +25,8 @@ export function SignupFlowListing() {
       onRowClick={(flow) => navigate(`/${tenantId}/auth-flows/${flow.signup_flow_id}`)}
       onCreate={() => navigate(`/${tenantId}/auth-flows/create`)}
       createLabel="New Auth Flow"
+      emptyTitle="No auth flows yet"
+      emptyDescription="Create your first auth flow to define how users authenticate and onboard into your applications."
     />
   )
 }

@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns"
 import { RoleActions } from "./RoleActions"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { SystemBadge } from "@/components/badges"
+import { StatusBadge } from "@/components/details/StatusBadge"
 import type { Role } from "@/services/api/roles/types"
 
 export const roleColumns: ColumnDef<Role>[] = [
@@ -33,12 +34,9 @@ export const roleColumns: ColumnDef<Role>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const role = row.original
-      const isActive = role.status === "active"
       return (
         <div className="px-3 py-1">
-          <Badge variant="outline" className={isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200"}>
-            <span className="capitalize">{role.status}</span>
-          </Badge>
+          <StatusBadge status={role.status} />
         </div>
       )
     },

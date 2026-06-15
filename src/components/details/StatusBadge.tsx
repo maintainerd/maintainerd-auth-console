@@ -7,14 +7,17 @@ const STATUS_DOT: Record<string, string> = {
   active: "bg-emerald-500",
   enabled: "bg-emerald-500",
   verified: "bg-emerald-500",
+  accepted: "bg-emerald-500",
   pending: "bg-amber-500",
   draft: "bg-amber-500",
   inactive: "bg-slate-400",
   disabled: "bg-slate-400",
   archived: "bg-slate-400",
+  expired: "bg-slate-400",
   suspended: "bg-red-500",
   blocked: "bg-red-500",
   revoked: "bg-red-500",
+  quarantined: "bg-red-500",
 }
 
 /** A restrained, entity-agnostic status pill: a small coloured dot + label. */
