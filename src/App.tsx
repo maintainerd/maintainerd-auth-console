@@ -63,15 +63,12 @@ import IpRestrictionsPage from './pages/security/ip-restrictions'
 import SignupFlowsPage from './pages/signup-flows'
 import SignupFlowDetailsPage from './pages/signup-flows/details'
 import SignupFlowAddOrUpdateForm from './pages/signup-flows/form'
-import AnalyticsPage from './pages/analytics'
 import LogMonitoringPage from './pages/log-monitoring'
+import AuthEventDetailsPage from './pages/log-monitoring/details/AuthEventDetailsPage'
 import NotificationsPage from './pages/notifications'
 import BrandingTemplatesPage from './pages/branding/templates'
 import BrandingDetailsPage from './pages/branding/templates/details/BrandingDetailsPage'
 import BrandingForm from './pages/branding/templates/form/BrandingForm'
-import LoginBrandingPage from './pages/branding/login'
-import LoginTemplateDetailsPage from './pages/branding/login/details'
-import LoginTemplateForm from './pages/branding/login/form'
 import EmailTemplatesPage from './pages/branding/email-templates'
 import EmailTemplateDetailsPage from './pages/branding/email-templates/details'
 import EmailTemplateForm from './pages/branding/email-templates/form'
@@ -96,7 +93,7 @@ function App() {
       <StepUpProvider>
       <AppBootstrap>
       <Routes>
-				<Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -107,11 +104,11 @@ function App() {
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
         <Route path="/:tenantId" element={<PrivateLayout />}>
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="monitoring" element={<AnalyticsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
+          <Route path="logs" element={<LogMonitoringPage />} />
+          <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="security" element={<SecurityPage />} />
           <Route path="security/mfa" element={<MfaConfigPage />} />
@@ -150,6 +147,12 @@ function App() {
           <Route path="clients/create" element={<ClientAddOrUpdateForm />} />
           <Route path="clients/:clientId" element={<ClientDetailsPage />} />
           <Route path="clients/:clientId/edit" element={<ClientAddOrUpdateForm />} />
+          <Route path="webhooks" element={<WebhooksPage />} />
+          <Route path="webhooks/create" element={<WebhookAddOrUpdateForm />} />
+          <Route path="webhooks/:webhookId" element={<WebhookDetailsPage />} />
+          <Route path="webhooks/:webhookId/edit" element={<WebhookAddOrUpdateForm />} />
+          <Route path="events/types" element={<EventTypesPage />} />
+          <Route path="events/routes" element={<EventRoutesPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="api-keys/create" element={<ApiKeyAddOrUpdateForm />} />
           <Route path="api-keys/:id" element={<ApiKeyDetailsPage />} />
@@ -158,27 +161,16 @@ function App() {
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
           <Route path="policies/:policyId/edit" element={<PolicyAddOrUpdateForm />} />
-					<Route path="auth-flows" element={<SignupFlowsPage />} />
-					<Route path="auth-flows/create" element={<SignupFlowAddOrUpdateForm />} />
-					<Route path="auth-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
-					<Route path="auth-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
-					<Route path="events" element={<DashboardPage />} />
-          <Route path="webhooks" element={<WebhooksPage />} />
-          <Route path="webhooks/create" element={<WebhookAddOrUpdateForm />} />
-          <Route path="webhooks/:webhookId" element={<WebhookDetailsPage />} />
-          <Route path="webhooks/:webhookId/edit" element={<WebhookAddOrUpdateForm />} />
-          <Route path="events/types" element={<EventTypesPage />} />
-          <Route path="events/routes" element={<EventRoutesPage />} />
-          <Route path="logs" element={<LogMonitoringPage />} />
+          <Route path="auth-flows" element={<SignupFlowsPage />} />
+          <Route path="auth-flows/create" element={<SignupFlowAddOrUpdateForm />} />
+          <Route path="auth-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
+          <Route path="auth-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
+          <Route path="events" element={<DashboardPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/templates" element={<BrandingTemplatesPage />} />
           <Route path="branding/templates/create" element={<BrandingForm />} />
           <Route path="branding/templates/:brandingId" element={<BrandingDetailsPage />} />
           <Route path="branding/templates/:brandingId/edit" element={<BrandingForm />} />
-          <Route path="branding/login" element={<LoginBrandingPage />} />
-          <Route path="branding/login/create" element={<LoginTemplateForm />} />
-          <Route path="branding/login/:templateId" element={<LoginTemplateDetailsPage />} />
-          <Route path="branding/login/:templateId/edit" element={<LoginTemplateForm />} />
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/email-templates/create" element={<EmailTemplateForm />} />
           <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />

@@ -38,8 +38,12 @@ export function useEmailTemplates(params?: EmailTemplateQueryParams) {
   return useQuery({
     queryKey: emailTemplateKeys.list(params),
     queryFn: () => fetchEmailTemplates(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   })
+}
+
+export function useEmailTemplatesList(params: Record<string, unknown>) {
+  return useEmailTemplates(params as EmailTemplateQueryParams)
 }
 
 /**

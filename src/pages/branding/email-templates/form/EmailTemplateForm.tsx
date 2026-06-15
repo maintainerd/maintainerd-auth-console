@@ -1,11 +1,10 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -19,7 +18,6 @@ import { useEmailTemplate, useCreateEmailTemplate, useUpdateEmailTemplate } from
 import { useToast } from "@/hooks/useToast"
 import type { EmailTemplateStatus } from "@/services/api/email-templates/types"
 
-// Validation schema
 const emailTemplateSchema = yup.object({
   name: yup.string().required('Name is required').min(3, 'Name must be at least 3 characters'),
   subject: yup.string().required('Subject is required').min(3, 'Subject must be at least 3 characters'),
@@ -27,6 +25,8 @@ const emailTemplateSchema = yup.object({
   body_plain: yup.string().required('Plain text content is required'),
   status: yup.string().oneOf(['active', 'inactive']).required('Status is required'),
 })
+
+type EmailTemplateFormData = yup.InferType<typeof emailTemplateSchema>
 
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
@@ -39,7 +39,6 @@ export default function EmailTemplateForm() {
   const { showSuccess, showError } = useToast()
 
   const isEditing = Boolean(templateId)
-  const isCreating = !isEditing
 
   const { data: templateData, isLoading: isFetchingTemplate } = useEmailTemplate(templateId || '')
   const createMutation = useCreateEmailTemplate()
@@ -50,22 +49,24 @@ export default function EmailTemplateForm() {
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting }
-  } = useForm({
+    formState: { errors, isSubmitting },
+  } = useForm<EmailTemplateFormData>({
     resolver: yupResolver(emailTemplateSchema),
     defaultValues: {
       name: "",
       subject: "",
       body_html: "",
       body_plain: "",
-      status: "active" as const,
+      status: "active",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
   })
 
+  const initialized = useRef(false)
   useEffect(() => {
-    if (isEditing && templateData) {
+    if (isEditing && templateData && !initialized.current) {
+      initialized.current = true
       reset({
         name: templateData.name,
         subject: templateData.subject,
@@ -76,11 +77,24 @@ export default function EmailTemplateForm() {
     }
   }, [isEditing, templateData, reset])
 
-  const isLoading = createMutation.isPending || updateMutation.isPending || isSubmitting
+  const isLoading =
+    isFetchingTemplate || createMutation.isPending || updateMutation.isPending || isSubmitting
 
-  const onSubmit = async (data: yup.InferType<typeof emailTemplateSchema>) => {
+  const onSubmit = async (data: EmailTemplateFormData) => {
     try {
-      if (isCreating) {
+      if (isEditing && templateId) {
+        await updateMutation.mutateAsync({
+          id: templateId,
+          data: {
+            name: data.name,
+            subject: data.subject,
+            body_html: data.body_html,
+            body_plain: data.body_plain,
+            status: data.status as EmailTemplateStatus,
+          },
+        })
+        showSuccess("Email template updated successfully")
+      } else {
         await createMutation.mutateAsync({
           name: data.name,
           subject: data.subject,
@@ -89,54 +103,23 @@ export default function EmailTemplateForm() {
           status: data.status as EmailTemplateStatus,
         })
         showSuccess("Email template created successfully")
-      } else {
-        await updateMutation.mutateAsync({
-          id: templateId!,
-          data: {
-            name: data.name,
-            subject: data.subject,
-            body_html: data.body_html,
-            body_plain: data.body_plain,
-            status: data.status as EmailTemplateStatus,
-          }
-        })
-        showSuccess("Email template updated successfully")
       }
-
       navigate(`/${tenantId}/branding/email-templates`)
     } catch (error) {
-      showError(error)
+      showError(error, "Failed to save email template")
     }
   }
 
-  const pageTitle = isCreating ? "Create Email Template" : `Edit ${templateData?.name || "Email Template"}`
-  const submitButtonText = isCreating ? "Create Template" : "Update Template"
-
   if (isEditing && isFetchingTemplate) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching email template details
-          </p>
+      <DetailsContainer>
+        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Loading...</h2>
+            <p className="mt-2 text-muted-foreground">Fetching email template details</p>
+          </div>
         </div>
-      </div>
-    )
-  }
-
-  if (isEditing && !isFetchingTemplate && !templateData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <h2 className="text-2xl font-semibold">Email Template Not Found</h2>
-        <p className="text-muted-foreground">
-          The email template you're trying to edit doesn't exist.
-        </p>
-        <Button onClick={() => navigate(`/${tenantId}/branding/email-templates`)}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Email Templates
-        </Button>
-      </div>
+      </DetailsContainer>
     )
   }
 
@@ -144,31 +127,40 @@ export default function EmailTemplateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          title={pageTitle}
-          description={isCreating
-            ? "Create a new email template for your authentication and notification emails."
-            : "Update the email template details, content, and design."}
-          backUrl={`/${tenantId}/branding/email-templates`}
+          backUrl={isEditing ? `/${tenantId}/branding/email-templates/${templateId}` : `/${tenantId}/branding/email-templates`}
+          backLabel="Back to Email Templates"
+          title={isEditing ? "Edit Email Template" : "Create Email Template"}
+          description={
+            isEditing
+              ? "Update the email template details, content, and status."
+              : "Create a new email template for authentication and notification emails."
+          }
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Template Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormInputField
                 label="Name"
-                placeholder="e.g., internal:user:password:reset"
+                placeholder="e.g., password_reset, welcome_email"
+                description="A unique identifier for this template."
+                disabled={isLoading}
                 error={errors.name?.message}
-                {...register('name')}
+                required
+                {...register("name")}
               />
 
               <FormInputField
                 label="Subject"
                 placeholder="Enter email subject line"
+                description="The subject line of the email."
+                disabled={isLoading}
                 error={errors.subject?.message}
-                {...register('subject')}
+                required
+                {...register("subject")}
               />
 
               <Controller
@@ -181,14 +173,16 @@ export default function EmailTemplateForm() {
                     options={STATUS_OPTIONS}
                     value={field.value}
                     onValueChange={field.onChange}
+                    disabled={isLoading}
                     error={errors.status?.message}
+                    required
                   />
                 )}
               />
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Email Content</CardTitle>
             </CardHeader>
@@ -196,17 +190,23 @@ export default function EmailTemplateForm() {
               <FormTextareaField
                 label="HTML Content"
                 placeholder="Enter HTML email template..."
+                description="The HTML version of the email body."
                 rows={12}
+                disabled={isLoading}
                 error={errors.body_html?.message}
-                {...register('body_html')}
+                required
+                {...register("body_html")}
               />
 
               <FormTextareaField
                 label="Plain Text Content"
                 placeholder="Enter plain text email template (fallback)..."
+                description="The plain text fallback for email clients that don't support HTML."
                 rows={8}
+                disabled={isLoading}
                 error={errors.body_plain?.message}
-                {...register('body_plain')}
+                required
+                {...register("body_plain")}
               />
             </CardContent>
           </Card>
@@ -215,13 +215,21 @@ export default function EmailTemplateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/${tenantId}/branding/email-templates`)}
+              onClick={() =>
+                navigate(
+                  isEditing
+                    ? `/${tenantId}/branding/email-templates/${templateId}`
+                    : `/${tenantId}/branding/email-templates`,
+                )
+              }
+              disabled={isLoading}
             >
               Cancel
             </Button>
-            <FormSubmitButton 
-              isSubmitting={isLoading} 
-              submitText={submitButtonText}
+            <FormSubmitButton
+              isSubmitting={isLoading}
+              submittingText="Saving..."
+              submitText={isEditing ? "Update Template" : "Create Template"}
             />
           </div>
         </form>

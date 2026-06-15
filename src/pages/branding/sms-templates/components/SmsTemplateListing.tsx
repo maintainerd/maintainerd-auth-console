@@ -1,92 +1,32 @@
-import * as React from "react"
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { SmsTemplateToolbar } from "./SmsTemplateToolbar"
+import { useNavigate, useParams } from "react-router-dom"
+import type { SortingState } from "@tanstack/react-table"
+import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { smsTemplateColumns } from "./SmsTemplateColumns"
-import { DataTable, DataTablePagination, DataTableActiveFilters } from "@/components/data-table"
-import { useSmsTemplateQuery } from "../hooks/useSmsTemplateQuery"
+import { useSmsTemplatesList } from "@/hooks/useSmsTemplates"
+
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const SEARCH_FIELDS = ["name"]
+const FILTER_GROUPS: readonly FilterGroup[] = [
+  { key: "status", label: "Status", options: ["active", "inactive"] },
+]
 
 export function SmsTemplateListing() {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-
-  const columns = React.useMemo(() => smsTemplateColumns, [])
-
-  const {
-    smsTemplates,
-    rowCount,
-    isLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    sorting,
-    setSorting,
-    pagination,
-    setPagination,
-  } = useSmsTemplateQuery()
-
-  const table = useReactTable({
-    data: smsTemplates,
-    columns,
-    pageCount: Math.ceil(rowCount / pagination.pageSize),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    manualSorting: true,
-    manualPagination: true,
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-  })
-
-  const activeFilters = React.useMemo(() => {
-    const filterLabels: string[] = []
-    if (filters.status.length > 0) {
-      filterLabels.push(`Status: ${filters.status.join(", ")}`)
-    }
-    return filterLabels
-  }, [filters])
-
-  const clearAllFilters = React.useCallback(() => {
-    setFilters({
-      status: []
-    })
-  }, [setFilters])
+  const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
-    <div className="space-y-4">
-      <SmsTemplateToolbar
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        table={table}
-      />
-      <DataTableActiveFilters
-        activeFilters={activeFilters}
-        onClearAll={clearAllFilters}
-      />
-      <DataTable
-        table={table}
-        columnCount={columns.length}
-        isLoading={isLoading}
-        error={error}
-      />
-      <DataTablePagination table={table} />
-    </div>
+    <ResourceListing
+      columns={smsTemplateColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search templates by name..."
+      useData={useSmsTemplatesList}
+      filterGroups={FILTER_GROUPS}
+      onRowClick={(template) => navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}`)}
+      onCreate={() => navigate(`/${tenantId}/branding/sms-templates/create`)}
+      createLabel="New Template"
+      emptyTitle="No SMS templates yet"
+      emptyDescription="Create your first SMS template to customize authentication and notification text messages."
+    />
   )
 }

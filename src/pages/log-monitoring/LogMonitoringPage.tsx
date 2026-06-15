@@ -1,20 +1,17 @@
-import * as React from "react"
-import { LogDataTable } from "./components/LogDataTable"
-import { logColumns } from "./components/LogColumns"
-import { MOCK_LOGS, type LogEntry } from "./constants"
+import { PageContainer, PageHeader } from "@/components/layout"
+import { DetailsContainer } from "@/components/container"
+import { AuthEventListing } from "./components/AuthEventListing"
 
 export default function LogMonitoringPage() {
-  const [logs] = React.useState<LogEntry[]>(MOCK_LOGS)
-
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Log Monitoring</h1>
-        <p className="text-muted-foreground">
-          Monitor system logs, authentication events, API requests, and security incidents across all services.
-        </p>
-      </div>
-      <LogDataTable columns={logColumns} data={logs} />
-    </div>
+    <DetailsContainer>
+      <PageContainer>
+        <PageHeader
+          title="Audit Logs"
+          description="Monitor authentication, authorization, and security events across your tenant. Filter by category, severity, result, or search by event type and IP."
+        />
+        <AuthEventListing />
+      </PageContainer>
+    </DetailsContainer>
   )
 }

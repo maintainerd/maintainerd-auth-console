@@ -178,7 +178,7 @@ export default function ApiAddOrUpdateForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={apiId || 'create'}>
           {/* Basic Information */}
-          <Card>
+          <Card className="shadow-xs">
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
