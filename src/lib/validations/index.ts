@@ -127,12 +127,6 @@ export {
   type PasswordPoliciesFormData
 } from './passwordPoliciesSchema'
 
-// Login Template schemas
-export {
-  loginTemplateSchema,
-  type LoginTemplateFormData
-} from './loginTemplateSchema'
-
 // Session Settings schemas
 export {
   sessionSettingsSchema,
