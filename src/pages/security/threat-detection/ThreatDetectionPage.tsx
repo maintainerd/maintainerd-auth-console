@@ -10,7 +10,6 @@ import { useThreatDetectionSettings, useUpdateThreatDetectionSettings } from '@/
 import { useToast } from '@/hooks/useToast'
 import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 export default function ThreatDetectionPage() {
   const { showSuccess, showError } = useToast()
@@ -102,28 +101,24 @@ export default function ThreatDetectionPage() {
                 description="Detect repeated failed login attempts per account"
                 checked={formValues.brute_force_detection_enabled}
                 onCheckedChange={(v) => handleUpdate({ brute_force_detection_enabled: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Impossible Travel Detection"
                 description="Flag logins from geographically impossible locations"
                 checked={formValues.impossible_travel_detection_enabled}
                 onCheckedChange={(v) => handleUpdate({ impossible_travel_detection_enabled: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="New Device Notification"
                 description="Alert users when a login occurs from a new device"
                 checked={formValues.new_device_notification_enabled}
                 onCheckedChange={(v) => handleUpdate({ new_device_notification_enabled: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Velocity Check"
                 description="Rate-limit login attempts per IP address"
                 checked={formValues.velocity_check_enabled}
                 onCheckedChange={(v) => handleUpdate({ velocity_check_enabled: v })}
-                switchClassName={SWITCH_CLASS}
               />
             </div>
           </SettingsCard>
@@ -139,14 +134,12 @@ export default function ThreatDetectionPage() {
                   description="Force MFA when risk score reaches the step-up threshold"
                   checked={formValues.risk_based_step_up_enabled}
                   onCheckedChange={(v) => handleUpdate({ risk_based_step_up_enabled: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
                 <FormSwitchField
                   label="Compromised Credential Monitoring"
                   description="Check credentials against known breach databases"
                   checked={formValues.compromised_credential_monitoring_enabled}
                   onCheckedChange={(v) => handleUpdate({ compromised_credential_monitoring_enabled: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
@@ -181,14 +174,12 @@ export default function ThreatDetectionPage() {
                   description="Query external IP reputation feeds"
                   checked={formValues.ip_reputation_check_enabled}
                   onCheckedChange={(v) => handleUpdate({ ip_reputation_check_enabled: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
                 <FormSwitchField
                   label="Block Tor Exit Nodes"
                   description="Reject logins originating from known Tor exit nodes"
                   checked={formValues.block_tor_exit_nodes}
                   onCheckedChange={(v) => handleUpdate({ block_tor_exit_nodes: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
               </div>
               <FormInputField

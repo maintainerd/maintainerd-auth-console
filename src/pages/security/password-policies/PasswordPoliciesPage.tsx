@@ -10,7 +10,6 @@ import { usePasswordPolicies, useUpdatePasswordPolicies } from '@/hooks/usePassw
 import { useToast } from '@/hooks/useToast'
 import { passwordPoliciesSchema, type PasswordPoliciesFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 const HASH_OPTIONS = [
   { value: 'argon2id', label: 'Argon2id' },
@@ -144,28 +143,24 @@ export default function PasswordPoliciesPage() {
                 description="At least one A–Z character"
                 checked={formValues.require_uppercase}
                 onCheckedChange={(v) => handleUpdate({ require_uppercase: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Require Lowercase"
                 description="At least one a–z character"
                 checked={formValues.require_lowercase}
                 onCheckedChange={(v) => handleUpdate({ require_lowercase: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Require Number"
                 description="At least one 0–9 digit"
                 checked={formValues.require_number}
                 onCheckedChange={(v) => handleUpdate({ require_number: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Require Symbol"
                 description="At least one special character"
                 checked={formValues.require_symbol}
                 onCheckedChange={(v) => handleUpdate({ require_symbol: v })}
-                switchClassName={SWITCH_CLASS}
               />
             </div>
           </SettingsCard>
@@ -180,14 +175,12 @@ export default function PasswordPoliciesPage() {
                 description="Block passwords from known common-password lists"
                 checked={formValues.reject_common_passwords}
                 onCheckedChange={(v) => handleUpdate({ reject_common_passwords: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Check HIBP"
                 description="Screen against Have I Been Pwned breach database"
                 checked={formValues.check_hibp}
                 onCheckedChange={(v) => handleUpdate({ check_hibp: v })}
-                switchClassName={SWITCH_CLASS}
               />
             </div>
             <div className="grid gap-4 md:grid-cols-2 mt-4">

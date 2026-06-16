@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Edit, Trash2, MoreVertical, Play, Pause, Mail, Activity, CalendarDays } from "lucide-react"
-import { format, formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow } from "date-fns"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

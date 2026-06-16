@@ -63,6 +63,7 @@ export {
   sendMFALoginSMS,
   beginMFALoginWebAuthn,
   register,
+  registerInvite,
   logout,
   fetchProfile,
   fetchAccount,

@@ -167,7 +167,6 @@ function ToggleRow({ control, name, title, desc }: {
         <Switch
           checked={field.value}
           onCheckedChange={field.onChange}
-          className="data-[state=checked]:bg-blue-600"
         />
       )} />
     </div>

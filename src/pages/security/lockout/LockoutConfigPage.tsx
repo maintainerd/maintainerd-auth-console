@@ -10,7 +10,6 @@ import { useLockoutConfig, useUpdateLockoutConfig } from '@/hooks/useLockoutConf
 import { useToast } from '@/hooks/useToast'
 import { lockoutConfigSchema, type LockoutConfigFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 export default function LockoutConfigPage() {
   const { showSuccess, showError } = useToast()
@@ -100,7 +99,6 @@ export default function LockoutConfigPage() {
                 checked={formValues.enabled}
                 onCheckedChange={(checked) => handleUpdate({ enabled: checked })}
                 error={errors.enabled?.message}
-                switchClassName={SWITCH_CLASS}
               />
               <div className="grid gap-4 md:grid-cols-2">
                 <FormInputField
@@ -145,7 +143,6 @@ export default function LockoutConfigPage() {
                 description="Increase lockout duration with each successive lockout"
                 checked={formValues.progressive_lockout}
                 onCheckedChange={(checked) => handleUpdate({ progressive_lockout: checked })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormInputField
                 label="Progression Reset (hours)"
@@ -167,21 +164,18 @@ export default function LockoutConfigPage() {
                 description="Automatically unlock after the lockout duration expires"
                 checked={formValues.auto_unlock}
                 onCheckedChange={(checked) => handleUpdate({ auto_unlock: checked })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Reset Count On Success"
                 description="Reset failed attempt counter on successful login"
                 checked={formValues.reset_count_on_success}
                 onCheckedChange={(checked) => handleUpdate({ reset_count_on_success: checked })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Notify User On Lockout"
                 description="Send notification to the user when their account is locked"
                 checked={formValues.notify_user_on_lockout}
                 onCheckedChange={(checked) => handleUpdate({ notify_user_on_lockout: checked })}
-                switchClassName={SWITCH_CLASS}
               />
             </div>
           </SettingsCard>

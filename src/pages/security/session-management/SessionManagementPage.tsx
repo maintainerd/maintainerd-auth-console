@@ -10,7 +10,6 @@ import { useSessionSettings, useUpdateSessionSettings } from '@/hooks/useSession
 import { useToast } from '@/hooks/useToast'
 import { sessionSettingsSchema, type SessionSettingsFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 const SAME_SITE_OPTIONS = [
   { value: 'Strict', label: 'Strict' },
@@ -162,7 +161,6 @@ export default function SessionManagementPage() {
                 description="Issue a new refresh token on every refresh; replaying a consumed token revokes the entire token family"
                 checked={formValues.rotate_refresh_tokens}
                 onCheckedChange={(v) => handleUpdate({ rotate_refresh_tokens: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormInputField
                 label="Reuse Grace (seconds)"
@@ -185,21 +183,18 @@ export default function SessionManagementPage() {
                 description="Only transmit cookies over HTTPS"
                 checked={formValues.cookie_secure}
                 onCheckedChange={(v) => handleUpdate({ cookie_secure: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="HttpOnly"
                 description="Block JavaScript access to cookies"
                 checked={formValues.cookie_http_only}
                 onCheckedChange={(v) => handleUpdate({ cookie_http_only: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Revoke on Password Change"
                 description="Terminate all other sessions when password is changed"
                 checked={formValues.revoke_sessions_on_password_change}
                 onCheckedChange={(v) => handleUpdate({ revoke_sessions_on_password_change: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSelectField
                 label="SameSite"

@@ -10,7 +10,6 @@ import { useTokenConfig, useUpdateTokenConfig } from '@/hooks/useTokenConfig'
 import { useToast } from '@/hooks/useToast'
 import { tokenConfigSchema, type TokenConfigFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 const SIGNING_OPTIONS = [
   { value: 'RS256', label: 'RS256' },
@@ -135,7 +134,6 @@ export default function TokenConfigPage() {
               description="Enforce S256 PKCE for all OAuth authorization code flows"
               checked={formValues.require_pkce}
               onCheckedChange={(v) => handleUpdate({ require_pkce: v })}
-              switchClassName={SWITCH_CLASS}
             />
           </SettingsCard>
 

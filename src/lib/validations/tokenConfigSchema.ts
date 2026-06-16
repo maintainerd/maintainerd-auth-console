@@ -11,8 +11,8 @@ export const tokenConfigSchema = yup.object({
     .required()
     .oneOf(['RS256', 'ES256', 'PS256']),
   require_pkce: yup.boolean().required(),
-  additional_id_token_claims: yup.array().of(yup.string()).required(),
-  additional_access_token_claims: yup.array().of(yup.string()).required(),
+  additional_id_token_claims: yup.array().of(yup.string().defined()).required(),
+  additional_access_token_claims: yup.array().of(yup.string().defined()).required(),
 }).required()
 
 export type TokenConfigFormData = yup.InferType<typeof tokenConfigSchema>

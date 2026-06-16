@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Cloud, Github, Facebook } from "lucide-react"
+import { ArrowUpDown, Cloud } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { SocialProviderActions } from "./SocialProviderActions"
 import { SystemBadge, StatusBadge } from "@/components/badges"
@@ -13,8 +13,8 @@ const getProviderBadge = (provider: ProviderOption) => {
     cognito: { label: "AWS Cognito", icon: Cloud },
     auth0: { label: "Auth0", icon: Cloud },
     google: { label: "Google", icon: Cloud },
-    facebook: { label: "Facebook", icon: Facebook },
-    github: { label: "GitHub", icon: Github },
+    facebook: { label: "Facebook", icon: Cloud },
+    github: { label: "GitHub", icon: Cloud },
     gitlab: { label: "GitLab", icon: Cloud },
     microsoft: { label: "Microsoft", icon: Cloud },
     apple: { label: "Apple", icon: Cloud },

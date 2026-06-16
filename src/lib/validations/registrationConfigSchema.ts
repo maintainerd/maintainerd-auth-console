@@ -18,8 +18,8 @@ export const registrationConfigSchema = yup.object({
     .number()
     .required()
     .min(1, 'Must be at least 1'),
-  allowed_email_domains: yup.array().of(yup.string()).required(),
-  blocked_email_domains: yup.array().of(yup.string()).required(),
+  allowed_email_domains: yup.array().of(yup.string().defined()).required(),
+  blocked_email_domains: yup.array().of(yup.string().defined()).required(),
 }).required()
 
 export type RegistrationConfigFormData = yup.InferType<typeof registrationConfigSchema>

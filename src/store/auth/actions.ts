@@ -3,6 +3,7 @@ import {
   login as authLogin,
   verifyMFALogin,
   register as authRegister,
+  registerInvite as authRegisterInvite,
   logout as authLogout,
   fetchAccount,
   validateAuthentication as validateAuth,
@@ -11,6 +12,8 @@ import {
  	type LoginRequest,
  	type MFALoginVerifyRequest,
  	type RegisterRequest,
+  type RegisterInviteRequest,
+  type RegisterInviteQueryParams,
  	type ForgotPasswordRequest,
  	type ResetPasswordRequest,
  	type ResetPasswordQueryParams
@@ -81,6 +84,28 @@ export const registerAsync = createAsyncThunk(
   async (data: RegisterAsyncRequest, thunkAPI) => {
     try {
       const response = await authRegister(data)
+      return { data: response.data }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed'
+      return thunkAPI.rejectWithValue({ message: errorMessage })
+    }
+  }
+)
+
+export interface RegisterInviteAsyncRequest {
+  username: string
+  password: string
+  queryParams: RegisterInviteQueryParams
+}
+
+export const registerInviteAsync = createAsyncThunk(
+  'auth/registerInvite',
+  async (data: RegisterInviteAsyncRequest, thunkAPI) => {
+    try {
+      const response = await authRegisterInvite(
+        { username: data.username, password: data.password },
+        data.queryParams
+      )
       return { data: response.data }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed'

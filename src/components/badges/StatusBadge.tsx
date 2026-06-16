@@ -1,83 +1,42 @@
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, AlertTriangle, Wrench, Archive, FileEdit, Timer } from "lucide-react"
-import type { Status } from "@/types/status"
+import { cn } from "@/lib/utils"
 
-interface StatusBadgeProps {
-  status: Status
-  className?: string
+// Canonical status pill for the whole app. Common status keywords → dot colour;
+// any entity's status string maps through here and unknown values fall back to a
+// neutral slate dot. Colour is carried by a small dot (not a pastel block), which
+// reads enterprise rather than "vibecoded". This is the single StatusBadge — the
+// pastel/icon variant was retired so every listing, header, and tab matches.
+const STATUS_DOT: Record<string, string> = {
+  active: "bg-emerald-500",
+  enabled: "bg-emerald-500",
+  verified: "bg-emerald-500",
+  accepted: "bg-emerald-500",
+  pending: "bg-amber-500",
+  draft: "bg-amber-500",
+  configuring: "bg-amber-500",
+  maintenance: "bg-amber-500",
+  inactive: "bg-slate-400",
+  disabled: "bg-slate-400",
+  archived: "bg-slate-400",
+  expired: "bg-slate-400",
+  suspended: "bg-red-500",
+  blocked: "bg-red-500",
+  revoked: "bg-red-500",
+  quarantined: "bg-red-500",
+  deprecated: "bg-red-500",
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const statusConfig: Record<Status, {
-    label: string
-    variant: "default" | "secondary" | "outline"
-    icon: typeof CheckCircle
-    className: string
-  }> = {
-    active: {
-      label: "Active",
-      variant: "default",
-      icon: CheckCircle,
-      className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-    },
-    inactive: {
-      label: "Inactive",
-      variant: "secondary",
-      icon: AlertTriangle,
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
-    },
-    pending: {
-      label: "Pending",
-      variant: "outline",
-      icon: Clock,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
-    suspended: {
-      label: "Suspended",
-      variant: "default",
-      icon: AlertTriangle,
-      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-    },
-    maintenance: {
-      label: "Maintenance",
-      variant: "default",
-      icon: Wrench,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
-    deprecated: {
-      label: "Deprecated",
-      variant: "default",
-      icon: Archive,
-      className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-    },
-    draft: {
-      label: "Draft",
-      variant: "outline",
-      icon: FileEdit,
-      className: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-    },
-    configuring: {
-      label: "Configuring",
-      variant: "default",
-      icon: Wrench,
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-    },
-    expired: {
-      label: "Expired",
-      variant: "default",
-      icon: Timer,
-      className: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200"
-    }
-  }
-
-  const config = statusConfig[status]
-  const Icon = config.icon
-
+/** A restrained, entity-agnostic status pill: a small coloured dot + label. */
+export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  const dot = STATUS_DOT[status?.toLowerCase()] ?? "bg-slate-400"
   return (
-    <Badge variant={config.variant} className={`${config.className} ${className || ""}`}>
-      <Icon className="h-3 w-3 mr-1" />
-      {config.label}
-    </Badge>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-0.5 text-xs font-medium capitalize",
+        className,
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", dot)} />
+      {status}
+    </span>
   )
 }
-

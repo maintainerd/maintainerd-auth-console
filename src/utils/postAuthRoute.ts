@@ -20,11 +20,12 @@ import { getTenantIdentifierFromPath } from '@/utils/tenant'
 export const VERIFY_EMAIL_ROUTE = '/email-verification'
 export const REGISTER_PROFILE_ROUTE = '/register/profile'
 export const REGISTER_ROUTE = '/register'
+export const REGISTER_INVITE_ROUTE = '/register/invite'
 export const LOGIN_ROUTE = '/login'
 export const NO_ACCESS_ROUTE = '/no-access'
 
 // Public auth pages an authenticated, fully-registered user should never sit on.
-const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password']
+const AUTH_PAGES = ['/login', '/register', '/register/invite', '/forgot-password', '/reset-password']
 
 export function dashboardRoute(tenant?: TenantEntity | null): string {
   const tenantIdentifier = tenant?.identifier || 'default'

@@ -112,6 +112,21 @@ export type RegisterResponse = ApiResponse<{
   created_at: string
 }>
 
+// RegisterInviteRequest — body for POST /register/invite
+export interface RegisterInviteRequest {
+  username: string
+  password: string
+}
+
+// RegisterInviteQueryParams — signed query params included in the invite URL
+export interface RegisterInviteQueryParams {
+  invite_token: string
+  expires: string
+  sig: string
+  auth_flow?: string
+  email?: string
+}
+
 export type ProfileResponse = ApiResponse<ProfileEntity>
 
 export interface ForgotPasswordRequest {

@@ -7,6 +7,7 @@ import {
   loginAsync,
   completeMFALoginAsync,
   registerAsync,
+  registerInviteAsync,
   logoutAsync,
   validateAuthAsync,
   initializeAuthAsync,
@@ -78,6 +79,29 @@ export function useAuth() {
       phone,
       clientId: clientId || undefined,
       providerId: providerId || undefined
+    })).unwrap()
+
+    return { data: result.data }
+  }, [dispatch, searchParams])
+
+  const registerInvite = useCallback(async (
+    username: string,
+    password: string,
+  ) => {
+    const inviteToken = searchParams.get('invite_token') || ''
+    const expires = searchParams.get('expires') || ''
+    const sig = searchParams.get('sig') || ''
+    const authFlow = searchParams.get('auth_flow') || undefined
+
+    const result = await dispatch(registerInviteAsync({
+      username,
+      password,
+      queryParams: {
+        invite_token: inviteToken,
+        expires,
+        sig,
+        auth_flow: authFlow,
+      }
     })).unwrap()
 
     return { data: result.data }
@@ -166,6 +190,7 @@ export function useAuth() {
     login,
     completeMFALogin,
     register,
+    registerInvite,
     logout,
     checkAuth,
     initializeAuth,

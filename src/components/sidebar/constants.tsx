@@ -152,11 +152,9 @@ export const data = {
           title: "Organization",
           route: "/organization",
           icon: Building2,
-          items: [
-            { title: "Tenants", route: "/tenants" },
-            { title: "Tenant Members", route: "/tenant/members" },
-            { title: "Tenant Settings", route: "/tenant/settings" },
-          ],
+            items: [
+              { title: "Tenants", route: "/tenants" },
+            ],
         },
         {
           title: "Settings",

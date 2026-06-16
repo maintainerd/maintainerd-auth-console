@@ -7,7 +7,7 @@ import { post, get } from '../client'
 import { API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from '../config'
 import type { ApiResponse } from '../types'
 import type { WebAuthnAssertionOptions } from '@/lib/webauthn'
-import type { ProfileEntity, AccountEntity, LoginRequest, LoginResponse, MFALoginVerifyRequest, LogoutResponse, RegisterRequest, RegisterResponse, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
+import type { ProfileEntity, AccountEntity, LoginRequest, LoginResponse, MFALoginVerifyRequest, LogoutResponse, RegisterRequest, RegisterResponse, RegisterInviteRequest, RegisterInviteQueryParams, CreateProfileRequest, CreateProfileResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordQueryParams, ProfileResponse } from './types'
 
 type AccountResponse = ApiResponse<AccountEntity>
 
@@ -101,6 +101,38 @@ export async function register(data: RegisterServiceRequest): Promise<RegisterRe
     }
   )
   return response
+}
+
+/**
+ * Register a new user via invite token (signed URL flow).
+ * The query params carry the signed invite token, expiration, signature,
+ * auth flow identifier, and invited email.
+ */
+export async function registerInvite(
+  data: RegisterInviteRequest,
+  queryParams: RegisterInviteQueryParams
+): Promise<RegisterResponse> {
+  const params = new URLSearchParams({
+    invite_token: queryParams.invite_token,
+    expires: queryParams.expires,
+    sig: queryParams.sig,
+  })
+  if (queryParams.auth_flow) {
+    params.append('auth_flow', queryParams.auth_flow)
+  }
+
+  const url = `${API_ENDPOINTS.AUTH.REGISTER_INVITE}?${params.toString()}`
+
+  return post<RegisterResponse>(
+    url,
+    {
+      username: data.username,
+      password: data.password,
+    },
+    {
+      headers: { ...TOKEN_DELIVERY_HEADER }
+    }
+  )
 }
 
 /**
@@ -226,6 +258,7 @@ export const authService = {
   sendMFALoginSMS,
   beginMFALoginWebAuthn,
   register,
+  registerInvite,
   logout,
   fetchProfile,
   fetchAccount,

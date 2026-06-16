@@ -20,7 +20,6 @@ import type {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   UpdateWebhookStatusRequest,
-  WebhookSubscription,
   SetWebhookSubscriptionRequest,
 } from '@/services/api/webhooks/types'
 

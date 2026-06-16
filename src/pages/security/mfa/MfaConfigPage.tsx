@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/useToast'
 import * as yup from 'yup'
 import type { MfaConfigPayload } from '@/services/api/mfa-config/types'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 const ALL_METHODS = [
   { value: 'totp', label: 'Authenticator App (TOTP)' },
@@ -34,7 +33,7 @@ const DIGITS_OPTIONS = [
 
 const mfaConfigSchema = yup.object({
   mode: yup.string().oneOf(['disabled', 'optional', 'enforced']).required(),
-  allowed_methods: yup.array().of(yup.string()).min(1, 'Select at least one method').required(),
+  allowed_methods: yup.array().of(yup.string().defined()).min(1, 'Select at least one method').required(),
   preferred_method: yup.string().required(),
   totp_issuer: yup.string().required(),
   totp_digits: yup.number().oneOf([6, 8]).required(),
@@ -81,7 +80,7 @@ export default function MfaConfigPage() {
   useEffect(() => {
     if (savedConfig) {
       reset({
-        mode: savedConfig.mode ?? 'optional',
+        mode: (savedConfig.mode ?? 'optional') as MfaConfigFormData['mode'],
         allowed_methods: savedConfig.allowed_methods ?? ['totp', 'webauthn', 'recovery_code'],
         preferred_method: savedConfig.preferred_method ?? 'webauthn',
         totp_issuer: savedConfig.totp_issuer ?? 'Lula',
@@ -272,14 +271,12 @@ export default function MfaConfigPage() {
                 description="Permit SMS-based MFA enrollment"
                 checked={formValues.allow_sms}
                 onCheckedChange={(v) => handleUpdate({ allow_sms: v })}
-                switchClassName={SWITCH_CLASS}
               />
               <FormSwitchField
                 label="Step-Up for Sensitive Actions"
                 description="Require fresh MFA for email changes and admin operations"
                 checked={formValues.require_mfa_for_sensitive_actions}
                 onCheckedChange={(v) => handleUpdate({ require_mfa_for_sensitive_actions: v })}
-                switchClassName={SWITCH_CLASS}
               />
             </div>
             <div className="mt-4">

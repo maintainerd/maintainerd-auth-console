@@ -10,7 +10,6 @@ import { useRegistrationConfig, useUpdateRegistrationConfig } from '@/hooks/useR
 import { useToast } from '@/hooks/useToast'
 import { registrationConfigSchema, type RegistrationConfigFormData } from '@/lib/validations'
 
-const SWITCH_CLASS = 'data-[state=checked]:bg-blue-600'
 
 export default function RegistrationConfigPage() {
   const { showSuccess, showError } = useToast()
@@ -109,14 +108,12 @@ export default function RegistrationConfigPage() {
                   description="Allow users to register themselves"
                   checked={formValues.self_registration_enabled}
                   onCheckedChange={(v) => handleUpdate({ self_registration_enabled: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
                 <FormSwitchField
                   label="CAPTCHA on Signup"
                   description="Require reCAPTCHA verification during registration"
                   checked={formValues.captcha_on_signup}
                   onCheckedChange={(v) => handleUpdate({ captcha_on_signup: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
@@ -173,21 +170,18 @@ export default function RegistrationConfigPage() {
                   description="Users must verify email before full access"
                   checked={formValues.require_email_verification}
                   onCheckedChange={(v) => handleUpdate({ require_email_verification: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
                 <FormSwitchField
                   label="Require Phone Verification"
                   description="Users must verify phone before full access"
                   checked={formValues.require_phone_verification}
                   onCheckedChange={(v) => handleUpdate({ require_phone_verification: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
                 <FormSwitchField
                   label="Auto-Confirm Accounts"
                   description="Skip verification and immediately activate new accounts"
                   checked={formValues.auto_confirm_enabled}
                   onCheckedChange={(v) => handleUpdate({ auto_confirm_enabled: v })}
-                  switchClassName={SWITCH_CLASS}
                 />
               </div>
               <FormInputField

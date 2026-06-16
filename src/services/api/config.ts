@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
     LOGIN_MFA_SEND_SMS: '/login/mfa/send-sms',
     LOGIN_MFA_WEBAUTHN_BEGIN: '/login/mfa/webauthn/begin',
     REGISTER: '/register',
+    REGISTER_INVITE: '/register/invite',
     LOGOUT: '/logout',
     // POST /api/v1/refresh-token — rotates the session using the httpOnly
     // refresh-token cookie (scoped to this path) and Set-Cookies fresh tokens
