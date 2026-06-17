@@ -29,8 +29,8 @@ export function useAuth() {
   const { showError } = useToast()
   const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await dispatch(loginAsync({ username: email, password })).unwrap()
+  const login = useCallback(async (email: string, password: string, tenantId?: string) => {
+    const result = await dispatch(loginAsync({ username: email, password, tenantId })).unwrap()
 
     // MFA enrolled: a second factor is required before the session is issued.
     if (result.mfaRequired) {
@@ -52,12 +52,14 @@ export function useAuth() {
     challengeToken: string,
     method: string,
     proof: { code?: string; assertion?: unknown },
+    tenantId?: string,
   ) => {
     const result = await dispatch(completeMFALoginAsync({
       mfa_challenge_token: challengeToken,
       method,
       code: proof.code,
       assertion: proof.assertion,
+      tenantId,
     })).unwrap()
     return { account: result.data }
   }, [dispatch])

@@ -61,6 +61,7 @@ import LockoutConfigPage from './pages/security/lockout/LockoutConfigPage'
 import RegistrationConfigPage from './pages/security/registration/RegistrationConfigPage'
 import ThreatDetectionPage from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
+import { TenantSettingsPage } from './pages/tenant-settings/TenantSettingsPage'
 import TenantsPage from './pages/tenants'
 import TenantDetailsPage from './pages/tenants/details'
 import TenantAddOrUpdateForm from './pages/tenants/form'
@@ -100,6 +101,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/:tenantId/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/register/invite" element={<RegisterInvitePage />} />
         <Route path="/email-verification" element={<VerifyEmailPage />} />
@@ -124,6 +126,7 @@ function App() {
           <Route path="security/registration" element={<RegistrationConfigPage />} />
           <Route path="security/threat" element={<ThreatDetectionPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
+          <Route path="settings" element={<TenantSettingsPage />} />
           <Route path="tenants" element={<TenantsPage />} />
           <Route path="tenants/create" element={<TenantAddOrUpdateForm />} />
           <Route path="tenants/:id" element={<TenantDetailsPage />} />

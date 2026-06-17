@@ -65,8 +65,8 @@ export function useMemberQuery() {
   const { data, isLoading, error } = useTenantMembers(tenantId, queryParams)
 
   // Use API data directly
-  const members = data?.data ?? []
-  const rowCount = members.length // API doesn't return total count, using current page count
+  const members = data?.data?.rows ?? []
+  const rowCount = members.length
 
   // Sync state to URL params
   React.useEffect(() => {

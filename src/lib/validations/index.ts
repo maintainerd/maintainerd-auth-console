@@ -162,3 +162,9 @@ export {
   webhookSchema,
   type WebhookFormData
 } from './webhookSchema'
+
+// Tenant settings schemas
+export { rateLimitConfigSchema, type RateLimitConfigFormData } from './rateLimitConfigSchema'
+export { auditConfigSchema, type AuditConfigFormData } from './auditConfigSchema'
+export { maintenanceConfigSchema, type MaintenanceConfigFormData } from './maintenanceConfigSchema'
+export { featureFlagsSchema, type FeatureFlagsFormData } from './featureFlagsSchema'

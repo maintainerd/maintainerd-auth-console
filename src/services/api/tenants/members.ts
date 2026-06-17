@@ -35,7 +35,13 @@ export interface TenantMembersListParams {
 
 export interface TenantMembersListResponse {
   success: boolean
-  data: TenantMember[]
+  data: {
+    rows: TenantMember[]
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
   message?: string
 }
 

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Check, ChevronsUpDown, Plus, Shield } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -19,9 +19,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { CreateTenantDialog } from "@/components/dialog"
+import { CreateTenantDialog, ConfirmationDialog } from "@/components/dialog"
 import { useTenant } from "@/hooks/useTenant"
+import { useAuth } from "@/hooks/useAuth"
 import { useTenantsList } from "@/hooks/useTenants"
+import { useToast } from "@/hooks/useToast"
 import type { TenantEntity } from "@/services/api/tenants/types"
 
 /** Small square initial tile, used as a lightweight tenant avatar. */
@@ -41,9 +43,11 @@ function TenantTile({ name, className }: { name?: string; className?: string }) 
 
 export function TenantSwitcher({ className }: { className?: string }) {
   const { tenantId } = useParams<{ tenantId: string }>()
-  const navigate = useNavigate()
+  const { logout } = useAuth()
+  const { showSuccess, showError } = useToast()
   const [open, setOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [switchTarget, setSwitchTarget] = useState<TenantEntity | null>(null)
 
   // Current tenant comes from the store (resolved from the URL on app init), so
   // the label is always correct — even if the active tenant is beyond the list cap.
@@ -60,8 +64,21 @@ export function TenantSwitcher({ className }: { className?: string }) {
   const handleSelect = (tenant: TenantEntity) => {
     setOpen(false)
     if (tenant.identifier !== tenantId) {
-      navigate(`/${tenant.identifier}/dashboard`)
+      setSwitchTarget(tenant)
     }
+  }
+
+  const handleConfirmSwitch = async () => {
+    if (!switchTarget) return
+    try {
+      await logout()
+      showSuccess("Logged out successfully")
+    } catch {
+      showError("Logout failed")
+    }
+    // Full page reload to clear all client-side state (cookies, Redux, React Query).
+    // A React Router navigate would keep stale session cookies in memory.
+    window.location.href = `/${switchTarget.identifier}/login`
   }
 
   const handleCreate = () => {
@@ -155,6 +172,7 @@ export function TenantSwitcher({ className }: { className?: string }) {
               )}
             </CommandList>
 
+            {active?.is_system && (
             <div className="border-t p-1">
               <button
                 type="button"
@@ -165,11 +183,28 @@ export function TenantSwitcher({ className }: { className?: string }) {
                 Create New Tenant
               </button>
             </div>
+            )}
           </Command>
         </PopoverContent>
       </Popover>
 
       <CreateTenantDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      <ConfirmationDialog
+        open={switchTarget !== null}
+        onOpenChange={(open) => { if (!open) setSwitchTarget(null) }}
+        onConfirm={handleConfirmSwitch}
+        title="Switch tenant"
+        description={
+          switchTarget
+            ? `You will be logged out and redirected to the login page for "${switchTarget.name}".`
+            : "You will be logged out and redirected to the tenant login page."
+        }
+        confirmText="Switch & Logout"
+        variant="destructive"
+        showWarning
+        warningMessage="Switching tenants will log you out of your current session."
+      />
     </div>
   )
 }

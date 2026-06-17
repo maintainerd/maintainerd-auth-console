@@ -28,11 +28,12 @@ import { useAppSelector } from '@/store/hooks'
 interface AddMemberDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  tenantId?: string
 }
 
-export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
+export function AddMemberDialog({ open, onOpenChange, tenantId: propTenantId }: AddMemberDialogProps) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
-  const tenantId = currentTenant?.tenant_id || ''
+  const tenantId = propTenantId || currentTenant?.tenant_id || ''
   const { showSuccess, showError } = useToast()
   const [selectedUserId, setSelectedUserId] = useState<string>("")
   const [role, setRole] = useState<'owner' | 'member'>('member')
@@ -85,7 +86,7 @@ export function AddMemberDialog({ open, onOpenChange }: AddMemberDialogProps) {
   const isLoading = addMemberMutation.isPending
 
   const users = usersData?.rows ?? []
-  const existingMemberUserIds = membersData?.data?.map(m => m.user.user_id) ?? []
+  const existingMemberUserIds = membersData?.data?.rows?.map(m => m.user.user_id) ?? []
 
   // Filter out users who are already members
   const availableUsers = users.filter(

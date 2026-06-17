@@ -25,11 +25,12 @@ interface UpdateMemberRoleDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   member: TenantMember
+  tenantId?: string
 }
 
-export function UpdateMemberRoleDialog({ open, onOpenChange, member }: UpdateMemberRoleDialogProps) {
+export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: propTenantId }: UpdateMemberRoleDialogProps) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
-  const tenantId = currentTenant?.tenant_id || ''
+  const tenantId = propTenantId || currentTenant?.tenant_id || ''
   const { showSuccess, showError } = useToast()
   const [role, setRole] = useState<'owner' | 'member'>(member.role)
   

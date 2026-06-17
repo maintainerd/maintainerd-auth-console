@@ -37,11 +37,11 @@ export interface LoginThunkResult {
   mfaAllowedMethods?: string[]
 }
 
-export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest>(
+export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest & { tenantId?: string }>(
   'auth/login',
-  async (data: LoginRequest, thunkAPI) => {
+  async (data: LoginRequest & { tenantId?: string }, thunkAPI) => {
 		try {
-			const response = await authLogin(data)
+			const response = await authLogin(data, data.tenantId)
 			// MFA enrolled: password step passed but a second factor is required.
 			// Surface the challenge to the UI instead of fetching a (nonexistent) session.
 			if (response.data?.mfa_required) {
@@ -65,11 +65,11 @@ export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest>(
 // completeMFALoginAsync finishes the login MFA second step. The verify call
 // Set-Cookies an acr=2 session, after which we load the profile and mark the
 // user authenticated — mirroring a normal login.
-export const completeMFALoginAsync = createAsyncThunk<LoginThunkResult, MFALoginVerifyRequest>(
+export const completeMFALoginAsync = createAsyncThunk<LoginThunkResult, MFALoginVerifyRequest & { tenantId?: string }>(
   'auth/completeMFALogin',
-  async (data: MFALoginVerifyRequest, thunkAPI) => {
+  async (data: MFALoginVerifyRequest & { tenantId?: string }, thunkAPI) => {
     try {
-      const response = await verifyMFALogin(data)
+      const response = await verifyMFALogin(data, data.tenantId)
       const account = await fetchAccount()
       return { data: account, message: response.message }
     } catch (error: unknown) {

@@ -15,6 +15,7 @@ import { useMutation } from "@tanstack/react-query"
 interface LoginMFAStepProps {
   challengeToken: string
   allowedMethods: string[]
+  tenantId?: string
   /** Called after the MFA step succeeds and the session is established. */
   onVerified: (result: { account: AccountEntity | null }) => void
   /** Return to the username/password form. */
@@ -26,7 +27,7 @@ interface LoginMFAStepProps {
  * a factor (TOTP/SMS/backup code/passkey); on success the backend issues an
  * acr=2 session so every step-up-gated action works for the whole session.
  */
-export function LoginMFAStep({ challengeToken, allowedMethods, onVerified, onCancel }: LoginMFAStepProps) {
+export function LoginMFAStep({ challengeToken, allowedMethods, tenantId, onVerified, onCancel }: LoginMFAStepProps) {
   const { showError } = useToast()
   const { completeMFALogin } = useAuth()
 
@@ -51,9 +52,9 @@ export function LoginMFAStep({ challengeToken, allowedMethods, onVerified, onCan
       if (METHOD_META[method]?.webauthn) {
         const options = await beginMFALoginWebAuthn(challengeToken)
         const assertion = await getAssertion(options)
-        return completeMFALogin(challengeToken, method, { assertion })
+        return completeMFALogin(challengeToken, method, { assertion }, tenantId)
       }
-      return completeMFALogin(challengeToken, method, { code: extractMFACode(method, code) })
+      return completeMFALogin(challengeToken, method, { code: extractMFACode(method, code) }, tenantId)
     },
     onSuccess: (result) => onVerified(result),
     onError: (e) => showError(e),

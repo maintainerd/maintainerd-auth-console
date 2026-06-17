@@ -18,9 +18,13 @@ import {
   type PaginationState,
 } from "@tanstack/react-table"
 
-export function MembersSettings() {
+interface MembersSettingsProps {
+  tenantId?: string
+}
+
+export function MembersSettings({ tenantId: propTenantId }: MembersSettingsProps = {}) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
-  const tenantId = currentTenant?.tenant_id || ''
+  const tenantId = propTenantId || currentTenant?.tenant_id || ''
   
   const [searchQuery, setSearchQuery] = useState("")
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
@@ -58,7 +62,7 @@ export function MembersSettings() {
 
   // Create a simple table instance for pagination
   const columns = useMemo(() => [], [])
-  const tableData = data?.data || []
+  const tableData = data?.data?.rows || []
 
   const table = useReactTable({
     data: tableData,
@@ -74,13 +78,14 @@ export function MembersSettings() {
 
   // Filter data based on search query (client-side filtering)
   const filteredData = useMemo(() => {
-    if (!searchQuery || !data?.data) return data?.data || []
-    return data.data.filter((member: TenantMember) =>
+    const rows = data?.data?.rows
+    if (!searchQuery || !rows) return rows || []
+    return rows.filter((member: TenantMember) =>
       member.user.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.user.username.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [data?.data, searchQuery])
+  }, [data?.data?.rows, searchQuery])
 
   // Handle delete member
   const handleDeleteMember = async () => {
@@ -170,9 +175,9 @@ export function MembersSettings() {
           </div>
 
           {/* Pagination controls */}
-          {data && data.data && data.data.length > 0 && !searchQuery && (
+          {data && data.data && data.data.rows && data.data.rows.length > 0 && !searchQuery && (
             <div className="pt-4 border-t">
-              <DataTablePagination table={table} rowCount={data.data.length} />
+              <DataTablePagination table={table} rowCount={data.data.rows.length} />
             </div>
           )}
         </div>
@@ -182,6 +187,7 @@ export function MembersSettings() {
       <AddMemberDialog
         open={addMemberDialogOpen}
         onOpenChange={setAddMemberDialogOpen}
+        tenantId={tenantId}
       />
 
       {/* Update Role Dialog */}
@@ -194,6 +200,7 @@ export function MembersSettings() {
             }
           }}
           member={updateRoleDialog.member}
+          tenantId={tenantId}
         />
       )}
 

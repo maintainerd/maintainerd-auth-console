@@ -15,11 +15,16 @@ type AccountResponse = ApiResponse<AccountEntity>
  * Login user with credentials
  * @param username - User's email/username
  * @param password - User's password
+ * @param tenantId - Optional tenant identifier for tenant-scoped login
  * @returns Promise<LoginResponse>
  */
-export async function login(data: LoginRequest): Promise<LoginResponse> {
+export async function login(data: LoginRequest, tenantId?: string): Promise<LoginResponse> {
+	let endpoint = API_ENDPOINTS.AUTH.LOGIN
+	if (tenantId) {
+		endpoint += `?tenant_id=${encodeURIComponent(tenantId)}`
+	}
 	const response = await post<LoginResponse>(
-		API_ENDPOINTS.AUTH.LOGIN,
+		endpoint,
 		data,
 		{
 			headers: { ...TOKEN_DELIVERY_HEADER }
@@ -33,8 +38,12 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
  * acr=2 session (with X-Token-Delivery: cookie), so no token handling is needed
  * client-side — callers just refresh the auth state afterwards.
  */
-export async function verifyMFALogin(data: MFALoginVerifyRequest): Promise<LoginResponse> {
-  return post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY, data, {
+export async function verifyMFALogin(data: MFALoginVerifyRequest, tenantId?: string): Promise<LoginResponse> {
+  let endpoint = API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY
+  if (tenantId) {
+    endpoint += `?tenant_id=${encodeURIComponent(tenantId)}`
+  }
+  return post<LoginResponse>(endpoint, data, {
     headers: { ...TOKEN_DELIVERY_HEADER },
   })
 }

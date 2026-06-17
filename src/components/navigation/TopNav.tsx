@@ -36,11 +36,10 @@ export function TopNav() {
     try {
       await logout()
       showSuccess("Logged out successfully")
-      navigate("/login")
+      navigate(tenantId ? `/${tenantId}/login` : "/login")
     } catch (error) {
       showError(error, "Logout failed")
-      // Even if logout fails, navigate to login
-      navigate("/login")
+      navigate(tenantId ? `/${tenantId}/login` : "/login")
     }
   }
   return (

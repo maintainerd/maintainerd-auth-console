@@ -6,8 +6,7 @@ import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { FormInputField, FormPasswordField, FormSubmitButton } from "@/components/form"
 import { buildLoginSchema, type LoginFormData } from "@/lib/validations"
 import { useToast } from "@/hooks/useToast"
-import { Link } from "react-router-dom"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { LoginMFAStep } from "./LoginMFAStep"
@@ -16,6 +15,7 @@ import type { AccountEntity } from '@/services/api/auth/types'
 
 const LoginForm = () => {
   const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId?: string }>()
   const { login } = useAuth()
   const { getCurrentTenant } = useTenant()
   const { showSuccess } = useToast()
@@ -53,7 +53,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
   const onSubmit = async (data: LoginFormData) => {
     setLoginError(null)
     try {
-      const response = await login(data.email, data.password)
+      const response = await login(data.email, data.password, tenantId)
       // MFA enrolled — show the second step; the session is issued there.
       if (response.mfaRequired) {
         setMfaChallenge({ token: response.challengeToken ?? '', methods: response.allowedMethods ?? [] })
@@ -85,6 +85,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
         <LoginMFAStep
           challengeToken={mfaChallenge.token}
           allowedMethods={mfaChallenge.methods}
+          tenantId={tenantId}
           onVerified={(result) => finishLogin(result.account)}
           onCancel={() => setMfaChallenge(null)}
         />

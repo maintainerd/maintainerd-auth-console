@@ -27,6 +27,12 @@ export const NO_ACCESS_ROUTE = '/no-access'
 // Public auth pages an authenticated, fully-registered user should never sit on.
 const AUTH_PAGES = ['/login', '/register', '/register/invite', '/forgot-password', '/reset-password']
 
+function isAuthPage(pathname: string): boolean {
+  if (AUTH_PAGES.includes(pathname)) return true
+  // /:tenantId/login is also an auth page
+  return /^\/[^/]+\/login$/.test(pathname)
+}
+
 export function dashboardRoute(tenant?: TenantEntity | null): string {
   const tenantIdentifier = tenant?.identifier || 'default'
   return `/${tenantIdentifier}/dashboard`
@@ -99,7 +105,7 @@ export function resolveGuardRedirect(ctx: GuardContext): string | null {
   }
 
   // Public auth pages: only bounce authenticated users to their home.
-  if (AUTH_PAGES.includes(pathname)) {
+  if (isAuthPage(pathname)) {
     return isAuthenticated ? home : null
   }
 

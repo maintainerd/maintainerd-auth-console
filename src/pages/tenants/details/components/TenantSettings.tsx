@@ -1,18 +1,51 @@
+import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
-import { Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Settings, Gauge, FileText, Wrench, Flag } from "lucide-react"
+
+const ITEMS = [
+  { title: "Rate Limits", description: "API request throttling", icon: Gauge, tab: "rate-limit" },
+  { title: "Audit", description: "Logging and retention", icon: FileText, tab: "audit" },
+  { title: "Maintenance", description: "Maintenance mode", icon: Wrench, tab: "maintenance" },
+  { title: "Feature Flags", description: "Runtime toggles", icon: Flag, tab: "feature-flags" },
+]
 
 export function TenantSettings() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
+
   return (
     <Card className="shadow-xs">
-      <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Settings className="size-6" />
-        </div>
-        <div className="space-y-1">
+      <CardContent className="py-8">
+        <div className="flex flex-col items-center gap-4 mb-8 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <Settings className="size-6" />
+          </div>
           <h3 className="text-lg font-semibold">Tenant Settings</h3>
           <p className="text-sm text-muted-foreground max-w-md">
-            Configure rate limits, audit logging, maintenance windows, and feature flags for this tenant.
+            Configure operational controls — rate limiting, audit logging, maintenance mode, and feature flags.
           </p>
+          <Button variant="outline" onClick={() => navigate(`/${tenantId}/settings`)}>
+            Open Settings
+          </Button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {ITEMS.map((item) => (
+            <button
+              key={item.tab}
+              onClick={() => navigate(`/${tenantId}/settings?tab=${item.tab}`)}
+              className="flex items-start gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-accent"
+            >
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <item.icon className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{item.title}</p>
+                <p className="text-xs text-muted-foreground">{item.description}</p>
+              </div>
+            </button>
+          ))}
         </div>
       </CardContent>
     </Card>
