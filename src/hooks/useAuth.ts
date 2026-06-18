@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useToast } from '@/hooks/useToast'
 import type { ProfileEntity } from '@/services/api/auth/types'
@@ -25,6 +26,7 @@ import { clearTenant } from '@/store/tenant/reducers'
 
 export function useAuth() {
   const dispatch = useAppDispatch()
+  const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
   const { showError } = useToast()
   const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
@@ -113,13 +115,14 @@ export function useAuth() {
     try {
       await dispatch(logoutAsync()).unwrap()
       dispatch(clearTenant())
+      queryClient.clear()
     } catch (error) {
       showError('Logout failed')
-      // Even if API fails, clear Redux state
       dispatch(clearTenant())
+      queryClient.clear()
       throw error
     }
-  }, [dispatch, showError])
+  }, [dispatch, queryClient, showError])
 
   const checkAuth = useCallback(async () => {
     try {
@@ -133,11 +136,12 @@ export function useAuth() {
 
   const initializeAuth = useCallback(async () => {
     try {
+      queryClient.clear()
       await dispatch(initializeAuthAsync()).unwrap()
     } catch {
-      // Silent failure for auth initialization - don't show error toast
+      // Silent failure for auth initialization
     }
-  }, [dispatch])
+  }, [dispatch, queryClient])
 
   const clearAuthError = useCallback(() => {
     dispatch(clearError())

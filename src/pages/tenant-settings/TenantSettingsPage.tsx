@@ -1,11 +1,10 @@
-import { Gauge, FileText, Wrench, Flag } from "lucide-react"
+import { Gauge, FileText, Wrench } from "lucide-react"
 import { useParams, useSearchParams } from "react-router-dom"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   AuditSettingsPanel,
-  FeatureFlagsSettingsPanel,
   MaintenanceSettingsPanel,
   RateLimitSettingsPanel,
 } from "./components/SettingsPanels"
@@ -25,11 +24,6 @@ const SETTINGS_TABS = [
     value: "maintenance",
     label: "Maintenance",
     icon: Wrench,
-  },
-  {
-    value: "feature-flags",
-    label: "Feature Flags",
-    icon: Flag,
   },
 ] as const
 
@@ -79,9 +73,6 @@ export function TenantSettingsPage() {
           </TabsContent>
           <TabsContent value="maintenance">
             <MaintenanceSettingsPanel />
-          </TabsContent>
-          <TabsContent value="feature-flags">
-            <FeatureFlagsSettingsPanel />
           </TabsContent>
         </Tabs>
       </div>

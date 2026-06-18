@@ -92,7 +92,6 @@ export interface UpdateTenantRequest {
   display_name: string
   description: string
   status: TenantStatus
-  is_public: boolean
 }
 
 /**

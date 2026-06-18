@@ -80,7 +80,6 @@ import EmailTemplateForm from './pages/branding/email-templates/form'
 import SmsTemplatesPage from './pages/branding/sms-templates'
 import SmsTemplateDetailsPage from './pages/branding/sms-templates/details'
 import SmsTemplateForm from './pages/branding/sms-templates/form'
-import GeneralSettingsPage from './pages/settings'
 import EmailConfigPage from './pages/messaging/email/EmailConfigPage'
 import SMSConfigPage from './pages/messaging/sms/SMSConfigPage'
 import MFAPage, { MFAIndex } from './pages/account/MFAPage'
@@ -191,7 +190,6 @@ function App() {
           <Route path="branding/sms-templates/create" element={<SmsTemplateForm />} />
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
-          <Route path="settings" element={<GeneralSettingsPage />} />
           <Route path="messaging/email" element={<EmailConfigPage />} />
           <Route path="messaging/sms" element={<SMSConfigPage />} />
           <Route path="account/profile" element={<ProfilePage />} />

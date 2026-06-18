@@ -6,7 +6,6 @@ export interface RegistrationConfig {
   blocked_email_domains: string[]
   auto_confirm_enabled: boolean
   verification_token_ttl_hours: number
-  default_role: string
   captcha_on_signup: boolean
   registration_rate_limit_per_ip_per_hour: number
 }
@@ -19,7 +18,6 @@ export interface RegistrationConfigPayload {
   blocked_email_domains?: string[]
   auto_confirm_enabled?: boolean
   verification_token_ttl_hours?: number
-  default_role?: string
   captcha_on_signup?: boolean
   registration_rate_limit_per_ip_per_hour?: number
 }

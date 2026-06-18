@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertTriangle, Save, Users, Settings as SettingsIcon } from "lucide-react"
-import { useTenantById, useUpdateTenant, useDeleteTenant } from "@/hooks/useTenants"
+import { useUpdateTenant, useDeleteTenant } from "@/hooks/useTenants"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailsContainer } from "@/components/container"
 import { useAppSelector } from "@/store/hooks"
@@ -16,11 +16,11 @@ import { GeneralSettings, MembersSettings, AdvancedSettings } from "./components
 
 export default function TenantSettingsPage() {
   const navigate = useNavigate()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const { showSuccess, showError } = useToast()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
-  
-  const { data: tenant, isLoading, isError } = useTenantById(currentTenant?.tenant_id)
+
   const updateTenantMutation = useUpdateTenant()
   const deleteTenantMutation = useDeleteTenant()
 
@@ -47,16 +47,16 @@ export default function TenantSettingsPage() {
 
   // Load saved settings when data is fetched
   useEffect(() => {
-    if (tenant) {
+    if (currentTenant) {
       const formData = {
-        name: tenant.name,
-        display_name: tenant.display_name,
-        description: tenant.description,
-        is_public: tenant.is_public,
+        name: currentTenant.name,
+        display_name: currentTenant.display_name,
+        description: currentTenant.description,
+        is_public: currentTenant.is_public,
       }
       reset(formData)
     }
-  }, [tenant, reset])
+  }, [currentTenant, reset])
 
   const handleUpdate = (updates: Partial<TenantSettingsFormData>) => {
     Object.entries(updates).forEach(([key, value]) => {
@@ -68,7 +68,7 @@ export default function TenantSettingsPage() {
   }
 
   const onSubmit = async (data: TenantSettingsFormData) => {
-    if (!currentTenant?.tenant_id) return
+    if (!tenantId) return
 
     try {
       const payload: UpdateTenantRequest = {
@@ -76,10 +76,9 @@ export default function TenantSettingsPage() {
         display_name: data.display_name,
         description: data.description,
         status: 'active',
-        is_public: data.is_public,
       }
       await updateTenantMutation.mutateAsync({
-        tenantId: currentTenant.tenant_id,
+        tenantId,
         data: payload
       })
       showSuccess('Tenant settings saved successfully')
@@ -89,44 +88,24 @@ export default function TenantSettingsPage() {
   }
 
   const handleDelete = async () => {
-    if (!currentTenant?.tenant_id) return
+    if (!tenantId) return
     
-    await deleteTenantMutation.mutateAsync(currentTenant.tenant_id)
+    await deleteTenantMutation.mutateAsync(tenantId)
     setDeleteDialogOpen(false)
     // Navigate to dashboard after deletion
-    navigate(`/${currentTenant.tenant_id}/dashboard`)
+    navigate(`/${tenantId}/dashboard`)
   }
 
-  // Loading state
-  if (isLoading) {
+  if (!tenantId || !currentTenant) {
     return (
       <DetailsContainer>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold">Loading...</h2>
+            <h2 className="text-2xl font-semibold">Tenant Not Found</h2>
             <p className="text-muted-foreground mt-2">
-              Fetching tenant settings
+              No tenant selected. Please select a tenant from the dashboard.
             </p>
           </div>
-        </div>
-      </DetailsContainer>
-    )
-  }
-
-  // Error state
-  if (isError || !tenant) {
-    return (
-      <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">Error Loading Settings</h2>
-            <p className="text-muted-foreground mt-2">
-              Failed to load tenant settings. Please try again.
-            </p>
-          </div>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
         </div>
       </DetailsContainer>
     )
@@ -163,7 +142,7 @@ export default function TenantSettingsPage() {
             <TabsContent value="general" className="space-y-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <GeneralSettings 
-                  tenant={tenant}
+                  tenant={currentTenant}
                   settings={formValues}
                   onUpdate={handleUpdate}
                   errors={errors}
@@ -190,7 +169,7 @@ export default function TenantSettingsPage() {
             {/* Advanced Tab */}
             <TabsContent value="advanced" className="space-y-6">
               <AdvancedSettings 
-                tenant={tenant}
+                tenant={currentTenant}
                 onDeleteClick={() => setDeleteDialogOpen(true)}
               />
             </TabsContent>
@@ -204,9 +183,9 @@ export default function TenantSettingsPage() {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDelete}
         title="Delete Tenant"
-        description={`This will permanently delete the tenant "${tenant.name}" and all associated data.`}
+        description={`This will permanently delete the tenant "${currentTenant.name}" and all associated data.`}
         confirmationText="This action cannot be undone. All data associated with this tenant will be permanently deleted."
-        itemName={tenant.name}
+        itemName={currentTenant.name}
         isDeleting={deleteTenantMutation.isPending}
       />
     </DetailsContainer>

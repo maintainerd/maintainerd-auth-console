@@ -6,17 +6,14 @@ import { Button } from "@/components/ui/button"
 import { FormInputField, FormSwitchField } from "@/components/form"
 import { SettingsCard } from "@/components/card"
 import { useAuditConfig, useUpdateAuditConfig } from "@/hooks/useAuditConfig"
-import { useFeatureFlags, useUpdateFeatureFlags } from "@/hooks/useFeatureFlags"
 import { useMaintenanceConfig, useUpdateMaintenanceConfig } from "@/hooks/useMaintenanceConfig"
 import { useRateLimitConfig, useUpdateRateLimitConfig } from "@/hooks/useRateLimitConfig"
 import { useToast } from "@/hooks/useToast"
 import {
   auditConfigSchema,
-  featureFlagsSchema,
   maintenanceConfigSchema,
   rateLimitConfigSchema,
   type AuditConfigFormData,
-  type FeatureFlagsFormData,
   type MaintenanceConfigFormData,
   type RateLimitConfigFormData,
 } from "@/lib/validations"
@@ -25,13 +22,7 @@ const LOG_LEVELS = [
   { value: "debug", label: "Debug" },
   { value: "info", label: "Info" },
   { value: "warn", label: "Warn" },
-  { value: "error", label: "Error" },
-]
-
-const EXPORT_FORMATS = [
-  { value: "json", label: "JSON" },
-  { value: "csv", label: "CSV" },
-  { value: "pdf", label: "PDF" },
+  { value: "critical", label: "Critical" },
 ]
 
 function LoadingSettings({ label }: { label: string }) {
@@ -148,7 +139,7 @@ export function AuditSettingsPanel() {
 
   const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<AuditConfigFormData>({
     resolver: yupResolver(auditConfigSchema),
-    defaultValues: { enabled: false, retention_days: 90, gdpr_mode: false, pii_masking: false, log_level: "info", export_format: "json" },
+    defaultValues: { enabled: false, retention_days: 90, pii_masking: false, log_level: "info" },
     mode: "onSubmit",
   })
 
@@ -159,10 +150,8 @@ export function AuditSettingsPanel() {
       reset({
         enabled: savedConfig.enabled ?? false,
         retention_days: savedConfig.retention_days ?? 90,
-        gdpr_mode: savedConfig.gdpr_mode ?? false,
         pii_masking: savedConfig.pii_masking ?? false,
         log_level: savedConfig.log_level ?? "info",
-        export_format: savedConfig.export_format ?? "json",
       })
     }
   }, [savedConfig, reset])
@@ -218,31 +207,11 @@ export function AuditSettingsPanel() {
         </div>
         <div className="mt-4 space-y-4">
           <FormSwitchField
-            label="GDPR Mode"
-            description="Restrict logging to comply with GDPR requirements."
-            checked={formValues.gdpr_mode}
-            onCheckedChange={(v) => handleUpdate({ gdpr_mode: v })}
-          />
-          <FormSwitchField
             label="PII Masking"
             description="Mask personally identifiable information in audit logs."
             checked={formValues.pii_masking}
             onCheckedChange={(v) => handleUpdate({ pii_masking: v })}
           />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Export" description="Configure audit log export format.">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Export Format</label>
-          <select
-            value={formValues.export_format}
-            onChange={(e) => handleUpdate({ export_format: e.target.value })}
-            className="flex h-11 w-full rounded-lg border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            {EXPORT_FORMATS.map((format) => <option key={format.value} value={format.value}>{format.label}</option>)}
-          </select>
-          {errors.export_format && <p className="text-sm text-destructive">{errors.export_format.message}</p>}
         </div>
       </SettingsCard>
 
@@ -334,122 +303,6 @@ export function MaintenanceSettingsPanel() {
             error={errors.scheduled_end?.message}
           />
         </div>
-      </SettingsCard>
-
-      <div className="flex justify-end">
-        <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-          <Save className="mr-2 h-4 w-4" />
-          {updateMutation.isPending || isSubmitting ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-    </form>
-  )
-}
-
-export function FeatureFlagsSettingsPanel() {
-  const { showSuccess, showError } = useToast()
-  const { data: savedConfig, isLoading } = useFeatureFlags()
-  const updateMutation = useUpdateFeatureFlags()
-
-  const { handleSubmit, reset, watch, setValue, formState: { isSubmitting } } = useForm<FeatureFlagsFormData>({
-    resolver: yupResolver(featureFlagsSchema),
-    defaultValues: { enable_passwordless_login: false, enable_email_sending: true, enable_sms_sending: false, enable_social_logins: false, enable_audit_export: false, enable_advanced_analytics: false, enable_experimental_features: false },
-    mode: "onSubmit",
-  })
-
-  const formValues = watch()
-
-  useEffect(() => {
-    if (savedConfig) {
-      reset({
-        enable_passwordless_login: savedConfig.enable_passwordless_login ?? false,
-        enable_email_sending: savedConfig.enable_email_sending ?? true,
-        enable_sms_sending: savedConfig.enable_sms_sending ?? false,
-        enable_social_logins: savedConfig.enable_social_logins ?? false,
-        enable_audit_export: savedConfig.enable_audit_export ?? false,
-        enable_advanced_analytics: savedConfig.enable_advanced_analytics ?? false,
-        enable_experimental_features: savedConfig.enable_experimental_features ?? false,
-      })
-    }
-  }, [savedConfig, reset])
-
-  const handleUpdate = (updates: Partial<FeatureFlagsFormData>) => {
-    Object.entries(updates).forEach(([key, value]) => {
-      setValue(key as keyof FeatureFlagsFormData, value, { shouldValidate: false, shouldDirty: true })
-    })
-  }
-
-  const onSubmit = async (data: FeatureFlagsFormData) => {
-    try {
-      await updateMutation.mutateAsync(data)
-      showSuccess("Feature flags saved successfully")
-    } catch (error) {
-      showError(error)
-    }
-  }
-
-  if (isLoading) return <LoadingSettings label="Loading feature flags..." />
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-      <SettingsCard title="Authentication" description="Control login and authentication features.">
-        <div className="space-y-4">
-          <FormSwitchField
-            label="Passwordless Login"
-            description="Allow users to sign in via magic link."
-            checked={formValues.enable_passwordless_login}
-            onCheckedChange={(v) => handleUpdate({ enable_passwordless_login: v })}
-          />
-          <FormSwitchField
-            label="Social Logins"
-            description="Allow sign-in via Google, GitHub, and other social providers."
-            checked={formValues.enable_social_logins}
-            onCheckedChange={(v) => handleUpdate({ enable_social_logins: v })}
-          />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Messaging" description="Control email and SMS sending capabilities.">
-        <div className="space-y-4">
-          <FormSwitchField
-            label="Email Sending"
-            description="Enable transactional email delivery (invites, password resets, verification)."
-            checked={formValues.enable_email_sending}
-            onCheckedChange={(v) => handleUpdate({ enable_email_sending: v })}
-          />
-          <FormSwitchField
-            label="SMS Sending"
-            description="Enable SMS OTP delivery and notifications."
-            checked={formValues.enable_sms_sending}
-            onCheckedChange={(v) => handleUpdate({ enable_sms_sending: v })}
-          />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Data & Analytics" description="Control audit exports and analytics features.">
-        <div className="space-y-4">
-          <FormSwitchField
-            label="Audit Export"
-            description="Allow exporting audit logs."
-            checked={formValues.enable_audit_export}
-            onCheckedChange={(v) => handleUpdate({ enable_audit_export: v })}
-          />
-          <FormSwitchField
-            label="Advanced Analytics"
-            description="Enable detailed analytics dashboards."
-            checked={formValues.enable_advanced_analytics}
-            onCheckedChange={(v) => handleUpdate({ enable_advanced_analytics: v })}
-          />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Experiments" description="Experimental features under development.">
-        <FormSwitchField
-          label="Experimental Features"
-          description="Enable features still under active development. May be unstable."
-          checked={formValues.enable_experimental_features}
-          onCheckedChange={(v) => handleUpdate({ enable_experimental_features: v })}
-        />
       </SettingsCard>
 
       <div className="flex justify-end">

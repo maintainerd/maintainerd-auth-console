@@ -72,12 +72,11 @@ export function TenantSwitcher({ className }: { className?: string }) {
     if (!switchTarget) return
     try {
       await logout()
-      showSuccess("Logged out successfully")
     } catch {
-      showError("Logout failed")
+      showError("Logout failed — please try again")
+      setSwitchTarget(null)
+      return
     }
-    // Full page reload to clear all client-side state (cookies, Redux, React Query).
-    // A React Router navigate would keep stale session cookies in memory.
     window.location.href = `/${switchTarget.identifier}/login`
   }
 

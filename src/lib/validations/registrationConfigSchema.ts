@@ -9,10 +9,6 @@ export const registrationConfigSchema = yup.object({
     .number()
     .required()
     .min(1, 'Must be at least 1'),
-  default_role: yup
-    .string()
-    .required('Default role is required')
-    .default('registered'),
   captcha_on_signup: yup.boolean().required(),
   registration_rate_limit_per_ip_per_hour: yup
     .number()

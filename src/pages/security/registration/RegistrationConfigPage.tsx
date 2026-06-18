@@ -24,7 +24,6 @@ export default function RegistrationConfigPage() {
       require_phone_verification: false,
       auto_confirm_enabled: false,
       verification_token_ttl_hours: 24,
-      default_role: 'registered',
       captcha_on_signup: true,
       registration_rate_limit_per_ip_per_hour: 10,
       allowed_email_domains: [],
@@ -43,7 +42,6 @@ export default function RegistrationConfigPage() {
         require_phone_verification: savedConfig.require_phone_verification ?? false,
         auto_confirm_enabled: savedConfig.auto_confirm_enabled ?? false,
         verification_token_ttl_hours: savedConfig.verification_token_ttl_hours ?? 24,
-        default_role: savedConfig.default_role ?? 'member',
         captcha_on_signup: savedConfig.captcha_on_signup ?? true,
         registration_rate_limit_per_ip_per_hour: savedConfig.registration_rate_limit_per_ip_per_hour ?? 10,
         allowed_email_domains: savedConfig.allowed_email_domains ?? [],
@@ -123,13 +121,6 @@ export default function RegistrationConfigPage() {
                   value={formValues.registration_rate_limit_per_ip_per_hour.toString()}
                   onChange={(e) => handleUpdate({ registration_rate_limit_per_ip_per_hour: parseInt(e.target.value) || 1 })}
                   error={errors.registration_rate_limit_per_ip_per_hour?.message}
-                />
-                <FormInputField
-                  label="Default Role"
-                  description="System role assigned to all newly registered users"
-                  value={formValues.default_role}
-                  disabled
-                  readOnly
                 />
               </div>
             </div>

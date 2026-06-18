@@ -1,11 +1,9 @@
 export interface AuditConfig {
   enabled: boolean
   retention_days: number
-  gdpr_mode: boolean
   pii_masking: boolean
   log_level: string
   event_types: string[]
-  export_format: string
 }
 
 export interface AuditConfigResponse {

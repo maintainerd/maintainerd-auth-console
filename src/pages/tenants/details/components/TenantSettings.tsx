@@ -1,13 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Settings, Gauge, FileText, Wrench, Flag } from "lucide-react"
+import { Settings, Gauge, FileText, Wrench } from "lucide-react"
 
 const ITEMS = [
   { title: "Rate Limits", description: "API request throttling", icon: Gauge, tab: "rate-limit" },
   { title: "Audit", description: "Logging and retention", icon: FileText, tab: "audit" },
   { title: "Maintenance", description: "Maintenance mode", icon: Wrench, tab: "maintenance" },
-  { title: "Feature Flags", description: "Runtime toggles", icon: Flag, tab: "feature-flags" },
 ]
 
 export function TenantSettings() {
@@ -23,7 +22,7 @@ export function TenantSettings() {
           </div>
           <h3 className="text-lg font-semibold">Tenant Settings</h3>
           <p className="text-sm text-muted-foreground max-w-md">
-            Configure operational controls — rate limiting, audit logging, maintenance mode, and feature flags.
+            Configure operational controls — rate limiting, audit logging, and maintenance mode.
           </p>
           <Button variant="outline" onClick={() => navigate(`/${tenantId}/settings`)}>
             Open Settings
