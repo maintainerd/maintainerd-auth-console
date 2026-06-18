@@ -70,4 +70,23 @@ describe("ResourceListing", () => {
     expect(screen.queryByRole("button", { name: /filters/i })).not.toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /^new$/i })).not.toBeInTheDocument()
   })
+
+  it("shows 'Clear search & filters' when filtered with no results and clears on click", async () => {
+    const user = u()
+    renderWithProviders(
+      <ResourceListing<Row>
+        columns={COLUMNS}
+        defaultSort={DEFAULT_SORT}
+        searchFields={["name"]}
+        searchPlaceholder="Search..."
+        useData={makeUseData({ rows: [], total: 0 })}
+      />,
+    )
+    const input = screen.getByPlaceholderText("Search...")
+    await user.type(input, "xyz")
+    await waitFor(() => expect(screen.getByText("No results found")).toBeInTheDocument())
+    const clearBtn = screen.getByRole("button", { name: /clear search & filters/i })
+    await user.click(clearBtn)
+    await waitFor(() => expect(input).toHaveValue(""))
+  })
 })

@@ -65,6 +65,8 @@ describe("userColumns", () => {
       }),
       makeUser({ user_id: "u3", username: "pending_user", status: "pending" }),
       makeUser({ user_id: "u4", username: "suspended_user", status: "suspended" }),
+      makeUser({ user_id: "u5", username: "no_name_user", fullname: "", status: "active" }),
+      makeUser({ user_id: "u6", username: " ", fullname: " ", status: "active" }),
     ]
 
     renderWithProviders(<Harness data={data} />)
@@ -75,11 +77,14 @@ describe("userColumns", () => {
     expect(screen.getByRole("button", { name: "Created" })).toBeInTheDocument()
 
     for (const s of statuses) {
-      expect(screen.getByText(s)).toBeInTheDocument()
+      expect(screen.getAllByText(s).length).toBeGreaterThanOrEqual(1)
     }
 
     expect(screen.getByText("active_user")).toBeInTheDocument()
     expect(screen.getByText("inactive_user")).toBeInTheDocument()
+    expect(screen.getByText("no_name_user")).toBeInTheDocument()
+    expect(screen.getAllByText("—").length).toBe(2)
+    expect(screen.getByText("?")).toBeInTheDocument()
 
     expect(screen.getAllByRole("button", { name: /open menu/i }).length).toBe(data.length)
   })
