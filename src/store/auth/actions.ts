@@ -12,7 +12,6 @@ import {
  	type LoginRequest,
  	type MFALoginVerifyRequest,
  	type RegisterRequest,
-  type RegisterInviteRequest,
   type RegisterInviteQueryParams,
  	type ForgotPasswordRequest,
  	type ResetPasswordRequest,

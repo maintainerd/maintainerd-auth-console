@@ -44,7 +44,7 @@ function TenantTile({ name, className }: { name?: string; className?: string }) 
 export function TenantSwitcher({ className }: { className?: string }) {
   const { tenantId } = useParams<{ tenantId: string }>()
   const { logout } = useAuth()
-  const { showSuccess, showError } = useToast()
+  const { showError } = useToast()
   const [open, setOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [switchTarget, setSwitchTarget] = useState<TenantEntity | null>(null)

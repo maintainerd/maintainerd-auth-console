@@ -10,7 +10,7 @@ const SetupTenantPage = () => {
 
   useEffect(() => {
     checkStatus()
-  }, [])
+  }, [checkStatus])
 
   useEffect(() => {
     if (status?.is_tenant_setup) {

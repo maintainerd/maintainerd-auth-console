@@ -10,7 +10,7 @@ const SetupAdminPage = () => {
 
   useEffect(() => {
     checkStatus()
-  }, [])
+  }, [checkStatus])
 
   useEffect(() => {
     if (!status) return

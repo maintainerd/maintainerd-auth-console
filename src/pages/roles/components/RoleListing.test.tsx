@@ -76,7 +76,8 @@ describe("RoleListing", () => {
 
   it("clicking New Role navigates to the create route", async () => {
     renderWithProviders(<RoleListing />)
-    await u().click(screen.getByRole("button", { name: /new role/i }))
+    const buttons = screen.getAllByRole("button", { name: /new role/i })
+    await u().click(buttons[0])
     expect(navigateMock).toHaveBeenCalledWith("/t1/roles/create")
   })
 })
