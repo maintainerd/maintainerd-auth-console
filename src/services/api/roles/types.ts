@@ -27,6 +27,7 @@ export type Role = {
  * Role list query parameters interface
  */
 export interface RoleQueryParams {
+  search?: string
   name?: string
   description?: string
   is_default?: boolean

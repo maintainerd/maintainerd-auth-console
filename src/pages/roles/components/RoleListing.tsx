@@ -5,7 +5,7 @@ import { roleColumns } from "./RoleColumns"
 import { useRoles } from "@/hooks/useRoles"
 
 const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
-const SEARCH_FIELDS = ["name", "description"]
+const SEARCH_FIELDS = ["search"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
 ]
