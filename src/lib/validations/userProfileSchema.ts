@@ -36,7 +36,6 @@ export const userProfileSchema = yup.object({
   gender: optionalString().oneOf(GENDER_VALUES as unknown as string[], 'Invalid gender'),
   bio: optionalString().max(1000, 'Bio must be at most 1000 characters'),
   phone: optionalString().max(20, 'Phone must be at most 20 characters'),
-  email: optionalString().email('Invalid email address').max(255, 'Email must be at most 255 characters'),
   address: optionalString().max(500, 'Address must be at most 500 characters'),
   city: optionalString().max(100, 'City must be at most 100 characters'),
   country: yup
@@ -48,8 +47,6 @@ export const userProfileSchema = yup.object({
     })
     .optional()
     .length(2, 'Country must be a 2-letter ISO code (e.g., US)'),
-  timezone: optionalString().max(50, 'Timezone must be at most 50 characters'),
-  language: optionalString().max(10, 'Language must be at most 10 characters'),
   profile_url: optionalString()
     .test('is-http-url', 'Enter a valid URL starting with http:// or https://', (value) => {
       if (!value) return true

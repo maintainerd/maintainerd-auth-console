@@ -36,12 +36,9 @@ function toDefaults(p: AccountProfile): UserProfileFormData {
     gender: p.gender || undefined,
     bio: p.bio || undefined,
     phone: p.phone || undefined,
-    email: p.email || undefined,
     address: p.address || undefined,
     city: p.city || undefined,
     country: p.country || undefined,
-    timezone: p.timezone || undefined,
-    language: p.language || undefined,
     profile_url: p.profile_url || undefined,
   }
 }

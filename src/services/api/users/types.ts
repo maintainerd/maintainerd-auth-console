@@ -121,6 +121,7 @@ export type UserIdentity = {
  * User list query parameters interface
  */
 export interface UserQueryParams {
+  search?: string
   username?: string
   email?: string
   phone?: string

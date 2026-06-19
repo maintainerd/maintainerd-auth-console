@@ -20,7 +20,7 @@ import {
   FormDateField,
 } from "@/components/form"
 import { userProfileSchema } from "@/lib/validations"
-import { countryOptions, timezoneOptions, languageOptions, genderOptions } from "@/lib/constants"
+import { countryOptions, genderOptions } from "@/lib/constants"
 import { useCreateUserProfile, useUpdateUserProfile } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import { useMetadataFields } from "@/hooks/useMetadataFields"
@@ -73,12 +73,9 @@ export function ProfileFormDialog({
       gender: undefined,
       bio: undefined,
       phone: undefined,
-      email: undefined,
       address: undefined,
       city: undefined,
       country: undefined,
-      timezone: undefined,
-      language: undefined,
       profile_url: undefined,
     },
     mode: 'onSubmit',
@@ -97,12 +94,9 @@ export function ProfileFormDialog({
         gender: profile.gender || undefined,
         bio: profile.bio || undefined,
         phone: profile.phone || undefined,
-        email: profile.email || undefined,
         address: profile.address || undefined,
         city: profile.city || undefined,
         country: profile.country || undefined,
-        timezone: profile.timezone || undefined,
-        language: profile.language || undefined,
         profile_url: profile.profile_url || undefined,
       })
 
@@ -118,12 +112,9 @@ export function ProfileFormDialog({
         gender: undefined,
         bio: undefined,
         phone: undefined,
-        email: undefined,
         address: undefined,
         city: undefined,
         country: undefined,
-        timezone: undefined,
-        language: undefined,
         profile_url: undefined,
       })
       resetFields(null)
@@ -151,12 +142,9 @@ export function ProfileFormDialog({
         gender: data.gender,
         bio: data.bio,
         phone: data.phone,
-        email: data.email,
         address: data.address,
         city: data.city,
         country: data.country,
-        timezone: data.timezone,
-        language: data.language,
         profile_url: data.profile_url,
         metadata: metadataPayload,
       }
@@ -291,14 +279,6 @@ export function ProfileFormDialog({
             <h3 className="font-medium">Contact Information</h3>
             <div className="grid gap-4 md:grid-cols-2">
               <FormInputField
-                label="Email"
-                type="email"
-                placeholder="john.doe@example.com"
-                maxLength={255}
-                error={errors.email?.message}
-                {...register("email")}
-              />
-              <FormInputField
                 label="Phone"
                 type="tel"
                 placeholder="+1 555 123 4567"
@@ -338,41 +318,6 @@ export function ProfileFormDialog({
                     value={field.value || ""}
                     onValueChange={field.onChange}
                     error={errors.country?.message}
-                  />
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Preferences */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Preferences</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Controller
-                name="timezone"
-                control={control}
-                render={({ field }) => (
-                  <FormSelectField
-                    label="Timezone"
-                    placeholder="Select timezone"
-                    options={timezoneOptions}
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                    error={errors.timezone?.message}
-                  />
-                )}
-              />
-              <Controller
-                name="language"
-                control={control}
-                render={({ field }) => (
-                  <FormSelectField
-                    label="Language"
-                    placeholder="Select language"
-                    options={languageOptions}
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                    error={errors.language?.message}
                   />
                 )}
               />

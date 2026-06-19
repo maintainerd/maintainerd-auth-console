@@ -109,7 +109,7 @@ describe("UserListing", () => {
 
     await waitFor(() =>
       expect(useUsersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ username: "alice", email: "alice", phone: "alice" }),
+        expect.objectContaining({ search: "alice" }),
       ),
     )
   })

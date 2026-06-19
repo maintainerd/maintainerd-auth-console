@@ -5,7 +5,7 @@ import { userColumns } from "./UserColumns"
 import { useUsers } from "@/hooks/useUsers"
 
 const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
-const SEARCH_FIELDS = ["username", "fullname", "email", "phone"]
+const SEARCH_FIELDS = ["search"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive", "pending", "suspended"] },
 ]

@@ -90,14 +90,11 @@ describe("ProfileFormDialog validation", () => {
       display_name: tooLong(100),
       profile_url: "ftp://bad",
       bio: tooLong(1000),
-      email: "not-an-email",
       phone: tooLong(20),
       address: tooLong(500),
       city: tooLong(100),
       gender: "not_a_gender",
       country: "USA",
-      timezone: tooLong(50),
-      language: tooLong(10),
       // Parseable by Date (so the calendar doesn't choke) but not YYYY-MM-DD.
       // Parseable by Date (so the calendar does not choke) but not YYYY-MM-DD.
       birthdate: "01/05/1990",
@@ -116,14 +113,11 @@ describe("ProfileFormDialog validation", () => {
       screen.getByText("Enter a valid URL starting with http:// or https://"),
     ).toBeInTheDocument()
     expect(screen.getByText("Bio must be at most 1000 characters")).toBeInTheDocument()
-    expect(screen.getByText("Invalid email address")).toBeInTheDocument()
     expect(screen.getByText("Phone must be at most 20 characters")).toBeInTheDocument()
     expect(screen.getByText("Address must be at most 500 characters")).toBeInTheDocument()
     expect(screen.getByText("City must be at most 100 characters")).toBeInTheDocument()
     expect(screen.getByText("Invalid gender")).toBeInTheDocument()
     expect(screen.getByText("Country must be a 2-letter ISO code (e.g., US)")).toBeInTheDocument()
-    expect(screen.getByText("Timezone must be at most 50 characters")).toBeInTheDocument()
-    expect(screen.getByText("Language must be at most 10 characters")).toBeInTheDocument()
     expect(screen.getByText("Birthdate must be in YYYY-MM-DD format")).toBeInTheDocument()
     expect(updateMutateAsync).not.toHaveBeenCalled()
   }, 10000)

@@ -203,11 +203,10 @@ describe("ProfileFormDialog", () => {
     expect(createMutateAsync).not.toHaveBeenCalled()
   })
 
-  it("blocks submission when email and profile url are invalid", async () => {
+  it("blocks submission when profile url is invalid", async () => {
     const u = user()
     renderForm({})
     await u.type(screen.getByLabelText(/first name/i), "Jane")
-    await u.type(screen.getByLabelText(/^email/i), "not-an-email")
     await u.type(screen.getByLabelText(/profile picture url/i), "ftp://bad")
     await u.click(screen.getByRole("button", { name: "Create Profile" }))
 
