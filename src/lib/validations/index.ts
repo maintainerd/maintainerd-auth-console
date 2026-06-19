@@ -7,27 +7,20 @@
 export {
   setupTenantSchema,
   setupAdminSchema,
-  setupProfilePersonalSchema,
   setupProfileContactSchema,
   setupProfileLocationSchema,
-  setupProfileCompleteSchema,
   type SetupTenantFormData,
   type SetupAdminFormData,
-  type SetupProfilePersonalFormData,
   type SetupProfileContactFormData,
   type SetupProfileLocationFormData,
-  type SetupProfileCompleteFormData
 } from './setupSchema'
 
 // Auth schemas
 export {
   buildLoginSchema,
-  buildPasswordValidation,
   buildRegisterSchema,
   buildResetPasswordSchema,
-  registerSchema,
   forgotPasswordSchema,
-  resetPasswordSchema,
   type LoginFormData,
   type RegisterFormData,
   type ForgotPasswordFormData,
@@ -49,11 +42,7 @@ export {
 // Policy schemas
 export {
   policySchema,
-  policyStatementSchema,
-  policyDocumentSchema,
   type PolicyFormData,
-  type PolicyStatementFormData,
-  type PolicyDocumentFormData
 } from './policySchema'
 
 // Identity Provider schemas
@@ -61,12 +50,6 @@ export {
   identityProviderSchema,
   type IdentityProviderFormData
 } from './identityProviderSchema'
-
-// Social Provider schemas
-export {
-  socialProviderSchema,
-  type SocialProviderFormData
-} from './socialProviderSchema'
 
 // Client schemas
 export {
@@ -95,7 +78,6 @@ export {
 // User schemas
 export {
   userSchema,
-  type UserFormData
 } from './userSchema'
 
 // User Profile schemas

@@ -4,10 +4,8 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
 import { tenantExtraReducers } from './extra-reducers'
 import type { TenantState } from './types'
-import type { TenantEntity } from '@/services/api/tenants/types'
 
 const initialState: TenantState = {
   currentTenant: null,
@@ -22,9 +20,6 @@ const tenantSlice = createSlice({
     clearError: (state: TenantState) => {
       state.error = null
     },
-    setCurrentTenant: (state: TenantState, action: PayloadAction<TenantEntity | null>) => {
-      state.currentTenant = action.payload
-    },
     clearTenant: (state: TenantState) => {
       state.currentTenant = null
       state.error = null
@@ -33,5 +28,5 @@ const tenantSlice = createSlice({
   extraReducers: tenantExtraReducers
 })
 
-export const { clearError, setCurrentTenant, clearTenant } = tenantSlice.actions
+export const { clearError, clearTenant } = tenantSlice.actions
 export default tenantSlice.reducer

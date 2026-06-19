@@ -31,17 +31,9 @@ const authSlice = createSlice({
       state.profile = action.payload
       state.isAuthenticated = !!action.payload
     },
-    clearAuth: (state: AuthState) => {
-      state.account = null
-      state.profile = null
-      state.roles = []
-      state.permissions = []
-      state.isAuthenticated = false
-      state.error = null
-    }
   },
   extraReducers: authExtraReducers
 })
 
-export const { clearError, setProfile, clearAuth } = authSlice.actions
+export const { clearError, setProfile } = authSlice.actions
 export default authSlice.reducer

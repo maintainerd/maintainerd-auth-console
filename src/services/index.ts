@@ -4,7 +4,7 @@
  */
 
 // API Client and utilities
-export { apiClient, ApiError, get, post, put, deleteRequest, patch } from './api/client'
+export { ApiError, get, post, put, deleteRequest, patch } from './api/client'
 export { API_CONFIG, API_ENDPOINTS } from './api/config'
 export type * from './api/types'
 
@@ -44,7 +44,6 @@ export type * from './api/api-keys/types'
 
 // Setup service functions
 export {
-  setupService,
   createTenant,
   createAdmin,
   createProfile,
@@ -57,7 +56,6 @@ export {
 
 // Authentication service functions
 export {
-  authService,
   login,
   verifyMFALogin,
   sendMFALoginSMS,
@@ -79,7 +77,6 @@ export {
 
 // Tenant service functions
 export {
-  tenantService,
   fetchDefaultTenant,
   fetchTenantByIdentifier,
   fetchTenant
@@ -87,7 +84,6 @@ export {
 
 // Service service functions
 export {
-  serviceService,
   fetchServices,
   fetchServiceById,
   createService,
@@ -100,7 +96,6 @@ export {
 
 // API service functions
 export {
-  apiService,
   fetchApis,
   fetchApiById,
   createApi,
@@ -111,7 +106,6 @@ export {
 
 // Policy service functions
 export {
-  policyService,
   fetchPolicies,
   fetchPolicyById,
   createPolicy,
@@ -123,7 +117,6 @@ export {
 
 // Client service functions
 export {
-  clientService,
   fetchClients,
   fetchClientById,
   createClient,

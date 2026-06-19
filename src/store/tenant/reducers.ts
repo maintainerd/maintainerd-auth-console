@@ -4,7 +4,7 @@
  */
 
 export { default as tenantReducer } from './slice'
-export { clearError, setCurrentTenant, clearTenant } from './slice'
+export { clearError, clearTenant } from './slice'
 export {
   fetchTenantAsync,
   fetchDefaultTenantAsync,

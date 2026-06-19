@@ -16,4 +16,4 @@ export { FormFileUploadField, type FormFileUploadFieldProps } from './FormFileUp
 export { default as FormSubmitButton } from './FormSubmitButton'
 export { default as FormLoginCard } from './FormLoginCard'
 export { default as FormSetupCard } from './FormSetupCard'
-export { default as MultiStepForm, type MultiStepFormProps, type MultiStepFormStep } from './MultiStepForm'
+
