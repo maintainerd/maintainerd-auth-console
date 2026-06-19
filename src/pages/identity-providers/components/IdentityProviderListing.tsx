@@ -5,11 +5,10 @@ import { identityProviderColumns } from "./IdentityProviderColumns"
 import { useIdentityProvidersList } from "@/hooks/useIdentityProviders"
 
 const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
-const SEARCH_FIELDS = ["name", "display_name", "identifier"]
+const SEARCH_FIELDS = ["search"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
   { key: "provider", label: "Provider", options: ["internal", "cognito", "auth0", "google", "facebook", "github"] },
-  { key: "is_system", label: "Type", options: ["system", "regular"] },
 ]
 
 export function IdentityProviderListing() {

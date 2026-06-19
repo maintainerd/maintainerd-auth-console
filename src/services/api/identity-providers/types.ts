@@ -86,6 +86,7 @@ export type IdentityProviderDetail = {
  * Identity provider list query parameters interface
  */
 export interface IdentityProviderQueryParams {
+  search?: string
   name?: string
   display_name?: string
   provider?: string
