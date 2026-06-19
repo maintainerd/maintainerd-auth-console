@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { LogOut, Settings, User, Bell, Globe } from "lucide-react"
+import { LogOut, Settings, User } from "lucide-react"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
@@ -25,12 +25,6 @@ export function TopNav() {
   const { logout } = useAuth()
   const { showSuccess, showError } = useToast()
   const profile = useAppSelector((state) => state.auth.profile)
-
-  const handleViewAllNotifications = () => {
-    if (tenantId) {
-      navigate(`/${tenantId}/notifications`)
-    }
-  }
 
   const handleLogout = async () => {
     try {
@@ -74,80 +68,6 @@ export function TopNav() {
 
           {/* Action Items */}
           <div className="flex items-center gap-2">
-            {/* Notification Bell */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-slate-200 hover:bg-white/10 hover:text-white">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
-                    3
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-72" align="end">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="max-h-80 overflow-y-auto">
-                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                    <div className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">New user registration</p>
-                      <p className="text-xs text-muted-foreground mt-1">John Doe registered for an account</p>
-                      <p className="text-xs text-muted-foreground mt-1">2m</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                    <div className="h-2 w-2 rounded-full bg-orange-500 mt-1 shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">API rate limit warning</p>
-                      <p className="text-xs text-muted-foreground mt-1">User-api approaching limits (85%)</p>
-                      <p className="text-xs text-muted-foreground mt-1">15m</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                    <div className="h-2 w-2 rounded-full bg-gray-400 mt-1 shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">System update completed</p>
-                      <p className="text-xs text-muted-foreground mt-1">Auth service updated to v2.1.0</p>
-                      <p className="text-xs text-muted-foreground mt-1">1h</p>
-                    </div>
-                  </DropdownMenuItem>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-center justify-center text-sm cursor-pointer"
-                  onClick={handleViewAllNotifications}
-                >
-                  View all
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hidden text-slate-200 hover:bg-white/10 hover:text-white sm:inline-flex">
-                  <Globe className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40" align="end">
-                <DropdownMenuLabel>Language</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  🇺🇸 English
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  🇪🇸 Español
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  🇫🇷 Français
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  🇩🇪 Deutsch
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

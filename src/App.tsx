@@ -70,7 +70,6 @@ import SignupFlowDetailsPage from './pages/signup-flows/details'
 import SignupFlowAddOrUpdateForm from './pages/signup-flows/form'
 import LogMonitoringPage from './pages/log-monitoring'
 import AuthEventDetailsPage from './pages/log-monitoring/details/AuthEventDetailsPage'
-import NotificationsPage from './pages/notifications'
 import BrandingTemplatesPage from './pages/branding/templates'
 import BrandingDetailsPage from './pages/branding/templates/details/BrandingDetailsPage'
 import BrandingForm from './pages/branding/templates/form/BrandingForm'
@@ -109,9 +108,6 @@ function App() {
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
-        <Route path="/:tenantId" element={<PrivateLayout />}>
-          <Route path="notifications" element={<NotificationsPage />} />
-        </Route>
         <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />

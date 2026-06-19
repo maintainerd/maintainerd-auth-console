@@ -82,10 +82,7 @@ const RegisterProfileForm = () => {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25 [&_[data-slot=select-trigger]]:h-11 [&_[data-slot=select-trigger]]:rounded-lg [&_[data-slot=select-trigger]]:bg-white [&_[data-slot=select-trigger]:focus-visible]:border-blue-500 [&_[data-slot=select-trigger]:focus-visible]:ring-blue-500/25"
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           {error && (
             <div role="alert" className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
@@ -124,7 +121,7 @@ const RegisterProfileForm = () => {
             isSubmitting={isSubmitting || isLoading}
             submitText="Create Profile"
             submittingText="Creating..."
-            className="mt-1 h-11 w-full font-medium shadow-sm"
+            className="mt-1 w-full"
           />
         </FieldGroup>
       </form>

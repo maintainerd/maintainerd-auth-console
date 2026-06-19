@@ -36,7 +36,7 @@ const RegisterProfileSuccess = () => {
         </p>
       </div>
 
-      <Button onClick={handleContinue} className="h-11 w-full font-medium shadow-sm" size="lg">
+      <Button onClick={handleContinue} className="w-full">
         Go to Dashboard
         <ArrowRight className="ml-2 size-4" />
       </Button>

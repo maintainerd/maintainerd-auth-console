@@ -34,13 +34,10 @@ const SetupTenantForm = () => {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           <FormInputField
-            label="Tenant Name"
+            label="Tenant name"
             placeholder="e.g. my-org-1"
             disabled={isLoading}
             error={errors.name?.message}
@@ -48,7 +45,7 @@ const SetupTenantForm = () => {
             {...register("name")}
           />
           <FormInputField
-            label="Display Name"
+            label="Display name"
             placeholder="e.g. My Organization"
             disabled={isLoading}
             error={errors.display_name?.message}
@@ -57,9 +54,9 @@ const SetupTenantForm = () => {
           />
           <FormSubmitButton
             isSubmitting={isLoading}
-            submitText="Create Tenant"
-            submittingText="Creating Tenant..."
-            className="mt-1 h-11 w-full font-medium shadow-sm"
+            submitText="Create tenant"
+            submittingText="Creating tenant..."
+            className="mt-1 w-full"
           />
         </FieldGroup>
       </form>

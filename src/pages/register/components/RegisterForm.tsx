@@ -78,10 +78,7 @@ const RegisterForm = () => {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           {registerError && (
             <div
@@ -127,7 +124,7 @@ const RegisterForm = () => {
             isSubmitting={isSubmitting}
             submitText="Create account"
             submittingText="Creating account..."
-            className="mt-1 h-11 w-full font-medium shadow-sm"
+            className="mt-1 w-full"
           />
         </FieldGroup>
       </form>

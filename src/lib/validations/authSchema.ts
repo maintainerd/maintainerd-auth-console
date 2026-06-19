@@ -98,20 +98,16 @@ export const forgotPasswordSchema = yup.object({
 
 export type ForgotPasswordFormData = yup.InferType<typeof forgotPasswordSchema>
 
-// Reset Password Form Schema
-export const resetPasswordSchema = yup.object({
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain uppercase, lowercase, number, and special character'
-    ),
-  confirmPassword: yup
-    .string()
-    .required('Please confirm your password')
-    .oneOf([yup.ref('password')], 'Passwords must match')
-})
+export function buildResetPasswordSchema(cfg?: PasswordConfigPublic) {
+  return yup.object({
+    password: buildPasswordValidation(cfg),
+    confirmPassword: yup
+      .string()
+      .required('Please confirm your password')
+      .oneOf([yup.ref('password')], 'Passwords must match'),
+  })
+}
+
+export const resetPasswordSchema = buildResetPasswordSchema()
 
 export type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { AlertCircle, Mail } from "lucide-react"
 import { FormSubmitButton, FormPasswordField, PasswordRequirements } from "@/components/form"
 import { FieldGroup } from "@/components/ui/field"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { useToast } from "@/hooks/useToast"
@@ -106,15 +107,20 @@ const RegisterInviteForm = () => {
 
   if (!invitedEmail) {
     return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <AlertCircle className="size-10 text-destructive" />
-        <h1 className="text-xl font-semibold">Invalid invite link</h1>
-        <p className="text-sm text-muted-foreground">
-          This invite link is missing the email parameter. Please request a new invitation.
-        </p>
-        <Link to="/login" className="text-sm font-medium text-primary hover:underline">
-          Back to sign in
-        </Link>
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10">
+            <AlertCircle className="size-7 text-destructive" />
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">Invalid invite link</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            This invite link is missing the email parameter. Please request a new invitation.
+          </p>
+        </div>
+
+        <Button asChild className="w-full">
+          <Link to="/login">Back to sign in</Link>
+        </Button>
       </div>
     )
   }
@@ -128,10 +134,7 @@ const RegisterInviteForm = () => {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           {registerError && (
             <div
@@ -145,7 +148,7 @@ const RegisterInviteForm = () => {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">Email</label>
-            <div className="flex items-center gap-2 h-11 rounded-lg border border-input bg-muted/50 px-3 text-sm text-muted-foreground">
+            <div className="flex h-9 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-sm text-muted-foreground">
               <Mail className="size-4 shrink-0" />
               <span>{invitedEmail}</span>
             </div>
@@ -176,7 +179,7 @@ const RegisterInviteForm = () => {
             isSubmitting={isSubmitting}
             submitText="Create account"
             submittingText="Creating account..."
-            className="mt-1 h-11 w-full font-medium shadow-sm"
+            className="mt-1 w-full"
           />
         </FieldGroup>
       </form>

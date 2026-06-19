@@ -59,23 +59,21 @@ const PersonalInfoStep = ({ data, onDataChange, onValidationChange }: PersonalIn
   }, [isValid, onValidationChange])
 
   return (
-    <div className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25">
-      <FieldGroup>
-        <FormInputField
-          label="First Name"
-          placeholder="John"
-          error={errors.first_name?.message}
-          required
-          {...register("first_name")}
-        />
-        <FormInputField
-          label="Last Name"
-          placeholder="Doe"
-          error={errors.last_name?.message}
-          {...register("last_name")}
-        />
-      </FieldGroup>
-    </div>
+    <FieldGroup>
+      <FormInputField
+        label="First Name"
+        placeholder="John"
+        error={errors.first_name?.message}
+        required
+        {...register("first_name")}
+      />
+      <FormInputField
+        label="Last Name"
+        placeholder="Doe"
+        error={errors.last_name?.message}
+        {...register("last_name")}
+      />
+    </FieldGroup>
   )
 }
 

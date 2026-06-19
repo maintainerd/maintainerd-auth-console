@@ -86,7 +86,7 @@ export default function VerifyEmailPage() {
               Your email has been confirmed. You can now sign in to your account.
             </p>
           </div>
-          <Button className="h-11 w-full font-medium shadow-sm" onClick={() => navigate('/login', { replace: true })}>
+          <Button className="w-full" onClick={() => navigate('/login', { replace: true })}>
             Sign in
           </Button>
         </div>
@@ -114,10 +114,7 @@ export default function VerifyEmailPage() {
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="[&_input]:h-11 [&_input]:rounded-lg [&_input]:bg-white [&_input:focus-visible]:border-blue-500 [&_input:focus-visible]:ring-blue-500/25"
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <FormInputField
               label="Verification code"
@@ -134,7 +131,7 @@ export default function VerifyEmailPage() {
               isSubmitting={isSubmitting}
               submitText="Verify email"
               submittingText="Verifying..."
-              className="h-11 w-full font-medium shadow-sm"
+              className="w-full"
             />
           </FieldGroup>
         </form>
@@ -144,9 +141,15 @@ export default function VerifyEmailPage() {
             {resending ? <Loader2 className="mr-1 size-3 animate-spin" /> : null}
             Didn't receive a code? Resend
           </Button>
-          <button type="button" onClick={() => navigate('/login')} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            onClick={() => navigate('/login')}
+            className="text-muted-foreground"
+          >
             Back to login
-          </button>
+          </Button>
         </div>
       </div>
     </LoginLayout>

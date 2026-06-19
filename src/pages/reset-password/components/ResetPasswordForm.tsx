@@ -1,21 +1,25 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { FormLoginCard, FormSubmitButton, FormPasswordField } from "@/components/form"
+import { FormSubmitButton, FormPasswordField, PasswordRequirements } from "@/components/form"
 import { FieldGroup } from "@/components/ui/field"
-import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validations"
+import { buildResetPasswordSchema, type ResetPasswordFormData } from "@/lib/validations"
 import { useAuth } from "@/hooks/useAuth"
+import { useTenant } from "@/hooks/useTenant"
 import { useToast } from "@/hooks/useToast"
-import { CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const ResetPasswordForm = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { resetPassword } = useAuth()
+  const { getCurrentTenant } = useTenant()
   const { showSuccess, showError, parseError } = useToast()
   const [resetPasswordError, setResetPasswordError] = useState<string | null>(null)
   const [passwordReset, setPasswordReset] = useState(false)
+  const [passwordTyped, setPasswordTyped] = useState(false)
 
   // Get query params
   const clientId = searchParams.get('client_id')
@@ -26,13 +30,16 @@ const ResetPasswordForm = () => {
 
   // Check if all required query params are present
   const hasValidParams = clientId && expires && providerId && sig && token
+  const passwordConfig = getCurrentTenant()?.password_config
+  const resetSchema = useMemo(() => buildResetPasswordSchema(passwordConfig), [passwordConfig])
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<ResetPasswordFormData>({
-    resolver: yupResolver(resetPasswordSchema),
+    resolver: yupResolver(resetSchema),
     defaultValues: {
       password: "",
       confirmPassword: ""
@@ -40,6 +47,12 @@ const ResetPasswordForm = () => {
     mode: 'onSubmit',
     reValidateMode: 'onSubmit'
   })
+
+  const passwordValue = watch("password") || ""
+
+  useEffect(() => {
+    if (passwordValue.length > 0) setPasswordTyped(true)
+  }, [passwordValue])
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!hasValidParams) {
@@ -71,110 +84,111 @@ const ResetPasswordForm = () => {
 
   if (!hasValidParams) {
     return (
-      <div className="flex flex-col gap-6">
-        <FormLoginCard
-          title="Invalid Reset Link"
-          description="This password reset link is invalid or has expired"
-        >
-          <div className="flex flex-col items-center gap-4 py-6">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                The password reset link you followed is invalid or has expired.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Please request a new password reset link.
-              </p>
-            </div>
-            <div className="pt-4 w-full space-y-2">
-              <button
-                onClick={() => navigate('/forgot-password')}
-                className="flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Request New Reset Link
-              </button>
-              <button
-                onClick={() => navigate('/login')}
-                className="flex w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              >
-                Back to Login
-              </button>
-            </div>
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10">
+            <AlertCircle className="size-7 text-destructive" />
           </div>
-        </FormLoginCard>
+          <h1 className="text-2xl font-semibold tracking-tight">Invalid reset link</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            This password reset link is invalid or has expired. Please request a new one.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Button
+            type="button"
+            onClick={() => navigate('/forgot-password')}
+            className="w-full"
+          >
+            Request new reset link
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate('/login')}
+            className="w-full"
+          >
+            Back to login
+          </Button>
+        </div>
       </div>
     )
   }
 
   if (passwordReset) {
     return (
-      <div className="flex flex-col gap-6">
-        <FormLoginCard
-          title="Password Reset Successful"
-          description="Your password has been reset successfully"
-        >
-          <div className="flex flex-col items-center gap-4 py-6">
-            <div className="rounded-full bg-green-50 p-3">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
-            </div>
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                You can now log in with your new password.
-              </p>
-            </div>
-            <div className="pt-4 w-full">
-              <button
-                onClick={() => navigate('/login')}
-                className="flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Go to Login
-              </button>
-            </div>
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle2 className="size-7 text-green-600" />
           </div>
-        </FormLoginCard>
+          <h1 className="text-2xl font-semibold tracking-tight">Password reset</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            You can now sign in with your new password.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          onClick={() => navigate('/login')}
+          className="w-full"
+        >
+          Go to login
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <FormLoginCard
-        title="Reset your password"
-        description="Enter your new password below"
-      >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            {resetPasswordError && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {resetPasswordError}
-              </div>
-            )}
-            <FormPasswordField
-              label="New Password"
-              placeholder="Enter your new password"
-              disabled={isSubmitting}
-              error={errors.password?.message}
-              required
-              {...register("password")}
-            />
-            <FormPasswordField
-              label="Confirm Password"
-              placeholder="Confirm your new password"
-              disabled={isSubmitting}
-              error={errors.confirmPassword?.message}
-              required
-              {...register("confirmPassword")}
-            />
-            <FormSubmitButton
-              isSubmitting={isSubmitting}
-              submitText="Reset Password"
-              submittingText="Resetting..."
-            />
-          </FieldGroup>
-        </form>
-      </FormLoginCard>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your new password below.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          {resetPasswordError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+            >
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span>{resetPasswordError}</span>
+            </div>
+          )}
+          <FormPasswordField
+            label="New password"
+            placeholder="Enter your new password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            error={errors.password?.message}
+            required
+            {...register("password")}
+          />
+          {passwordTyped && <PasswordRequirements password={passwordValue} config={passwordConfig} />}
+          <FormPasswordField
+            label="Confirm password"
+            placeholder="Confirm your new password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            error={errors.confirmPassword?.message}
+            required
+            {...register("confirmPassword")}
+          />
+          <FormSubmitButton
+            isSubmitting={isSubmitting}
+            submitText="Reset password"
+            submittingText="Resetting..."
+            className="mt-1 w-full"
+          />
+        </FieldGroup>
+      </form>
     </div>
   )
 }
 
 export default ResetPasswordForm
-

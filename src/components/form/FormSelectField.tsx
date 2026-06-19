@@ -69,6 +69,7 @@ export function FormSelectField({
         <SelectTrigger
           id={fieldId}
           className={cn(
+            "w-full",
             error && "border-red-500 focus:ring-red-500",
             className
           )}

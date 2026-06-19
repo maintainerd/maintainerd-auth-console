@@ -1,13 +1,14 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { FormLoginCard, FormSubmitButton, FormInputField } from "@/components/form"
+import { FormSubmitButton, FormInputField } from "@/components/form"
 import { FieldGroup } from "@/components/ui/field"
 import { Link } from "react-router-dom"
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
-import { CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const ForgotPasswordForm = () => {
   const { forgotPassword } = useAuth()
@@ -44,76 +45,71 @@ const ForgotPasswordForm = () => {
 
   if (emailSent) {
     return (
-      <div className="flex flex-col gap-6">
-        <FormLoginCard
-          title="Check your email"
-          description="We've sent password reset instructions to your email"
-        >
-          <div className="flex flex-col items-center gap-4 py-6">
-            <div className="rounded-full bg-green-50 p-3">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
-            </div>
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                If an account exists with this email, you will receive password reset instructions shortly.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Please check your inbox and spam folder.
-              </p>
-            </div>
-            <div className="pt-4 w-full">
-              <Link
-                to="/login"
-                className="flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Back to Login
-              </Link>
-            </div>
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle2 className="size-7 text-green-600" />
           </div>
-        </FormLoginCard>
+          <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            If an account exists with this email, password reset instructions will arrive shortly.
+          </p>
+        </div>
+
+        <Button asChild className="w-full">
+          <Link to="/login">Back to login</Link>
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <FormLoginCard
-        title="Forgot your password?"
-        description="Enter your email address and we'll send you instructions to reset your password"
-      >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            {forgotPasswordError && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {forgotPasswordError}
-              </div>
-            )}
-            <FormInputField
-              label="Email"
-              type="email"
-              placeholder="johndoe@example.com"
-              disabled={isSubmitting}
-              error={errors.email?.message}
-              required
-              {...register("email")}
-            />
-            <FormSubmitButton
-              isSubmitting={isSubmitting}
-              submitText="Send Reset Instructions"
-              submittingText="Sending..."
-            />
-            <div className="text-center text-sm text-muted-foreground">
-              Remember your password?{" "}
-              <Link to="/login" className="underline-offset-4 hover:underline">
-                Back to Login
-              </Link>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Forgot your password?</h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your email and we'll send reset instructions.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          {forgotPasswordError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+            >
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span>{forgotPasswordError}</span>
             </div>
-          </FieldGroup>
-        </form>
-      </FormLoginCard>
+          )}
+          <FormInputField
+            label="Email"
+            type="email"
+            placeholder="you@company.com"
+            autoComplete="email"
+            disabled={isSubmitting}
+            error={errors.email?.message}
+            required
+            {...register("email")}
+          />
+          <FormSubmitButton
+            isSubmitting={isSubmitting}
+            submitText="Send reset instructions"
+            submittingText="Sending..."
+            className="mt-1 w-full"
+          />
+        </FieldGroup>
+      </form>
+
+      <div className="text-center text-sm text-muted-foreground">
+        Remember your password?{" "}
+        <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          Back to login
+        </Link>
+      </div>
     </div>
   )
 }
 
 export default ForgotPasswordForm
-
