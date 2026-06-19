@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Users,
   Shield,
@@ -24,19 +25,13 @@ import { useQuery } from "@tanstack/react-query"
 import { fetchMFAStatus } from "@/services/api/mfa"
 import { DetailsContainer } from "@/components/container"
 import { RecentActivityCard } from "./components/RecentActivityCard"
+import { useDashboardSummary } from "@/hooks/useDashboard"
 
-// Placeholder metrics — wire to live counts (e.g. /users, /clients, /services,
-// /identity_providers, /auth-events/count) when those pages are built.
-const STATS = [
-  { label: "Total Users", value: "1,234", icon: Users, hero: true },
-  { label: "Applications", value: "8", icon: Layers },
-  { label: "Services", value: "12", icon: Server },
-  { label: "Identity Providers", value: "5", icon: KeyRound },
-]
+const fmt = (n: number) => n.toLocaleString()
 
 const QUICK_ACTIONS = [
   { icon: Users, title: "Manage Users", desc: "Add users and assign roles", to: "/users" },
-  { icon: Shield, title: "Security Settings", desc: "Configure security policies", to: "/security/settings" },
+  { icon: Shield, title: "Security Settings", desc: "Configure security policies", to: "/security/password" },
   { icon: Server, title: "Manage Services", desc: "Register application services", to: "/services" },
   { icon: KeyRound, title: "Identity Providers", desc: "Connect external providers", to: "/providers/identity" },
 ]
@@ -44,10 +39,10 @@ const QUICK_ACTIONS = [
 // Security areas that exist in the backend (/security-settings/*, /ip-restriction-rules)
 // AND have a built console page.
 const SECURITY_LINKS = [
-  { title: "Multi-Factor Auth", desc: "Require a second authentication factor", icon: ShieldCheck, to: "/security/settings" },
-  { title: "Password Policy", desc: "Set password strength requirements", icon: Lock, to: "/security/password-policies" },
-  { title: "Sessions", desc: "Session lifetime and concurrency limits", icon: Clock, to: "/security/sessions" },
-  { title: "Threat Detection", desc: "Detect and block suspicious activity", icon: ShieldAlert, to: "/security/threats" },
+  { title: "Multi-Factor Auth", desc: "Require a second authentication factor", icon: ShieldCheck, to: "/security/mfa" },
+  { title: "Password Policy", desc: "Set password strength requirements", icon: Lock, to: "/security/password" },
+  { title: "Sessions", desc: "Session lifetime and concurrency limits", icon: Clock, to: "/security/session" },
+  { title: "Attack Protection", desc: "Detect and block suspicious activity", icon: ShieldAlert, to: "/security/threat" },
   { title: "IP Restrictions", desc: "Allow or block access by IP range", icon: Globe, to: "/security/ip-restrictions" },
 ]
 
@@ -139,8 +134,16 @@ function MfaStatusBanner({ onSetup }: { onSetup: () => void }) {
 const DashboardPage = () => {
   const navigate = useNavigate()
   const { tenantId } = useParams()
+  const { data: summary, isLoading } = useDashboardSummary()
 
   const to = (path: string) => navigate(`/${tenantId}${path}`)
+
+  const stats = [
+    { label: "Total Users", value: summary ? fmt(summary.users.total) : undefined, icon: Users, hero: true },
+    { label: "Applications", value: summary ? fmt(summary.clients.total) : undefined, icon: Layers },
+    { label: "Services", value: summary ? fmt(summary.services.total) : undefined, icon: Server },
+    { label: "Identity Providers", value: summary ? fmt(summary.identity_providers.total) : undefined, icon: KeyRound },
+  ]
 
   return (
     <DetailsContainer>
@@ -158,7 +161,7 @@ const DashboardPage = () => {
 
       {/* KPI stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map((stat) => (
+        {stats.map((stat) => (
           <Card
             key={stat.label}
             className={cn(
@@ -172,7 +175,11 @@ const DashboardPage = () => {
                 <p className={cn("text-sm", stat.hero ? "text-blue-50" : "text-muted-foreground")}>
                   {stat.label}
                 </p>
-                <p className="text-2xl font-semibold tracking-tight">{stat.value}</p>
+                {isLoading || stat.value === undefined ? (
+                  <Skeleton className={cn("h-8 w-16", stat.hero && "bg-white/20")} />
+                ) : (
+                  <p className="text-2xl font-semibold tracking-tight">{stat.value}</p>
+                )}
               </div>
               <div
                 className={cn(

@@ -78,4 +78,5 @@ export const API_ENDPOINTS = {
   EVENT_TYPE: '/event-types',
   TENANT_EVENT_TYPE: '/tenant-event-types',
   EVENT_ROUTE: '/event-routes',
+  DASHBOARD: '/dashboard',
 } as const
