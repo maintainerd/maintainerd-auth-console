@@ -5,7 +5,7 @@ export default function ClientsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Client Management"
+        title="Clients"
         description="Manage OAuth clients and applications that integrate with your authentication system. Configure client types, permissions, and security settings for web apps, mobile apps, and machine-to-machine services."
       />
       <ClientListing />

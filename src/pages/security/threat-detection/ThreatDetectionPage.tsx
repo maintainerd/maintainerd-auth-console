@@ -73,7 +73,7 @@ export default function ThreatDetectionPage() {
     return (
       <DetailsContainer>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading threat detection settings...</p>
+          <p className="text-muted-foreground">Loading attack protection settings...</p>
         </div>
       </DetailsContainer>
     )
@@ -83,7 +83,7 @@ export default function ThreatDetectionPage() {
     <DetailsContainer>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Threat Detection</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Attack Protection</h1>
           <p className="text-muted-foreground">
             Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring.
           </p>

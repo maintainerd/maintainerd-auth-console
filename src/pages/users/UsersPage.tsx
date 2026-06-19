@@ -5,7 +5,7 @@ export default function UsersPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="User Management"
+        title="Users"
         description="Manage user accounts, authentication settings, and security features like 2FA and email verification."
       />
       <UserListing />

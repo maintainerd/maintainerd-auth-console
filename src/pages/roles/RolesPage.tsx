@@ -5,7 +5,7 @@ export default function RolesPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Role Management"
+        title="Roles"
         description="Create and manage roles with specific permissions to control what users can access and do."
       />
       <RoleListing />

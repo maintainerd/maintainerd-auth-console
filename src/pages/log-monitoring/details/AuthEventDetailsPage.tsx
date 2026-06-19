@@ -33,7 +33,7 @@ export default function AuthEventDetailsPage() {
 
   return (
     <DetailLayout
-      backLabel="Back to Audit Logs"
+      backLabel="Back to Monitoring"
       onBack={() => navigate(`/${tenantId}/logs`)}
       isLoading={isLoading}
       isError={isError || !event}

@@ -142,7 +142,7 @@ export default function MfaConfigPage() {
     <DetailsContainer>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">MFA</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Multi-Factor Auth</h1>
           <p className="text-muted-foreground">
             Configure multi-factor authentication enforcement, allowed methods, and device trust policies.
           </p>

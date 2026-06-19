@@ -5,7 +5,7 @@ export default function PoliciesPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Policy Management"
+        title="Policies"
         description="Create and manage IAM policies that control service access with allow and deny statements."
       />
       <PolicyListing />

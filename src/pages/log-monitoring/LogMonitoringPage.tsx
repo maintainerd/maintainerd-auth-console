@@ -7,7 +7,7 @@ export default function LogMonitoringPage() {
     <DetailsContainer>
       <PageContainer>
         <PageHeader
-          title="Audit Logs"
+          title="Monitoring"
           description="Monitor authentication, authorization, and security events across your tenant. Filter by category, severity, result, or search by event type and IP."
         />
         <AuthEventListing />

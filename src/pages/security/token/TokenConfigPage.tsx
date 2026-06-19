@@ -94,7 +94,7 @@ export default function TokenConfigPage() {
     <DetailsContainer>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Token Configuration</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Tokens</h1>
           <p className="text-muted-foreground">
             Configure JWT signing algorithm, clock skew, PKCE, and additional token claims.
           </p>

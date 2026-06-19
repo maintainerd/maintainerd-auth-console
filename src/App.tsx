@@ -52,7 +52,6 @@ import ApiKeyAddOrUpdateForm from './pages/api-keys/form'
 import PoliciesPage from './pages/policies'
 import PolicyDetailsPage from './pages/policies/details'
 import PolicyAddOrUpdateForm from './pages/policies/form'
-import SecurityPage from './pages/security'
 import MfaConfigPage from './pages/security/mfa/MfaConfigPage'
 import PasswordPoliciesPage from './pages/security/password-policies'
 import SessionManagementPage from './pages/security/session-management'
@@ -112,7 +111,6 @@ function App() {
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="security" element={<SecurityPage />} />
           <Route path="security/mfa" element={<MfaConfigPage />} />
           <Route path="security/password" element={<PasswordPoliciesPage />} />
           <Route path="security/session" element={<SessionManagementPage />} />

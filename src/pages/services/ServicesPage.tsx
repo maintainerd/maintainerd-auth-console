@@ -5,7 +5,7 @@ export default function ServicesPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Service Management"
+        title="Services"
         description="Manage microservices, their APIs, and permissions within your authentication system."
       />
       <ServiceListing />
