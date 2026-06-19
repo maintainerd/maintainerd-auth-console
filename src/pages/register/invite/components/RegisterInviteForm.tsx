@@ -89,8 +89,7 @@ const RegisterInviteForm = () => {
   const onSubmit = async (data: InviteFormData) => {
     setRegisterError(null)
     try {
-      const fallbackName = invitedEmail ? invitedEmail.split('@')[0] : 'User'
-      await registerInvite(fallbackName, data.password)
+      await registerInvite(invitedEmail, data.password)
 
       if (invitedEmail) {
         localStorage.setItem('register_email', invitedEmail)
