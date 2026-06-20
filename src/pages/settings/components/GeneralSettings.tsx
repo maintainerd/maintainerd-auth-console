@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import type { TenantEntity } from "@/services/api/tenants/types"
 import type { BaseSettingsProps } from "./types"
@@ -89,20 +88,6 @@ export function GeneralSettings({ tenant, settings, onUpdate, errors }: GeneralS
           {errors?.description && (
             <p className="text-sm text-destructive">{errors.description.message}</p>
           )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="is-public">Public Tenant</Label>
-            <p className="text-sm text-muted-foreground">
-              Make this tenant publicly accessible
-            </p>
-          </div>
-          <Switch
-            id="is-public"
-            checked={settings.is_public}
-            onCheckedChange={(checked) => onUpdate({ is_public: checked })}
-          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">

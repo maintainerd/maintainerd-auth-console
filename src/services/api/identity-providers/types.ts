@@ -18,7 +18,7 @@ export type ProviderType = 'identity' | 'social'
  * Provider options
  */
 export type ProviderOption =
-  | 'internal'
+  | 'maintainerd'
   | 'cognito'
   | 'auth0'
   | 'google'
@@ -159,7 +159,6 @@ export interface CreateIdentityProviderRequest {
   provider_type: ProviderType
   config: Record<string, unknown>
   status: IdentityProviderStatus
-  tenant_id: string
 }
 
 /**

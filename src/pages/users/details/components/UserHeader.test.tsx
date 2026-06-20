@@ -12,6 +12,7 @@ const {
   verifyPhoneMutateAsync,
   completeAccountMutateAsync,
   resetMfaMutateAsync,
+  updateStatusMutateAsync,
   showSuccessMock,
   showErrorMock,
 } = vi.hoisted(() => ({
@@ -21,6 +22,7 @@ const {
   verifyPhoneMutateAsync: vi.fn(),
   completeAccountMutateAsync: vi.fn(),
   resetMfaMutateAsync: vi.fn(),
+  updateStatusMutateAsync: vi.fn(),
   showSuccessMock: vi.fn(),
   showErrorMock: vi.fn(),
 }))
@@ -36,6 +38,7 @@ vi.mock("@/hooks/useUsers", () => ({
   useVerifyUserPhone: () => ({ mutateAsync: verifyPhoneMutateAsync, isPending: false }),
   useCompleteUserAccount: () => ({ mutateAsync: completeAccountMutateAsync, isPending: false }),
   useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
+  useUpdateUserStatus: () => ({ mutateAsync: updateStatusMutateAsync, isPending: false }),
 }))
 
 vi.mock("@/hooks/useToast", () => ({

@@ -13,7 +13,7 @@
  * Maintainerd uses to authenticate *as a relying party* with that provider. The
  * federation runtime (internal/idp) reads these from the provider config; the
  * secret is write-only — stored encrypted at rest and never returned to the form
- * (leave it blank on edit to keep the existing value). The built-in `internal`
+ * (leave it blank on edit to keep the existing value). The built-in `maintainerd`
  * provider has no external connection and therefore no credentials.
  *
  * Note: this is distinct from the Clients resource, which models the apps that
@@ -58,7 +58,7 @@ export interface ProviderConfigSchema {
 
 /** Human-friendly provider names, shared across forms, tables, and detail pages. */
 export const PROVIDER_LABELS: Record<string, string> = {
-  internal: "Internal",
+  maintainerd: "Maintainerd",
   cognito: "AWS Cognito",
   auth0: "Auth0",
   microsoft: "Microsoft Entra ID",
@@ -73,7 +73,7 @@ export const PROVIDER_LABELS: Record<string, string> = {
 
 /** Display order for the provider dropdown — identity providers first, then social. */
 export const PROVIDER_ORDER: ProviderOption[] = [
-  "internal",
+  "maintainerd",
   "cognito",
   "auth0",
   "microsoft",
@@ -153,7 +153,7 @@ function connectionGroup(opts: { federation?: boolean } = {}): ProviderConfigGro
 }
 
 export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchema> = {
-  internal: {
+  maintainerd: {
     kind: "identity",
     summary:
       "Built-in authentication managed by Maintainerd. User accounts, passwords, and sessions are handled natively — no external connection details are required.",

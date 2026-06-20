@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarDays, Globe, Lock, FileText } from "lucide-react"
+import { CalendarDays, FileText } from "lucide-react"
 import { format } from "date-fns"
 import type { TenantEntity } from "@/services/api/tenants/types"
 
@@ -22,27 +22,6 @@ export function TenantOverview({ tenant }: TenantOverviewProps) {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="shadow-xs">
-          <CardHeader className="flex flex-row items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              {tenant.is_public ? <Globe className="size-4" /> : <Lock className="size-4" />}
-            </div>
-            <div>
-              <CardTitle className="text-base">Visibility</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {tenant.is_public ? "Public" : "Private"}
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {tenant.is_public
-                ? "This tenant is publicly accessible. Anyone can view its registration page and branding."
-                : "This tenant is private. Only invited users can access it."}
-            </p>
-          </CardContent>
-        </Card>
-
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center gap-2">
             <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">

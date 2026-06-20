@@ -23,6 +23,7 @@ export const REGISTER_ROUTE = '/register'
 export const REGISTER_INVITE_ROUTE = '/register/invite'
 export const LOGIN_ROUTE = '/login'
 export const NO_ACCESS_ROUTE = '/no-access'
+export const SERVICE_UNAVAILABLE_ROUTE = '/service-unavailable'
 
 // Public auth pages an authenticated, fully-registered user should never sit on.
 const AUTH_PAGES = ['/login', '/register', '/register/invite', '/forgot-password', '/reset-password']
@@ -82,7 +83,7 @@ export function resolveGuardRedirect(ctx: GuardContext): string | null {
   const { pathname, isAuthenticated, account, tenant } = ctx
 
   // First-run setup and the no-access page are never gated.
-  if (pathname === NO_ACCESS_ROUTE || pathname.startsWith('/setup')) {
+  if (pathname === NO_ACCESS_ROUTE || pathname === SERVICE_UNAVAILABLE_ROUTE || pathname.startsWith('/setup')) {
     return null
   }
 

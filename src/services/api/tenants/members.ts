@@ -18,7 +18,7 @@ export interface TenantMemberUser {
 }
 
 export interface TenantMember {
-  tenant_user_id: string
+  tenant_member_id: string
   role: 'owner' | 'member'
   user: TenantMemberUser
   created_at: string
@@ -62,10 +62,14 @@ export async function addTenantMember(tenantId: string, user_id: string, role: '
   return post(`${API_ENDPOINTS.TENANT}s/${tenantId}/members`, { user_id, role })
 }
 
-export async function updateTenantMemberRole(tenantId: string, tenant_user_id: string, role: 'owner' | 'member') {
-  return patch(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${tenant_user_id}/role`, { role })
+export async function updateTenantMemberRole(tenantId: string, tenant_member_id: string, role: 'owner' | 'member') {
+  return patch(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${tenant_member_id}/role`, { role })
 }
 
-export async function deleteTenantMember(tenantId: string, tenant_user_id: string) {
-  return deleteRequest(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${tenant_user_id}`)
+export async function transferTenantOwnership(tenantId: string, new_owner_member_id: string) {
+  return patch(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${new_owner_member_id}/role`, { role: 'owner' })
+}
+
+export async function deleteTenantMember(tenantId: string, tenant_member_id: string) {
+  return deleteRequest(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${tenant_member_id}`)
 }

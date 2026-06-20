@@ -7,7 +7,7 @@ import { DataTablePagination } from "@/components/data-table"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { MemberItem } from "./MemberItem"
 import { AddMemberDialog } from "./AddMemberDialog"
-import { UpdateMemberRoleDialog } from "@/pages/settings/components/UpdateMemberRoleDialog"
+import { TransferOwnershipDialog } from "./TransferOwnershipDialog"
 import { useTenantMembers, useDeleteTenantMember } from "@/hooks/useTenantMembers"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from '@/store/hooks'
@@ -20,20 +20,21 @@ import {
 
 interface MembersSettingsProps {
   tenantId?: string
+  isSystemTenant?: boolean
 }
 
-export function MembersSettings({ tenantId: propTenantId }: MembersSettingsProps = {}) {
+export function MembersSettings({ tenantId: propTenantId, isSystemTenant }: MembersSettingsProps = {}) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
   const tenantId = propTenantId || currentTenant?.tenant_id || ''
   
   const [searchQuery, setSearchQuery] = useState("")
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
-  const [updateRoleDialog, setUpdateRoleDialog] = useState<{
+  const [transferOwnershipDialog, setTransferOwnershipDialog] = useState<{
     open: boolean
-    member: TenantMember | null
+    owner: TenantMember | null
   }>({
     open: false,
-    member: null
+    owner: null
   })
   const [deleteMemberDialog, setDeleteMemberDialog] = useState<{
     open: boolean
@@ -150,26 +151,30 @@ export function MembersSettings({ tenantId: propTenantId }: MembersSettingsProps
 
             {filteredData && filteredData.length > 0 && (
               <>
-                {filteredData.map((member: TenantMember) => (
-                  <MemberItem
-                    key={member.tenant_user_id}
-                    member={member}
-                    onUpdateRole={() => 
-                      setUpdateRoleDialog({
-                        open: true,
-                        member: member
-                      })
-                    }
-                    onDelete={(memberId, memberName) => 
-                      setDeleteMemberDialog({
-                        open: true,
-                        memberId,
-                        memberName,
-                        username: member.user.username
-                      })
-                    }
-                  />
-                ))}
+                {filteredData.map((member: TenantMember) => {
+                  const isOwner = member.role === 'owner'
+                  const isProtectedOwner = isSystemTenant && isOwner
+                  return (
+                    <MemberItem
+                      key={member.tenant_member_id}
+                      member={member}
+                      onTransferOwnership={isOwner && !isProtectedOwner ? () =>
+                        setTransferOwnershipDialog({
+                          open: true,
+                          owner: member
+                        })
+                      : undefined}
+                      onDelete={isOwner ? undefined : (memberId, memberName) =>
+                        setDeleteMemberDialog({
+                          open: true,
+                          memberId,
+                          memberName,
+                          username: member.user.username
+                        })
+                      }
+                    />
+                  )
+                })}
               </>
             )}
           </div>
@@ -190,17 +195,17 @@ export function MembersSettings({ tenantId: propTenantId }: MembersSettingsProps
         tenantId={tenantId}
       />
 
-      {/* Update Role Dialog */}
-      {updateRoleDialog.member && (
-        <UpdateMemberRoleDialog
-          open={updateRoleDialog.open}
+      {/* Transfer Ownership Dialog */}
+      {transferOwnershipDialog.owner && (
+        <TransferOwnershipDialog
+          open={transferOwnershipDialog.open}
           onOpenChange={(open) => {
             if (!open) {
-              setUpdateRoleDialog({ open: false, member: null })
+              setTransferOwnershipDialog({ open: false, owner: null })
             }
           }}
-          member={updateRoleDialog.member}
           tenantId={tenantId}
+          currentOwner={transferOwnershipDialog.owner}
         />
       )}
 

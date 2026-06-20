@@ -8,7 +8,7 @@ export default function TenantsPage() {
       <PageHeader
         icon={Building2}
         title="Tenants"
-        description="Manage your tenant organizations, their status, visibility, and authentication settings."
+        description="Manage your tenant organizations, their status, and authentication settings."
       />
       <TenantListing />
     </PageContainer>

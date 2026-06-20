@@ -106,6 +106,7 @@ export {
 
 // Password Policies schemas
 export {
+  PASSWORD_POLICY_LIMITS,
   passwordPoliciesSchema,
   type PasswordPoliciesFormData
 } from './passwordPoliciesSchema'

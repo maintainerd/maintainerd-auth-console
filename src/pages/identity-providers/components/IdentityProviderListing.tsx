@@ -8,7 +8,7 @@ const DEFAULT_SORT: SortingState = [{ id: "name", desc: false }]
 const SEARCH_FIELDS = ["search"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
-  { key: "provider", label: "Provider", options: ["internal", "cognito", "auth0", "google", "facebook", "github", "gitlab", "microsoft", "apple", "linkedin", "twitter"] },
+  { key: "provider", label: "Provider", options: ["maintainerd", "cognito", "auth0", "google", "facebook", "github", "gitlab", "microsoft", "apple", "linkedin", "twitter"] },
 ]
 
 export function IdentityProviderListing() {

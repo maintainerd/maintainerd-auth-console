@@ -54,4 +54,10 @@ describe("buildPasswordRules", () => {
     const rules = buildPasswordRules("x".repeat(65), cfg({ max_length: 64 }))
     expect(rules.find((r) => r.label === "No more than 64 characters")?.met).toBe(false)
   })
+
+  it("counts Unicode code points rather than UTF-16 units", () => {
+    const rules = buildPasswordRules("😀😀", cfg({ min_length: 2, max_length: 2 }))
+    expect(rules[0].met).toBe(true)
+    expect(rules[1].met).toBe(true)
+  })
 })

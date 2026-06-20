@@ -33,7 +33,7 @@ export const identityProviderSchema = yup.object({
     .string()
     .oneOf(
       [
-        'internal',
+        'maintainerd',
         'cognito',
         'auth0',
         'google',

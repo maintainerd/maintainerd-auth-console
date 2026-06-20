@@ -12,7 +12,6 @@ import {
   FormInputField,
   FormTextareaField,
   FormSelectField,
-  FormSwitchField,
   FormSubmitButton,
   type SelectOption,
 } from "@/components/form"
@@ -58,7 +57,6 @@ export default function TenantAddOrUpdateForm() {
       display_name: "",
       description: "",
       status: "active",
-      is_public: false,
     },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
@@ -71,7 +69,6 @@ export default function TenantAddOrUpdateForm() {
         display_name: tenantData.display_name,
         description: tenantData.description,
         status: tenantData.status,
-        is_public: tenantData.is_public,
       })
     }
   }, [isEditing, tenantData, reset])
@@ -86,7 +83,6 @@ export default function TenantAddOrUpdateForm() {
         display_name: data.display_name,
         description: data.description,
         status: data.status as TenantStatus,
-        is_public: data.is_public as boolean,
       }
 
       if (isCreating) {
@@ -239,21 +235,6 @@ export default function TenantAddOrUpdateForm() {
                       disabled={isLoading}
                       error={errors.status?.message}
                       required
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="is_public"
-                  control={control}
-                  render={({ field }) => (
-                    <FormSwitchField
-                      label="Public Tenant"
-                      description="Allow public access to this tenant's registration and branding"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isLoading}
-                      error={errors.is_public?.message}
                     />
                   )}
                 />

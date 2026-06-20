@@ -32,7 +32,6 @@ async function fetchTenantsForListing(
   if (params.identifier) qp.set("identifier", params.identifier)
   if (params.status) qp.set("status", params.status)
   if (params.is_system !== undefined) qp.set("is_system", String(params.is_system))
-  if (params.is_public !== undefined) qp.set("is_public", String(params.is_public))
   if (params.page) qp.set("page", String(params.page))
   if (params.limit) qp.set("limit", String(params.limit))
   if (params.sort_by) qp.set("sort_by", params.sort_by)

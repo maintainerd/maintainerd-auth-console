@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Building2, CalendarDays, Edit, Globe, Hash, Lock, MoreVertical, Trash2, User } from "lucide-react"
+import { Building2, CalendarDays, Edit, Fingerprint, Hash, MoreVertical, Trash2, User } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -39,6 +39,11 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
 
   const attributes: DetailAttribute[] = [
     {
+      icon: Fingerprint,
+      label: "Tenant ID",
+      value: <span className="font-mono text-xs">{tenant.tenant_id}</span>,
+    },
+    {
       icon: Hash,
       label: "Name",
       value: <span className="font-mono text-xs">{tenant.name}</span>,
@@ -54,19 +59,14 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
       value: tenant.description || <span className="text-muted-foreground">—</span>,
     },
     {
-      icon: tenant.is_public ? Globe : Lock,
-      label: "Visibility",
-      value: tenant.is_public ? "Public" : "Private",
-    },
-    {
       icon: CalendarDays,
       label: "Created",
-      value: format(new Date(tenant.created_at), "PP"),
+      value: format(new Date(tenant.created_at), "PPp"),
     },
     {
       icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(tenant.updated_at), "PP"),
+      value: format(new Date(tenant.updated_at), "PPp"),
     },
   ]
 

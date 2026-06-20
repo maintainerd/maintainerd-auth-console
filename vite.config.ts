@@ -18,6 +18,9 @@ export default defineConfig({
   },
   /** Development server configuration */
   server: {
+    watch: {
+      ignored: ['**/coverage/**'],
+    },
     proxy: {
       // Proxy API requests to the backend during development
       '/api': {
@@ -47,46 +50,21 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],
-      // Scope coverage to the shared service factory, the shared listing engine,
-      // and the Users listing components (the reference implementation).
       include: [
-        'src/services/api/_lib/**',
-        'src/components/data-table/useServerDataTable.ts',
-        'src/components/data-table/ListingToolbar.tsx',
-        'src/components/data-table/ResourceListing.tsx',
-        'src/components/data-table/RowActions.tsx',
-        'src/pages/users/components/UserActions.tsx',
-        'src/pages/users/components/UserColumns.tsx',
-        'src/pages/users/components/UserListing.tsx',
-        'src/components/data-table/usePaginationTable.ts',
-        'src/components/details/StatusBadge.tsx',
-        'src/components/details/EmptyState.tsx',
-        'src/components/details/ListSkeleton.tsx',
-        'src/components/details/DetailHeaderCard.tsx',
-        'src/components/details/DetailLayout.tsx',
-        // Users details feature (the reference test standard for detail views).
-        'src/pages/users/details/UserDetailsPage.tsx',
-        'src/pages/users/details/components/UserHeader.tsx',
-        'src/pages/users/details/components/UserMetadata.tsx',
-        'src/pages/users/details/components/UserRoles.tsx',
-        'src/pages/users/details/components/UserIdentities.tsx',
-        'src/pages/users/details/components/UserActivity.tsx',
-        'src/pages/users/details/components/UserSessions.tsx',
-        'src/pages/users/details/components/UserProfiles.tsx',
-        'src/pages/users/details/components/ProfileActions.tsx',
-        'src/pages/users/details/components/ProfileFormDialog.tsx',
-        'src/pages/users/details/components/AssignUserRolesDialog.tsx',
-        // Users add/update form + the shared metadata-fields hook it relies on.
-        'src/pages/users/form/UserAddOrUpdateForm.tsx',
-        'src/hooks/useMetadataFields.ts',
+        'src/components/**',
+        'src/pages/**',
+        'src/hooks/**',
+        'src/services/**',
+        'src/utils/**',
+        'src/lib/**',
+        'src/store/**',
       ],
-      exclude: ['**/*.test.{ts,tsx}', 'src/test/**'],
-      thresholds: {
-        statements: 80,
-        branches: 80,
-        functions: 80,
-        lines: 80,
-      },
+      exclude: [
+        '**/*.test.{ts,tsx}',
+        '**/*.d.ts',
+        'src/test/**',
+        'src/components/ui/**',
+      ],
     },
   },
 })

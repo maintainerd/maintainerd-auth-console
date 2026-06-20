@@ -109,7 +109,7 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
       state.isLoading = false
       state.isInitialized = true
       populateAccount(state, action.payload)
-      state.isAuthenticated = true
+      state.isAuthenticated = !!action.payload
     })
     .addCase(initializeAuthAsync.rejected, (state) => {
       state.isLoading = false

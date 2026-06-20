@@ -87,6 +87,13 @@ export function AddMemberDialog({ open, onOpenChange, tenantId: propTenantId }: 
 
   const users = usersData?.rows ?? []
   const existingMemberUserIds = membersData?.data?.rows?.map(m => m.user.user_id) ?? []
+  const hasOwner = membersData?.data?.rows?.some(m => m.role === 'owner') ?? false
+
+  useEffect(() => {
+    if (hasOwner && role === 'owner') {
+      setRole('member')
+    }
+  }, [hasOwner, role])
 
   // Filter out users who are already members
   const availableUsers = users.filter(
@@ -111,24 +118,26 @@ export function AddMemberDialog({ open, onOpenChange, tenantId: propTenantId }: 
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Role Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="role">
-              Member Role <span className="text-destructive">*</span>
-            </Label>
-            <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'member')}>
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="member">Member</SelectItem>
-                <SelectItem value="owner">Owner</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Owners have full access to manage the tenant
-            </p>
-          </div>
+          {/* Role Selection — only shown when tenant has no owner yet */}
+          {!hasOwner && (
+            <div className="space-y-2">
+              <Label htmlFor="role">
+                Member Role <span className="text-destructive">*</span>
+              </Label>
+              <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'member')}>
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Owners have full administrative access to the tenant. Only one owner is allowed.
+              </p>
+            </div>
+          )}
 
           {/* User Selection */}
           <div className="space-y-3">

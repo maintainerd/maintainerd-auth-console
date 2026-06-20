@@ -26,9 +26,11 @@ interface UpdateMemberRoleDialogProps {
   onOpenChange: (open: boolean) => void
   member: TenantMember
   tenantId?: string
+  hasOwner?: boolean
+  isSystemTenant?: boolean
 }
 
-export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: propTenantId }: UpdateMemberRoleDialogProps) {
+export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: propTenantId, hasOwner, isSystemTenant }: UpdateMemberRoleDialogProps) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
   const tenantId = propTenantId || currentTenant?.tenant_id || ''
   const { showSuccess, showError } = useToast()
@@ -51,7 +53,7 @@ export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: p
 
     try {
       await updateRoleMutation.mutateAsync({
-        tenant_user_id: member.tenant_user_id,
+        tenant_member_id: member.tenant_member_id,
         role
       })
       showSuccess("Member role updated successfully")
@@ -79,8 +81,18 @@ export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: p
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="owner">Owner</SelectItem>
-                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem
+                    value="owner"
+                    disabled={member.role !== 'owner' && hasOwner}
+                  >
+                    Owner
+                  </SelectItem>
+                  <SelectItem
+                    value="member"
+                    disabled={member.role === 'owner' && isSystemTenant}
+                  >
+                    Member
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">

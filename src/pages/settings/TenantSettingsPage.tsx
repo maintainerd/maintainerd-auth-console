@@ -36,7 +36,6 @@ export default function TenantSettingsPage() {
       name: "",
       display_name: "",
       description: "",
-      is_public: false,
     },
     mode: 'onSubmit',
     reValidateMode: 'onSubmit'
@@ -52,7 +51,6 @@ export default function TenantSettingsPage() {
         name: currentTenant.name,
         display_name: currentTenant.display_name,
         description: currentTenant.description,
-        is_public: currentTenant.is_public,
       }
       reset(formData)
     }

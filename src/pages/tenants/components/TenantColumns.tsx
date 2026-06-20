@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Building2, Globe, Lock } from "lucide-react"
+import { Building2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import { TenantActions } from "./TenantActions"
@@ -41,29 +41,6 @@ export function tenantColumns(
           {row.original.identifier}
         </div>
       ),
-    },
-    {
-      id: "Visibility",
-      accessorKey: "is_public",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Visibility" />,
-      cell: ({ row }) => {
-        const tenant = row.original
-        return (
-          <div className="px-3 py-1">
-            {tenant.is_public ? (
-              <Badge variant="default" className="flex items-center gap-1 w-fit">
-                <Globe className="h-3 w-3" />
-                Public
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="flex items-center gap-1 w-fit">
-                <Lock className="h-3 w-3" />
-                Private
-              </Badge>
-            )}
-          </div>
-        )
-      },
     },
     {
       id: "Status",

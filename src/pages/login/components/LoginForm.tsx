@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { AlertCircle } from "lucide-react"
@@ -23,7 +23,7 @@ const LoginForm = () => {
   const [mfaChallenge, setMfaChallenge] = useState<{ token: string; methods: string[] } | null>(null)
 
   const currentTenant = getCurrentTenant()
-  const loginSchema = useMemo(() => buildLoginSchema(currentTenant?.password_config), [currentTenant?.password_config])
+  const loginSchema = buildLoginSchema()
   const showSignUp = currentTenant?.registration_config?.self_registration_enabled !== false
 
   const {

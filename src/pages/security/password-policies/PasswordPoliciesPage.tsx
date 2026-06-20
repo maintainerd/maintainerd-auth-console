@@ -3,12 +3,16 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
 import { DetailsContainer } from '@/components/container'
-import { Save } from 'lucide-react'
+import { AlertCircle, RefreshCw, Save } from 'lucide-react'
 import { FormSwitchField, FormInputField, FormSelectField } from '@/components/form'
 import { SettingsCard } from '@/components/card'
 import { usePasswordPolicies, useUpdatePasswordPolicies } from '@/hooks/usePasswordPolicies'
 import { useToast } from '@/hooks/useToast'
-import { passwordPoliciesSchema, type PasswordPoliciesFormData } from '@/lib/validations'
+import {
+  PASSWORD_POLICY_LIMITS,
+  passwordPoliciesSchema,
+  type PasswordPoliciesFormData,
+} from '@/lib/validations'
 
 
 const HASH_OPTIONS = [
@@ -20,7 +24,13 @@ const HASH_OPTIONS = [
 
 export default function PasswordPoliciesPage() {
   const { showSuccess, showError } = useToast()
-  const { data: savedPolicies, isLoading } = usePasswordPolicies()
+  const {
+    data: savedPolicies,
+    error: loadError,
+    isError,
+    isLoading,
+    refetch,
+  } = usePasswordPolicies()
   const updateMutation = useUpdatePasswordPolicies()
 
   const {
@@ -28,6 +38,7 @@ export default function PasswordPoliciesPage() {
     reset,
     watch,
     setValue,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<PasswordPoliciesFormData>({
     resolver: yupResolver(passwordPoliciesSchema),
@@ -46,7 +57,8 @@ export default function PasswordPoliciesPage() {
       hash_algorithm: 'argon2id',
       min_strength_score: 2,
     },
-    mode: 'onSubmit',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   })
 
   const formValues = watch()
@@ -74,10 +86,11 @@ export default function PasswordPoliciesPage() {
   const handleUpdate = (updates: Partial<PasswordPoliciesFormData>) => {
     Object.entries(updates).forEach(([key, value]) => {
       setValue(key as keyof PasswordPoliciesFormData, value, {
-        shouldValidate: false,
+        shouldValidate: true,
         shouldDirty: true,
       })
     })
+    void trigger()
   }
 
   const onSubmit = async (data: PasswordPoliciesFormData) => {
@@ -94,6 +107,30 @@ export default function PasswordPoliciesPage() {
       <DetailsContainer>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <p className="text-muted-foreground">Loading password policies...</p>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isError || !savedPolicies) {
+    return (
+      <DetailsContainer>
+        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
+            <AlertCircle className="size-6 text-destructive" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">Unable to load password policy</h2>
+            <p className="max-w-md text-sm text-muted-foreground">
+              {loadError instanceof Error
+                ? loadError.message
+                : 'The saved policy could not be retrieved. No settings have been changed.'}
+            </p>
+          </div>
+          <Button type="button" variant="outline" onClick={() => void refetch()}>
+            <RefreshCw className="mr-2 size-4" />
+            Try again
+          </Button>
         </div>
       </DetailsContainer>
     )
@@ -119,6 +156,8 @@ export default function PasswordPoliciesPage() {
               <FormInputField
                 label="Minimum Length"
                 type="number"
+                min={1}
+                max={PASSWORD_POLICY_LIMITS.maxLength}
                 value={formValues.min_length.toString()}
                 onChange={(e) =>
                   handleUpdate({ min_length: parseInt(e.target.value) || 1 })
@@ -129,6 +168,8 @@ export default function PasswordPoliciesPage() {
               <FormInputField
                 label="Maximum Length"
                 type="number"
+                min={64}
+                max={PASSWORD_POLICY_LIMITS.maxLength}
                 value={formValues.max_length.toString()}
                 onChange={(e) =>
                   handleUpdate({ max_length: parseInt(e.target.value) || 64 })
@@ -188,6 +229,8 @@ export default function PasswordPoliciesPage() {
                 label="Password History Count"
                 description="Number of previous passwords to remember (0 = disabled)"
                 type="number"
+                min={0}
+                max={PASSWORD_POLICY_LIMITS.maxHistoryCount}
                 value={formValues.password_history_count.toString()}
                 onChange={(e) =>
                   handleUpdate({ password_history_count: parseInt(e.target.value) || 0 })
@@ -198,6 +241,8 @@ export default function PasswordPoliciesPage() {
                 label="Minimum Strength Score"
                 description="0–4 zxcvbn-like threshold (2 = good)"
                 type="number"
+                min={0}
+                max={4}
                 value={formValues.min_strength_score.toString()}
                 onChange={(e) =>
                   handleUpdate({ min_strength_score: parseInt(e.target.value) || 0 })
@@ -216,6 +261,8 @@ export default function PasswordPoliciesPage() {
                 label="Max Age (days)"
                 description="Days until password expires (0 = never)"
                 type="number"
+                min={0}
+                max={PASSWORD_POLICY_LIMITS.maxAgeDays}
                 value={formValues.max_age_days.toString()}
                 onChange={(e) =>
                   handleUpdate({ max_age_days: parseInt(e.target.value) || 0 })
@@ -225,6 +272,8 @@ export default function PasswordPoliciesPage() {
               <FormInputField
                 label="Temporary Password Validity (hours)"
                 type="number"
+                min={1}
+                max={PASSWORD_POLICY_LIMITS.maxTemporaryPasswordValidityHours}
                 value={formValues.temporary_password_validity_hours.toString()}
                 onChange={(e) =>
                   handleUpdate({

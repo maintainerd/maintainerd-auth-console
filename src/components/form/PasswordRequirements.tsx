@@ -6,7 +6,7 @@
  * buildPasswordValidation() in authSchema.ts, so what the user sees matches what
  * the schema enforces — and both follow the tenant's password_config.
  */
-import { Check, X } from 'lucide-react'
+import { Check, Info, X } from 'lucide-react'
 import type { PasswordConfigPublic } from '@/services/api/tenants/types'
 import { cn } from '@/lib/utils'
 import { buildPasswordRules } from './passwordRules'
@@ -38,6 +38,13 @@ export function PasswordRequirements({ password, config, className }: PasswordRe
           <span>{rule.label}</span>
         </li>
       ))}
+      <li className="mt-1 flex items-start gap-2 text-xs text-muted-foreground">
+        <Info className="mt-0.5 size-3.5 shrink-0" />
+        <span>
+          Additional tenant checks for password strength, common passwords, and known breaches may
+          run when you submit.
+        </span>
+      </li>
     </ul>
   )
 }

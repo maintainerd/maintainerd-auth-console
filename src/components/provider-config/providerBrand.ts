@@ -30,7 +30,7 @@ export interface ProviderBrand {
 }
 
 const PROVIDER_BRAND: Record<string, ProviderBrand> = {
-  internal: { Icon: ShieldCheck, color: "text-foreground" },
+  maintainerd: { Icon: ShieldCheck, color: "text-foreground" },
   cognito: { Icon: IconBrandAws, color: "text-[#FF9900]" },
   auth0: { Icon: IconBrandAuth0, color: "text-[#EB5424]" },
   microsoft: { Icon: IconBrandAzure, color: "text-[#0078D4]" },

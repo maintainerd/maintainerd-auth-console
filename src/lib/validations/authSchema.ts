@@ -11,9 +11,17 @@ export function buildPasswordValidation(cfg?: PasswordConfigPublic) {
 
   const minLen = cfg?.min_length ?? 12
   const maxLen = cfg?.max_length ?? 128
-  schema = schema.min(minLen, `Password must be at least ${minLen} characters`)
+  schema = schema.test(
+    'minimum-character-length',
+    `Password must be at least ${minLen} characters`,
+    (value) => !value || Array.from(value).length >= minLen,
+  )
   if (maxLen > 0) {
-    schema = schema.max(maxLen, `Password must not exceed ${maxLen} characters`)
+    schema = schema.test(
+      'maximum-character-length',
+      `Password must not exceed ${maxLen} characters`,
+      (value) => !value || Array.from(value).length <= maxLen,
+    )
   }
   if (cfg?.require_uppercase) {
     schema = schema.matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
@@ -30,14 +38,17 @@ export function buildPasswordValidation(cfg?: PasswordConfigPublic) {
   return schema
 }
 
-export function buildLoginSchema(cfg?: PasswordConfigPublic) {
+export function buildLoginSchema() {
   return yup.object({
     email: yup
       .string()
       .required('Email is required')
       .email('Please enter a valid email address')
       .max(255, 'Email must not exceed 255 characters'),
-    password: buildPasswordValidation(cfg),
+    // Existing passwords remain valid after an administrator strengthens the
+    // tenant policy. Complexity rules apply only when a password is created or
+    // changed; login should validate presence and let the server authenticate.
+    password: yup.string().required('Password is required'),
   })
 }
 

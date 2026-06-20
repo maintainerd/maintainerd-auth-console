@@ -45,7 +45,6 @@ export interface TenantEntity {
   description: string
   identifier: string
   status: TenantStatus
-  is_public: boolean
   is_default: boolean
   is_system: boolean
   created_at: string
@@ -64,7 +63,6 @@ export interface TenantListParams {
   description?: string
   identifier?: string
   status?: TenantStatus
-  is_public?: boolean
   is_default?: boolean
   is_system?: boolean
   page?: number
@@ -81,7 +79,6 @@ export interface CreateTenantRequest {
   display_name: string
   description: string
   status: TenantStatus
-  is_public: boolean
 }
 
 /**

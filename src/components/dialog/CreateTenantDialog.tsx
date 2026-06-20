@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
-import { FormInputField, FormTextareaField, FormSelectField, FormCheckboxField } from "@/components/form"
+import { FormInputField, FormTextareaField, FormSelectField } from "@/components/form"
 import { createTenantSchema, type CreateTenantFormData } from "@/lib/validations"
 import { useCreateTenant } from "@/hooks/useTenants"
 import type { TenantStatus } from "@/services/api/tenants/types"
@@ -40,7 +40,6 @@ export function CreateTenantDialog({
       display_name: "",
       description: "",
       status: "active" as TenantStatus,
-      is_public: true,
     },
   })
 
@@ -127,13 +126,6 @@ export function CreateTenantDialog({
               )}
             />
 
-            <FormCheckboxField
-              label="Public Tenant"
-              description="Allow public access to this tenant"
-              disabled={isLoading}
-              error={errors.is_public?.message}
-              {...register("is_public")}
-            />
           </FieldGroup>
 
           <DialogFooter className="mt-6">

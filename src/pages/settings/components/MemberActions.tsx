@@ -6,20 +6,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   MoreHorizontal,
-  Shield,
-  Trash2
+  Trash2,
+  ArrowRightLeft
 } from "lucide-react"
 import { DeleteConfirmationDialog } from "@/components/dialog"
+import { TransferOwnershipDialog } from "./TransferOwnershipDialog"
 import { useDeleteTenantMember } from "@/hooks/useTenantMembers"
 import { useToast } from "@/hooks/useToast"
 import { useAppSelector } from '@/store/hooks'
 import type { TenantMember } from "@/services/api/tenants/members"
-import { UpdateMemberRoleDialog } from "@/pages/settings/components/UpdateMemberRoleDialog"
 
 interface MemberActionsProps {
   member: TenantMember
@@ -28,23 +27,27 @@ interface MemberActionsProps {
 export function MemberActions({ member }: MemberActionsProps) {
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
   const tenantId = currentTenant?.tenant_id || ''
+  const isSystemTenant = currentTenant?.is_system ?? false
   const { showSuccess, showError } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showUpdateRoleDialog, setShowUpdateRoleDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
 
   const deleteMemberMutation = useDeleteTenantMember(tenantId)
 
-  const handleUpdateRole = () => {
-    setShowUpdateRoleDialog(true)
-  }
+  const isOwner = member.role === 'owner'
+  const isProtectedOwner = isSystemTenant && isOwner
 
   const handleDelete = async () => {
     try {
-      await deleteMemberMutation.mutateAsync(member.tenant_user_id)
+      await deleteMemberMutation.mutateAsync(member.tenant_member_id)
       showSuccess("Member removed successfully")
     } catch (error) {
       showError(error)
     }
+  }
+
+  if (isProtectedOwner) {
+    return null
   }
 
   return (
@@ -57,37 +60,45 @@ export function MemberActions({ member }: MemberActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleUpdateRole}>
-            <Shield className="mr-2 h-4 w-4" />
-            Update Role
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Remove Member
-          </DropdownMenuItem>
+          {isOwner && (
+            <DropdownMenuItem onClick={() => setShowTransferDialog(true)}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Transfer Ownership
+            </DropdownMenuItem>
+          )}
+          {!isOwner && (
+            <DropdownMenuItem
+              onClick={() => setShowDeleteDialog(true)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Remove Member
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
-        title="Remove Member"
-        description={`Are you sure you want to remove ${member.user.fullname} from this tenant? This action cannot be undone.`}
-        confirmationText="DELETE"
-        itemName="DELETE"
-        isDeleting={deleteMemberMutation.isPending}
-      />
+      {!isOwner && (
+        <DeleteConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleDelete}
+          title="Remove Member"
+          description={`Are you sure you want to remove ${member.user.fullname} from this tenant? This action cannot be undone.`}
+          confirmationText="DELETE"
+          itemName="DELETE"
+          isDeleting={deleteMemberMutation.isPending}
+        />
+      )}
 
-      <UpdateMemberRoleDialog
-        open={showUpdateRoleDialog}
-        onOpenChange={setShowUpdateRoleDialog}
-        member={member}
-      />
+      {isOwner && (
+        <TransferOwnershipDialog
+          open={showTransferDialog}
+          onOpenChange={setShowTransferDialog}
+          tenantId={tenantId}
+          currentOwner={member}
+        />
+      )}
     </>
   )
 }

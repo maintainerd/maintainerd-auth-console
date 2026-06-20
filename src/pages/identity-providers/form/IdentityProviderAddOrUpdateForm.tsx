@@ -59,7 +59,7 @@ export default function IdentityProviderAddOrUpdateForm() {
     defaultValues: {
       name: "",
       displayName: "",
-      provider: "internal",
+      provider: "maintainerd",
       status: "active",
     },
     mode: 'onSubmit',
@@ -126,7 +126,6 @@ export default function IdentityProviderAddOrUpdateForm() {
           provider_type: providerType,
           config,
           status: formData.status as IdentityProviderStatus,
-          tenant_id: currentTenant.tenant_id
         }
         await createProviderMutation.mutateAsync(createData)
         showSuccess("Identity provider created successfully")

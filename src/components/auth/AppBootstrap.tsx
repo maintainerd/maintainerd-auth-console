@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import { determineTenantIdentifier } from '@/utils/tenant'
+import { SERVICE_UNAVAILABLE_ROUTE } from '@/utils/postAuthRoute'
 import AppLoadingScreen from '@/components/layout/AppLoadingScreen'
 import { RouteGuard } from './RouteGuard'
 
@@ -20,7 +21,7 @@ import { RouteGuard } from './RouteGuard'
 export function AppBootstrap({ children }: { children: ReactNode }) {
   const location = useLocation()
   const { initializeAuth, isInitialized } = useAuth()
-  const { initializeFromLocation, currentTenant } = useTenant()
+  const { initializeFromLocation, currentTenant, error: tenantError } = useTenant()
 
   const authStartedRef = useRef(false)
   const lastTenantIdentifierRef = useRef<string | null | undefined>(undefined)
@@ -60,6 +61,17 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
   const ready = isInitialized && tenantSettled
   if (!ready) {
     return <AppLoadingScreen branding={currentTenant?.branding} />
+  }
+
+  const isExemptFromServiceCheck =
+    location.pathname === SERVICE_UNAVAILABLE_ROUTE ||
+    location.pathname.startsWith('/setup') ||
+    location.pathname === '/login' ||
+    location.pathname.startsWith('/register') ||
+    /^\/[^/]+\/login$/.test(location.pathname)
+
+  if (!currentTenant && tenantError && !isExemptFromServiceCheck) {
+    return <Navigate to={SERVICE_UNAVAILABLE_ROUTE} replace />
   }
 
   return <RouteGuard>{children}</RouteGuard>

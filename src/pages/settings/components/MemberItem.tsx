@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Shield, Trash2, MoreHorizontal } from "lucide-react"
+import { User, Shield, Trash2, MoreHorizontal, ArrowRightLeft } from "lucide-react"
 import { format } from "date-fns"
 import type { TenantMember } from "@/services/api/tenants/members"
 
@@ -15,9 +15,10 @@ interface MemberItemProps {
   member: TenantMember
   onUpdateRole?: () => void
   onDelete?: (memberId: string, memberName: string) => void
+  onTransferOwnership?: () => void
 }
 
-export function MemberItem({ member, onUpdateRole, onDelete }: MemberItemProps) {
+export function MemberItem({ member, onUpdateRole, onDelete, onTransferOwnership }: MemberItemProps) {
   return (
     <div className="flex items-start gap-3 py-3 border-b last:border-0">
       <div className="mt-1">
@@ -55,7 +56,7 @@ export function MemberItem({ member, onUpdateRole, onDelete }: MemberItemProps) 
           <span>Added: {format(new Date(member.created_at), "MMM d, yyyy")}</span>
         </div>
       </div>
-      {(onUpdateRole || onDelete) && (
+      {(onUpdateRole || onDelete || onTransferOwnership) && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -64,6 +65,13 @@ export function MemberItem({ member, onUpdateRole, onDelete }: MemberItemProps) 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {onTransferOwnership && (
+              <DropdownMenuItem onClick={onTransferOwnership}>
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                Transfer Ownership
+              </DropdownMenuItem>
+            )}
+            {onTransferOwnership && (onUpdateRole || onDelete) && <DropdownMenuSeparator />}
             {onUpdateRole && (
               <DropdownMenuItem onClick={onUpdateRole}>
                 <Shield className="mr-2 h-4 w-4" />
@@ -73,7 +81,7 @@ export function MemberItem({ member, onUpdateRole, onDelete }: MemberItemProps) 
             {onUpdateRole && onDelete && <DropdownMenuSeparator />}
             {onDelete && (
               <DropdownMenuItem
-                onClick={() => onDelete(member.tenant_user_id, member.user.fullname)}
+                onClick={() => onDelete(member.tenant_member_id, member.user.fullname)}
                 className="text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />

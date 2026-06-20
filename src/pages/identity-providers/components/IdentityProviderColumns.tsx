@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { Cloud, Shield } from "lucide-react"
+import { Shield } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { IdentityProviderActions } from "./IdentityProviderActions"
 import { DataTableColumnHeader } from "@/components/data-table"
@@ -9,30 +9,12 @@ import { StatusBadge } from "@/components/details/StatusBadge"
 import { PROVIDER_LABELS, ProviderLogo, getProviderBrand } from "@/components/provider-config"
 import type { IdentityProvider, ProviderOption } from "@/services/api/identity-providers/types"
 
-const getInternalExternalBadge = (isSystem: boolean) => {
-  if (isSystem) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        <Shield className="h-3 w-3 mr-1" />
-        Internal
-      </Badge>
-    )
-  }
-
-  return (
-    <Badge variant="outline" className="text-xs">
-      <Cloud className="h-3 w-3 mr-1" />
-      External
-    </Badge>
-  )
-}
-
 const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
   if (isSystem) {
     return (
       <Badge variant="secondary" className="text-xs">
         <Shield className="h-3 w-3 mr-1" />
-        Built-in
+        {PROVIDER_LABELS[provider] ?? provider}
       </Badge>
     )
   }
@@ -64,24 +46,20 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
               <SystemBadge isSystem={provider.is_system} />
             </div>
             <span className="text-sm text-muted-foreground truncate">{provider.name}</span>
-            <span className="text-xs text-muted-foreground font-mono truncate">{provider.identifier}</span>
           </div>
         </div>
       )
     },
   },
   {
-    id: "Type",
-    accessorKey: "is_system",
-    enableSorting: false,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => {
-      return (
-        <div className="px-3 py-1">
-          {getInternalExternalBadge(row.original.is_system)}
-        </div>
-      )
-    },
+    id: "identifier",
+    accessorKey: "identifier",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Identifier" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <span className="text-xs text-muted-foreground font-mono truncate">{row.original.identifier}</span>
+      </div>
+    ),
   },
   {
     id: "provider",

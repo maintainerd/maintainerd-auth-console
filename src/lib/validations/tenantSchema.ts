@@ -30,9 +30,6 @@ export const createTenantSchema = yup.object({
     .string()
     .required('Status is required')
     .oneOf(['active', 'inactive', 'suspended'], 'Invalid status'),
-  is_public: yup
-    .boolean()
-    .required('Please specify if tenant is public')
 })
 
 export type CreateTenantFormData = yup.InferType<typeof createTenantSchema>

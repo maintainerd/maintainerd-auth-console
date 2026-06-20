@@ -11,6 +11,9 @@ import {
   CalendarDays,
   Minus,
   ShieldOff,
+  Play,
+  Pause,
+  Ban,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -30,9 +33,10 @@ import {
   useVerifyUserPhone,
   useCompleteUserAccount,
   useResetUserMfa,
+  useUpdateUserStatus,
 } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
-import type { User } from "@/services/api/users/types"
+import type { User, UserStatus } from "@/services/api/users/types"
 
 interface UserHeaderProps {
   user: User
@@ -77,11 +81,13 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const verifyPhoneMutation = useVerifyUserPhone()
   const completeAccountMutation = useCompleteUserAccount()
   const resetMfaMutation = useResetUserMfa()
+  const updateStatusMutation = useUpdateUserStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<{ status: UserStatus; title: string; description: string } | null>(null)
 
   const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
     try {
@@ -190,6 +196,25 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {user.status !== "active" && (
+                  <DropdownMenuItem onClick={() => setStatusAction({ status: "active", title: "Activate User", description: "Are you sure you want to activate this user? They will be able to sign in and access the system." })}>
+                    <Play className="mr-2 size-4" />
+                    Activate User
+                  </DropdownMenuItem>
+                )}
+                {user.status === "active" && (
+                  <>
+                    <DropdownMenuItem onClick={() => setStatusAction({ status: "inactive", title: "Deactivate User", description: "Are you sure you want to deactivate this user? They will no longer be able to sign in." })}>
+                      <Pause className="mr-2 size-4" />
+                      Deactivate User
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatusAction({ status: "suspended", title: "Suspend User", description: "Are you sure you want to suspend this user? This is typically used for security concerns or policy violations. They will be immediately logged out and cannot sign in." })}>
+                      <Ban className="mr-2 size-4" />
+                      Suspend User
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowVerifyEmailDialog(true)}>
                   <CheckCircle2 className="mr-2 size-4" />
                   Mark Email as Verified
@@ -267,6 +292,21 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         description="This removes all of the user's multi-factor authentication enrollments. They'll be prompted to set up MFA again on next sign-in. Continue?"
         confirmText="Reset MFA"
         isLoading={resetMfaMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={() => {
+          if (!statusAction) return
+          runAction(
+            () => updateStatusMutation.mutateAsync({ userId, data: { status: statusAction.status } }),
+            `User status updated to ${statusAction.status}`,
+          ).then(() => setStatusAction(null))
+        }}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        isLoading={updateStatusMutation.isPending}
       />
     </>
   )

@@ -19,7 +19,6 @@ export async function fetchTenantList(params?: TenantListParams): Promise<Tenant
     description: params?.description ?? '',
     identifier: params?.identifier ?? '',
     status: params?.status ?? '',
-    is_public: params?.is_public !== undefined ? String(params.is_public) : '',
     is_default: params?.is_default !== undefined ? String(params.is_default) : '',
     is_system: params?.is_system !== undefined ? String(params.is_system) : '',
     page: params?.page !== undefined ? String(params.page) : '1',

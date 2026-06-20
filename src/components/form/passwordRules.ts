@@ -19,12 +19,13 @@ export interface PasswordRule {
 export function buildPasswordRules(password: string, config?: PasswordConfigPublic): PasswordRule[] {
   const minLen = config?.min_length ?? 12
   const maxLen = config?.max_length ?? 128
+  const passwordLength = Array.from(password).length
 
   const rules: PasswordRule[] = [
-    { label: `At least ${minLen} characters`, met: password.length >= minLen },
+    { label: `At least ${minLen} characters`, met: passwordLength >= minLen },
   ]
   if (maxLen > 0) {
-    rules.push({ label: `No more than ${maxLen} characters`, met: password.length <= maxLen })
+    rules.push({ label: `No more than ${maxLen} characters`, met: passwordLength <= maxLen })
   }
   if (config?.require_uppercase) {
     rules.push({ label: 'One uppercase letter', met: /[A-Z]/.test(password) })

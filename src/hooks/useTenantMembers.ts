@@ -4,6 +4,7 @@ import {
   addTenantMember,
   updateTenantMemberRole,
   deleteTenantMember,
+  transferTenantOwnership,
 } from '@/services/api/tenants/members'
 import type { TenantMembersListParams } from '@/services/api/tenants/members'
 
@@ -29,8 +30,8 @@ export function useAddTenantMember(tenantId: string) {
 export function useUpdateTenantMemberRole(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tenant_user_id, role }: { tenant_user_id: string; role: 'owner' | 'member' }) =>
-      updateTenantMemberRole(tenantId, tenant_user_id, role),
+    mutationFn: ({ tenant_member_id, role }: { tenant_member_id: string; role: 'owner' | 'member' }) =>
+      updateTenantMemberRole(tenantId, tenant_member_id, role),
     onSuccess: () => {
       // Only invalidate tenant-members query, not tenant query
       queryClient.invalidateQueries({ queryKey: ['tenant-members', tenantId] })
@@ -41,7 +42,18 @@ export function useUpdateTenantMemberRole(tenantId: string) {
 export function useDeleteTenantMember(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (tenant_user_id: string) => deleteTenantMember(tenantId, tenant_user_id),
+    mutationFn: (tenant_member_id: string) => deleteTenantMember(tenantId, tenant_member_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenant-members', tenantId] })
+    },
+  })
+}
+
+export function useTransferTenantOwnership(tenantId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (new_owner_member_id: string) =>
+      transferTenantOwnership(tenantId, new_owner_member_id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-members', tenantId] })
     },

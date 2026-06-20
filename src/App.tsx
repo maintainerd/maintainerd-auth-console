@@ -7,6 +7,7 @@ import '@/styles/toast.css'
 import { queryClient } from '@/lib/queryClient'
 import { AppBootstrap } from './components/auth/AppBootstrap'
 import NoAccessPage from './pages/no-access/NoAccessPage'
+import ServiceUnavailablePage from './pages/service-unavailable/ServiceUnavailablePage'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import RegisterInvitePage from './pages/register/invite/RegisterInvitePage'
@@ -97,6 +98,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/no-access" element={<NoAccessPage />} />
+        <Route path="/service-unavailable" element={<ServiceUnavailablePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/:tenantId/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
