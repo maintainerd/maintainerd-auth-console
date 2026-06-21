@@ -14,6 +14,7 @@ import {
   Play,
   Pause,
   Ban,
+  Link2,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -35,6 +36,7 @@ import {
   useResetUserMfa,
   useUpdateUserStatus,
 } from "@/hooks/useUsers"
+import { adminSendMagicLink } from "@/services/api/users"
 import { useToast } from "@/hooks/useToast"
 import type { User, UserStatus } from "@/services/api/users/types"
 
@@ -87,6 +89,7 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
+  const [showMagicLinkDialog, setShowMagicLinkDialog] = useState(false)
   const [statusAction, setStatusAction] = useState<{ status: UserStatus; title: string; description: string } | null>(null)
 
   const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
@@ -231,6 +234,10 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
                   <ShieldOff className="mr-2 size-4" />
                   Reset MFA
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowMagicLinkDialog(true)}>
+                  <Link2 className="mr-2 size-4" />
+                  Send Magic Link
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
@@ -307,6 +314,15 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         title={statusAction?.title ?? ""}
         description={statusAction?.description ?? ""}
         isLoading={updateStatusMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showMagicLinkDialog}
+        onOpenChange={setShowMagicLinkDialog}
+        onConfirm={() => runAction(() => adminSendMagicLink(userId), "Magic link sent to user's email")}
+        title="Send Magic Link"
+        description={`Send a passwordless login link to ${user.email || "the user's email"}? The link expires in 15 minutes and can only be used once.`}
+        confirmText="Send Magic Link"
       />
     </>
   )
