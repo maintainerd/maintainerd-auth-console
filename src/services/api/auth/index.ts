@@ -62,6 +62,11 @@ export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void
   }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
+export async function verifyMagicLink(token: string, clientId: string, providerId: string): Promise<LoginResponse> {
+  const url = `/magic-link/verify?client_id=${encodeURIComponent(clientId)}&provider_id=${encodeURIComponent(providerId)}`
+  return post<LoginResponse>(url, { token }, { headers: TOKEN_DELIVERY_HEADER })
+}
+
 /** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */
 export async function beginMFALoginWebAuthn(challengeToken: string): Promise<WebAuthnAssertionOptions> {
   const r = await post<ApiResponse<WebAuthnAssertionOptions>>(API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN, {

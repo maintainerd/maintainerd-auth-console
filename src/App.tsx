@@ -13,6 +13,7 @@ import RegisterPage from './pages/register'
 import RegisterInvitePage from './pages/register/invite/RegisterInvitePage'
 import ForgotPasswordPage from './pages/forgot-password'
 import ResetPasswordPage from './pages/reset-password'
+import MagicLinkPage from './pages/magic-link/MagicLinkPage'
 import SetupTenantPage from './pages/setup/tenant'
 import SetupAdminPage from './pages/setup/admin'
 import RegisterProfilePage from './pages/register/profile'
@@ -113,6 +114,7 @@ function App() {
         <Route path="/email-verification" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/magic-link" element={<MagicLinkPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
