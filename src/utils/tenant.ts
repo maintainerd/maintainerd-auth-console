@@ -38,7 +38,11 @@ export function getTenantIdentifierFromPath(pathname: string): string | null {
  * @returns Tenant identifier or null if not found
  */
 export function getTenantIdentifierFromQuery(searchParams: URLSearchParams): string | null {
-  return searchParams.get('t')
+  return searchParams.get('t') || searchParams.get('tenant_id')
+}
+
+export function tenantAuthRoute(path: string, tenantIdentifier?: string | null): string {
+  return tenantIdentifier ? `${path}?t=${encodeURIComponent(tenantIdentifier)}` : path
 }
 
 /**

@@ -6,7 +6,7 @@ import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { FormInputField, FormPasswordField, FormSubmitButton } from "@/components/form"
 import { buildLoginSchema, type LoginFormData } from "@/lib/validations"
 import { useToast } from "@/hooks/useToast"
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { LoginMFAStep } from "./LoginMFAStep"
@@ -14,11 +14,10 @@ import { resolvePostAuthRoute, dashboardRoute } from "@/utils/postAuthRoute"
 import type { AccountEntity } from '@/services/api/auth/types'
 import { sendMagicLink } from '@/services/api/auth'
 import { Button } from '@/components/ui/button'
+import { tenantAuthRoute } from '@/utils/tenant'
 
 const LoginForm = () => {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId?: string }>()
-  const [searchParams] = useSearchParams()
   const { login } = useAuth()
   const { getCurrentTenant } = useTenant()
   const { showSuccess } = useToast()
@@ -28,6 +27,7 @@ const LoginForm = () => {
   const [magicLinkSent, setMagicLinkSent] = useState(false)
 
   const currentTenant = getCurrentTenant()
+  const tenantId = currentTenant?.identifier
   const loginSchema = buildLoginSchema()
   const showSignUp = currentTenant?.registration_config?.self_registration_enabled !== false
 
@@ -60,6 +60,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
   const onSubmit = async (data: LoginFormData) => {
     setLoginError(null)
     try {
+      if (!tenantId) throw new Error('Tenant context is not initialized')
       const response = await login(data.email, data.password, tenantId)
       // MFA enrolled — show the second step; the session is issued there.
       if (response.mfaRequired) {
@@ -87,10 +88,9 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
     setLoginError(null)
     setIsSendingMagicLink(true)
     try {
+      if (!tenantId) throw new Error('Tenant context is not initialized')
       await sendMagicLink(getValues('email'), {
-        clientId: searchParams.get('client_id') || undefined,
-        providerId: searchParams.get('provider_id') || undefined,
-        tenantId: tenantId || searchParams.get('tenant_id') || undefined,
+        tenantId,
       })
       setMagicLinkSent(true)
     } catch (err: unknown) {
@@ -129,7 +129,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
           <p className="max-w-xs text-sm text-muted-foreground">
-            If an account exists for that email, a secure sign-in link will arrive shortly.
+            A secure sign-in link will arrive shortly.
           </p>
         </div>
 
@@ -182,7 +182,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
                 <span className="text-red-500 ml-1">*</span>
               </FieldLabel>
               <Link
-                to="/forgot-password"
+                to={tenantAuthRoute('/forgot-password', tenantId)}
                 className="ml-auto text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
                 Forgot password?
@@ -237,7 +237,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
       {showSignUp && (
       <div className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={tenantAuthRoute('/register', tenantId)} className="font-medium text-primary underline-offset-4 hover:underline">
           Sign up
         </Link>
       </div>

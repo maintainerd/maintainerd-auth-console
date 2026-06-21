@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useToast } from '@/hooks/useToast'
@@ -27,11 +26,11 @@ import { clearTenant } from '@/store/tenant/reducers'
 export function useAuth() {
   const dispatch = useAppDispatch()
   const queryClient = useQueryClient()
-  const [searchParams] = useSearchParams()
   const { showError } = useToast()
   const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
+  const tenantId = useAppSelector((state) => state.tenant.currentTenant?.identifier)
 
-  const login = useCallback(async (email: string, password: string, tenantId?: string) => {
+  const login = useCallback(async (email: string, password: string, tenantId: string) => {
     const result = await dispatch(loginAsync({ username: email, password, tenantId })).unwrap()
 
     // MFA enrolled: a second factor is required before the session is issued.
@@ -74,30 +73,29 @@ export function useAuth() {
     password: string,
     phone?: string
   ) => {
-    // Get client_id and provider_id from URL query parameters
-    const clientId = searchParams.get('client_id')
-    const providerId = searchParams.get('provider_id')
+    if (!tenantId) throw new Error('Tenant context is not initialized')
 
     const result = await dispatch(registerAsync({
       fullname,
       email,
       password,
       phone,
-      clientId: clientId || undefined,
-      providerId: providerId || undefined
+      tenantId,
     })).unwrap()
 
     return { data: result.data }
-  }, [dispatch, searchParams])
+  }, [dispatch, tenantId])
 
   const registerInvite = useCallback(async (
     username: string,
     password: string,
   ) => {
+    const searchParams = new URLSearchParams(window.location.search)
     const inviteToken = searchParams.get('invite_token') || ''
     const expires = searchParams.get('expires') || ''
     const sig = searchParams.get('sig') || ''
     const authFlow = searchParams.get('auth_flow') || undefined
+    const inviteTenantId = searchParams.get('tenant_id') || undefined
 
     const result = await dispatch(registerInviteAsync({
       username,
@@ -107,11 +105,12 @@ export function useAuth() {
         expires,
         sig,
         auth_flow: authFlow,
+        tenant_id: inviteTenantId,
       }
     })).unwrap()
 
     return { data: result.data }
-  }, [dispatch, searchParams])
+  }, [dispatch])
 
   const logout = useCallback(async () => {
     try {
@@ -179,8 +178,9 @@ export function useAuth() {
   }, [dispatch])
 
   const forgotPassword = useCallback(async (email: string) => {
-    await dispatch(forgotPasswordAsync({ email })).unwrap()
-  }, [dispatch])
+    if (!tenantId) throw new Error('Tenant context is not initialized')
+    await dispatch(forgotPasswordAsync({ email, tenant_id: tenantId })).unwrap()
+  }, [dispatch, tenantId])
 
   const resetPassword = useCallback(async (data: ResetPasswordAsyncRequest) => {
     await dispatch(resetPasswordAsync(data)).unwrap()

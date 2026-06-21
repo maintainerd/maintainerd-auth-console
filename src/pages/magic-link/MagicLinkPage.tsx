@@ -11,7 +11,7 @@ import type { AccountEntity } from "@/services/api/auth/types"
 export default function MagicLinkPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { fetchDefault, currentTenant } = useTenant()
+  const { currentTenant } = useTenant()
   const [status, setStatus] = useState<"verifying" | "mfa" | "success" | "error">("verifying")
   const [errorMessage, setErrorMessage] = useState("")
   const [dashboardPath, setDashboardPath] = useState("")
@@ -30,12 +30,8 @@ export default function MagicLinkPage() {
   }, [])
 
   useEffect(() => {
-    if (!currentTenant) fetchDefault()
-  }, [currentTenant, fetchDefault])
-
-  useEffect(() => {
     if (verifiedRef.current) return
-    const hasClientContext = searchParams.has("client_id") || searchParams.has("tenant_id")
+    const hasClientContext = searchParams.has("tenant_id") && !searchParams.has("client_id")
     const hasSignedLink = searchParams.has("expires") && searchParams.has("sig")
 
     if (!searchParams.get("token") || !hasClientContext || !hasSignedLink) {
@@ -141,7 +137,6 @@ export default function MagicLinkPage() {
             challengeToken={mfaChallenge.token}
             allowedMethods={mfaChallenge.methods}
             tenantId={searchParams.get("tenant_id") || undefined}
-            clientId={searchParams.get("client_id") || undefined}
             onVerified={(result) => finishAuthentication(result.account)}
             onCancel={() => navigate("/login", { replace: true })}
           />

@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { useToast } from "@/hooks/useToast"
 import { resolvePostAuthRoute } from "@/utils/postAuthRoute"
+import { tenantAuthRoute } from "@/utils/tenant"
 
 const RegisterForm = () => {
   const navigate = useNavigate()
@@ -21,6 +22,7 @@ const RegisterForm = () => {
   // Password rules follow the tenant policy, so build the schema from the
   // tenant's password_config (same source the live checklist below reads).
   const passwordConfig = getCurrentTenant()?.password_config
+  const tenantIdentifier = getCurrentTenant()?.identifier
   const registerSchema = useMemo(() => buildRegisterSchema(passwordConfig), [passwordConfig])
 
   const {
@@ -131,7 +133,7 @@ const RegisterForm = () => {
 
       <div className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={tenantAuthRoute('/login', tenantIdentifier)} className="font-medium text-primary underline-offset-4 hover:underline">
           Sign in
         </Link>
       </div>

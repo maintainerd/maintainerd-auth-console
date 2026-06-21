@@ -72,4 +72,16 @@ describe('LoginForm passwordless sign-in', () => {
     expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument()
     await waitFor(() => expect(screen.getByRole('button', { name: 'Back to password sign in' })).toBeEnabled())
   })
+
+  it('shows the backend error when no account exists for the email', async () => {
+    const user = userEvent.setup()
+    sendMagicLinkMock.mockRejectedValueOnce(new Error('no account found with that email address'))
+    renderWithProviders(<LoginForm />, { route: '/acme/login', path: '/:tenantId/login' })
+
+    await user.type(screen.getByRole('textbox', { name: /email/i }), 'missing@example.com')
+    await user.click(screen.getByRole('button', { name: 'Email me a sign-in link' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('no account found with that email address')
+    expect(screen.queryByRole('heading', { name: 'Check your email' })).not.toBeInTheDocument()
+  })
 })

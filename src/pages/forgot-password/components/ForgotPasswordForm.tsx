@@ -9,9 +9,12 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTenant } from "@/hooks/useTenant"
+import { tenantAuthRoute } from "@/utils/tenant"
 
 const ForgotPasswordForm = () => {
   const { forgotPassword } = useAuth()
+  const { currentTenant } = useTenant()
   const { showSuccess, showError, parseError } = useToast()
   const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
@@ -57,7 +60,7 @@ const ForgotPasswordForm = () => {
         </div>
 
         <Button asChild className="w-full">
-          <Link to="/login">Back to login</Link>
+          <Link to={tenantAuthRoute('/login', currentTenant?.identifier)}>Back to login</Link>
         </Button>
       </div>
     )
@@ -104,7 +107,7 @@ const ForgotPasswordForm = () => {
 
       <div className="text-center text-sm text-muted-foreground">
         Remember your password?{" "}
-        <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={tenantAuthRoute('/login', currentTenant?.identifier)} className="font-medium text-primary underline-offset-4 hover:underline">
           Back to login
         </Link>
       </div>

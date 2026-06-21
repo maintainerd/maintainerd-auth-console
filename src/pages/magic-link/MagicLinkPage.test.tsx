@@ -22,15 +22,15 @@ vi.mock('@/hooks/useTenant', () => ({
 }))
 
 vi.mock('@/pages/login/components/LoginMFAStep', () => ({
-  LoginMFAStep: ({ allowedMethods, clientId }: { allowedMethods: string[]; clientId?: string }) => (
+  LoginMFAStep: ({ allowedMethods, tenantId }: { allowedMethods: string[]; tenantId?: string }) => (
     <div>
       <span>Methods: {allowedMethods.join(',')}</span>
-      <span>Client: {clientId}</span>
+      <span>Tenant: {tenantId}</span>
     </div>
   ),
 }))
 
-const callbackURL = '/magic-link?token=opaque&client_id=console&expires=1234567890&sig=signed'
+const callbackURL = '/magic-link?token=opaque&tenant_id=acme&expires=1234567890&sig=signed'
 
 describe('MagicLinkPage MFA routing', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('MagicLinkPage MFA routing', () => {
 
     expect(await screen.findByRole('heading', { name: 'Two-step verification' })).toBeInTheDocument()
     expect(screen.getByText('Methods: totp,webauthn')).toBeInTheDocument()
-    expect(screen.getByText('Client: console')).toBeInTheDocument()
+    expect(screen.getByText('Tenant: acme')).toBeInTheDocument()
     expect(fetchAccountMock).not.toHaveBeenCalled()
   })
 

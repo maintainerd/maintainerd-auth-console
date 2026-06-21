@@ -41,24 +41,17 @@ describe('sendMagicLink', () => {
     })
   })
 
-  it('preserves explicit client and provider context', async () => {
-    await sendMagicLink('user@example.com', { clientId: 'console', providerId: 'local' })
-
-    expect(post).toHaveBeenCalledWith('/magic-link/send?client_id=console&provider_id=local', {
-      email: 'user@example.com',
-    })
-  })
 })
 
 describe('verifyMFALogin', () => {
-  it('preserves client context for a magic-link MFA challenge', async () => {
+  it('preserves tenant context for an internal MFA challenge', async () => {
     vi.mocked(post).mockResolvedValueOnce({ success: true })
     const request = { mfa_challenge_token: 'challenge', method: 'totp', code: '123456' }
 
-    await verifyMFALogin(request, undefined, 'console-client')
+    await verifyMFALogin(request, 'acme')
 
     expect(post).toHaveBeenCalledWith(
-      '/login/mfa/verify?client_id=console-client',
+      '/login/mfa/verify?tenant_id=acme',
       request,
       { headers: TOKEN_DELIVERY_HEADER },
     )

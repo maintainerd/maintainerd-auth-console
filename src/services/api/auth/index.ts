@@ -18,11 +18,8 @@ type AccountResponse = ApiResponse<AccountEntity>
  * @param tenantId - Optional tenant identifier for tenant-scoped login
  * @returns Promise<LoginResponse>
  */
-export async function login(data: LoginRequest, tenantId?: string): Promise<LoginResponse> {
-	let endpoint = API_ENDPOINTS.AUTH.LOGIN
-	if (tenantId) {
-		endpoint += `?tenant_id=${encodeURIComponent(tenantId)}`
-	}
+export async function login(data: LoginRequest, tenantId: string): Promise<LoginResponse> {
+	const endpoint = `${API_ENDPOINTS.AUTH.LOGIN}?tenant_id=${encodeURIComponent(tenantId)}`
 	const response = await post<LoginResponse>(
 		endpoint,
 		data,
@@ -75,20 +72,13 @@ export async function verifyMagicLink(queryString: string): Promise<LoginRespons
 }
 
 export interface SendMagicLinkContext {
-  clientId?: string
-  providerId?: string
-  tenantId?: string
+  tenantId: string
 }
 
-export async function sendMagicLink(email: string, context: SendMagicLinkContext = {}): Promise<void> {
+export async function sendMagicLink(email: string, context: SendMagicLinkContext): Promise<void> {
   const params = new URLSearchParams()
 
-  if (context.clientId && context.providerId) {
-    params.set('client_id', context.clientId)
-    params.set('provider_id', context.providerId)
-  } else if (context.tenantId) {
-    params.set('tenant_id', context.tenantId)
-  }
+  params.set('tenant_id', context.tenantId)
 
   const query = params.toString()
   const endpoint = `${API_ENDPOINTS.AUTH.MAGIC_LINK_SEND}${query ? `?${query}` : ''}`
@@ -111,8 +101,7 @@ export async function beginMFALoginWebAuthn(challengeToken: string): Promise<Web
 
 // Extended register request with optional query parameters
 export interface RegisterServiceRequest extends Omit<RegisterRequest, 'username'> {
-  clientId?: string
-  providerId?: string
+  tenantId: string
 }
 
 /**
@@ -133,13 +122,7 @@ export async function register(data: RegisterServiceRequest): Promise<RegisterRe
   let endpoint = API_ENDPOINTS.AUTH.REGISTER
   const queryParams = new URLSearchParams()
 
-  if (data.clientId) {
-    queryParams.append('client_id', data.clientId)
-  }
-
-  if (data.providerId) {
-    queryParams.append('provider_id', data.providerId)
-  }
+  queryParams.append('tenant_id', data.tenantId)
 
   if (queryParams.toString()) {
     endpoint += `?${queryParams.toString()}`
@@ -171,6 +154,9 @@ export async function registerInvite(
   })
   if (queryParams.auth_flow) {
     params.append('auth_flow', queryParams.auth_flow)
+  }
+  if (queryParams.tenant_id) {
+    params.append('tenant_id', queryParams.tenant_id)
   }
 
   const url = `${API_ENDPOINTS.AUTH.REGISTER_INVITE}?${params.toString()}`
@@ -272,8 +258,8 @@ export async function fetchAccount(): Promise<AccountEntity | null> {
  */
 export async function forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
   const response = await post<ForgotPasswordResponse>(
-    API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
-    data
+    `${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}?tenant_id=${encodeURIComponent(data.tenant_id)}`,
+    { email: data.email }
   )
   return response
 }
@@ -290,9 +276,8 @@ export async function resetPassword(
 ): Promise<ResetPasswordResponse> {
   // Build URL with query parameters
   const params = new URLSearchParams({
-    client_id: queryParams.client_id,
+    tenant_id: queryParams.tenant_id,
     expires: queryParams.expires,
-    provider_id: queryParams.provider_id,
     sig: queryParams.sig,
     token: queryParams.token
   })

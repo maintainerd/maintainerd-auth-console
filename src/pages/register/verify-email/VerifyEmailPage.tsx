@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import * as yup from 'yup'
@@ -21,17 +21,13 @@ type FormData = yup.InferType<typeof schema>
 
 export default function VerifyEmailPage() {
   const navigate = useNavigate()
-  const { currentTenant, fetchDefault } = useTenant()
+  const { currentTenant } = useTenant()
   const { isAuthenticated, refreshAccount } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [resending, setResending] = useState(false)
   const [verified, setVerified] = useState(false)
 
   const email = localStorage.getItem('register_email') || ''
-
-  useEffect(() => {
-    if (!currentTenant) fetchDefault()
-  }, [currentTenant, fetchDefault])
 
   // Note: the already-verified / wrong-step redirect is handled centrally by
   // RouteGuard before this page renders.
@@ -68,7 +64,9 @@ export default function VerifyEmailPage() {
   const handleResend = async () => {
     setResending(true)
     try {
-      await post('/email-verification/send', { email })
+      const tenantId = currentTenant?.identifier
+      if (!tenantId) throw new Error('Tenant context is not initialized')
+      await post(`/email-verification/send?tenant_id=${encodeURIComponent(tenantId)}`, { email })
     } catch { /* fail silently */ }
     finally { setResending(false) }
   }

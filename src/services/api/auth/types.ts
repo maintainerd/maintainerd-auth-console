@@ -125,12 +125,14 @@ export interface RegisterInviteQueryParams {
   sig: string
   auth_flow?: string
   email?: string
+  tenant_id?: string
 }
 
 export type ProfileResponse = ApiResponse<ProfileEntity>
 
 export interface ForgotPasswordRequest {
   email: string
+  tenant_id: string
 }
 
 export type ForgotPasswordResponse = ApiResponse
@@ -140,9 +142,8 @@ export interface ResetPasswordRequest {
 }
 
 export interface ResetPasswordQueryParams {
-  client_id: string
+  tenant_id: string
   expires: string
-  provider_id: string
   sig: string
   token: string
 }

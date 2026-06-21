@@ -21,8 +21,7 @@ import type { AccountEntity } from '@/services/api/auth/types'
 
 // Extended register request with optional query parameters
 export interface RegisterAsyncRequest extends Omit<RegisterRequest, 'username'> {
-  clientId?: string
-  providerId?: string
+  tenantId: string
 }
 
 // LoginThunkResult is the shared fulfilled payload for the password and MFA
@@ -36,9 +35,9 @@ export interface LoginThunkResult {
   mfaAllowedMethods?: string[]
 }
 
-export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest & { tenantId?: string }>(
+export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest & { tenantId: string }>(
   'auth/login',
-  async (data: LoginRequest & { tenantId?: string }, thunkAPI) => {
+  async (data: LoginRequest & { tenantId: string }, thunkAPI) => {
 		try {
 			const response = await authLogin(data, data.tenantId)
 			// MFA enrolled: password step passed but a second factor is required.
