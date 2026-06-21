@@ -91,6 +91,7 @@ import MFAPage, { MFAIndex } from './pages/account/MFAPage'
 import TOTPSetupPage from './pages/account/TOTPSetupPage'
 import PasskeySetupPage from './pages/account/PasskeySetupPage'
 import SMSSetupPage from './pages/account/SMSSetupPage'
+import EmailOtpSetupPage from './pages/account/EmailOtpSetupPage'
 import ProfilePage from './pages/account/ProfilePage'
 import SettingsPage from './pages/account/SettingsPage'
 
@@ -208,6 +209,7 @@ function App() {
             <Route path="totp" element={<TOTPSetupPage />} />
             <Route path="passkeys" element={<PasskeySetupPage />} />
             <Route path="sms" element={<SMSSetupPage />} />
+            <Route path="email-otp" element={<EmailOtpSetupPage />} />
           </Route>
         </Route>
       </Routes>

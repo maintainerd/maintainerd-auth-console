@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
     // Login MFA second step (issues an acr=2 session on success).
     LOGIN_MFA_VERIFY: '/login/mfa/verify',
     LOGIN_MFA_SEND_SMS: '/login/mfa/send-sms',
+    LOGIN_MFA_SEND_EMAIL_OTP: '/login/mfa/send-email-otp',
     LOGIN_MFA_WEBAUTHN_BEGIN: '/login/mfa/webauthn/begin',
     REGISTER: '/register',
     REGISTER_INVITE: '/register/invite',

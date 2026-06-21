@@ -120,7 +120,7 @@ export const resetUserMfa = (userId: string): Promise<void> =>
   post<ApiResponse<void>>(`/mfa/admin/users/${userId}/reset`).then((r) => assertSuccess(r, 'reset MFA'))
 
 // The individual MFA factors an admin can reset for a user.
-export type UserMfaMethod = 'totp' | 'sms' | 'webauthn' | 'backup_code'
+export type UserMfaMethod = 'totp' | 'sms' | 'email_otp' | 'webauthn' | 'backup_code'
 
 // Admin action: reset a single MFA factor for a user
 // (POST /mfa/admin/users/{uuid}/reset/{method}). Same permission + step-up as the

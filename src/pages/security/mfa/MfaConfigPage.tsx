@@ -43,6 +43,7 @@ const mfaConfigSchema = yup.object({
   recovery_codes_count: yup.number().min(0).max(16).required(),
   admin_grace_period_days: yup.number().min(0).required(),
   allow_sms: yup.boolean().required(),
+  allow_email_otp: yup.boolean().required(),
   require_mfa_for_sensitive_actions: yup.boolean().required(),
   step_up_ttl_minutes: yup.number().min(1).max(60).required(),
 })
@@ -72,6 +73,7 @@ export default function MfaConfigPage() {
       recovery_codes_count: 10,
       admin_grace_period_days: 0,
       allow_sms: false,
+      allow_email_otp: false,
       require_mfa_for_sensitive_actions: true,
       step_up_ttl_minutes: 5,
     },
@@ -87,6 +89,7 @@ export default function MfaConfigPage() {
       recovery_codes_count: savedConfig.recovery_codes_count ?? 10,
       admin_grace_period_days: savedConfig.admin_grace_period_days ?? 0,
       allow_sms: savedConfig.allow_sms ?? false,
+      allow_email_otp: savedConfig.allow_email_otp ?? false,
       require_mfa_for_sensitive_actions: savedConfig.require_mfa_for_sensitive_actions ?? true,
       step_up_ttl_minutes: savedConfig.step_up_ttl_minutes ?? 5,
     } : undefined,
@@ -299,6 +302,7 @@ export default function MfaConfigPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <FormSwitchField label="Allow SMS" description="Permit SMS-based MFA enrollment" checked={formValues.allow_sms} onCheckedChange={(v) => handleUpdate({ allow_sms: v })} disabled={isBusy} />
+                <FormSwitchField label="Allow Email OTP" description="Permit email OTP-based MFA enrollment" checked={formValues.allow_email_otp} onCheckedChange={(v) => handleUpdate({ allow_email_otp: v })} disabled={isBusy} />
                 <FormSwitchField label="Step-Up for Sensitive Actions" description="Require fresh MFA for email changes and admin operations" checked={formValues.require_mfa_for_sensitive_actions} onCheckedChange={(v) => handleUpdate({ require_mfa_for_sensitive_actions: v })} disabled={isBusy} />
               </div>
               <div className="grid gap-4 md:grid-cols-2">

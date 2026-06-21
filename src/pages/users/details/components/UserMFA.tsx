@@ -4,6 +4,7 @@ import {
   Key,
   Smartphone,
   MessageSquare,
+  Mail,
   RefreshCw,
   ShieldOff,
   Clock,
@@ -115,7 +116,7 @@ export function UserMFA({ userId }: UserMFAProps) {
   ]
 
   const hasAnyMfa =
-    !!data && (data.is_totp_enabled || data.is_webauthn_enabled || data.is_sms_enabled)
+    !!data && (data.is_totp_enabled || data.is_webauthn_enabled || data.is_sms_enabled || data.is_email_otp_enabled)
   const passkeys = data?.webauthn_keys ?? []
 
   return (
@@ -159,6 +160,13 @@ export function UserMFA({ userId }: UserMFAProps) {
                 description="One-time codes texted to a verified phone number"
                 enabled={data.is_sms_enabled}
                 actions={resetAction("sms", "SMS")}
+              />
+              <MethodRow
+                icon={Mail}
+                title="Email OTP"
+                description="One-time codes sent to a verified email address"
+                enabled={data.is_email_otp_enabled}
+                actions={resetAction("email_otp", "Email OTP")}
               />
               <MethodRow
                 icon={Key}

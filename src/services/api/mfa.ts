@@ -13,6 +13,7 @@ export interface MFAStatusResponse {
   is_totp_enabled: boolean
   is_webauthn_enabled: boolean
   is_sms_available: boolean
+  is_email_otp_available: boolean
   backup_codes_count: number
   webauthn_keys: MFAWebAuthnKey[]
   mfa_enabled_at?: string | null
@@ -154,6 +155,23 @@ export async function disableSMS(): Promise<void> {
   assertSuccess(r, "disable SMS")
 }
 
+// ── Email OTP MFA ────────────────────────────────────────────────────────────
+
+export async function beginEmailOtpEnrollment(email: string): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/email-otp/enroll`, { email })
+  assertSuccess(r, "begin Email OTP enrollment")
+}
+
+export async function verifyEmailOtpEnrollment(email: string, code: string): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/email-otp/verify`, { email, code })
+  assertSuccess(r, "verify Email OTP enrollment")
+}
+
+export async function disableEmailOtp(): Promise<void> {
+  const r = await deleteRequest<ApiResponse<void>>(`${BASE}/email-otp`)
+  assertSuccess(r, "disable Email OTP")
+}
+
 // ── Reset all (self-service) ──────────────────────────────────────────────────
 // Clears every MFA factor for the signed-in user. The server scopes this to the
 // session identity (no target param), so it can only ever reset your own MFA.
@@ -185,6 +203,11 @@ export async function issueStepUpChallenge(): Promise<StepUpChallenge> {
 export async function sendStepUpSMS(): Promise<void> {
   const r = await post<ApiResponse<void>>(`${BASE}/step-up/send-sms`)
   assertSuccess(r, "send step-up SMS code")
+}
+
+export async function sendStepUpEmailOtp(): Promise<void> {
+  const r = await post<ApiResponse<void>>(`${BASE}/step-up/send-email-otp`)
+  assertSuccess(r, "send step-up Email OTP code")
 }
 
 // Proof for a step-up verification: a typed code (totp/sms/backup_code) or a

@@ -1,4 +1,4 @@
-import { Smartphone, MessageSquare, KeyRound, Fingerprint } from "lucide-react"
+import { Smartphone, MessageSquare, KeyRound, Fingerprint, Mail } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 /**
@@ -19,6 +19,7 @@ export const MFA_METHOD_META: Record<string, MFAMethodMeta> = {
   totp: { label: "Authenticator app", icon: Smartphone, numeric: true },
   webauthn: { label: "Passkey", icon: Fingerprint, numeric: false, webauthn: true },
   sms: { label: "Text message", icon: MessageSquare, numeric: true },
+  email_otp: { label: "Email OTP", icon: Mail, numeric: true },
   backup_code: { label: "Backup code", icon: KeyRound, numeric: false },
 }
 

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { getAssertion } from "@/lib/webauthn"
 import { MFA_METHOD_META as METHOD_META, extractMFACode } from "@/lib/mfaMethods"
 import { useToast } from "@/hooks/useToast"
-import { beginWebAuthnAuthentication, issueStepUpChallenge, sendStepUpSMS, verifyStepUp } from "@/services/api/mfa"
+import { beginWebAuthnAuthentication, issueStepUpChallenge, sendStepUpSMS, sendStepUpEmailOtp, verifyStepUp } from "@/services/api/mfa"
 import { useMutation } from "@tanstack/react-query"
 
 interface StepUpDialogProps {
@@ -35,6 +35,7 @@ export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, 
   const [method, setMethod] = useState("")
   const [code, setCode] = useState("")
   const [smsSent, setSmsSent] = useState(false)
+  const [emailOtpSent, setEmailOtpSent] = useState(false)
 
   const challengeMutation = useMutation({
     mutationFn: issueStepUpChallenge,
@@ -50,6 +51,12 @@ export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, 
   const smsMutation = useMutation({
     mutationFn: sendStepUpSMS,
     onSuccess: () => setSmsSent(true),
+    onError: (e) => showError(e),
+  })
+
+  const emailOtpMutation = useMutation({
+    mutationFn: sendStepUpEmailOtp,
+    onSuccess: () => setEmailOtpSent(true),
     onError: (e) => showError(e),
   })
 
@@ -69,7 +76,7 @@ export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, 
   // Reset and request a fresh challenge each time the dialog opens.
   useEffect(() => {
     if (open) {
-      setChallengeToken(""); setMethods([]); setMethod(""); setCode(""); setSmsSent(false)
+      setChallengeToken(""); setMethods([]); setMethod(""); setCode(""); setSmsSent(false); setEmailOtpSent(false)
       challengeMutation.mutate()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,7 +128,7 @@ export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, 
                       <button
                         key={m}
                         type="button"
-                        onClick={() => { setMethod(m); setCode(""); setSmsSent(false) }}
+                        onClick={() => { setMethod(m); setCode(""); setSmsSent(false); setEmailOtpSent(false) }}
                         className={cn(
                           "flex items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors",
                           selected ? "border-primary bg-accent" : "hover:bg-accent/50",
@@ -145,6 +152,11 @@ export function StepUpDialog({ open, onOpenChange, onVerified, onCancel, title, 
                 {method === "sms" && (
                   <Button variant="outline" size="sm" onClick={() => smsMutation.mutate()} disabled={smsMutation.isPending}>
                     {smsMutation.isPending ? "Sending…" : smsSent ? "Resend code" : "Send code to my phone"}
+                  </Button>
+                )}
+                {method === "email_otp" && (
+                  <Button variant="outline" size="sm" onClick={() => emailOtpMutation.mutate()} disabled={emailOtpMutation.isPending}>
+                    {emailOtpMutation.isPending ? "Sending…" : emailOtpSent ? "Resend code" : "Send code to my email"}
                   </Button>
                 )}
 

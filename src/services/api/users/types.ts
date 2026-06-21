@@ -351,6 +351,7 @@ export interface UserMFAResponse {
   is_totp_enabled: boolean
   is_webauthn_enabled: boolean
   is_sms_enabled: boolean
+  is_email_otp_enabled: boolean
   backup_codes_count: number
   webauthn_keys?: UserMFAWebAuthnKey[]
   mfa_enabled_at?: string | null

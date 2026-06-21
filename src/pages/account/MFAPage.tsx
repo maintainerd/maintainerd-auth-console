@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate, useLocation, useSearchParams, Outlet } from "react-router-dom"
-import { Key, Smartphone, MessageSquare, ShieldCheck, ShieldAlert, ChevronRight, KeyRound, ShieldOff } from "lucide-react"
+import { Key, Smartphone, MessageSquare, Mail, ShieldCheck, ShieldAlert, ChevronRight, KeyRound, ShieldOff } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -77,9 +77,10 @@ export function MFAIndex() {
 
   const totpOn = data.is_totp_enabled ?? false
   const smsOn = data.is_sms_available ?? false
+  const emailOtpOn = data.is_email_otp_available ?? false
   const passkeyCount = data.webauthn_keys?.length ?? 0
   const passkeyOn = passkeyCount > 0
-  const activeCount = [totpOn, smsOn, passkeyOn].filter(Boolean).length
+  const activeCount = [totpOn, smsOn, emailOtpOn, passkeyOn].filter(Boolean).length
   const protected_ = activeCount > 0
   const base = `/${tenantId}/account/mfa`
 
@@ -123,6 +124,14 @@ export function MFAIndex() {
               description="Receive one-time codes on your verified phone number."
               active={smsOn}
               onClick={() => navigate(`${base}/sms${fromQuery}`)}
+            />
+            <Separator />
+            <MethodRow
+              icon={Mail}
+              title="Email OTP"
+              description="Receive one-time codes at your verified email address."
+              active={emailOtpOn}
+              onClick={() => navigate(`${base}/email-otp${fromQuery}`)}
             />
             <Separator />
             <MethodRow

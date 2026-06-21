@@ -55,6 +55,13 @@ export async function sendMFALoginSMS(challengeToken: string): Promise<void> {
   })
 }
 
+/** Send an Email OTP for the in-flight login MFA challenge. */
+export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void> {
+  await post<ApiResponse<void>>(API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_EMAIL_OTP, {
+    mfa_challenge_token: challengeToken,
+  }, { headers: TOKEN_DELIVERY_HEADER })
+}
+
 /** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */
 export async function beginMFALoginWebAuthn(challengeToken: string): Promise<WebAuthnAssertionOptions> {
   const r = await post<ApiResponse<WebAuthnAssertionOptions>>(API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN, {
@@ -265,6 +272,7 @@ export const authService = {
   login,
   verifyMFALogin,
   sendMFALoginSMS,
+  sendMFALoginEmailOtp,
   beginMFALoginWebAuthn,
   register,
   registerInvite,

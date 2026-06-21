@@ -8,7 +8,7 @@ import { getAssertion } from "@/lib/webauthn"
 import { MFA_METHOD_META as METHOD_META, extractMFACode } from "@/lib/mfaMethods"
 import { useToast } from "@/hooks/useToast"
 import { useAuth } from "@/hooks/useAuth"
-import { sendMFALoginSMS, beginMFALoginWebAuthn } from "@/services/api/auth"
+import { sendMFALoginSMS, sendMFALoginEmailOtp, beginMFALoginWebAuthn } from "@/services/api/auth"
 import type { AccountEntity } from "@/services/api/auth/types"
 import { useMutation } from "@tanstack/react-query"
 
@@ -35,6 +35,7 @@ export function LoginMFAStep({ challengeToken, allowedMethods, tenantId, onVerif
   const [method, setMethod] = useState(methods[0] ?? "")
   const [code, setCode] = useState("")
   const [smsSent, setSmsSent] = useState(false)
+  const [emailOtpSent, setEmailOtpSent] = useState(false)
 
   useEffect(() => {
     if (!method && methods.length > 0) setMethod(methods[0])
@@ -44,6 +45,12 @@ export function LoginMFAStep({ challengeToken, allowedMethods, tenantId, onVerif
   const smsMutation = useMutation({
     mutationFn: () => sendMFALoginSMS(challengeToken),
     onSuccess: () => setSmsSent(true),
+    onError: (e) => showError(e),
+  })
+
+  const emailOtpMutation = useMutation({
+    mutationFn: () => sendMFALoginEmailOtp(challengeToken),
+    onSuccess: () => setEmailOtpSent(true),
     onError: (e) => showError(e),
   })
 
@@ -99,7 +106,7 @@ export function LoginMFAStep({ challengeToken, allowedMethods, tenantId, onVerif
                 <button
                   key={m}
                   type="button"
-                  onClick={() => { setMethod(m); setCode(""); setSmsSent(false) }}
+                  onClick={() => { setMethod(m); setCode(""); setSmsSent(false); setEmailOtpSent(false) }}
                   className={cn(
                     "flex items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors",
                     selected ? "border-primary bg-accent" : "hover:bg-accent/50",
@@ -123,6 +130,11 @@ export function LoginMFAStep({ challengeToken, allowedMethods, tenantId, onVerif
           {method === "sms" && (
             <Button variant="outline" size="sm" onClick={() => smsMutation.mutate()} disabled={smsMutation.isPending}>
               {smsMutation.isPending ? "Sending…" : smsSent ? "Resend code" : "Send code to my phone"}
+            </Button>
+          )}
+          {method === "email_otp" && (
+            <Button variant="outline" size="sm" onClick={() => emailOtpMutation.mutate()} disabled={emailOtpMutation.isPending}>
+              {emailOtpMutation.isPending ? "Sending…" : emailOtpSent ? "Resend code" : "Send code to my email"}
             </Button>
           )}
           <div className="space-y-2">

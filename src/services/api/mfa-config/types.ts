@@ -6,6 +6,7 @@ export interface MfaConfig {
   grace_period_days: number
   preferred_method: string
   allow_sms: boolean
+  allow_email_otp: boolean
   totp_digits: number
   totp_period_seconds: number
   recovery_codes_count: number
@@ -22,6 +23,7 @@ export interface MfaConfigPayload {
   grace_period_days?: number
   preferred_method?: string
   allow_sms?: boolean
+  allow_email_otp?: boolean
   totp_digits?: number
   totp_period_seconds?: number
   recovery_codes_count?: number

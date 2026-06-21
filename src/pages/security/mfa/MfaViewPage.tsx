@@ -144,6 +144,7 @@ export default function MfaViewPage() {
                 <Attr icon={KeyRound} label="Recovery Codes" value={data.recovery_codes_count > 0 ? `${data.recovery_codes_count} codes` : "Disabled"} />
                 <Attr icon={Clock} label="Step-Up TTL" value={`${data.step_up_ttl_minutes} minutes`} />
                 <Attr icon={data.allow_sms ? Check : X} label="Allow SMS" value={data.allow_sms ? "Enabled" : "Disabled"} />
+                <Attr icon={data.allow_email_otp ? Check : X} label="Allow Email OTP" value={data.allow_email_otp ? "Enabled" : "Disabled"} />
                 <Attr icon={data.require_mfa_for_sensitive_actions ? Check : X} label="Sensitive Actions" value={data.require_mfa_for_sensitive_actions ? "Step-up required" : "Not required"} />
               </div>
             </CardContent>
