@@ -23,10 +23,8 @@ export function SmsTemplateListing() {
       useData={useSmsTemplatesList}
       filterGroups={FILTER_GROUPS}
       onRowClick={(template) => navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}`)}
-      onCreate={() => navigate(`/${tenantId}/branding/sms-templates/create`)}
-      createLabel="New Template"
-      emptyTitle="No SMS templates yet"
-      emptyDescription="Create your first SMS template to customize authentication and notification text messages."
+      emptyTitle="No SMS templates found"
+      emptyDescription="SMS templates are managed by the system. Configure existing templates to customize authentication and notification text messages."
     />
   )
 }

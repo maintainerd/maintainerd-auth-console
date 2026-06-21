@@ -17,7 +17,7 @@ export type SmsTemplate = {
   name: string
   description: string
   message: string
-  senderId: string
+  parametersDoc: string | null
   status: SmsTemplateStatus
   isDefault: boolean
   isSystem: boolean
@@ -33,7 +33,7 @@ export type SmsTemplatePayload = {
   name: string
   description: string
   message: string
-  sender_id: string
+  parameters_doc: string | null
   status: SmsTemplateStatus
   is_default: boolean
   is_system: boolean
@@ -67,24 +67,11 @@ export interface SmsTemplateListResponse {
 }
 
 /**
- * Create SMS Template Request
- */
-export interface CreateSmsTemplateRequest {
-  name: string
-  description: string
-  message: string
-  sender_id: string
-  status: SmsTemplateStatus
-}
-
-/**
  * Update SMS Template Request
  */
 export interface UpdateSmsTemplateRequest {
-  name: string
   description: string
   message: string
-  sender_id: string
   status: SmsTemplateStatus
 }
 

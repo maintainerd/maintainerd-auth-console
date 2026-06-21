@@ -7,14 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchSmsTemplates,
   fetchSmsTemplateById,
-  createSmsTemplate,
   updateSmsTemplate,
   updateSmsTemplateStatus,
-  deleteSmsTemplate,
 } from '@/services/api/sms-templates'
 import type {
   SmsTemplateQueryParams,
-  CreateSmsTemplateRequest,
   UpdateSmsTemplateRequest,
   UpdateSmsTemplateStatusRequest,
 } from '@/services/api/sms-templates/types'
@@ -59,22 +56,6 @@ export function useSmsTemplate(id: string) {
 }
 
 /**
- * Hook to create a new SMS template
- */
-export function useCreateSmsTemplate() {
-  const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
-
-  return useMutation({
-    mutationFn: (data: CreateSmsTemplateRequest) => createSmsTemplate(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: smsTemplateKeys.lists() })
-      showSuccess('SMS template created successfully')
-    },
-  })
-}
-
-/**
  * Hook to update an SMS template
  */
 export function useUpdateSmsTemplate() {
@@ -106,22 +87,6 @@ export function useUpdateSmsTemplateStatus() {
       queryClient.invalidateQueries({ queryKey: smsTemplateKeys.lists() })
       queryClient.invalidateQueries({ queryKey: smsTemplateKeys.detail(result.smsTemplateId) })
       showSuccess(`SMS template ${result.status === 'active' ? 'activated' : 'deactivated'} successfully`)
-    },
-  })
-}
-
-/**
- * Hook to delete an SMS template
- */
-export function useDeleteSmsTemplate() {
-  const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
-
-  return useMutation({
-    mutationFn: (id: string) => deleteSmsTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: smsTemplateKeys.lists() })
-      showSuccess('SMS template deleted successfully')
     },
   })
 }

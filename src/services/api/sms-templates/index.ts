@@ -2,7 +2,7 @@
  * SMS Template API Service
  */
 
-import { get, post, put, patch, deleteRequest } from '../client'
+import { get, put, patch } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
@@ -10,7 +10,6 @@ import type {
   SmsTemplatePayload,
   SmsTemplateQueryParams,
   SmsTemplateListResponse,
-  CreateSmsTemplateRequest,
   UpdateSmsTemplateRequest,
   UpdateSmsTemplateStatusRequest,
 } from './types'
@@ -24,7 +23,7 @@ function transformPayloadToSmsTemplate(payload: SmsTemplatePayload): SmsTemplate
     name: payload.name,
     description: payload.description,
     message: payload.message,
-    senderId: payload.sender_id,
+    parametersDoc: payload.parameters_doc,
     status: payload.status,
     isDefault: payload.is_default,
     isSystem: payload.is_system,
@@ -86,22 +85,6 @@ export async function fetchSmsTemplateById(id: string): Promise<SmsTemplate> {
 }
 
 /**
- * Create a new SMS template
- */
-export async function createSmsTemplate(
-  data: CreateSmsTemplateRequest
-): Promise<SmsTemplate> {
-  const endpoint = API_ENDPOINTS.SMS_TEMPLATE
-  const response = await post<ApiResponse<SmsTemplatePayload>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return transformPayloadToSmsTemplate(response.data)
-  }
-
-  throw new Error(response.message || 'Failed to create SMS template')
-}
-
-/**
  * Update an existing SMS template
  */
 export async function updateSmsTemplate(
@@ -133,16 +116,4 @@ export async function updateSmsTemplateStatus(
   }
 
   throw new Error(response.message || 'Failed to update SMS template status')
-}
-
-/**
- * Delete an SMS template
- */
-export async function deleteSmsTemplate(id: string): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.SMS_TEMPLATE}/${id}`
-  const response = await deleteRequest<ApiResponse<void>>(endpoint)
-
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to delete SMS template')
-  }
 }

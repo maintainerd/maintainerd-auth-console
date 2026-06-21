@@ -195,7 +195,6 @@ function App() {
           <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />
           <Route path="branding/email-templates/:templateId/edit" element={<EmailTemplateForm />} />
           <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
-          <Route path="branding/sms-templates/create" element={<SmsTemplateForm />} />
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
           <Route path="messaging/email" element={<EmailDeliveryPage />} />
