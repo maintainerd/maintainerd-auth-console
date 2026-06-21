@@ -62,8 +62,11 @@ export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void
   }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
-export async function verifyMagicLink(token: string, clientId: string, providerId: string): Promise<LoginResponse> {
-  const url = `/magic-link/verify?client_id=${encodeURIComponent(clientId)}&provider_id=${encodeURIComponent(providerId)}`
+export async function verifyMagicLink(token: string, clientId: string, providerId?: string): Promise<LoginResponse> {
+  let url = `/magic-link/verify?client_id=${encodeURIComponent(clientId)}`
+  if (providerId) {
+    url += `&provider_id=${encodeURIComponent(providerId)}`
+  }
   return post<LoginResponse>(url, { token }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
