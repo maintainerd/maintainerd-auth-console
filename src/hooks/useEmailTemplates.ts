@@ -7,14 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchEmailTemplates,
   fetchEmailTemplateById,
-  createEmailTemplate,
   updateEmailTemplate,
   updateEmailTemplateStatus,
-  deleteEmailTemplate,
 } from '@/services/api/email-templates'
 import type {
   EmailTemplateQueryParams,
-  CreateEmailTemplateRequest,
   UpdateEmailTemplateRequest,
   UpdateEmailTemplateStatusRequest,
 } from '@/services/api/email-templates/types'
@@ -59,22 +56,6 @@ export function useEmailTemplate(id: string) {
 }
 
 /**
- * Hook to create a new email template
- */
-export function useCreateEmailTemplate() {
-  const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
-
-  return useMutation({
-    mutationFn: (data: CreateEmailTemplateRequest) => createEmailTemplate(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: emailTemplateKeys.lists() })
-      showSuccess('Email template created successfully')
-    },
-  })
-}
-
-/**
  * Hook to update an email template
  */
 export function useUpdateEmailTemplate() {
@@ -106,22 +87,6 @@ export function useUpdateEmailTemplateStatus() {
       queryClient.invalidateQueries({ queryKey: emailTemplateKeys.lists() })
       queryClient.invalidateQueries({ queryKey: emailTemplateKeys.detail(result.emailTemplateId) })
       showSuccess(`Email template ${result.status === 'active' ? 'activated' : 'deactivated'} successfully`)
-    },
-  })
-}
-
-/**
- * Hook to delete an email template
- */
-export function useDeleteEmailTemplate() {
-  const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
-
-  return useMutation({
-    mutationFn: (id: string) => deleteEmailTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: emailTemplateKeys.lists() })
-      showSuccess('Email template deleted successfully')
     },
   })
 }

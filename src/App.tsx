@@ -54,12 +54,16 @@ import PoliciesPage from './pages/policies'
 import PolicyDetailsPage from './pages/policies/details'
 import PolicyAddOrUpdateForm from './pages/policies/form'
 import MfaConfigPage from './pages/security/mfa/MfaConfigPage'
-import PasswordPoliciesPage from './pages/security/password-policies'
-import SessionManagementPage from './pages/security/session-management'
+import MfaViewPage from './pages/security/mfa/MfaViewPage'
+import PasswordPoliciesPage, { PasswordPoliciesFormPage } from './pages/security/password-policies'
+import SessionManagementPage, { SessionManagementFormPage } from './pages/security/session-management'
+import TokenViewPage from './pages/security/token/TokenViewPage'
 import TokenConfigPage from './pages/security/token/TokenConfigPage'
+import LockoutViewPage from './pages/security/lockout/LockoutViewPage'
 import LockoutConfigPage from './pages/security/lockout/LockoutConfigPage'
+import RegistrationViewPage from './pages/security/registration/RegistrationViewPage'
 import RegistrationConfigPage from './pages/security/registration/RegistrationConfigPage'
-import ThreatDetectionPage from './pages/security/threat-detection'
+import ThreatDetectionPage, { ThreatDetectionFormPage } from './pages/security/threat-detection'
 import IpRestrictionsPage from './pages/security/ip-restrictions'
 import { TenantSettingsPage } from './pages/tenant-settings/TenantSettingsPage'
 import TenantsPage from './pages/tenants'
@@ -79,7 +83,9 @@ import EmailTemplateForm from './pages/branding/email-templates/form'
 import SmsTemplatesPage from './pages/branding/sms-templates'
 import SmsTemplateDetailsPage from './pages/branding/sms-templates/details'
 import SmsTemplateForm from './pages/branding/sms-templates/form'
+import EmailDeliveryPage from './pages/messaging/email/EmailDeliveryPage'
 import EmailConfigPage from './pages/messaging/email/EmailConfigPage'
+import SMSDeliveryPage from './pages/messaging/sms/SMSDeliveryPage'
 import SMSConfigPage from './pages/messaging/sms/SMSConfigPage'
 import MFAPage, { MFAIndex } from './pages/account/MFAPage'
 import TOTPSetupPage from './pages/account/TOTPSetupPage'
@@ -113,13 +119,20 @@ function App() {
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="security/mfa" element={<MfaConfigPage />} />
+          <Route path="security/mfa" element={<MfaViewPage />} />
+          <Route path="security/mfa/configure" element={<MfaConfigPage />} />
           <Route path="security/password" element={<PasswordPoliciesPage />} />
+          <Route path="security/password/configure" element={<PasswordPoliciesFormPage />} />
           <Route path="security/session" element={<SessionManagementPage />} />
-          <Route path="security/token" element={<TokenConfigPage />} />
-          <Route path="security/lockout" element={<LockoutConfigPage />} />
-          <Route path="security/registration" element={<RegistrationConfigPage />} />
+          <Route path="security/session/configure" element={<SessionManagementFormPage />} />
+          <Route path="security/token" element={<TokenViewPage />} />
+          <Route path="security/token/configure" element={<TokenConfigPage />} />
+          <Route path="security/lockout" element={<LockoutViewPage />} />
+          <Route path="security/lockout/configure" element={<LockoutConfigPage />} />
+          <Route path="security/registration" element={<RegistrationViewPage />} />
+          <Route path="security/registration/configure" element={<RegistrationConfigPage />} />
           <Route path="security/threat" element={<ThreatDetectionPage />} />
+          <Route path="security/threat/configure" element={<ThreatDetectionFormPage />} />
           <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="settings" element={<TenantSettingsPage />} />
           <Route path="tenants" element={<TenantsPage />} />
@@ -179,15 +192,16 @@ function App() {
           <Route path="branding/templates/:brandingId" element={<BrandingDetailsPage />} />
           <Route path="branding/templates/:brandingId/edit" element={<BrandingForm />} />
           <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
-          <Route path="branding/email-templates/create" element={<EmailTemplateForm />} />
           <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />
           <Route path="branding/email-templates/:templateId/edit" element={<EmailTemplateForm />} />
           <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
           <Route path="branding/sms-templates/create" element={<SmsTemplateForm />} />
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
-          <Route path="messaging/email" element={<EmailConfigPage />} />
-          <Route path="messaging/sms" element={<SMSConfigPage />} />
+          <Route path="messaging/email" element={<EmailDeliveryPage />} />
+          <Route path="messaging/email/configure" element={<EmailConfigPage />} />
+          <Route path="messaging/sms" element={<SMSDeliveryPage />} />
+          <Route path="messaging/sms/configure" element={<SMSConfigPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           <Route path="account/settings" element={<SettingsPage />} />
           <Route path="account/mfa" element={<MFAPage />}>

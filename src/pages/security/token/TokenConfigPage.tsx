@@ -1,15 +1,16 @@
 import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DetailsContainer } from '@/components/container'
-import { Save, Key } from 'lucide-react'
-import { FormSwitchField, FormInputField, FormSelectField, FormCheckboxField } from '@/components/form'
-import { SettingsCard } from '@/components/card'
+import { FormPageHeader } from '@/components/header'
+import { FormSwitchField, FormInputField, FormSelectField, FormCheckboxField, FormSubmitButton } from '@/components/form'
 import { useTokenConfig, useUpdateTokenConfig } from '@/hooks/useTokenConfig'
 import { useToast } from '@/hooks/useToast'
 import { tokenConfigSchema, type TokenConfigFormData } from '@/lib/validations'
-
 
 const SIGNING_OPTIONS = [
   { value: 'RS256', label: 'RS256' },
@@ -30,7 +31,11 @@ const KNOWN_CLAIMS = [
 ]
 
 export default function TokenConfigPage() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
+  const backTo = `/${tenantId}/security/token`
+
   const { data: savedConfig, isLoading } = useTokenConfig()
   const updateMutation = useUpdateTokenConfig()
 
@@ -67,24 +72,36 @@ export default function TokenConfigPage() {
   }
 
   const toggleClaim = (claims: string[], claim: string, checked: boolean) => {
-    const updated = checked ? [...claims, claim] : claims.filter((c) => c !== claim)
-    return updated
+    return checked ? [...claims, claim] : claims.filter((c) => c !== claim)
   }
 
   const onSubmit = async (data: TokenConfigFormData) => {
     try {
       await updateMutation.mutateAsync(data)
-      showSuccess('Token config saved successfully')
+      showSuccess('Token configuration saved successfully')
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
   }
 
+  const isBusy = isSubmitting || updateMutation.isPending
+
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading token configuration...</p>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Tokens" title="Configure Tokens" description="Set JWT signing, PKCE, and token claims." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -92,58 +109,37 @@ export default function TokenConfigPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Tokens</h1>
-          <p className="text-muted-foreground">
-            Configure JWT signing algorithm, clock skew, PKCE, and additional token claims.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <FormPageHeader
+          backUrl={backTo}
+          backLabel="Back to Tokens"
+          title="Configure Tokens"
+          description="Configure JWT signing algorithm, clock skew, PKCE, and additional token claims."
+        />
 
-        <div className="grid gap-6">
-          <SettingsCard
-            title="JWT Settings"
-            description="Signing algorithm and clock skew tolerance."
-            icon={Key}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormSelectField
-                label="Signing Algorithm"
-                options={SIGNING_OPTIONS}
-                value={formValues.signing_algorithm}
-                onValueChange={(v) => handleUpdate({ signing_algorithm: v as TokenConfigFormData['signing_algorithm'] })}
-                error={errors.signing_algorithm?.message}
-              />
-              <FormInputField
-                label="Clock Skew Leeway (seconds)"
-                description="0–300 seconds"
-                type="number"
-                value={formValues.clock_skew_leeway_seconds.toString()}
-                onChange={(e) => handleUpdate({ clock_skew_leeway_seconds: parseInt(e.target.value) || 0 })}
-                error={errors.clock_skew_leeway_seconds?.message}
-              />
-            </div>
-          </SettingsCard>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">JWT Settings</CardTitle>
+              <p className="text-sm text-muted-foreground">Signing algorithm, clock skew tolerance, and PKCE enforcement.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormSelectField label="Signing Algorithm" options={SIGNING_OPTIONS} value={formValues.signing_algorithm} onValueChange={(v) => handleUpdate({ signing_algorithm: v as TokenConfigFormData['signing_algorithm'] })} error={errors.signing_algorithm?.message} disabled={isBusy} />
+                <FormInputField label="Clock Skew Leeway (seconds)" description="0–300 seconds" type="number" value={formValues.clock_skew_leeway_seconds.toString()} onChange={(e) => handleUpdate({ clock_skew_leeway_seconds: parseInt(e.target.value) || 0 })} error={errors.clock_skew_leeway_seconds?.message} disabled={isBusy} />
+              </div>
+              <FormSwitchField label="Require PKCE" description="Enforce S256 PKCE for all OAuth authorization code flows" checked={formValues.require_pkce} onCheckedChange={(v) => handleUpdate({ require_pkce: v })} disabled={isBusy} />
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="PKCE"
-            description="Proof Key for Code Exchange enforcement."
-          >
-            <FormSwitchField
-              label="Require PKCE"
-              description="Enforce S256 PKCE for all OAuth authorization code flows"
-              checked={formValues.require_pkce}
-              onCheckedChange={(v) => handleUpdate({ require_pkce: v })}
-            />
-          </SettingsCard>
-
-          <SettingsCard
-            title="Additional ID Token Claims"
-            description="Extra claims injected into the ID token. Defaults: roles, tenant_id."
-          >
-            <div className="space-y-1">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">ID Token Claims</CardTitle>
+              <p className="text-sm text-muted-foreground">Extra claims injected into the ID token.</p>
+            </CardHeader>
+            <CardContent>
               {errors.additional_id_token_claims?.message && (
-                <p className="text-sm text-red-600">{errors.additional_id_token_claims.message}</p>
+                <p className="text-sm text-red-600 mb-2">{errors.additional_id_token_claims.message}</p>
               )}
               <div className="grid gap-2 sm:grid-cols-3">
                 {KNOWN_CLAIMS.map((claim) => (
@@ -151,28 +147,22 @@ export default function TokenConfigPage() {
                     key={`id-${claim.value}`}
                     label={claim.label}
                     checked={formValues.additional_id_token_claims.includes(claim.value)}
-                    onCheckedChange={(checked) =>
-                      handleUpdate({
-                        additional_id_token_claims: toggleClaim(
-                          formValues.additional_id_token_claims,
-                          claim.value,
-                          checked,
-                        ),
-                      })
-                    }
+                    onCheckedChange={(checked) => handleUpdate({ additional_id_token_claims: toggleClaim(formValues.additional_id_token_claims, claim.value, checked) })}
+                    disabled={isBusy}
                   />
                 ))}
               </div>
-            </div>
-          </SettingsCard>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Additional Access Token Claims"
-            description="Extra claims injected into the access token. Defaults: roles, tenant_id."
-          >
-            <div className="space-y-1">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Access Token Claims</CardTitle>
+              <p className="text-sm text-muted-foreground">Extra claims injected into the access token.</p>
+            </CardHeader>
+            <CardContent>
               {errors.additional_access_token_claims?.message && (
-                <p className="text-sm text-red-600">{errors.additional_access_token_claims.message}</p>
+                <p className="text-sm text-red-600 mb-2">{errors.additional_access_token_claims.message}</p>
               )}
               <div className="grid gap-2 sm:grid-cols-3">
                 {KNOWN_CLAIMS.map((claim) => (
@@ -180,29 +170,22 @@ export default function TokenConfigPage() {
                     key={`access-${claim.value}`}
                     label={claim.label}
                     checked={formValues.additional_access_token_claims.includes(claim.value)}
-                    onCheckedChange={(checked) =>
-                      handleUpdate({
-                        additional_access_token_claims: toggleClaim(
-                          formValues.additional_access_token_claims,
-                          claim.value,
-                          checked,
-                        ),
-                      })
-                    }
+                    onCheckedChange={(checked) => handleUpdate({ additional_access_token_claims: toggleClaim(formValues.additional_access_token_claims, claim.value, checked) })}
+                    disabled={isBusy}
                   />
                 ))}
               </div>
-            </div>
-          </SettingsCard>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
+              Cancel
             </Button>
+            <FormSubmitButton isSubmitting={isBusy} submitText="Save Changes" />
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </DetailsContainer>
   )
 }

@@ -1,7 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Mail } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { Badge } from "@/components/ui/badge"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { StatusBadge } from "@/components/details/StatusBadge"
 import { EmailTemplateActions } from "./EmailTemplateActions"
@@ -25,32 +24,6 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
           </div>
         </div>
       )
-    },
-  },
-  {
-    id: "type",
-    accessorKey: "isSystem",
-    enableSorting: false,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => {
-      const template = row.original
-      const badges: React.ReactNode[] = []
-      if (template.isSystem) {
-        badges.push(
-          <Badge key="system" variant="secondary" className="text-xs font-normal">System</Badge>
-        )
-      }
-      if (template.isDefault) {
-        badges.push(
-          <Badge key="default" variant="outline" className="text-xs font-normal">Default</Badge>
-        )
-      }
-      if (badges.length === 0) {
-        badges.push(
-          <Badge key="custom" variant="outline" className="text-xs font-normal">Custom</Badge>
-        )
-      }
-      return <div className="flex gap-1 px-3 py-1">{badges}</div>
     },
   },
   {

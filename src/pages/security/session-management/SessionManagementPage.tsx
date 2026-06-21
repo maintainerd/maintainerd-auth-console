@@ -1,15 +1,16 @@
 import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DetailsContainer } from '@/components/container'
-import { Save, Clock } from 'lucide-react'
-import { FormSwitchField, FormInputField, FormSelectField } from '@/components/form'
-import { SettingsCard } from '@/components/card'
+import { FormPageHeader } from '@/components/header'
+import { FormSwitchField, FormInputField, FormSelectField, FormSubmitButton } from '@/components/form'
 import { useSessionSettings, useUpdateSessionSettings } from '@/hooks/useSessionSettings'
 import { useToast } from '@/hooks/useToast'
 import { sessionSettingsSchema, type SessionSettingsFormData } from '@/lib/validations'
-
 
 const SAME_SITE_OPTIONS = [
   { value: 'Strict', label: 'Strict' },
@@ -18,7 +19,11 @@ const SAME_SITE_OPTIONS = [
 ]
 
 export default function SessionManagementPage() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
+  const backTo = `/${tenantId}/security/session`
+
   const { data: saved, isLoading } = useSessionSettings()
   const updateMutation = useUpdateSessionSettings()
 
@@ -70,16 +75,29 @@ export default function SessionManagementPage() {
     try {
       await updateMutation.mutateAsync(data)
       showSuccess('Session settings saved successfully')
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
   }
 
+  const isBusy = isSubmitting || updateMutation.isPending
+
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading session settings...</p>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Sessions" title="Configure Sessions" description="Set token lifetimes, timeouts, and cookie settings." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -87,133 +105,78 @@ export default function SessionManagementPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Sessions</h1>
-          <p className="text-muted-foreground">
-            Configure token lifetimes, idle/absolute timeouts, concurrency, refresh rotation, and cookie flags.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <FormPageHeader
+          backUrl={backTo}
+          backLabel="Back to Sessions"
+          title="Configure Sessions"
+          description="Configure token lifetimes, idle/absolute timeouts, concurrency, refresh rotation, and cookie flags."
+        />
 
-        <div className="grid gap-6">
-          <SettingsCard
-            title="Token Lifetimes"
-            description="Set how long access and refresh tokens remain valid."
-            icon={Clock}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField
-                label="Access Token TTL (minutes)"
-                description="1–60 minutes"
-                type="number"
-                value={formValues.access_token_ttl_minutes.toString()}
-                onChange={(e) => handleUpdate({ access_token_ttl_minutes: parseInt(e.target.value) || 1 })}
-                error={errors.access_token_ttl_minutes?.message}
-              />
-              <FormInputField
-                label="Refresh Token TTL (days)"
-                description="1–365 days"
-                type="number"
-                value={formValues.refresh_token_ttl_days.toString()}
-                onChange={(e) => handleUpdate({ refresh_token_ttl_days: parseInt(e.target.value) || 1 })}
-                error={errors.refresh_token_ttl_days?.message}
-              />
-            </div>
-          </SettingsCard>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Token Lifetimes</CardTitle>
+              <p className="text-sm text-muted-foreground">Set how long access and refresh tokens remain valid.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField label="Access Token TTL (minutes)" description="1–60 minutes" type="number" value={formValues.access_token_ttl_minutes.toString()} onChange={(e) => handleUpdate({ access_token_ttl_minutes: parseInt(e.target.value) || 1 })} error={errors.access_token_ttl_minutes?.message} disabled={isBusy} />
+                <FormInputField label="Refresh Token TTL (days)" description="1–365 days" type="number" value={formValues.refresh_token_ttl_days.toString()} onChange={(e) => handleUpdate({ refresh_token_ttl_days: parseInt(e.target.value) || 1 })} error={errors.refresh_token_ttl_days?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Timeouts & Concurrency"
-            description="Idle and absolute session limits. Set concurrency to 0 for unlimited."
-          >
-            <div className="grid gap-4 md:grid-cols-3">
-              <FormInputField
-                label="Idle Timeout (minutes)"
-                type="number"
-                value={formValues.idle_timeout_minutes.toString()}
-                onChange={(e) => handleUpdate({ idle_timeout_minutes: parseInt(e.target.value) || 1 })}
-                error={errors.idle_timeout_minutes?.message}
-              />
-              <FormInputField
-                label="Absolute Timeout (hours)"
-                type="number"
-                value={formValues.absolute_timeout_hours.toString()}
-                onChange={(e) => handleUpdate({ absolute_timeout_hours: parseInt(e.target.value) || 1 })}
-                error={errors.absolute_timeout_hours?.message}
-              />
-              <FormInputField
-                label="Max Concurrent Sessions"
-                description="0 = unlimited"
-                type="number"
-                value={formValues.max_concurrent_sessions.toString()}
-                onChange={(e) => handleUpdate({ max_concurrent_sessions: parseInt(e.target.value) || 0 })}
-                error={errors.max_concurrent_sessions?.message}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Timeouts & Concurrency</CardTitle>
+              <p className="text-sm text-muted-foreground">Idle and absolute session limits. Set concurrency to 0 for unlimited.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <FormInputField label="Idle Timeout (minutes)" type="number" value={formValues.idle_timeout_minutes.toString()} onChange={(e) => handleUpdate({ idle_timeout_minutes: parseInt(e.target.value) || 1 })} error={errors.idle_timeout_minutes?.message} disabled={isBusy} />
+                <FormInputField label="Absolute Timeout (hours)" type="number" value={formValues.absolute_timeout_hours.toString()} onChange={(e) => handleUpdate({ absolute_timeout_hours: parseInt(e.target.value) || 1 })} error={errors.absolute_timeout_hours?.message} disabled={isBusy} />
+                <FormInputField label="Max Concurrent Sessions" description="0 = unlimited" type="number" value={formValues.max_concurrent_sessions.toString()} onChange={(e) => handleUpdate({ max_concurrent_sessions: parseInt(e.target.value) || 0 })} error={errors.max_concurrent_sessions?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Refresh Rotation"
-            description="Single-use refresh tokens with reuse detection and family revocation."
-          >
-            <div className="space-y-4">
-              <FormSwitchField
-                label="Rotate Refresh Tokens"
-                description="Issue a new refresh token on every refresh; replaying a consumed token revokes the entire token family"
-                checked={formValues.rotate_refresh_tokens}
-                onCheckedChange={(v) => handleUpdate({ rotate_refresh_tokens: v })}
-              />
-              <FormInputField
-                label="Reuse Grace (seconds)"
-                description="Replay window before family revocation (0 = instant)"
-                type="number"
-                value={formValues.refresh_token_reuse_interval_seconds.toString()}
-                onChange={(e) => handleUpdate({ refresh_token_reuse_interval_seconds: parseInt(e.target.value) || 0 })}
-                error={errors.refresh_token_reuse_interval_seconds?.message}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Refresh Rotation</CardTitle>
+              <p className="text-sm text-muted-foreground">Single-use refresh tokens with reuse detection and family revocation.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormSwitchField label="Rotate Refresh Tokens" description="Issue a new refresh token on every refresh; replaying a consumed token revokes the entire token family" checked={formValues.rotate_refresh_tokens} onCheckedChange={(v) => handleUpdate({ rotate_refresh_tokens: v })} disabled={isBusy} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField label="Reuse Grace (seconds)" description="Replay window before family revocation (0 = instant)" type="number" value={formValues.refresh_token_reuse_interval_seconds.toString()} onChange={(e) => handleUpdate({ refresh_token_reuse_interval_seconds: parseInt(e.target.value) || 0 })} error={errors.refresh_token_reuse_interval_seconds?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Cookie Settings"
-            description="Security flags applied to authentication cookies."
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <FormSwitchField
-                label="Secure"
-                description="Only transmit cookies over HTTPS"
-                checked={formValues.cookie_secure}
-                onCheckedChange={(v) => handleUpdate({ cookie_secure: v })}
-              />
-              <FormSwitchField
-                label="HttpOnly"
-                description="Block JavaScript access to cookies"
-                checked={formValues.cookie_http_only}
-                onCheckedChange={(v) => handleUpdate({ cookie_http_only: v })}
-              />
-              <FormSwitchField
-                label="Revoke on Password Change"
-                description="Terminate all other sessions when password is changed"
-                checked={formValues.revoke_sessions_on_password_change}
-                onCheckedChange={(v) => handleUpdate({ revoke_sessions_on_password_change: v })}
-              />
-              <FormSelectField
-                label="SameSite"
-                options={SAME_SITE_OPTIONS}
-                value={formValues.cookie_same_site}
-                onValueChange={(v) => handleUpdate({ cookie_same_site: v as SessionSettingsFormData['cookie_same_site'] })}
-                error={errors.cookie_same_site?.message}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Cookie Settings</CardTitle>
+              <p className="text-sm text-muted-foreground">Security flags applied to authentication cookies.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormSwitchField label="Secure" description="Only transmit cookies over HTTPS" checked={formValues.cookie_secure} onCheckedChange={(v) => handleUpdate({ cookie_secure: v })} disabled={isBusy} />
+                <FormSwitchField label="HttpOnly" description="Block JavaScript access to cookies" checked={formValues.cookie_http_only} onCheckedChange={(v) => handleUpdate({ cookie_http_only: v })} disabled={isBusy} />
+                <FormSwitchField label="Revoke on Password Change" description="Terminate all other sessions when password is changed" checked={formValues.revoke_sessions_on_password_change} onCheckedChange={(v) => handleUpdate({ revoke_sessions_on_password_change: v })} disabled={isBusy} />
+                <FormSelectField label="SameSite" options={SAME_SITE_OPTIONS} value={formValues.cookie_same_site} onValueChange={(v) => handleUpdate({ cookie_same_site: v as SessionSettingsFormData['cookie_same_site'] })} error={errors.cookie_same_site?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
+              Cancel
             </Button>
+            <FormSubmitButton isSubmitting={isBusy} submitText="Save Changes" />
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </DetailsContainer>
   )
 }

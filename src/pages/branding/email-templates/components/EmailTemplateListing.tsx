@@ -23,10 +23,8 @@ export function EmailTemplateListing() {
       useData={useEmailTemplatesList}
       filterGroups={FILTER_GROUPS}
       onRowClick={(template) => navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}`)}
-      onCreate={() => navigate(`/${tenantId}/branding/email-templates/create`)}
-      createLabel="New Template"
-      emptyTitle="No email templates yet"
-      emptyDescription="Create your first email template to customize authentication and notification emails."
+      emptyTitle="No email templates"
+      emptyDescription="Email templates are seeded automatically when a tenant is created."
     />
   )
 }

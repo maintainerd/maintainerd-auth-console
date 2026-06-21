@@ -62,6 +62,7 @@ export function FormSelectField({
       </FieldLabel>
 
       <Select
+        key={value}
         value={value || undefined}
         onValueChange={onValueChange}
         disabled={disabled}

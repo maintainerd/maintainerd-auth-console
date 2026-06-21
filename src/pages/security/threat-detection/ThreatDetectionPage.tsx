@@ -1,18 +1,23 @@
 import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DetailsContainer } from '@/components/container'
-import { Save, AlertTriangle } from 'lucide-react'
-import { FormSwitchField, FormInputField } from '@/components/form'
-import { SettingsCard } from '@/components/card'
+import { FormPageHeader } from '@/components/header'
+import { FormSwitchField, FormInputField, FormSubmitButton } from '@/components/form'
 import { useThreatDetectionSettings, useUpdateThreatDetectionSettings } from '@/hooks/useThreatDetectionSettings'
 import { useToast } from '@/hooks/useToast'
 import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } from '@/lib/validations'
 
-
 export default function ThreatDetectionPage() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
+  const backTo = `/${tenantId}/security/threat`
+
   const { data: savedSettings, isLoading } = useThreatDetectionSettings()
   const updateMutation = useUpdateThreatDetectionSettings()
 
@@ -63,17 +68,30 @@ export default function ThreatDetectionPage() {
   const onSubmit = async (data: ThreatDetectionSettingsFormData) => {
     try {
       await updateMutation.mutateAsync(data)
-      showSuccess('Threat detection settings saved successfully')
+      showSuccess('Attack protection settings saved successfully')
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
   }
 
+  const isBusy = isSubmitting || updateMutation.isPending
+
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading attack protection settings...</p>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Attack Protection" title="Configure Attack Protection" description="Set threat detection and risk policies." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -81,125 +99,71 @@ export default function ThreatDetectionPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Attack Protection</h1>
-          <p className="text-muted-foreground">
-            Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <FormPageHeader
+          backUrl={backTo}
+          backLabel="Back to Attack Protection"
+          title="Configure Attack Protection"
+          description="Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring."
+        />
 
-        <div className="grid gap-6">
-          <SettingsCard
-            title="Detection Engines"
-            description="Enable threat detection subsystems that run before credential checks on every login."
-            icon={AlertTriangle}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <FormSwitchField
-                label="Brute Force Detection"
-                description="Detect repeated failed login attempts per account"
-                checked={formValues.brute_force_detection_enabled}
-                onCheckedChange={(v) => handleUpdate({ brute_force_detection_enabled: v })}
-              />
-              <FormSwitchField
-                label="Impossible Travel Detection"
-                description="Flag logins from geographically impossible locations"
-                checked={formValues.impossible_travel_detection_enabled}
-                onCheckedChange={(v) => handleUpdate({ impossible_travel_detection_enabled: v })}
-              />
-              <FormSwitchField
-                label="New Device Notification"
-                description="Alert users when a login occurs from a new device"
-                checked={formValues.new_device_notification_enabled}
-                onCheckedChange={(v) => handleUpdate({ new_device_notification_enabled: v })}
-              />
-              <FormSwitchField
-                label="Velocity Check"
-                description="Rate-limit login attempts per IP address"
-                checked={formValues.velocity_check_enabled}
-                onCheckedChange={(v) => handleUpdate({ velocity_check_enabled: v })}
-              />
-            </div>
-          </SettingsCard>
-
-          <SettingsCard
-            title="Risk-Based Controls"
-            description="Step-up and blocking based on a cumulative risk score (0–100)."
-          >
-            <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Detection Engines</CardTitle>
+              <p className="text-sm text-muted-foreground">Threat detection subsystems that run on every login.</p>
+            </CardHeader>
+            <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormSwitchField
-                  label="Risk-Based Step-Up"
-                  description="Force MFA when risk score reaches the step-up threshold"
-                  checked={formValues.risk_based_step_up_enabled}
-                  onCheckedChange={(v) => handleUpdate({ risk_based_step_up_enabled: v })}
-                />
-                <FormSwitchField
-                  label="Compromised Credential Monitoring"
-                  description="Check credentials against known breach databases"
-                  checked={formValues.compromised_credential_monitoring_enabled}
-                  onCheckedChange={(v) => handleUpdate({ compromised_credential_monitoring_enabled: v })}
-                />
+                <FormSwitchField label="Brute Force Detection" description="Detect repeated failed login attempts per account" checked={formValues.brute_force_detection_enabled} onCheckedChange={(v) => handleUpdate({ brute_force_detection_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="Impossible Travel Detection" description="Flag logins from geographically impossible locations" checked={formValues.impossible_travel_detection_enabled} onCheckedChange={(v) => handleUpdate({ impossible_travel_detection_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="New Device Notification" description="Alert users when a login occurs from a new device" checked={formValues.new_device_notification_enabled} onCheckedChange={(v) => handleUpdate({ new_device_notification_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="Velocity Check" description="Rate-limit login attempts per IP address" checked={formValues.velocity_check_enabled} onCheckedChange={(v) => handleUpdate({ velocity_check_enabled: v })} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Risk-Based Controls</CardTitle>
+              <p className="text-sm text-muted-foreground">Step-up and blocking based on a cumulative risk score (0-100).</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormSwitchField label="Risk-Based Step-Up" description="Force MFA when risk score reaches the step-up threshold" checked={formValues.risk_based_step_up_enabled} onCheckedChange={(v) => handleUpdate({ risk_based_step_up_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="Compromised Credential Monitoring" description="Check credentials against known breach databases" checked={formValues.compromised_credential_monitoring_enabled} onCheckedChange={(v) => handleUpdate({ compromised_credential_monitoring_enabled: v })} disabled={isBusy} />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <FormInputField
-                  label="Step-Up Threshold"
-                  description="Risk score ≥ this value forces MFA"
-                  type="number"
-                  value={formValues.risk_step_up_threshold.toString()}
-                  onChange={(e) => handleUpdate({ risk_step_up_threshold: parseInt(e.target.value) || 0 })}
-                  error={errors.risk_step_up_threshold?.message}
-                />
-                <FormInputField
-                  label="Block Threshold"
-                  description="Risk score ≥ this value blocks the login entirely"
-                  type="number"
-                  value={formValues.risk_block_threshold.toString()}
-                  onChange={(e) => handleUpdate({ risk_block_threshold: parseInt(e.target.value) || 0 })}
-                  error={errors.risk_block_threshold?.message}
-                />
+                <FormInputField label="Step-Up Threshold" description="Risk score >= this forces MFA" type="number" value={formValues.risk_step_up_threshold.toString()} onChange={(e) => handleUpdate({ risk_step_up_threshold: parseInt(e.target.value) || 0 })} error={errors.risk_step_up_threshold?.message} disabled={isBusy} />
+                <FormInputField label="Block Threshold" description="Risk score >= this blocks the login" type="number" value={formValues.risk_block_threshold.toString()} onChange={(e) => handleUpdate({ risk_block_threshold: parseInt(e.target.value) || 0 })} error={errors.risk_block_threshold?.message} disabled={isBusy} />
               </div>
-            </div>
-          </SettingsCard>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Network & IP"
-            description="IP reputation checks, Tor blocking, and per-IP velocity limits."
-          >
-            <div className="space-y-4">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Network & IP</CardTitle>
+              <p className="text-sm text-muted-foreground">IP reputation checks, Tor blocking, and per-IP velocity limits.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormSwitchField
-                  label="IP Reputation Check"
-                  description="Query external IP reputation feeds"
-                  checked={formValues.ip_reputation_check_enabled}
-                  onCheckedChange={(v) => handleUpdate({ ip_reputation_check_enabled: v })}
-                />
-                <FormSwitchField
-                  label="Block Tor Exit Nodes"
-                  description="Reject logins originating from known Tor exit nodes"
-                  checked={formValues.block_tor_exit_nodes}
-                  onCheckedChange={(v) => handleUpdate({ block_tor_exit_nodes: v })}
-                />
+                <FormSwitchField label="IP Reputation Check" description="Query external IP reputation feeds" checked={formValues.ip_reputation_check_enabled} onCheckedChange={(v) => handleUpdate({ ip_reputation_check_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="Block Tor Exit Nodes" description="Reject logins originating from known Tor exit nodes" checked={formValues.block_tor_exit_nodes} onCheckedChange={(v) => handleUpdate({ block_tor_exit_nodes: v })} disabled={isBusy} />
               </div>
-              <FormInputField
-                label="Velocity Limit (failures/IP/hour)"
-                type="number"
-                value={formValues.velocity_failures_per_ip_per_hour.toString()}
-                onChange={(e) => handleUpdate({ velocity_failures_per_ip_per_hour: parseInt(e.target.value) || 1 })}
-                error={errors.velocity_failures_per_ip_per_hour?.message}
-              />
-            </div>
-          </SettingsCard>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField label="Velocity Limit (failures/IP/hour)" type="number" value={formValues.velocity_failures_per_ip_per_hour.toString()} onChange={(e) => handleUpdate({ velocity_failures_per_ip_per_hour: parseInt(e.target.value) || 1 })} error={errors.velocity_failures_per_ip_per_hour?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
+              Cancel
             </Button>
+            <FormSubmitButton isSubmitting={isBusy} submitText="Save Changes" />
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </DetailsContainer>
   )
 }

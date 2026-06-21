@@ -18,6 +18,7 @@ export type EmailTemplate = {
   subject: string
   bodyHtml: string
   bodyPlain: string
+  parametersDoc: string | null
   status: EmailTemplateStatus
   isDefault: boolean
   isSystem: boolean
@@ -34,6 +35,7 @@ export type EmailTemplatePayload = {
   subject: string
   body_html: string
   body_plain: string
+  parameters_doc: string | null
   status: EmailTemplateStatus
   is_default: boolean
   is_system: boolean
@@ -67,21 +69,9 @@ export interface EmailTemplateListResponse {
 }
 
 /**
- * Create Email Template Request
- */
-export interface CreateEmailTemplateRequest {
-  name: string
-  subject: string
-  body_html: string
-  body_plain: string
-  status: EmailTemplateStatus
-}
-
-/**
  * Update Email Template Request
  */
 export interface UpdateEmailTemplateRequest {
-  name: string
   subject: string
   body_html: string
   body_plain: string

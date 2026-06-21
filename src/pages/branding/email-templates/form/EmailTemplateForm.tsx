@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -14,7 +15,7 @@ import {
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
-import { useEmailTemplate, useCreateEmailTemplate, useUpdateEmailTemplate } from "@/hooks/useEmailTemplates"
+import { useEmailTemplate, useUpdateEmailTemplate } from "@/hooks/useEmailTemplates"
 import { useToast } from "@/hooks/useToast"
 import type { EmailTemplateStatus } from "@/services/api/email-templates/types"
 
@@ -34,14 +35,12 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function EmailTemplateForm() {
-  const { tenantId, templateId } = useParams<{ tenantId: string; templateId?: string }>()
+  const { tenantId, templateId } = useParams<{ tenantId: string; templateId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-
-  const isEditing = Boolean(templateId)
+  const backTo = `/${tenantId}/branding/email-templates/${templateId}`
 
   const { data: templateData, isLoading: isFetchingTemplate } = useEmailTemplate(templateId || '')
-  const createMutation = useCreateEmailTemplate()
   const updateMutation = useUpdateEmailTemplate()
 
   const {
@@ -65,7 +64,7 @@ export default function EmailTemplateForm() {
 
   const initialized = useRef(false)
   useEffect(() => {
-    if (isEditing && templateData && !initialized.current) {
+    if (templateData && !initialized.current) {
       initialized.current = true
       reset({
         name: templateData.name,
@@ -75,49 +74,44 @@ export default function EmailTemplateForm() {
         status: templateData.status,
       })
     }
-  }, [isEditing, templateData, reset])
+  }, [templateData, reset])
 
-  const isLoading =
-    isFetchingTemplate || createMutation.isPending || updateMutation.isPending || isSubmitting
+  const isBusy = updateMutation.isPending || isSubmitting
 
   const onSubmit = async (data: EmailTemplateFormData) => {
+    if (!templateId) return
     try {
-      if (isEditing && templateId) {
-        await updateMutation.mutateAsync({
-          id: templateId,
-          data: {
-            name: data.name,
-            subject: data.subject,
-            body_html: data.body_html,
-            body_plain: data.body_plain,
-            status: data.status as EmailTemplateStatus,
-          },
-        })
-        showSuccess("Email template updated successfully")
-      } else {
-        await createMutation.mutateAsync({
-          name: data.name,
+      await updateMutation.mutateAsync({
+        id: templateId,
+        data: {
           subject: data.subject,
           body_html: data.body_html,
           body_plain: data.body_plain,
           status: data.status as EmailTemplateStatus,
-        })
-        showSuccess("Email template created successfully")
-      }
-      navigate(`/${tenantId}/branding/email-templates`)
+        },
+      })
+      showSuccess("Email template updated successfully")
+      navigate(backTo)
     } catch (error) {
-      showError(error, "Failed to save email template")
+      showError(error)
     }
   }
 
-  if (isEditing && isFetchingTemplate) {
+  if (isFetchingTemplate) {
     return (
       <DetailsContainer>
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">Loading...</h2>
-            <p className="mt-2 text-muted-foreground">Fetching email template details</p>
-          </div>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Template" title="Edit Email Template" description="Update the email template details and content." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -127,27 +121,23 @@ export default function EmailTemplateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/branding/email-templates/${templateId}` : `/${tenantId}/branding/email-templates`}
-          backLabel="Back to Email Templates"
-          title={isEditing ? "Edit Email Template" : "Create Email Template"}
-          description={
-            isEditing
-              ? "Update the email template details, content, and status."
-              : "Create a new email template for authentication and notification emails."
-          }
+          backUrl={backTo}
+          backLabel="Back to Template"
+          title="Edit Email Template"
+          description="Update the email template details, content, and status."
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Template Information</CardTitle>
+              <CardTitle className="text-base">Template Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormInputField
                 label="Name"
                 placeholder="e.g., password_reset, welcome_email"
-                description="A unique identifier for this template."
-                disabled={isLoading}
+                description="Template identifier — cannot be changed."
+                disabled
                 error={errors.name?.message}
                 required
                 {...register("name")}
@@ -157,7 +147,7 @@ export default function EmailTemplateForm() {
                 label="Subject"
                 placeholder="Enter email subject line"
                 description="The subject line of the email."
-                disabled={isLoading}
+                disabled={isBusy}
                 error={errors.subject?.message}
                 required
                 {...register("subject")}
@@ -173,7 +163,7 @@ export default function EmailTemplateForm() {
                     options={STATUS_OPTIONS}
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={isLoading}
+                    disabled={isBusy}
                     error={errors.status?.message}
                     required
                   />
@@ -184,7 +174,7 @@ export default function EmailTemplateForm() {
 
           <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Email Content</CardTitle>
+              <CardTitle className="text-base">Email Content</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormTextareaField
@@ -192,7 +182,7 @@ export default function EmailTemplateForm() {
                 placeholder="Enter HTML email template..."
                 description="The HTML version of the email body."
                 rows={12}
-                disabled={isLoading}
+                disabled={isBusy}
                 error={errors.body_html?.message}
                 required
                 {...register("body_html")}
@@ -203,7 +193,7 @@ export default function EmailTemplateForm() {
                 placeholder="Enter plain text email template (fallback)..."
                 description="The plain text fallback for email clients that don't support HTML."
                 rows={8}
-                disabled={isLoading}
+                disabled={isBusy}
                 error={errors.body_plain?.message}
                 required
                 {...register("body_plain")}
@@ -211,26 +201,49 @@ export default function EmailTemplateForm() {
             </CardContent>
           </Card>
 
+          {templateData?.parametersDoc && (
+            <Card className="shadow-xs">
+              <CardHeader>
+                <CardTitle className="text-base">Template Parameters</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Use these variables in the HTML and plain text content. They will be replaced with actual values when the email is sent.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto rounded-md border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="px-4 py-2 text-left font-medium">Parameter</th>
+                        <th className="px-4 py-2 text-left font-medium">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {templateData.parametersDoc
+                        .split('\n')
+                        .filter((line) => line.startsWith('|') && !line.includes('---'))
+                        .slice(1)
+                        .map((line, i) => {
+                          const cells = line.split('|').map((c) => c.trim()).filter(Boolean)
+                          return (
+                            <tr key={i} className="border-b last:border-0">
+                              <td className="px-4 py-2 font-mono text-xs">{cells[0]?.replace(/`/g, '')}</td>
+                              <td className="px-4 py-2 text-muted-foreground">{cells[1]}</td>
+                            </tr>
+                          )
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  isEditing
-                    ? `/${tenantId}/branding/email-templates/${templateId}`
-                    : `/${tenantId}/branding/email-templates`,
-                )
-              }
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
               Cancel
             </Button>
-            <FormSubmitButton
-              isSubmitting={isLoading}
-              submittingText="Saving..."
-              submitText={isEditing ? "Update Template" : "Create Template"}
-            />
+            <FormSubmitButton isSubmitting={isBusy} submitText="Update Template" />
           </div>
         </form>
       </div>

@@ -1,18 +1,23 @@
 import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DetailsContainer } from '@/components/container'
-import { Save } from 'lucide-react'
-import { FormSwitchField, FormInputField, FormTextareaField } from '@/components/form'
-import { SettingsCard } from '@/components/card'
+import { FormPageHeader } from '@/components/header'
+import { FormSwitchField, FormInputField, FormTextareaField, FormSubmitButton } from '@/components/form'
 import { useRegistrationConfig, useUpdateRegistrationConfig } from '@/hooks/useRegistrationConfig'
 import { useToast } from '@/hooks/useToast'
 import { registrationConfigSchema, type RegistrationConfigFormData } from '@/lib/validations'
 
-
 export default function RegistrationConfigPage() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
+  const backTo = `/${tenantId}/security/registration`
+
   const { data: savedConfig, isLoading } = useRegistrationConfig()
   const updateMutation = useUpdateRegistrationConfig()
 
@@ -57,10 +62,7 @@ export default function RegistrationConfigPage() {
   }
 
   const parseDomains = (text: string): string[] =>
-    text
-      .split(/[\n,]/)
-      .map((d) => d.trim().toLowerCase())
-      .filter(Boolean)
+    text.split(/[\n,]/).map((d) => d.trim().toLowerCase()).filter(Boolean)
 
   const domainsToText = (domains: string[]): string =>
     (domains || []).join('\n')
@@ -68,17 +70,30 @@ export default function RegistrationConfigPage() {
   const onSubmit = async (data: RegistrationConfigFormData) => {
     try {
       await updateMutation.mutateAsync(data)
-      showSuccess('Registration config saved successfully')
+      showSuccess('Registration configuration saved successfully')
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
   }
 
+  const isBusy = isSubmitting || updateMutation.isPending
+
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading registration configuration...</p>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Registration" title="Configure Registration" description="Set registration and verification policies." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -86,113 +101,69 @@ export default function RegistrationConfigPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Registration</h1>
-          <p className="text-muted-foreground">
-            Configure self-registration, verification, domain rules, and rate limiting.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <FormPageHeader
+          backUrl={backTo}
+          backLabel="Back to Registration"
+          title="Configure Registration"
+          description="Configure self-registration, verification, domain rules, and rate limiting."
+        />
 
-        <div className="grid gap-6">
-          <SettingsCard
-            title="Registration Settings"
-            description="Control how users can register and the default role assigned."
-          >
-            <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Registration Settings</CardTitle>
+              <p className="text-sm text-muted-foreground">Control how users can register.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormSwitchField
-                  label="Self Registration"
-                  description="Allow users to register themselves"
-                  checked={formValues.self_registration_enabled}
-                  onCheckedChange={(v) => handleUpdate({ self_registration_enabled: v })}
-                />
-                <FormSwitchField
-                  label="CAPTCHA on Signup"
-                  description="Require reCAPTCHA verification during registration"
-                  checked={formValues.captcha_on_signup}
-                  onCheckedChange={(v) => handleUpdate({ captcha_on_signup: v })}
-                />
+                <FormSwitchField label="Self Registration" description="Allow users to register themselves" checked={formValues.self_registration_enabled} onCheckedChange={(v) => handleUpdate({ self_registration_enabled: v })} disabled={isBusy} />
+                <FormSwitchField label="CAPTCHA on Signup" description="Require reCAPTCHA verification during registration" checked={formValues.captcha_on_signup} onCheckedChange={(v) => handleUpdate({ captcha_on_signup: v })} disabled={isBusy} />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <FormInputField
-                  label="Rate Limit (per IP per hour)"
-                  type="number"
-                  value={formValues.registration_rate_limit_per_ip_per_hour.toString()}
-                  onChange={(e) => handleUpdate({ registration_rate_limit_per_ip_per_hour: parseInt(e.target.value) || 1 })}
-                  error={errors.registration_rate_limit_per_ip_per_hour?.message}
-                />
+                <FormInputField label="Rate Limit (per IP per hour)" type="number" value={formValues.registration_rate_limit_per_ip_per_hour.toString()} onChange={(e) => handleUpdate({ registration_rate_limit_per_ip_per_hour: parseInt(e.target.value) || 1 })} error={errors.registration_rate_limit_per_ip_per_hour?.message} disabled={isBusy} />
               </div>
-            </div>
-          </SettingsCard>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Domain Rules"
-            description="Restrict registration to specific email domains. One domain per line. Supports wildcard patterns like *.example.com."
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormTextareaField
-                label="Allowed Email Domains"
-                description="Leave empty to allow all domains"
-                value={domainsToText(formValues.allowed_email_domains)}
-                onChange={(e) => handleUpdate({ allowed_email_domains: parseDomains(e.target.value) })}
-                error={errors.allowed_email_domains?.message}
-                rows={5}
-              />
-              <FormTextareaField
-                label="Blocked Email Domains"
-                description="Domains explicitly denied (takes precedence over allowed)"
-                value={domainsToText(formValues.blocked_email_domains)}
-                onChange={(e) => handleUpdate({ blocked_email_domains: parseDomains(e.target.value) })}
-                error={errors.blocked_email_domains?.message}
-                rows={5}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Domain Rules</CardTitle>
+              <p className="text-sm text-muted-foreground">Restrict registration to specific email domains. One domain per line. Supports wildcard patterns like *.example.com.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormTextareaField label="Allowed Email Domains" description="Leave empty to allow all domains" value={domainsToText(formValues.allowed_email_domains)} onChange={(e) => handleUpdate({ allowed_email_domains: parseDomains(e.target.value) })} error={errors.allowed_email_domains?.message} rows={5} disabled={isBusy} />
+                <FormTextareaField label="Blocked Email Domains" description="Domains explicitly denied (takes precedence)" value={domainsToText(formValues.blocked_email_domains)} onChange={(e) => handleUpdate({ blocked_email_domains: parseDomains(e.target.value) })} error={errors.blocked_email_domains?.message} rows={5} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Verification"
-            description="Configure email and phone verification requirements."
-          >
-            <div className="space-y-4">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Verification</CardTitle>
+              <p className="text-sm text-muted-foreground">Configure email and phone verification requirements.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormSwitchField
-                  label="Require Email Verification"
-                  description="Users must verify email before full access"
-                  checked={formValues.require_email_verification}
-                  onCheckedChange={(v) => handleUpdate({ require_email_verification: v })}
-                />
-                <FormSwitchField
-                  label="Require Phone Verification"
-                  description="Users must verify phone before full access"
-                  checked={formValues.require_phone_verification}
-                  onCheckedChange={(v) => handleUpdate({ require_phone_verification: v })}
-                />
-                <FormSwitchField
-                  label="Auto-Confirm Accounts"
-                  description="Skip verification and immediately activate new accounts"
-                  checked={formValues.auto_confirm_enabled}
-                  onCheckedChange={(v) => handleUpdate({ auto_confirm_enabled: v })}
-                />
+                <FormSwitchField label="Require Email Verification" description="Users must verify email before full access" checked={formValues.require_email_verification} onCheckedChange={(v) => handleUpdate({ require_email_verification: v })} disabled={isBusy} />
+                <FormSwitchField label="Require Phone Verification" description="Users must verify phone before full access" checked={formValues.require_phone_verification} onCheckedChange={(v) => handleUpdate({ require_phone_verification: v })} disabled={isBusy} />
+                <FormSwitchField label="Auto-Confirm Accounts" description="Skip verification and immediately activate new accounts" checked={formValues.auto_confirm_enabled} onCheckedChange={(v) => handleUpdate({ auto_confirm_enabled: v })} disabled={isBusy} />
               </div>
-              <FormInputField
-                label="Verification Token TTL (hours)"
-                type="number"
-                value={formValues.verification_token_ttl_hours.toString()}
-                onChange={(e) => handleUpdate({ verification_token_ttl_hours: parseInt(e.target.value) || 1 })}
-                error={errors.verification_token_ttl_hours?.message}
-              />
-            </div>
-          </SettingsCard>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField label="Verification Token TTL (hours)" type="number" value={formValues.verification_token_ttl_hours.toString()} onChange={(e) => handleUpdate({ verification_token_ttl_hours: parseInt(e.target.value) || 1 })} error={errors.verification_token_ttl_hours?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
+              Cancel
             </Button>
+            <FormSubmitButton isSubmitting={isBusy} submitText="Save Changes" />
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </DetailsContainer>
   )
 }

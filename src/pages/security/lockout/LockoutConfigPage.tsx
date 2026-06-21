@@ -1,18 +1,23 @@
 import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DetailsContainer } from '@/components/container'
-import { Save } from 'lucide-react'
-import { FormSwitchField, FormInputField } from '@/components/form'
-import { SettingsCard } from '@/components/card'
+import { FormPageHeader } from '@/components/header'
+import { FormSwitchField, FormInputField, FormSubmitButton } from '@/components/form'
 import { useLockoutConfig, useUpdateLockoutConfig } from '@/hooks/useLockoutConfig'
 import { useToast } from '@/hooks/useToast'
 import { lockoutConfigSchema, type LockoutConfigFormData } from '@/lib/validations'
 
-
 export default function LockoutConfigPage() {
+  const { tenantId } = useParams<{ tenantId: string }>()
+  const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
+  const backTo = `/${tenantId}/security/lockout`
+
   const { data: savedConfig, isLoading } = useLockoutConfig()
   const updateMutation = useUpdateLockoutConfig()
 
@@ -61,17 +66,30 @@ export default function LockoutConfigPage() {
   const onSubmit = async (data: LockoutConfigFormData) => {
     try {
       await updateMutation.mutateAsync(data)
-      showSuccess('Lockout config saved successfully')
+      showSuccess('Lockout configuration saved successfully')
+      navigate(backTo)
     } catch (error) {
       showError(error)
     }
   }
 
+  const isBusy = isSubmitting || updateMutation.isPending
+
   if (isLoading) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Loading lockout configuration...</p>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Account Lockout" title="Configure Account Lockout" description="Set lockout policies and behavior." />
+          <Card className="shadow-xs">
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -79,115 +97,73 @@ export default function LockoutConfigPage() {
 
   return (
     <DetailsContainer>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Account Lockout</h1>
-          <p className="text-muted-foreground">
-            Configure failed-login lockout policies, progressive escalation, and auto-unlock behavior.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <FormPageHeader
+          backUrl={backTo}
+          backLabel="Back to Account Lockout"
+          title="Configure Account Lockout"
+          description="Configure failed-login lockout policies, progressive escalation, and auto-unlock behavior."
+        />
 
-        <div className="grid gap-6">
-          <SettingsCard
-            title="Lockout Policy"
-            description="Set thresholds and duration for account lockouts."
-          >
-            <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Lockout Policy</CardTitle>
+              <p className="text-sm text-muted-foreground">Set thresholds and duration for account lockouts.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <FormSwitchField
                 label="Enable Lockout"
                 description="Enable account lockout after repeated failed login attempts"
                 checked={formValues.enabled}
                 onCheckedChange={(checked) => handleUpdate({ enabled: checked })}
                 error={errors.enabled?.message}
+                disabled={isBusy}
               />
               <div className="grid gap-4 md:grid-cols-2">
-                <FormInputField
-                  label="Max Failed Attempts"
-                  type="number"
-                  value={formValues.max_failed_attempts.toString()}
-                  onChange={(e) => handleUpdate({ max_failed_attempts: parseInt(e.target.value) || 1 })}
-                  error={errors.max_failed_attempts?.message}
-                />
-                <FormInputField
-                  label="Lockout Duration (minutes)"
-                  type="number"
-                  value={formValues.lockout_duration_minutes.toString()}
-                  onChange={(e) => handleUpdate({ lockout_duration_minutes: parseInt(e.target.value) || 1 })}
-                  error={errors.lockout_duration_minutes?.message}
-                />
-                <FormInputField
-                  label="Observation Window (minutes)"
-                  type="number"
-                  value={formValues.observation_window_minutes.toString()}
-                  onChange={(e) => handleUpdate({ observation_window_minutes: parseInt(e.target.value) || 1 })}
-                  error={errors.observation_window_minutes?.message}
-                />
-                <FormInputField
-                  label="Max Lockout Duration (minutes)"
-                  type="number"
-                  value={formValues.max_lockout_duration_minutes.toString()}
-                  onChange={(e) => handleUpdate({ max_lockout_duration_minutes: parseInt(e.target.value) || 1 })}
-                  error={errors.max_lockout_duration_minutes?.message}
-                />
+                <FormInputField label="Max Failed Attempts" type="number" value={formValues.max_failed_attempts.toString()} onChange={(e) => handleUpdate({ max_failed_attempts: parseInt(e.target.value) || 1 })} error={errors.max_failed_attempts?.message} disabled={isBusy} />
+                <FormInputField label="Lockout Duration (minutes)" type="number" value={formValues.lockout_duration_minutes.toString()} onChange={(e) => handleUpdate({ lockout_duration_minutes: parseInt(e.target.value) || 1 })} error={errors.lockout_duration_minutes?.message} disabled={isBusy} />
+                <FormInputField label="Observation Window (minutes)" type="number" value={formValues.observation_window_minutes.toString()} onChange={(e) => handleUpdate({ observation_window_minutes: parseInt(e.target.value) || 1 })} error={errors.observation_window_minutes?.message} disabled={isBusy} />
+                <FormInputField label="Max Lockout Duration (minutes)" type="number" value={formValues.max_lockout_duration_minutes.toString()} onChange={(e) => handleUpdate({ max_lockout_duration_minutes: parseInt(e.target.value) || 1 })} error={errors.max_lockout_duration_minutes?.message} disabled={isBusy} />
               </div>
-            </div>
-          </SettingsCard>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Progressive Lockout"
-            description="Escalate lockout duration on repeated lockouts."
-          >
-            <div className="space-y-4">
-              <FormSwitchField
-                label="Progressive Lockout"
-                description="Increase lockout duration with each successive lockout"
-                checked={formValues.progressive_lockout}
-                onCheckedChange={(checked) => handleUpdate({ progressive_lockout: checked })}
-              />
-              <FormInputField
-                label="Progression Reset (hours)"
-                type="number"
-                value={formValues.progression_reset_hours.toString()}
-                onChange={(e) => handleUpdate({ progression_reset_hours: parseInt(e.target.value) || 1 })}
-                error={errors.progression_reset_hours?.message}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Progressive Lockout</CardTitle>
+              <p className="text-sm text-muted-foreground">Escalate lockout duration on repeated lockouts.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormSwitchField label="Progressive Lockout" description="Increase lockout duration with each successive lockout" checked={formValues.progressive_lockout} onCheckedChange={(checked) => handleUpdate({ progressive_lockout: checked })} disabled={isBusy} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormInputField label="Progression Reset (hours)" type="number" value={formValues.progression_reset_hours.toString()} onChange={(e) => handleUpdate({ progression_reset_hours: parseInt(e.target.value) || 1 })} error={errors.progression_reset_hours?.message} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <SettingsCard
-            title="Behavior"
-            description="Additional lockout behavior settings."
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <FormSwitchField
-                label="Auto Unlock After Duration"
-                description="Automatically unlock after the lockout duration expires"
-                checked={formValues.auto_unlock}
-                onCheckedChange={(checked) => handleUpdate({ auto_unlock: checked })}
-              />
-              <FormSwitchField
-                label="Reset Count On Success"
-                description="Reset failed attempt counter on successful login"
-                checked={formValues.reset_count_on_success}
-                onCheckedChange={(checked) => handleUpdate({ reset_count_on_success: checked })}
-              />
-              <FormSwitchField
-                label="Notify User On Lockout"
-                description="Send notification to the user when their account is locked"
-                checked={formValues.notify_user_on_lockout}
-                onCheckedChange={(checked) => handleUpdate({ notify_user_on_lockout: checked })}
-              />
-            </div>
-          </SettingsCard>
+          <Card className="shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base">Behavior</CardTitle>
+              <p className="text-sm text-muted-foreground">Additional lockout behavior settings.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormSwitchField label="Auto Unlock After Duration" description="Automatically unlock after the lockout duration expires" checked={formValues.auto_unlock} onCheckedChange={(checked) => handleUpdate({ auto_unlock: checked })} disabled={isBusy} />
+                <FormSwitchField label="Reset Count On Success" description="Reset failed attempt counter on successful login" checked={formValues.reset_count_on_success} onCheckedChange={(checked) => handleUpdate({ reset_count_on_success: checked })} disabled={isBusy} />
+                <FormSwitchField label="Notify User On Lockout" description="Send notification to the user when their account is locked" checked={formValues.notify_user_on_lockout} onCheckedChange={(checked) => handleUpdate({ notify_user_on_lockout: checked })} disabled={isBusy} />
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px] px-6" disabled={updateMutation.isPending || isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateMutation.isPending || isSubmitting ? 'Saving...' : 'Save Changes'}
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => navigate(backTo)} disabled={isBusy}>
+              Cancel
             </Button>
+            <FormSubmitButton isSubmitting={isBusy} submitText="Save Changes" />
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </DetailsContainer>
   )
 }

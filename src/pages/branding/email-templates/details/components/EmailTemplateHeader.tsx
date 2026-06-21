@@ -1,18 +1,17 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Play, Pause, Mail, Activity, CalendarDays } from "lucide-react"
+import { Edit, MoreVertical, Play, Pause, Mail, Activity, CalendarDays } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog, ConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
-import { useUpdateEmailTemplateStatus, useDeleteEmailTemplate } from "@/hooks/useEmailTemplates"
+import { useUpdateEmailTemplateStatus } from "@/hooks/useEmailTemplates"
 import { useToast } from "@/hooks/useToast"
 import type { EmailTemplate, EmailTemplateStatus } from "@/services/api/email-templates/types"
 
@@ -32,20 +31,9 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
   const navigate = useNavigate()
   const { showError } = useToast()
   const updateStatusMutation = useUpdateEmailTemplateStatus()
-  const deleteTemplateMutation = useDeleteEmailTemplate()
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showStatusDialog, setShowStatusDialog] = useState(false)
   const [pendingStatusAction, setPendingStatusAction] = useState<PendingStatusAction | null>(null)
-
-  const handleDelete = async () => {
-    try {
-      await deleteTemplateMutation.mutateAsync(templateId)
-      navigate(`/${tenantId}/branding/email-templates`)
-    } catch (error) {
-      showError(error)
-    }
-  }
 
   const handleStatusChange = (status: EmailTemplateStatus, title: string, description: string) => {
     setPendingStatusAction({ status, title, description })
@@ -66,11 +54,9 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
     }
   }
 
-  const canDelete = !template.isSystem
   const canEditStatus = !template.isSystem
 
   const attributes: DetailAttribute[] = [
-    { icon: Activity, label: "Type", value: template.isSystem ? "System" : template.isDefault ? "Default" : "Custom" },
     { icon: Activity, label: "Subject", value: template.subject },
     { icon: CalendarDays, label: "Created", value: formatDistanceToNow(new Date(template.createdAt), { addSuffix: true }) },
     { icon: CalendarDays, label: "Updated", value: formatDistanceToNow(new Date(template.updatedAt), { addSuffix: true }) },
@@ -99,40 +85,29 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
               <Edit className="size-4" />
               Edit
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
-                  <span className="sr-only">Open actions</span>
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {canEditStatus && (
-                  <>
-                    {template.status === 'inactive' ? (
-                      <DropdownMenuItem onClick={() => handleStatusChange('active', 'Activate Email Template', 'Are you sure you want to activate this email template?')}>
-                        <Play className="mr-2 size-4" />
-                        Activate
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem onClick={() => handleStatusChange('inactive', 'Deactivate Email Template', 'Are you sure you want to deactivate this email template?')}>
-                        <Pause className="mr-2 size-4" />
-                        Deactivate
-                      </DropdownMenuItem>
-                    )}
-                  </>
-                )}
-                {canDelete && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive focus:text-destructive">
-                      <Trash2 className="mr-2 size-4" />
-                      Delete Template
+            {canEditStatus && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {template.status === 'inactive' ? (
+                    <DropdownMenuItem onClick={() => handleStatusChange('active', 'Activate Email Template', 'Are you sure you want to activate this email template?')}>
+                      <Play className="mr-2 size-4" />
+                      Activate
                     </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  ) : (
+                    <DropdownMenuItem onClick={() => handleStatusChange('inactive', 'Deactivate Email Template', 'Are you sure you want to deactivate this email template?')}>
+                      <Pause className="mr-2 size-4" />
+                      Deactivate
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </>
         }
       />
@@ -147,16 +122,6 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
         cancelText="Cancel"
         variant="default"
         isLoading={updateStatusMutation.isPending}
-      />
-
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
-        title="Delete Email Template"
-        description="This action cannot be undone. This will permanently delete the email template."
-        itemName={template.name}
-        isDeleting={deleteTemplateMutation.isPending}
       />
     </>
   )

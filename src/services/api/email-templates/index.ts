@@ -2,7 +2,7 @@
  * Email Template API Service
  */
 
-import { get, post, put, patch, deleteRequest } from '../client'
+import { get, put, patch } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
 import type {
@@ -10,7 +10,6 @@ import type {
   EmailTemplatePayload,
   EmailTemplateQueryParams,
   EmailTemplateListResponse,
-  CreateEmailTemplateRequest,
   UpdateEmailTemplateRequest,
   UpdateEmailTemplateStatusRequest,
 } from './types'
@@ -25,6 +24,7 @@ function transformPayloadToEmailTemplate(payload: EmailTemplatePayload): EmailTe
     subject: payload.subject,
     bodyHtml: payload.body_html,
     bodyPlain: payload.body_plain,
+    parametersDoc: payload.parameters_doc,
     status: payload.status,
     isDefault: payload.is_default,
     isSystem: payload.is_system,
@@ -90,20 +90,6 @@ export async function fetchEmailTemplateById(id: string): Promise<EmailTemplate>
 }
 
 /**
- * Create a new email template
- */
-export async function createEmailTemplate(data: CreateEmailTemplateRequest): Promise<EmailTemplate> {
-  const endpoint = API_ENDPOINTS.EMAIL_TEMPLATE
-  const response = await post<ApiResponse<EmailTemplatePayload>>(endpoint, data)
-
-  if (response.success && response.data) {
-    return transformPayloadToEmailTemplate(response.data)
-  }
-
-  throw new Error(response.message || 'Failed to create email template')
-}
-
-/**
  * Update an existing email template
  */
 export async function updateEmailTemplate(
@@ -135,16 +121,4 @@ export async function updateEmailTemplateStatus(
   }
 
   throw new Error(response.message || 'Failed to update email template status')
-}
-
-/**
- * Delete an email template
- */
-export async function deleteEmailTemplate(id: string): Promise<void> {
-  const endpoint = `${API_ENDPOINTS.EMAIL_TEMPLATE}/${id}`
-  const response = await deleteRequest<ApiResponse<void>>(endpoint)
-
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to delete email template')
-  }
 }
