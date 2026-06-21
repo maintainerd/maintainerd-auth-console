@@ -111,6 +111,13 @@ export default function MfaConfigPage() {
       : allowedMethods.filter((m) => m !== method)
     handleUpdate({ allowed_methods: updated })
 
+    if (method === 'sms') {
+      handleUpdate({ allow_sms: checked })
+    }
+    if (method === 'email_otp') {
+      handleUpdate({ allow_email_otp: checked })
+    }
+
     if (!checked && formValues.preferred_method === method) {
       const next = updated[0] || 'totp'
       handleUpdate({ preferred_method: next })
