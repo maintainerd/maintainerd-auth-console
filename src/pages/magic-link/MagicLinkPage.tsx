@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useSearchParams, useNavigate } from "react-router-dom"
+import { useSearchParams, useNavigate, useParams } from "react-router-dom"
 import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,6 +9,7 @@ import LoginLayout from "@/components/layout/LoginLayout"
 
 export default function MagicLinkPage() {
   const [searchParams] = useSearchParams()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { fetchDefault, currentTenant } = useTenant()
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying")
@@ -37,7 +38,7 @@ export default function MagicLinkPage() {
         if (cancelled) return
         setStatus("success")
         setTimeout(() => {
-          window.location.href = "/"
+          window.location.href = tenantId ? `/${tenantId}/dashboard` : "/"
         }, 1000)
       } catch (err) {
         if (cancelled) return
@@ -50,7 +51,7 @@ export default function MagicLinkPage() {
 
     verify()
     return () => { cancelled = true }
-  }, [searchParams])
+  }, [searchParams, tenantId])
 
   return (
     <LoginLayout branding={currentTenant?.branding}>

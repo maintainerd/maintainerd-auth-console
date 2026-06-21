@@ -109,12 +109,12 @@ function App() {
         <Route path="/service-unavailable" element={<ServiceUnavailablePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/:tenantId/login" element={<LoginPage />} />
+        <Route path="/:tenantId/magic-link" element={<MagicLinkPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/register/invite" element={<RegisterInvitePage />} />
         <Route path="/email-verification" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/magic-link" element={<MagicLinkPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route path="/register/profile" element={<RegisterProfilePage />} />
