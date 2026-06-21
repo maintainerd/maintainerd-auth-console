@@ -38,9 +38,15 @@ export async function login(data: LoginRequest, tenantId?: string): Promise<Logi
  * acr=2 session (with X-Token-Delivery: cookie), so no token handling is needed
  * client-side — callers just refresh the auth state afterwards.
  */
-export async function verifyMFALogin(data: MFALoginVerifyRequest, tenantId?: string): Promise<LoginResponse> {
+export async function verifyMFALogin(
+  data: MFALoginVerifyRequest,
+  tenantId?: string,
+  clientId?: string,
+): Promise<LoginResponse> {
   let endpoint = API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY
-  if (tenantId) {
+  if (clientId) {
+    endpoint += `?client_id=${encodeURIComponent(clientId)}`
+  } else if (tenantId) {
     endpoint += `?tenant_id=${encodeURIComponent(tenantId)}`
   }
   return post<LoginResponse>(endpoint, data, {
@@ -62,12 +68,34 @@ export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void
   }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
-export async function verifyMagicLink(token: string, clientId: string, providerId?: string): Promise<LoginResponse> {
-  let url = `/magic-link/verify?client_id=${encodeURIComponent(clientId)}`
-  if (providerId) {
-    url += `&provider_id=${encodeURIComponent(providerId)}`
+export async function verifyMagicLink(queryString: string): Promise<LoginResponse> {
+  return post<LoginResponse>(`${API_ENDPOINTS.AUTH.MAGIC_LINK_VERIFY}?${queryString}`, {}, {
+    headers: TOKEN_DELIVERY_HEADER,
+  })
+}
+
+export interface SendMagicLinkContext {
+  clientId?: string
+  providerId?: string
+  tenantId?: string
+}
+
+export async function sendMagicLink(email: string, context: SendMagicLinkContext = {}): Promise<void> {
+  const params = new URLSearchParams()
+
+  if (context.clientId && context.providerId) {
+    params.set('client_id', context.clientId)
+    params.set('provider_id', context.providerId)
+  } else if (context.tenantId) {
+    params.set('tenant_id', context.tenantId)
   }
-  return post<LoginResponse>(url, { token }, { headers: TOKEN_DELIVERY_HEADER })
+
+  const query = params.toString()
+  const endpoint = `${API_ENDPOINTS.AUTH.MAGIC_LINK_SEND}${query ? `?${query}` : ''}`
+  const response = await post<ApiResponse<unknown>>(endpoint, { email })
+  if (!response.success) {
+    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to send sign-in link')
+  }
 }
 
 /** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */

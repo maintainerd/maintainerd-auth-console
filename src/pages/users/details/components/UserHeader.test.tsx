@@ -13,6 +13,7 @@ const {
   completeAccountMutateAsync,
   resetMfaMutateAsync,
   updateStatusMutateAsync,
+  adminSendMagicLinkMutateAsync,
   showSuccessMock,
   showErrorMock,
 } = vi.hoisted(() => ({
@@ -23,6 +24,7 @@ const {
   completeAccountMutateAsync: vi.fn(),
   resetMfaMutateAsync: vi.fn(),
   updateStatusMutateAsync: vi.fn(),
+  adminSendMagicLinkMutateAsync: vi.fn(),
   showSuccessMock: vi.fn(),
   showErrorMock: vi.fn(),
 }))
@@ -32,14 +34,32 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
-vi.mock("@/hooks/useUsers", () => ({
-  useDeleteUser: () => ({ mutateAsync: deleteMutateAsync, isPending: false }),
-  useVerifyUserEmail: () => ({ mutateAsync: verifyEmailMutateAsync, isPending: false }),
-  useVerifyUserPhone: () => ({ mutateAsync: verifyPhoneMutateAsync, isPending: false }),
-  useCompleteUserAccount: () => ({ mutateAsync: completeAccountMutateAsync, isPending: false }),
-  useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
-  useUpdateUserStatus: () => ({ mutateAsync: updateStatusMutateAsync, isPending: false }),
-}))
+vi.mock("@/hooks/useUsers", async () => {
+  const { useState } = await vi.importActual<typeof import("react")>("react")
+
+  return {
+    useDeleteUser: () => ({ mutateAsync: deleteMutateAsync, isPending: false }),
+    useVerifyUserEmail: () => ({ mutateAsync: verifyEmailMutateAsync, isPending: false }),
+    useVerifyUserPhone: () => ({ mutateAsync: verifyPhoneMutateAsync, isPending: false }),
+    useCompleteUserAccount: () => ({ mutateAsync: completeAccountMutateAsync, isPending: false }),
+    useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
+    useUpdateUserStatus: () => ({ mutateAsync: updateStatusMutateAsync, isPending: false }),
+    useAdminSendMagicLink: () => {
+      const [isPending, setIsPending] = useState(false)
+      return {
+        isPending,
+        mutateAsync: async (userId: string) => {
+          setIsPending(true)
+          try {
+            return await adminSendMagicLinkMutateAsync(userId)
+          } finally {
+            setIsPending(false)
+          }
+        },
+      }
+    },
+  }
+})
 
 vi.mock("@/hooks/useToast", () => ({
   useToast: () => ({ showSuccess: showSuccessMock, showError: showErrorMock }),
@@ -223,5 +243,29 @@ describe("UserHeader", () => {
 
     await waitFor(() => expect(showErrorMock).toHaveBeenCalledWith(err))
     expect(navigateMock).not.toHaveBeenCalledWith("/t1/users")
+  })
+
+  it("shows a loading state while sending a magic link", async () => {
+    const u = user()
+    let finishSending!: () => void
+    adminSendMagicLinkMutateAsync.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishSending = resolve
+      }),
+    )
+    setup()
+
+    await u.click(getActionsButton())
+    await u.click(await screen.findByText("Send Magic Link"))
+
+    const dialog = await screen.findByRole("dialog")
+    await u.click(within(dialog).getByRole("button", { name: "Send Magic Link" }))
+
+    expect(await within(dialog).findByRole("button", { name: "Processing..." })).toBeDisabled()
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeDisabled()
+    expect(adminSendMagicLinkMutateAsync).toHaveBeenCalledWith("u1")
+
+    finishSending()
+    await waitFor(() => expect(showSuccessMock).toHaveBeenCalledWith("Magic link sent to user's email"))
   })
 })

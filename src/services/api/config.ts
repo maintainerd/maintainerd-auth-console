@@ -53,6 +53,8 @@ export const API_ENDPOINTS = {
     REFRESH: '/refresh-token',
     PROFILE: '/profile',
     ACCOUNT: '/account',
+    MAGIC_LINK_SEND: '/magic-link/send',
+    MAGIC_LINK_VERIFY: '/magic-link/verify',
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
   },

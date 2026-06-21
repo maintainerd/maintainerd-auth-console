@@ -1,26 +1,31 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, Mail } from "lucide-react"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { FormInputField, FormPasswordField, FormSubmitButton } from "@/components/form"
 import { buildLoginSchema, type LoginFormData } from "@/lib/validations"
 import { useToast } from "@/hooks/useToast"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useTenant } from "@/hooks/useTenant"
 import { LoginMFAStep } from "./LoginMFAStep"
 import { resolvePostAuthRoute, dashboardRoute } from "@/utils/postAuthRoute"
 import type { AccountEntity } from '@/services/api/auth/types'
+import { sendMagicLink } from '@/services/api/auth'
+import { Button } from '@/components/ui/button'
 
 const LoginForm = () => {
   const navigate = useNavigate()
   const { tenantId } = useParams<{ tenantId?: string }>()
+  const [searchParams] = useSearchParams()
   const { login } = useAuth()
   const { getCurrentTenant } = useTenant()
   const { showSuccess } = useToast()
   const [loginError, setLoginError] = useState<string | null>(null)
   const [mfaChallenge, setMfaChallenge] = useState<{ token: string; methods: string[] } | null>(null)
+  const [isSendingMagicLink, setIsSendingMagicLink] = useState(false)
+  const [magicLinkSent, setMagicLinkSent] = useState(false)
 
   const currentTenant = getCurrentTenant()
   const loginSchema = buildLoginSchema()
@@ -29,6 +34,8 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors, isSubmitting }
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
@@ -73,6 +80,26 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
     }
   }
 
+  const handleMagicLink = async () => {
+    const emailIsValid = await trigger('email')
+    if (!emailIsValid) return
+
+    setLoginError(null)
+    setIsSendingMagicLink(true)
+    try {
+      await sendMagicLink(getValues('email'), {
+        clientId: searchParams.get('client_id') || undefined,
+        providerId: searchParams.get('provider_id') || undefined,
+        tenantId: tenantId || searchParams.get('tenant_id') || undefined,
+      })
+      setMagicLinkSent(true)
+    } catch (err: unknown) {
+      setLoginError(err instanceof Error ? err.message : 'Failed to send sign-in link. Please try again.')
+    } finally {
+      setIsSendingMagicLink(false)
+    }
+  }
+
   if (mfaChallenge) {
     return (
       <div className="flex flex-col gap-8">
@@ -89,6 +116,26 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
           onVerified={(result) => finishLogin(result.account)}
           onCancel={() => setMfaChallenge(null)}
         />
+      </div>
+    )
+  }
+
+  if (magicLinkSent) {
+    return (
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle2 className="size-7 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            If an account exists for that email, a secure sign-in link will arrive shortly.
+          </p>
+        </div>
+
+        <Button type="button" variant="outline" className="w-full" onClick={() => setMagicLinkSent(false)}>
+          Back to password sign in
+        </Button>
       </div>
     )
   }
@@ -160,6 +207,30 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
             submittingText="Signing in..."
             className="mt-1 w-full"
           />
+
+          <div className="relative py-1">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={isSubmitting || isSendingMagicLink}
+            onClick={handleMagicLink}
+          >
+            {isSendingMagicLink ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <Mail className="mr-2 size-4" />
+            )}
+            {isSendingMagicLink ? 'Sending sign-in link...' : 'Email me a sign-in link'}
+          </Button>
         </FieldGroup>
       </form>
 

@@ -64,11 +64,12 @@ export const loginAsync = createAsyncThunk<LoginThunkResult, LoginRequest & { te
 // completeMFALoginAsync finishes the login MFA second step. The verify call
 // Set-Cookies an acr=2 session, after which we load the profile and mark the
 // user authenticated — mirroring a normal login.
-export const completeMFALoginAsync = createAsyncThunk<LoginThunkResult, MFALoginVerifyRequest & { tenantId?: string }>(
+export const completeMFALoginAsync = createAsyncThunk<LoginThunkResult, MFALoginVerifyRequest & { tenantId?: string; clientId?: string }>(
   'auth/completeMFALogin',
-  async (data: MFALoginVerifyRequest & { tenantId?: string }, thunkAPI) => {
+  async (data: MFALoginVerifyRequest & { tenantId?: string; clientId?: string }, thunkAPI) => {
     try {
-      const response = await verifyMFALogin(data, data.tenantId)
+      const { tenantId, clientId, ...request } = data
+      const response = await verifyMFALogin(request, tenantId, clientId)
       const account = await fetchAccount()
       return { data: account, message: response.message }
     } catch (error: unknown) {

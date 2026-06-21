@@ -1,19 +1,33 @@
-import { useEffect, useState, useRef } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react"
+import { Loader2, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { verifyMagicLink, fetchAccount } from "@/services/api/auth"
 import { useTenant } from "@/hooks/useTenant"
 import LoginLayout from "@/components/layout/LoginLayout"
+import { LoginMFAStep } from "@/pages/login/components/LoginMFAStep"
+import type { AccountEntity } from "@/services/api/auth/types"
 
 export default function MagicLinkPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { fetchDefault, currentTenant } = useTenant()
-  const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying")
+  const [status, setStatus] = useState<"verifying" | "mfa" | "success" | "error">("verifying")
   const [errorMessage, setErrorMessage] = useState("")
+  const [dashboardPath, setDashboardPath] = useState("")
+  const [mfaChallenge, setMfaChallenge] = useState<{ token: string; methods: string[] } | null>(null)
   const verifiedRef = useRef(false)
+
+  const finishAuthentication = useCallback((account: AccountEntity | null | undefined) => {
+    const tenantIdentifier = account?.tenant?.identifier
+    if (!tenantIdentifier) {
+      setStatus("error")
+      setErrorMessage("The sign-in session could not be established. Please request a new magic link.")
+      return
+    }
+    setDashboardPath(`/${tenantIdentifier}/dashboard`)
+    setStatus("success")
+  }, [])
 
   useEffect(() => {
     if (!currentTenant) fetchDefault()
@@ -21,27 +35,36 @@ export default function MagicLinkPage() {
 
   useEffect(() => {
     if (verifiedRef.current) return
-    const token = searchParams.get("token")
-    const clientId = searchParams.get("client_id")
+    const hasClientContext = searchParams.has("client_id") || searchParams.has("tenant_id")
+    const hasSignedLink = searchParams.has("expires") && searchParams.has("sig")
 
-    if (!token || !clientId) {
+    if (!searchParams.get("token") || !hasClientContext || !hasSignedLink) {
       setStatus("error")
-      setErrorMessage("Invalid magic link — missing required parameters.")
+      setErrorMessage("This magic link is invalid or incomplete. Please request a new one.")
       return
     }
 
-    const providerId = searchParams.get("provider_id") || undefined
     verifiedRef.current = true
 
     async function verify() {
       try {
-        await verifyMagicLink(token!, clientId!, providerId)
+        const response = await verifyMagicLink(searchParams.toString())
+        if (response.data?.mfa_required) {
+          const challengeToken = response.data.mfa_challenge_token
+          if (!challengeToken) {
+            throw new Error("The MFA challenge could not be started. Please request a new magic link.")
+          }
+          setMfaChallenge({
+            token: challengeToken,
+            // Defensive filtering: the backend already excludes this redundant
+            // method, but the UI must never offer the same mailbox twice.
+            methods: (response.data.mfa_allowed_methods ?? []).filter((method) => method !== "email_otp"),
+          })
+          setStatus("mfa")
+          return
+        }
         const account = await fetchAccount()
-        const tenantIdentifier = account.tenant?.identifier || "default"
-        setStatus("success")
-        setTimeout(() => {
-          window.location.href = `/${tenantIdentifier}/dashboard`
-        }, 800)
+        finishAuthentication(account)
       } catch (err) {
         setStatus("error")
         setErrorMessage(
@@ -51,55 +74,95 @@ export default function MagicLinkPage() {
     }
 
     verify()
-  }, [searchParams])
+  }, [finishAuthentication, searchParams])
+
+  useEffect(() => {
+    if (status !== "success" || !dashboardPath) return
+
+    const timer = window.setTimeout(() => {
+      window.location.assign(dashboardPath)
+    }, 3000)
+
+    return () => window.clearTimeout(timer)
+  }, [dashboardPath, status])
 
   return (
     <LoginLayout branding={currentTenant?.branding}>
-      <div className="mx-auto w-full max-w-sm space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Magic Link</h1>
-          <p className="text-sm text-muted-foreground">Signing you in securely</p>
+      {status === "verifying" && (
+        <div className="flex flex-col gap-8 text-center" role="status" aria-live="polite">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex size-14 items-center justify-center rounded-full bg-blue-100">
+              <Loader2 className="size-7 animate-spin text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">Signing you in</h1>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              We&apos;re securely verifying your magic link.
+            </p>
+          </div>
         </div>
+      )}
 
-        <Card className="shadow-xs">
-          <CardContent className="flex flex-col items-center justify-center gap-4 py-10 text-center">
-            {status === "verifying" && (
-              <>
-                <Loader2 className="size-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Verifying your magic link...</p>
-              </>
-            )}
+      {status === "success" && (
+        <div className="flex flex-col gap-8 text-center" role="status" aria-live="polite">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle2 className="size-7 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">You&apos;re signed in</h1>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              Your magic link was verified successfully. We&apos;re taking you to your dashboard.
+            </p>
+          </div>
 
-            {status === "success" && (
-              <>
-                <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10">
-                  <CheckCircle2 className="size-5 text-emerald-600" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Signed in successfully</p>
-                  <p className="text-xs text-muted-foreground">Redirecting...</p>
-                </div>
-              </>
-            )}
+          <Button className="w-full" onClick={() => window.location.assign(dashboardPath)}>
+            Go to dashboard
+            <ArrowRight className="ml-2 size-4" />
+          </Button>
 
-            {status === "error" && (
-              <>
-                <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10">
-                  <XCircle className="size-5 text-destructive" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Verification failed</p>
-                  <p className="text-xs text-muted-foreground">{errorMessage}</p>
-                </div>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/login", { replace: true })}>
-                  <Link2 className="size-4" />
-                  Go to Login
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          <p className="text-xs text-muted-foreground">
+            Redirecting automatically in a few seconds...
+          </p>
+        </div>
+      )}
+
+      {status === "mfa" && mfaChallenge && (
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="flex size-14 items-center justify-center rounded-full bg-blue-100">
+              <ShieldCheck className="size-7 text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">Two-step verification</h1>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              Your magic link was accepted. Confirm a different factor to finish signing in.
+            </p>
+          </div>
+
+          <LoginMFAStep
+            challengeToken={mfaChallenge.token}
+            allowedMethods={mfaChallenge.methods}
+            tenantId={searchParams.get("tenant_id") || undefined}
+            clientId={searchParams.get("client_id") || undefined}
+            onVerified={(result) => finishAuthentication(result.account)}
+            onCancel={() => navigate("/login", { replace: true })}
+          />
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="flex flex-col gap-8 text-center" role="alert">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="size-7 text-destructive" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">Magic link unavailable</h1>
+            <p className="max-w-xs text-sm text-muted-foreground">{errorMessage}</p>
+          </div>
+
+          <Button className="w-full" onClick={() => navigate("/login", { replace: true })}>
+            Back to sign in
+          </Button>
+        </div>
+      )}
     </LoginLayout>
   )
 }

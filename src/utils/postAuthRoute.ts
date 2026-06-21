@@ -22,11 +22,19 @@ export const REGISTER_PROFILE_ROUTE = '/register/profile'
 export const REGISTER_ROUTE = '/register'
 export const REGISTER_INVITE_ROUTE = '/register/invite'
 export const LOGIN_ROUTE = '/login'
+export const MAGIC_LINK_ROUTE = '/magic-link'
 export const NO_ACCESS_ROUTE = '/no-access'
 export const SERVICE_UNAVAILABLE_ROUTE = '/service-unavailable'
 
 // Public auth pages an authenticated, fully-registered user should never sit on.
-const AUTH_PAGES = ['/login', '/register', '/register/invite', '/forgot-password', '/reset-password']
+const AUTH_PAGES = [
+  LOGIN_ROUTE,
+  REGISTER_ROUTE,
+  REGISTER_INVITE_ROUTE,
+  '/forgot-password',
+  '/reset-password',
+  MAGIC_LINK_ROUTE,
+]
 
 function isAuthPage(pathname: string): boolean {
   if (AUTH_PAGES.includes(pathname)) return true
@@ -57,7 +65,8 @@ export function resolvePostAuthRoute(
     return REGISTER_PROFILE_ROUTE
   }
 
-  return dashboardRoute(tenant)
+  const accountTenantIdentifier = account.tenant?.identifier
+  return accountTenantIdentifier ? `/${accountTenantIdentifier}/dashboard` : dashboardRoute(tenant)
 }
 
 export interface GuardContext {

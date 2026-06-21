@@ -40,6 +40,10 @@ describe("resolvePostAuthRoute", () => {
   it("sends a fully-registered user to their tenant dashboard", () => {
     expect(resolvePostAuthRoute(account(), tenant())).toBe("/acme/dashboard")
   })
+
+  it("prefers the authenticated account tenant when bootstrap tenant context is stale", () => {
+    expect(resolvePostAuthRoute(account(), tenant({ identifier: "default" }))).toBe("/acme/dashboard")
+  })
 })
 
 describe("resolveGuardRedirect", () => {
@@ -59,6 +63,11 @@ describe("resolveGuardRedirect", () => {
   it("lets unauthenticated users see auth pages but bounces authenticated ones", () => {
     expect(guard("/login", false, null)).toBeNull()
     expect(guard("/login", true, account())).toBe("/acme/dashboard")
+  })
+
+  it("lets an unauthenticated magic-link callback run before login gating", () => {
+    expect(guard("/magic-link", false, null)).toBeNull()
+    expect(guard("/magic-link", true, account())).toBe("/acme/dashboard")
   })
 
   it("sends unauthenticated users off protected pages to login", () => {

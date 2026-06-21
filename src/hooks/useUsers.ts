@@ -25,6 +25,7 @@ import {
   completeUserAccount,
   resetUserMfa,
   resetUserMfaMethod,
+  adminSendMagicLink,
   type UserMfaMethod,
   fetchUserActivity,
   fetchRecentActivity,
@@ -351,6 +352,15 @@ export function useResetUserMfa() {
 }
 
 /**
+ * Hook to send a single-use magic sign-in link to a user (admin action).
+ */
+export function useAdminSendMagicLink() {
+  return useMutation({
+    mutationFn: (userId: string) => adminSendMagicLink(userId),
+  })
+}
+
+/**
  * Hook to reset a single MFA factor for a user (admin action) — leaves the
  * user's other factors intact.
  */
@@ -426,4 +436,3 @@ export function useUserMFA(userId: string) {
     enabled: !!userId,
   })
 }
-

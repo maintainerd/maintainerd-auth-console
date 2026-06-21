@@ -35,8 +35,8 @@ import {
   useCompleteUserAccount,
   useResetUserMfa,
   useUpdateUserStatus,
+  useAdminSendMagicLink,
 } from "@/hooks/useUsers"
-import { adminSendMagicLink } from "@/services/api/users"
 import { useToast } from "@/hooks/useToast"
 import type { User, UserStatus } from "@/services/api/users/types"
 
@@ -84,6 +84,7 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const completeAccountMutation = useCompleteUserAccount()
   const resetMfaMutation = useResetUserMfa()
   const updateStatusMutation = useUpdateUserStatus()
+  const magicLinkMutation = useAdminSendMagicLink()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
@@ -319,10 +320,13 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
       <ConfirmationDialog
         open={showMagicLinkDialog}
         onOpenChange={setShowMagicLinkDialog}
-        onConfirm={() => runAction(() => adminSendMagicLink(userId), "Magic link sent to user's email")}
+        onConfirm={() =>
+          runAction(() => magicLinkMutation.mutateAsync(userId), "Magic link sent to user's email")
+        }
         title="Send Magic Link"
         description={`Send a passwordless login link to ${user.email || "the user's email"}? The link expires in 15 minutes and can only be used once.`}
         confirmText="Send Magic Link"
+        isLoading={magicLinkMutation.isPending}
       />
     </>
   )
