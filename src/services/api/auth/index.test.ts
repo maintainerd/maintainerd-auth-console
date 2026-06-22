@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { post } from '../client'
 import { TOKEN_DELIVERY_HEADER } from '../config'
 import { verifyMFALogin } from './index'

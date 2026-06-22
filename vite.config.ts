@@ -25,7 +25,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the internal API via nginx during development
       '/api': {
-        target: 'http://private-api.auth.maintainerd.local',
+        target: 'https://private-api.auth.maintainerd.local',
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
