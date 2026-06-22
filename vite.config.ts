@@ -22,9 +22,9 @@ export default defineConfig({
       ignored: ['**/coverage/**'],
     },
     proxy: {
-      // Proxy API requests to the backend during development
+      // Proxy API requests to the internal API via nginx during development
       '/api': {
-        target: 'http://api.maintainerd.auth',
+        target: 'http://private-api.auth.maintainerd.local',
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
