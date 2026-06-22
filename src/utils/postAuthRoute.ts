@@ -22,7 +22,6 @@ export const REGISTER_PROFILE_ROUTE = '/register/profile'
 export const REGISTER_ROUTE = '/register'
 export const REGISTER_INVITE_ROUTE = '/register/invite'
 export const LOGIN_ROUTE = '/login'
-export const MAGIC_LINK_ROUTE = '/magic-link'
 export const NO_ACCESS_ROUTE = '/no-access'
 export const SERVICE_UNAVAILABLE_ROUTE = '/service-unavailable'
 
@@ -33,7 +32,6 @@ const AUTH_PAGES = [
   REGISTER_INVITE_ROUTE,
   '/forgot-password',
   '/reset-password',
-  MAGIC_LINK_ROUTE,
 ]
 
 function isAuthPage(pathname: string): boolean {

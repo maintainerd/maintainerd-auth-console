@@ -130,11 +130,6 @@ export const resetUserMfaMethod = (userId: string, method: UserMfaMethod): Promi
     assertSuccess(r, 'reset MFA method'),
   )
 
-export const adminSendMagicLink = (userUUID: string): Promise<void> =>
-  post<ApiResponse<void>>('/magic-link/admin-send', { user_uuid: userUUID }).then((r) =>
-    assertSuccess(r, 'send magic link'),
-  )
-
 // Activity: the auth-events recorded against this user (read-only audit trail).
 export const fetchUserActivity = (userId: string, params?: UserActivityQueryParams): Promise<UserActivityResponse> =>
   get<ApiResponse<UserActivityResponse>>(

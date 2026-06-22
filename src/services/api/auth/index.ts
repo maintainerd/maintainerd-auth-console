@@ -65,29 +65,6 @@ export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void
   }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
-export async function verifyMagicLink(queryString: string): Promise<LoginResponse> {
-  return post<LoginResponse>(`${API_ENDPOINTS.AUTH.MAGIC_LINK_VERIFY}?${queryString}`, {}, {
-    headers: TOKEN_DELIVERY_HEADER,
-  })
-}
-
-export interface SendMagicLinkContext {
-  tenantId: string
-}
-
-export async function sendMagicLink(email: string, context: SendMagicLinkContext): Promise<void> {
-  const params = new URLSearchParams()
-
-  params.set('tenant_id', context.tenantId)
-
-  const query = params.toString()
-  const endpoint = `${API_ENDPOINTS.AUTH.MAGIC_LINK_SEND}${query ? `?${query}` : ''}`
-  const response = await post<ApiResponse<unknown>>(endpoint, { email })
-  if (!response.success) {
-    throw new Error(typeof response.error === 'string' ? response.error : 'Failed to send sign-in link')
-  }
-}
-
 /** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */
 export async function beginMFALoginWebAuthn(challengeToken: string): Promise<WebAuthnAssertionOptions> {
   const r = await post<ApiResponse<WebAuthnAssertionOptions>>(API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN, {

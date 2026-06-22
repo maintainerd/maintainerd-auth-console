@@ -67,7 +67,6 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
     location.pathname === SERVICE_UNAVAILABLE_ROUTE ||
     location.pathname.startsWith('/setup') ||
     location.pathname === '/login' ||
-    location.pathname === '/magic-link' ||
     location.pathname === '/reset-password' ||
     location.pathname.startsWith('/register') ||
     /^\/[^/]+\/login$/.test(location.pathname)

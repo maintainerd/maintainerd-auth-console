@@ -65,11 +65,6 @@ describe("resolveGuardRedirect", () => {
     expect(guard("/login", true, account())).toBe("/acme/dashboard")
   })
 
-  it("lets an unauthenticated magic-link callback run before login gating", () => {
-    expect(guard("/magic-link", false, null)).toBeNull()
-    expect(guard("/magic-link", true, account())).toBe("/acme/dashboard")
-  })
-
   it("sends unauthenticated users off protected pages to login", () => {
     expect(guard("/acme/dashboard", false, null)).toBe("/login")
   })

@@ -25,7 +25,6 @@ import {
   completeUserAccount,
   resetUserMfa,
   resetUserMfaMethod,
-  adminSendMagicLink,
   type UserMfaMethod,
   fetchUserActivity,
   fetchRecentActivity,
@@ -348,15 +347,6 @@ export function useResetUserMfa() {
       queryClient.invalidateQueries({ queryKey: userKeys.mfa(userId) })
       queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
     },
-  })
-}
-
-/**
- * Hook to send a single-use magic sign-in link to a user (admin action).
- */
-export function useAdminSendMagicLink() {
-  return useMutation({
-    mutationFn: (userId: string) => adminSendMagicLink(userId),
   })
 }
 
