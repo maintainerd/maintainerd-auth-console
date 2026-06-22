@@ -18,6 +18,7 @@ export default defineConfig({
   },
   /** Development server configuration */
   server: {
+    allowedHosts: ['.auth.maintainerd.local'],
     watch: {
       ignored: ['**/coverage/**'],
     },
