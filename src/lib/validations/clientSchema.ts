@@ -29,9 +29,6 @@ export const clientSchema = yup.object({
     .required('Domain is required')
     .min(3, 'Domain must be at least 3 characters')
     .max(100, 'Domain must not exceed 100 characters'),
-  identityProviderId: yup
-    .string()
-    .required('Identity provider is required'),
   status: yup
     .string()
     .required('Status is required')

@@ -10,6 +10,8 @@ import {
   createClient,
   updateClient,
   deleteClient,
+  addClientIdentityProvider,
+  removeClientIdentityProvider,
   updateClientStatus,
   rotateClientSecret,
   fetchClientConfig,
@@ -32,7 +34,8 @@ import type {
   CreateClientUriRequest,
   UpdateClientUriRequest,
   AddClientApisRequest,
-  AddClientApiPermissionsRequest
+  AddClientApiPermissionsRequest,
+  AddClientIdentityProviderRequest
 } from '@/services/api/clients/types'
 
 /**
@@ -132,6 +135,38 @@ export function useDeleteClient() {
     mutationFn: (clientId: string) => deleteClient(clientId),
     onSuccess: () => {
       // Invalidate clients list to refetch
+      queryClient.invalidateQueries({ queryKey: clientKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to connect an identity provider to an existing client.
+ */
+export function useAddClientIdentityProvider() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ clientId, data }: { clientId: string; data: AddClientIdentityProviderRequest }) =>
+      addClientIdentityProvider(clientId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) })
+      queryClient.invalidateQueries({ queryKey: clientKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Hook to disconnect an identity provider from a client without deleting the client.
+ */
+export function useRemoveClientIdentityProvider() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ clientId, connectionId }: { clientId: string; connectionId: string }) =>
+      removeClientIdentityProvider(clientId, connectionId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) })
       queryClient.invalidateQueries({ queryKey: clientKeys.lists() })
     },
   })

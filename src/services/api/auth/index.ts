@@ -37,37 +37,31 @@ export async function login(data: LoginRequest, tenantId: string): Promise<Login
  */
 export async function verifyMFALogin(
   data: MFALoginVerifyRequest,
-  tenantId?: string,
-  clientId?: string,
+  tenantId: string,
 ): Promise<LoginResponse> {
-  let endpoint = API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY
-  if (clientId) {
-    endpoint += `?client_id=${encodeURIComponent(clientId)}`
-  } else if (tenantId) {
-    endpoint += `?tenant_id=${encodeURIComponent(tenantId)}`
-  }
+  const endpoint = `${API_ENDPOINTS.AUTH.LOGIN_MFA_VERIFY}?tenant_id=${encodeURIComponent(tenantId)}`
   return post<LoginResponse>(endpoint, data, {
     headers: { ...TOKEN_DELIVERY_HEADER },
   })
 }
 
 /** Send an SMS OTP for the in-flight login MFA challenge. */
-export async function sendMFALoginSMS(challengeToken: string): Promise<void> {
-  await post<ApiResponse<void>>(API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_SMS, {
+export async function sendMFALoginSMS(challengeToken: string, tenantId: string): Promise<void> {
+  await post<ApiResponse<void>>(`${API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_SMS}?tenant_id=${encodeURIComponent(tenantId)}`, {
     mfa_challenge_token: challengeToken,
   })
 }
 
 /** Send an Email OTP for the in-flight login MFA challenge. */
-export async function sendMFALoginEmailOtp(challengeToken: string): Promise<void> {
-  await post<ApiResponse<void>>(API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_EMAIL_OTP, {
+export async function sendMFALoginEmailOtp(challengeToken: string, tenantId: string): Promise<void> {
+  await post<ApiResponse<void>>(`${API_ENDPOINTS.AUTH.LOGIN_MFA_SEND_EMAIL_OTP}?tenant_id=${encodeURIComponent(tenantId)}`, {
     mfa_challenge_token: challengeToken,
   }, { headers: TOKEN_DELIVERY_HEADER })
 }
 
 /** Begin a passkey assertion ceremony for the in-flight login MFA challenge. */
-export async function beginMFALoginWebAuthn(challengeToken: string): Promise<WebAuthnAssertionOptions> {
-  const r = await post<ApiResponse<WebAuthnAssertionOptions>>(API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN, {
+export async function beginMFALoginWebAuthn(challengeToken: string, tenantId: string): Promise<WebAuthnAssertionOptions> {
+  const r = await post<ApiResponse<WebAuthnAssertionOptions>>(`${API_ENDPOINTS.AUTH.LOGIN_MFA_WEBAUTHN_BEGIN}?tenant_id=${encodeURIComponent(tenantId)}`, {
     mfa_challenge_token: challengeToken,
   })
   if (!r.success || !r.data) {

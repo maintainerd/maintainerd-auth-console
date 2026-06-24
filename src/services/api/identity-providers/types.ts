@@ -12,7 +12,7 @@ export type IdentityProviderStatus = Extract<Status, 'active' | 'inactive'>
 /**
  * Identity provider type
  */
-export type ProviderType = 'identity' | 'social'
+export type ProviderType = 'system' | 'social' | 'enterprise'
 
 /**
  * Provider options
@@ -30,10 +30,19 @@ export type ProviderOption =
   | 'linkedin'
   | 'twitter'
 
+export type IdentityProviderConfig = Record<string, unknown>
+
+export type IdentityProviderConnectionFields = {
+  issuer: string | null
+  provider_client_id: string | null
+  allow_jit_provisioning: boolean
+  email_domains: string[]
+}
+
 /**
  * Identity Provider type
  */
-export type IdentityProvider = {
+export type IdentityProvider = IdentityProviderConnectionFields & {
   identity_provider_id: string
   name: string
   display_name: string
@@ -66,14 +75,14 @@ export type Tenant = {
 /**
  * Identity Provider Detail type (includes config and tenant)
  */
-export type IdentityProviderDetail = {
+export type IdentityProviderDetail = IdentityProviderConnectionFields & {
   identity_provider_id: string
   name: string
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, unknown> | null
+  config: IdentityProviderConfig | null
   tenant: Tenant | null
   status: IdentityProviderStatus
   is_default: boolean
@@ -116,7 +125,7 @@ export interface IdentityProviderListResponse {
 /**
  * Single identity provider response interface (for list items)
  */
-export interface IdentityProviderResponse {
+export interface IdentityProviderResponse extends IdentityProviderConnectionFields {
   identity_provider_id: string
   name: string
   display_name: string
@@ -133,14 +142,14 @@ export interface IdentityProviderResponse {
 /**
  * Identity provider detail response interface (includes config and tenant)
  */
-export interface IdentityProviderDetailResponse {
+export interface IdentityProviderDetailResponse extends IdentityProviderConnectionFields {
   identity_provider_id: string
   name: string
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
   identifier: string
-  config: Record<string, unknown> | null
+  config: IdentityProviderConfig | null
   tenant: Tenant | null
   status: IdentityProviderStatus
   is_default: boolean
@@ -157,7 +166,12 @@ export interface CreateIdentityProviderRequest {
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
-  config: Record<string, unknown>
+  issuer?: string | null
+  provider_client_id?: string | null
+  provider_client_secret?: string
+  allow_jit_provisioning?: boolean
+  email_domains?: string[]
+  config: IdentityProviderConfig
   status: IdentityProviderStatus
 }
 
@@ -169,7 +183,12 @@ export interface UpdateIdentityProviderRequest {
   display_name: string
   provider: ProviderOption
   provider_type: ProviderType
-  config: Record<string, unknown>
+  issuer?: string | null
+  provider_client_id?: string | null
+  provider_client_secret?: string
+  allow_jit_provisioning?: boolean
+  email_domains?: string[]
+  config: IdentityProviderConfig
   status: IdentityProviderStatus
 }
 
@@ -179,4 +198,3 @@ export interface UpdateIdentityProviderRequest {
 export interface UpdateIdentityProviderStatusRequest {
   status: IdentityProviderStatus
 }
-

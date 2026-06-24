@@ -1,12 +1,13 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { AppWindow, Braces, KeyRound, Link2, Server, Settings } from "lucide-react"
+import { AppWindow, Braces, Building2, KeyRound, Link2, Server, Settings } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useClient } from "@/hooks/useClients"
-import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris } from "./components"
+import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris, ClientIdentityProviders } from "./components"
 
 const TABS = [
   { value: "overview", label: "Overview", icon: AppWindow },
+  { value: "identity-providers", label: "Identity Providers", icon: Building2 },
   { value: "credentials", label: "Credentials", icon: KeyRound },
   { value: "config", label: "OAuth & Tokens", icon: Settings },
   { value: "uris", label: "URIs & Origins", icon: Link2 },
@@ -59,6 +60,10 @@ export default function ClientDetailsPage() {
 
             <TabsContent value="overview" className="mt-4">
               <ClientInformation client={clientData} />
+            </TabsContent>
+
+            <TabsContent value="identity-providers" className="mt-4">
+              <ClientIdentityProviders client={clientData} />
             </TabsContent>
 
             <TabsContent value="credentials" className="mt-4">

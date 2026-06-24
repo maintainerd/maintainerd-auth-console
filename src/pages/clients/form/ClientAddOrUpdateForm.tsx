@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { Check, ChevronsUpDown, Plus, X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -20,7 +18,6 @@ import {
   type SelectOption
 } from "@/components/form"
 import { clientSchema, type ClientFormData } from "@/lib/validations"
-import { cn } from "@/lib/utils"
 import { useAppSelector } from "@/store/hooks"
 import {
   useClient,
@@ -30,7 +27,6 @@ import {
   useCreateClientUri,
   useUpdateClientUri
 } from "@/hooks/useClients"
-import { useIdentityProviders, useIdentityProvider } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
 import type {
   CreateClientRequest,
@@ -76,10 +72,7 @@ export default function ClientAddOrUpdateForm() {
   const { showSuccess, showError } = useToast()
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
 
-  // When launched from an identity provider's Clients tab, the provider is
-  // preselected and the back navigation returns to that provider.
   const navState = (location.state || {}) as {
-    identityProviderId?: string
     from?: string
     backLabel?: string
   }
@@ -97,20 +90,6 @@ export default function ClientAddOrUpdateForm() {
   // URI mutations (URIs are now included in client response, no need to fetch separately)
   const createClientUriMutation = useCreateClientUri()
   const updateClientUriMutation = useUpdateClientUri()
-
-  // Identity provider search state
-  const [providerSearchValue, setProviderSearchValue] = useState("")
-  const [providerSearchOpen, setProviderSearchOpen] = useState(false)
-
-  // Fetch identity providers with search and pagination. Social connectors are
-  // identity providers too, so the picker covers every provider_type.
-  const { data: identityProvidersData } = useIdentityProviders({
-    display_name: providerSearchValue || undefined,
-    limit: 10,
-    page: 1,
-    sort_by: 'name',
-    sort_order: 'asc',
-  })
 
   // Application URIs state (with IDs for tracking existing URIs)
   const [loginUri, setLoginUri] = useState<UriEntry>({ uri: "" })
@@ -167,17 +146,15 @@ export default function ClientAddOrUpdateForm() {
     handleSubmit,
     control,
     reset,
-    setValue,
     watch,
     formState: { errors, isSubmitting }
   } = useForm<ClientFormData>({
-    resolver: yupResolver(clientSchema),
+    resolver: yupResolver(clientSchema) as Resolver<ClientFormData>,
     defaultValues: {
       name: "",
       displayName: "",
       clientType: "spa",
       domain: "",
-      identityProviderId: "",
       status: "active",
     },
     mode: 'onSubmit',
@@ -190,18 +167,6 @@ export default function ClientAddOrUpdateForm() {
   const clientType = (watch("clientType") || "spa") as ClientType
   const capability = getClientTypeCapability(clientType)
   const pkceForced = capability.pkce === "required"
-
-  // Fetch selected provider when editing (to display the name)
-  const selectedProviderId = control._formValues.identityProviderId
-  const { data: selectedProviderData } = useIdentityProvider(selectedProviderId || '')
-
-  // Preselect the identity provider when creating from a provider's Clients tab
-  useEffect(() => {
-    if (!isEditing && navState.identityProviderId) {
-      setValue("identityProviderId", navState.identityProviderId)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, navState.identityProviderId])
 
   // When the operator switches client type, apply that type's OAuth defaults.
   // Guarded so it never clobbers values hydrated from an existing client (edit
@@ -226,7 +191,6 @@ export default function ClientAddOrUpdateForm() {
         displayName: clientData.display_name,
         clientType: clientData.client_type,
         domain: clientData.domain ?? "",
-        identityProviderId: clientData.identity_provider?.identity_provider_id ?? "",
         status: clientData.status,
       })
       // Mark the hydrated type as current so the defaults effect doesn't
@@ -462,7 +426,6 @@ export default function ClientAddOrUpdateForm() {
           display_name: formData.displayName,
           client_type: formData.clientType as ClientType,
           domain: formData.domain,
-          identity_provider_id: formData.identityProviderId,
           status: formData.status as ClientStatus,
           config,
         }
@@ -525,11 +488,6 @@ export default function ClientAddOrUpdateForm() {
 
   const isLoading = isFetchingClient || createClientMutation.isPending || updateClientMutation.isPending
   const showUriCard = hasApplicationUris(capability)
-
-  // Get selected provider display name (from search results or from fetched provider)
-  const selectedProvider = identityProvidersData?.rows?.find(
-    provider => provider.identity_provider_id === control._formValues.identityProviderId
-  ) || selectedProviderData
 
   return (
     <DetailsContainer>
@@ -624,74 +582,6 @@ export default function ClientAddOrUpdateForm() {
                 {...register("domain")}
               />
 
-              <Controller
-                name="identityProviderId"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label>
-                      Identity Provider <span className="text-destructive">*</span>
-                    </Label>
-                    <Popover open={providerSearchOpen} onOpenChange={setProviderSearchOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={providerSearchOpen}
-                          className="w-full justify-between"
-                          disabled={isLoading}
-                        >
-                          <span className={field.value ? "" : "text-muted-foreground"}>
-                            {field.value
-                              ? selectedProvider?.display_name || "Select identity provider"
-                              : "Select identity provider"}
-                          </span>
-                          <ChevronsUpDown className="h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0" align="start">
-                        <Command>
-                          <CommandInput
-                            placeholder="Search identity providers..."
-                            value={providerSearchValue}
-                            onValueChange={setProviderSearchValue}
-                          />
-                          <CommandList>
-                            <CommandEmpty>No identity providers found.</CommandEmpty>
-                            <CommandGroup>
-                              {identityProvidersData?.rows?.map((provider) => (
-                                <CommandItem
-                                  key={provider.identity_provider_id}
-                                  value={provider.identity_provider_id}
-                                  onSelect={() => {
-                                    field.onChange(provider.identity_provider_id)
-                                    setProviderSearchOpen(false)
-                                    setProviderSearchValue("")
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      field.value === provider.identity_provider_id ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{provider.display_name}</span>
-                                    <span className="text-xs text-muted-foreground">{provider.name}</span>
-                                  </div>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    {errors.identityProviderId?.message && (
-                      <p className="text-sm text-destructive">{errors.identityProviderId.message}</p>
-                    )}
-                  </div>
-                )}
-              />
             </CardContent>
           </Card>
 

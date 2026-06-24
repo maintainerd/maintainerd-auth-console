@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,11 +8,20 @@ import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
   FormInputField,
+  FormPasswordField,
   FormSelectField,
+  FormSwitchField,
   FormSubmitButton,
+  FormTextareaField,
   type SelectOption
 } from "@/components/form"
-import { ProviderConfigSection, useProviderConfig, PROVIDER_SELECT_OPTIONS, getProviderKind } from "@/components/provider-config"
+import {
+  ProviderConfigSection,
+  useProviderConfig,
+  PROVIDER_SELECT_OPTIONS,
+  getProviderConnectionSchema,
+  getProviderKind,
+} from "@/components/provider-config"
 import { identityProviderSchema, type IdentityProviderFormData } from "@/lib/validations"
 import { useAppSelector } from "@/store/hooks"
 import { useIdentityProvider, useCreateIdentityProvider, useUpdateIdentityProvider } from "@/hooks/useIdentityProviders"
@@ -25,6 +34,17 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
 ]
+
+function parseList(value: string | null | undefined): string[] {
+  return (value ?? "")
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function formatList(values: string[] | null | undefined): string {
+  return (values ?? []).join(", ")
+}
 
 export default function IdentityProviderAddOrUpdateForm() {
   const { tenantId, providerId } = useParams<{ tenantId: string; providerId?: string }>()
@@ -53,14 +73,20 @@ export default function IdentityProviderAddOrUpdateForm() {
     control,
     reset,
     watch,
+    setError,
     formState: { errors, isSubmitting }
   } = useForm<IdentityProviderFormData>({
-    resolver: yupResolver(identityProviderSchema),
+    resolver: yupResolver(identityProviderSchema) as Resolver<IdentityProviderFormData>,
     defaultValues: {
       name: "",
       displayName: "",
       provider: "maintainerd",
       status: "active",
+      issuer: "",
+      clientId: "",
+      clientSecret: "",
+      allowJITProvisioning: false,
+      emailDomains: "",
     },
     mode: 'onSubmit',
     reValidateMode: 'onSubmit'
@@ -70,6 +96,8 @@ export default function IdentityProviderAddOrUpdateForm() {
   // selected provider changes; both the well-known and additional fields are
   // merged into a single `config` JSON on save.
   const selectedProvider = watch("provider")
+  const selectedStatus = watch("status")
+  const connectionSchema = getProviderConnectionSchema(selectedProvider)
   const providerConfig = useProviderConfig(selectedProvider)
 
   // Load existing provider data if editing
@@ -80,6 +108,11 @@ export default function IdentityProviderAddOrUpdateForm() {
         displayName: providerData.display_name,
         provider: providerData.provider,
         status: providerData.status as 'active' | 'inactive',
+        issuer: providerData.issuer ?? "",
+        clientId: providerData.provider_client_id ?? "",
+        clientSecret: "",
+        allowJITProvisioning: providerData.allow_jit_provisioning ?? false,
+        emailDomains: formatList(providerData.email_domains),
       })
 
       providerConfig.load(providerData.config, providerData.provider)
@@ -94,6 +127,16 @@ export default function IdentityProviderAddOrUpdateForm() {
       return
     }
 
+    const activeExternalProvider = Boolean(connectionSchema && formData.status === "active")
+    if (activeExternalProvider && !isEditing && !(formData.clientSecret ?? "").trim()) {
+      setError("clientSecret", {
+        type: "manual",
+        message: "Client secret is required when creating an active external provider",
+      })
+      showError("Please complete the required connection fields.")
+      return
+    }
+
     if (!providerConfig.validate()) {
       showError("Please complete the required provider configuration fields.")
       return
@@ -101,33 +144,30 @@ export default function IdentityProviderAddOrUpdateForm() {
 
     try {
       const config = providerConfig.buildConfig()
-
       const providerType = getProviderKind(formData.provider)
+      const clientSecret = (formData.clientSecret ?? "").trim()
+      const payload = {
+        name: formData.name,
+        display_name: formData.displayName,
+        provider: formData.provider as ProviderOption,
+        provider_type: providerType,
+        issuer: connectionSchema ? (formData.issuer ?? "").trim() || null : null,
+        provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
+        allow_jit_provisioning: connectionSchema ? Boolean(formData.allowJITProvisioning) : false,
+        email_domains: connectionSchema ? parseList(formData.emailDomains) : [],
+        config,
+        status: formData.status as IdentityProviderStatus,
+        ...(clientSecret ? { provider_client_secret: clientSecret } : {}),
+      }
 
       if (isEditing && providerId) {
-        const updateData = {
-          name: formData.name,
-          display_name: formData.displayName,
-          provider: formData.provider as ProviderOption,
-          provider_type: providerType,
-          config,
-          status: formData.status as IdentityProviderStatus,
-        }
         await updateProviderMutation.mutateAsync({
           identityProviderId: providerId,
-          data: updateData
+          data: payload
         })
         showSuccess("Identity provider updated successfully")
       } else {
-        const createData = {
-          name: formData.name,
-          display_name: formData.displayName,
-          provider: formData.provider as ProviderOption,
-          provider_type: providerType,
-          config,
-          status: formData.status as IdentityProviderStatus,
-        }
-        await createProviderMutation.mutateAsync(createData)
+        await createProviderMutation.mutateAsync(payload)
         showSuccess("Identity provider created successfully")
       }
 
@@ -240,6 +280,89 @@ export default function IdentityProviderAddOrUpdateForm() {
               </div>
             </CardContent>
           </Card>
+
+          {connectionSchema && (
+            <Card className="shadow-xs">
+              <CardHeader>
+                <CardTitle className="text-base">Connection</CardTitle>
+                <p className="text-sm text-muted-foreground">{connectionSchema.summary}</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {connectionSchema.fields.map((field) => {
+                    if (field.key === "allow_jit_provisioning") {
+                      return (
+                        <Controller
+                          key={field.key}
+                          name="allowJITProvisioning"
+                          control={control}
+                          render={({ field: formField }) => (
+                            <FormSwitchField
+                              id="allow-jit-provisioning"
+                              label={field.label}
+                              description={field.description}
+                              checked={Boolean(formField.value)}
+                              onCheckedChange={formField.onChange}
+                              disabled={fieldsDisabled}
+                              containerClassName="md:col-span-2 rounded-md border p-4"
+                            />
+                          )}
+                        />
+                      )
+                    }
+
+                    if (field.key === "email_domains") {
+                      return (
+                        <FormTextareaField
+                          key={field.key}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          description={field.description}
+                          disabled={fieldsDisabled}
+                          error={errors.emailDomains?.message}
+                          containerClassName="md:col-span-2"
+                          {...register("emailDomains")}
+                        />
+                      )
+                    }
+
+                    if (field.key === "provider_client_secret") {
+                      return (
+                        <FormPasswordField
+                          key={field.key}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          description={
+                            isEditing
+                              ? "Leave blank to keep the stored secret, or enter a new value to replace it."
+                              : field.description
+                          }
+                          disabled={fieldsDisabled}
+                          error={errors.clientSecret?.message}
+                          required={field.required && selectedStatus === "active" && !isEditing}
+                          {...register("clientSecret")}
+                        />
+                      )
+                    }
+
+                    return (
+                      <FormInputField
+                        key={field.key}
+                        label={field.label}
+                        type={field.type === "url" ? "url" : "text"}
+                        placeholder={field.placeholder}
+                        description={field.description}
+                        disabled={fieldsDisabled}
+                        error={field.key === "issuer" ? errors.issuer?.message : errors.clientId?.message}
+                        required={field.required && selectedStatus === "active"}
+                        {...register(field.key === "issuer" ? "issuer" : "clientId")}
+                      />
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Provider-aware configuration */}
           <ProviderConfigSection

@@ -1,7 +1,7 @@
-import { ExternalLink, Info, Settings } from "lucide-react"
+import { Info, KeyRound } from "lucide-react"
 import { InformationCard } from "@/components/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { getProviderConfigSchema } from "@/components/provider-config"
+import { getProviderConnectionSchema, PROVIDER_LABELS } from "@/components/provider-config"
 import type { IdentityProviderDetail } from "@/services/api/identity-providers/types"
 
 interface IdentityProviderInformationTabProps {
@@ -10,52 +10,58 @@ interface IdentityProviderInformationTabProps {
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return ""
+  if (Array.isArray(value)) return value.join(", ")
   if (typeof value === "object") return JSON.stringify(value)
   return String(value)
 }
 
+function connectionValue(provider: IdentityProviderDetail, key: string): unknown {
+  switch (key) {
+    case "issuer":
+      return provider.issuer
+    case "provider_client_id":
+      return provider.provider_client_id
+    case "allow_jit_provisioning":
+      return provider.allow_jit_provisioning ? "Enabled" : "Off"
+    case "email_domains":
+      return provider.email_domains
+    default:
+      return ""
+  }
+}
+
 /**
  * Read-only mirror of the provider-aware section of the form: it renders the
- * well-known, provider-level config fields (grouped) for the selected provider.
- * Client credentials are intentionally absent — those live under the Clients tab.
+ * top-level provider connection fields. Client secrets are intentionally absent
+ * because the backend stores them write-only.
  */
-export function IdentityProviderInformationTab({ provider }: IdentityProviderInformationTabProps) {
-  const schema = getProviderConfigSchema(provider.provider)
-  const config = provider.config || {}
-  const hasFields = Boolean(schema && schema.groups.length > 0)
+export function IdentityProviderConnectionTab({ provider }: IdentityProviderInformationTabProps) {
+  const connectionSchema = getProviderConnectionSchema(provider.provider)
+  const providerLabel = PROVIDER_LABELS[provider.provider] ?? provider.provider
 
   return (
     <InformationCard
-      title="Provider Information"
-      description={schema?.summary ?? "Connection details for this identity provider."}
-      icon={Settings}
+      title="Connection"
+      description={
+        connectionSchema
+          ? `${providerLabel} broker connection fields stored on the provider record.`
+          : "Built-in Maintainerd authentication does not use an upstream provider connection."
+      }
+      icon={KeyRound}
     >
       <div className="space-y-6">
-        {schema?.docsUrl && (
-          <a
-            href={schema.docsUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            {schema.docsLabel ?? "Setup documentation"}
-          </a>
-        )}
+        {connectionSchema && (
+          <div className="space-y-4">
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-semibold">Broker Connection</h4>
+              <p className="text-sm text-muted-foreground">{connectionSchema.summary}</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {connectionSchema.fields
+                .filter((field) => field.key !== "provider_client_secret")
+                .map((field) => {
+                  const value = formatValue(connectionValue(provider, field.key))
 
-        {hasFields ? (
-          schema!.groups.map((group, groupIndex) => (
-            <div key={group.title} className="space-y-4">
-              {groupIndex > 0 && <div className="border-t" />}
-              <div className="space-y-0.5">
-                <h4 className="text-sm font-semibold">{group.title}</h4>
-                {group.description && (
-                  <p className="text-sm text-muted-foreground">{group.description}</p>
-                )}
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {group.fields.map((field) => {
-                  const value = formatValue(config[field.key])
                   return (
                     <div key={field.key} className="space-y-1">
                       <p className="text-sm font-medium text-muted-foreground">{field.label}</p>
@@ -69,15 +75,16 @@ export function IdentityProviderInformationTab({ provider }: IdentityProviderInf
                     </div>
                   )
                 })}
-              </div>
             </div>
-          ))
-        ) : (
+          </div>
+        )}
+
+        {!connectionSchema && (
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This provider has no provider-level configuration. Authentication is handled through
-              its clients.
+              This system provider is managed by Maintainerd and has no issuer, upstream client ID,
+              client secret, or email-domain routing.
             </AlertDescription>
           </Alert>
         )}

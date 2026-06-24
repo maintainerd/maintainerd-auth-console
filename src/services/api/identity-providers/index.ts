@@ -34,7 +34,10 @@ export async function fetchIdentityProviders(params?: IdentityProviderQueryParam
   const response = await get<ApiResponse<IdentityProviderListResponse>>(endpoint)
 
   if (response.success && response.data) {
-    return response.data
+    return {
+      ...response.data,
+      rows: response.data.rows ?? [],
+    }
   }
 
   throw new Error(response.message || 'Failed to fetch identity providers')
@@ -117,4 +120,3 @@ export const identityProviderService = {
   deleteIdentityProvider,
   updateIdentityProviderStatus,
 }
-

@@ -1,20 +1,11 @@
 /**
  * Provider Configuration Schemas
  *
- * Declarative, per-provider field maps. Each identity/social provider stores its
- * connection details in a single free-form `config` JSON blob on the backend.
- * These schemas describe the well-known keys a given provider needs so the form
- * can render a tailored, labelled section for them. Any keys the operator adds
- * beyond this list are surfaced as "Additional configuration" and merged into
- * the same JSON on save.
- *
- * Connection credentials: external providers (Cognito, Auth0, Google, …) include
- * a "Connection" group with the OAuth/OIDC `client_id` and `client_secret` that
- * Maintainerd uses to authenticate *as a relying party* with that provider. The
- * federation runtime (internal/idp) reads these from the provider config; the
- * secret is write-only — stored encrypted at rest and never returned to the form
- * (leave it blank on edit to keep the existing value). The built-in `maintainerd`
- * provider has no external connection and therefore no credentials.
+ * Declarative, per-provider field maps. Shared connection fields live as
+ * top-level identity provider columns on the backend (`issuer`,
+ * `provider_client_id`, `provider_client_secret`, `allow_jit_provisioning`, and `email_domains`). The schemas
+ * below only describe provider-specific config JSON keys such as scopes,
+ * endpoint overrides, directory IDs, and social-provider options.
  *
  * Note: this is distinct from the Clients resource, which models the apps that
  * authenticate *against* Maintainerd and whose credentials Maintainerd issues.
@@ -25,7 +16,13 @@ import type { ProviderOption } from "@/services/api/identity-providers/types"
 export type ProviderFieldType = "text" | "password" | "url" | "list" | "switch"
 
 /** Backend `provider_type` discriminator. */
-export type ProviderKind = "identity" | "social"
+export type ProviderKind = "system" | "social" | "enterprise"
+export type ProviderConnectionFieldKey =
+  | "issuer"
+  | "provider_client_id"
+  | "provider_client_secret"
+  | "allow_jit_provisioning"
+  | "email_domains"
 
 export interface ProviderConfigField {
   /** Key written into the provider `config` JSON. */
@@ -54,6 +51,20 @@ export interface ProviderConfigSchema {
   docsUrl?: string
   /** Grouped, well-known fields. Empty for providers with no provider-level config. */
   groups: ProviderConfigGroup[]
+}
+
+export interface ProviderConnectionField {
+  key: ProviderConnectionFieldKey
+  label: string
+  type: ProviderFieldType
+  required?: boolean
+  placeholder?: string
+  description?: string
+}
+
+export interface ProviderConnectionSchema {
+  summary: string
+  fields: ProviderConnectionField[]
 }
 
 /** Human-friendly provider names, shared across forms, tables, and detail pages. */
@@ -86,88 +97,165 @@ export const PROVIDER_ORDER: ProviderOption[] = [
   "twitter",
 ]
 
-/**
- * Build the shared "Connection" credentials group. Every external provider needs
- * the OAuth client_id/client_secret Maintainerd authenticates with; `federation`
- * adds the home-realm and UserInfo overrides relevant to full OIDC providers.
- */
-function connectionGroup(opts: { federation?: boolean } = {}): ProviderConfigGroup {
-  const fields: ProviderConfigField[] = [
-    {
-      key: "client_id",
-      label: "Client ID",
-      type: "text",
-      required: true,
-      placeholder: "your-app-client-id",
-      description: "OAuth client ID issued by the provider for this application.",
-    },
-    {
-      key: "client_secret",
-      label: "Client Secret",
-      type: "password",
-      required: true,
-      placeholder: "••••••••",
-      description:
-        "OAuth client secret issued by the provider. Stored encrypted — leave blank to keep the existing secret.",
-    },
-    {
-      key: "scopes",
-      label: "Scopes",
-      type: "list",
-      placeholder: "openid, profile, email",
-      description: "Comma-separated scopes requested during sign-in.",
-    },
-    {
-      key: "allow_jit_provisioning",
-      label: "Just-in-Time Provisioning",
-      type: "switch",
-      description: "Create a local user automatically on first successful sign-in.",
-    },
-  ]
+const DEFAULT_ISSUERS: Partial<Record<ProviderOption, string>> = {
+  cognito: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_aB12cD34",
+  auth0: "https://your-tenant.us.auth0.com/",
+  microsoft: "https://login.microsoftonline.com/common/v2.0",
+  google: "https://accounts.google.com",
+  github: "https://github.com",
+  gitlab: "https://gitlab.com",
+  facebook: "https://www.facebook.com",
+  apple: "https://appleid.apple.com",
+  linkedin: "https://www.linkedin.com",
+  twitter: "https://twitter.com",
+}
 
-  if (opts.federation) {
-    fields.push(
+const CLIENT_ID_LABELS: Partial<Record<ProviderOption, string>> = {
+  cognito: "App Client ID",
+  auth0: "Application Client ID",
+  apple: "Services ID",
+}
+
+const CLIENT_SECRET_LABELS: Partial<Record<ProviderOption, string>> = {
+  cognito: "App Client Secret",
+  apple: "Client Secret JWT",
+}
+
+/** Provider-specific labels for the backend-owned connection columns. */
+export function getProviderConnectionSchema(provider: string): ProviderConnectionSchema | undefined {
+  const option = provider as ProviderOption
+  const schema = getProviderConfigSchema(option)
+  if (!schema || schema.kind === "system") return undefined
+
+  return {
+    summary:
+      "Connection details are stored as dedicated provider fields. Provider-specific options below are saved into config JSON.",
+    fields: [
+      {
+        key: "issuer",
+        label: option === "cognito" ? "User Pool Issuer URL" : "Issuer URL",
+        type: "url",
+        required: true,
+        placeholder: DEFAULT_ISSUERS[option] ?? "https://provider.example.com",
+        description:
+          "Issuer or authority URL used by the broker to discover metadata and validate tokens.",
+      },
+      {
+        key: "provider_client_id",
+        label: CLIENT_ID_LABELS[option] ?? "OAuth Client ID",
+        type: "text",
+        required: true,
+        placeholder: option === "cognito" ? "your-app-client-id" : "your-oauth-client-id",
+        description: "OAuth application identifier issued by the external provider.",
+      },
+      {
+        key: "provider_client_secret",
+        label: CLIENT_SECRET_LABELS[option] ?? "OAuth Client Secret",
+        type: "password",
+        required: true,
+        placeholder: "••••••••",
+        description:
+          "Stored encrypted by the backend. Leave blank when editing to keep the existing secret.",
+      },
+      {
+        key: "allow_jit_provisioning",
+        label: "Just-in-Time Provisioning",
+        type: "switch",
+        description: "Create a local user automatically on first successful broker sign-in.",
+      },
       {
         key: "email_domains",
         label: "Email Domains",
         type: "list",
         placeholder: "example.com, corp.example.com",
-        description: "Email domains routed to this provider for home-realm discovery. Optional.",
+        description: "Domains routed to this provider during home-realm discovery.",
+      },
+    ],
+  }
+}
+
+export function getPromotedProviderFieldKeys(): string[] {
+  return [
+    "issuer",
+    "provider_client_id",
+    "provider_client_secret",
+    "allow_jit_provisioning",
+    "email_domains",
+    // Legacy config keys from before the backend promoted provider credentials.
+    "client_id",
+    "client_secret",
+  ]
+}
+
+function scopesGroup(defaultScopes = "openid, profile, email"): ProviderConfigGroup {
+  return {
+    title: "OAuth",
+    description: "Optional scopes requested during sign-in.",
+    fields: [
+      {
+        key: "scopes",
+        label: "Scopes",
+        type: "list",
+        placeholder: defaultScopes,
+        description: "Comma-separated scopes requested during sign-in.",
+      },
+    ],
+  }
+}
+
+function endpointOverridesGroup(): ProviderConfigGroup {
+  return {
+    title: "Endpoint Overrides",
+    description: "Optional overrides for providers that do not fully match discovery metadata.",
+    fields: [
+      {
+        key: "authorization_endpoint",
+        label: "Authorization Endpoint",
+        type: "url",
+        placeholder: "https://provider.example.com/oauth2/authorize",
+      },
+      {
+        key: "token_endpoint",
+        label: "Token Endpoint",
+        type: "url",
+        placeholder: "https://provider.example.com/oauth2/token",
       },
       {
         key: "userinfo_endpoint",
         label: "UserInfo Endpoint",
         type: "url",
-        placeholder: "https://provider.example.com/userinfo",
-        description: "Override the OIDC UserInfo endpoint. Optional; derived from discovery when blank.",
+        placeholder: "https://provider.example.com/oauth2/userinfo",
       },
-    )
+      {
+        key: "jwks_uri",
+        label: "JWKS URI",
+        type: "url",
+        placeholder: "https://provider.example.com/.well-known/jwks.json",
+      },
+    ],
   }
+}
 
-  return {
-    title: "Connection",
-    description:
-      "OAuth/OIDC application credentials Maintainerd uses to authenticate with this provider.",
-    fields,
-  }
+function commonExternalGroups(defaultScopes?: string): ProviderConfigGroup[] {
+  return [scopesGroup(defaultScopes), endpointOverridesGroup()]
 }
 
 export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchema> = {
   maintainerd: {
-    kind: "identity",
+    kind: "system",
     summary:
       "Built-in authentication managed by Maintainerd. User accounts, passwords, and sessions are handled natively — no external connection details are required.",
     groups: [],
   },
 
   cognito: {
-    kind: "identity",
+    kind: "enterprise",
     summary: "Connect an Amazon Cognito User Pool. Maintainerd needs the pool's regional identifiers and OAuth credentials to validate tokens and broker sign-in.",
     docsLabel: "AWS Cognito user pool guide",
     docsUrl:
       "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html",
     groups: [
-      connectionGroup({ federation: true }),
+      ...commonExternalGroups(),
       {
         title: "User Pool",
         description: "Identifiers for the Cognito User Pool that issues tokens.",
@@ -195,25 +283,18 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
             placeholder: "https://your-app.auth.us-east-1.amazoncognito.com",
             description: "Cognito hosted UI / OAuth domain. Optional if you don't use the hosted UI.",
           },
-          {
-            key: "issuer",
-            label: "Issuer URL",
-            type: "url",
-            placeholder: "https://cognito-idp.us-east-1.amazonaws.com/{pool-id}",
-            description: "OIDC issuer URL. Leave blank to derive it from the region and pool ID.",
-          },
         ],
       },
     ],
   },
 
   auth0: {
-    kind: "identity",
+    kind: "enterprise",
     summary: "Connect an Auth0 tenant. Provide the tenant connection details and application credentials.",
     docsLabel: "Auth0 application setup",
     docsUrl: "https://auth0.com/docs/get-started/applications",
     groups: [
-      connectionGroup({ federation: true }),
+      ...commonExternalGroups(),
       {
         title: "Tenant",
         fields: [
@@ -224,13 +305,6 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
             required: true,
             placeholder: "your-tenant.us.auth0.com",
             description: "Your Auth0 tenant domain, without the https:// prefix.",
-          },
-          {
-            key: "issuer",
-            label: "Issuer URL",
-            type: "url",
-            placeholder: "https://your-tenant.us.auth0.com/",
-            description: "OIDC issuer URL. Optional; defaults to the tenant domain.",
           },
           {
             key: "audience",
@@ -252,12 +326,12 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
   },
 
   microsoft: {
-    kind: "identity",
+    kind: "enterprise",
     summary: "Sign in with Microsoft Entra ID (Azure AD). Provide the directory and application credentials.",
     docsLabel: "Microsoft Entra ID platform",
     docsUrl: "https://learn.microsoft.com/en-us/entra/identity-platform/",
     groups: [
-      connectionGroup({ federation: true }),
+      ...commonExternalGroups(),
       {
         title: "Directory",
         fields: [
@@ -268,13 +342,6 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
             required: true,
             placeholder: "common",
             description: "Entra tenant ID, or one of: common, organizations, consumers.",
-          },
-          {
-            key: "issuer",
-            label: "Issuer URL",
-            type: "url",
-            placeholder: "https://login.microsoftonline.com/{tenant}/v2.0",
-            description: "OIDC issuer URL. Optional; derived from the tenant.",
           },
         ],
       },
@@ -287,7 +354,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "Google OAuth 2.0",
     docsUrl: "https://developers.google.com/identity/protocols/oauth2",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups(),
       {
         title: "Options",
         fields: [
@@ -310,7 +377,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsUrl:
       "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups("read:user, user:email"),
       {
         title: "Options",
         fields: [
@@ -332,7 +399,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "GitLab OAuth provider",
     docsUrl: "https://docs.gitlab.com/ee/integration/oauth_provider.html",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups("openid, profile, email"),
       {
         title: "Options",
         fields: [
@@ -354,7 +421,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "Facebook Login setup",
     docsUrl: "https://developers.facebook.com/docs/facebook-login/",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups("public_profile, email"),
       {
         title: "Options",
         fields: [
@@ -376,7 +443,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "Sign in with Apple",
     docsUrl: "https://developer.apple.com/sign-in-with-apple/",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups("name, email"),
       {
         title: "Developer",
         fields: [
@@ -406,7 +473,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "Sign in with LinkedIn",
     docsUrl:
       "https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin",
-    groups: [connectionGroup()],
+    groups: commonExternalGroups("openid, profile, email"),
   },
 
   twitter: {
@@ -415,7 +482,7 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     docsLabel: "X OAuth 2.0",
     docsUrl: "https://developer.twitter.com/en/docs/authentication/oauth-2-0",
     groups: [
-      connectionGroup(),
+      ...commonExternalGroups("tweet.read, users.read, offline.access"),
       {
         title: "Options",
         fields: [

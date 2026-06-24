@@ -24,6 +24,7 @@ import type {
   ClientApisResponse,
   AddClientApisRequest,
   AddClientApiPermissionsRequest,
+  AddClientIdentityProviderRequest,
 } from './types'
 
 /**
@@ -102,6 +103,40 @@ export async function deleteClient(clientId: string): Promise<void> {
   if (!response.success) {
     throw new Error(response.message || 'Failed to delete client')
   }
+}
+
+/**
+ * Connect an identity provider to an existing client.
+ */
+export async function addClientIdentityProvider(
+  clientId: string,
+  data: AddClientIdentityProviderRequest,
+): Promise<ClientResponse> {
+  const endpoint = `${API_ENDPOINTS.CLIENT}/${clientId}/identity_providers`
+  const response = await post<ApiResponse<ClientResponse>>(endpoint, data)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to connect identity provider')
+}
+
+/**
+ * Disconnect an identity provider from a client by removing the relationship row.
+ */
+export async function removeClientIdentityProvider(
+  clientId: string,
+  connectionId: string,
+): Promise<ClientResponse> {
+  const endpoint = `${API_ENDPOINTS.CLIENT}/${clientId}/identity_providers/${connectionId}`
+  const response = await deleteRequest<ApiResponse<ClientResponse>>(endpoint)
+
+  if (response.success && response.data) {
+    return response.data
+  }
+
+  throw new Error(response.message || 'Failed to disconnect identity provider')
 }
 
 /**

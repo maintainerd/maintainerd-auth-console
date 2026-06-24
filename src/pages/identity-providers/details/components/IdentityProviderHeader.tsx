@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, KeyRound, Building2, CalendarDays } from "lucide-react"
+import { Edit, Trash2, MoreVertical, KeyRound, Building2, CalendarDays, Globe2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -57,6 +57,15 @@ export function IdentityProviderHeader({ provider, tenantId, providerId }: Ident
       icon: Building2,
       label: "Provider Type",
       value: getProviderDisplayName(provider.provider, provider.is_system),
+    },
+    {
+      icon: Globe2,
+      label: "Issuer",
+      value: provider.issuer ? (
+        <span className="break-all font-mono text-xs">{provider.issuer}</span>
+      ) : (
+        <span className="text-muted-foreground">Built-in</span>
+      ),
     },
     {
       icon: Building2,

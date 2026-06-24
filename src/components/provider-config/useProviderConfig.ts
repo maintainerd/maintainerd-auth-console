@@ -10,9 +10,11 @@
  * field's declared `type` decides how they are parsed back out in `buildConfig`:
  *   - list   → comma/newline separated string ⇄ string[]
  *   - switch → "true"/"false" ⇄ boolean
- *   - password → write-only: never hydrated from the (redacted) config, and only
- *     sent when the operator types a new value, so a routine edit preserves the
- *     stored secret.
+ *   - password → write-only config fields, if a provider ever declares one.
+ *
+ * Shared broker connection fields such as issuer/client ID/secret/JIT/domains
+ * are top-level provider columns and are handled by the identity provider form,
+ * not by this config JSON controller.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -115,8 +117,8 @@ export function useProviderConfig(provider: string) {
   )
 
   // When the provider changes, re-bucket the current values under the new
-  // provider's field set so shared keys (client_id, scopes, …) carry over and
-  // the rest fall back to additional fields. Values are already display strings,
+  // provider's field set so shared config keys (scopes, endpoint overrides, …)
+  // carry over and the rest fall back to additional fields. Values are already display strings,
   // so this is a straight key re-bucketing — no type coercion needed.
   useEffect(() => {
     if (prevProviderRef.current === provider) return

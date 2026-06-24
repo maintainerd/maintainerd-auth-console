@@ -53,8 +53,7 @@ export function useAuth() {
     challengeToken: string,
     method: string,
     proof: { code?: string; assertion?: unknown },
-    tenantId?: string,
-    clientId?: string,
+    tenantId: string,
   ) => {
     const result = await dispatch(completeMFALoginAsync({
       mfa_challenge_token: challengeToken,
@@ -62,7 +61,6 @@ export function useAuth() {
       code: proof.code,
       assertion: proof.assertion,
       tenantId,
-      clientId,
     })).unwrap()
     return { account: result.data }
   }, [dispatch])

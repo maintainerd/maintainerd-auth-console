@@ -60,6 +60,16 @@ export type ClientIdentityProvider = {
   updated_at: string
 }
 
+export type ClientIdentityProviderConnection = {
+  client_identity_provider_id: string
+  identity_provider: ClientIdentityProvider
+  is_default: boolean
+  enabled: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
 /**
  * Client type
  */
@@ -71,6 +81,7 @@ export type Client = {
   domain?: string | null
   uris?: Uri[]
   identity_provider?: ClientIdentityProvider
+  connections?: ClientIdentityProviderConnection[]
   status: ClientStatus
   is_default: boolean
   is_system: boolean
@@ -132,6 +143,7 @@ export interface ClientResponse {
   domain?: string | null
   uris?: Uri[]
   identity_provider?: ClientIdentityProvider
+  connections?: ClientIdentityProviderConnection[]
   status: ClientStatus
   is_default: boolean
   is_system: boolean
@@ -165,7 +177,7 @@ export interface CreateClientRequest {
   display_name: string
   client_type: ClientType
   domain: string
-  identity_provider_id: string
+  identity_provider_id?: string
   status: ClientStatus
   config: Record<string, unknown>
 }
@@ -187,6 +199,13 @@ export interface UpdateClientRequest {
  */
 export interface UpdateClientStatusRequest {
   status: ClientStatus
+}
+
+export interface AddClientIdentityProviderRequest {
+  identity_provider_id: string
+  is_default: boolean
+  enabled?: boolean
+  display_order: number
 }
 
 /**

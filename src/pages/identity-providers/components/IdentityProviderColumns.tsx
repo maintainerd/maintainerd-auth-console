@@ -52,16 +52,6 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "identifier",
-    accessorKey: "identifier",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Identifier" />,
-    cell: ({ row }) => (
-      <div className="px-3 py-1">
-        <span className="text-xs text-muted-foreground font-mono truncate">{row.original.identifier}</span>
-      </div>
-    ),
-  },
-  {
     id: "provider",
     accessorKey: "provider",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Provider" />,

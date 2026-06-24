@@ -1,14 +1,15 @@
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { AppWindow, Globe, Pencil, Plus, Trash2 } from "lucide-react"
+import { AppWindow, Eye, Globe, Link2, Unlink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton, StatusBadge } from "@/components/details"
 import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
-import { useClients, useDeleteClient } from "@/hooks/useClients"
+import { useClients, useRemoveClientIdentityProvider } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
 import type { Client } from "@/services/api/clients/types"
 import { type PaginationState } from "@tanstack/react-table"
+import { ConnectClientDialog } from "./ConnectClientDialog"
 
 const CLIENT_TYPE_LABELS: Record<string, string> = {
   traditional: "Traditional Web",
@@ -26,9 +27,10 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const deleteClientMutation = useDeleteClient()
+  const removeConnectionMutation = useRemoveClientIdentityProvider()
 
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false)
 
   const { data, isLoading, isError } = useClients({
     identity_provider_id: providerId,
@@ -44,22 +46,25 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
     pageCount: data?.total_pages ?? 0,
   })
 
-  const providerDetailUrl = `/${tenantId}/providers/identity/${providerId}?tab=clients`
+  const connectedClients = data?.rows ?? []
+  const connectedClientIds = connectedClients.map((client) => client.client_id)
 
-  const handleAddClient = () => {
-    navigate(`/${tenantId}/clients/create`, {
-      state: {
-        identityProviderId: providerId,
-        from: providerDetailUrl,
-        backLabel: "Back to Provider Details",
-      },
-    })
+  const getProviderConnection = (client: Client) => {
+    return client.connections?.find(
+      (connection) => connection.identity_provider.identity_provider_id === providerId,
+    )
   }
 
-  const removeClient = async (client: Client) => {
+  const disconnectClient = async (client: Client) => {
+    const connectionId = getProviderConnection(client)?.client_identity_provider_id
+    if (!connectionId) {
+      showError("Unable to find this client connection")
+      return
+    }
+
     try {
-      await deleteClientMutation.mutateAsync(client.client_id)
-      showSuccess(`Deleted client ${client.display_name}`)
+      await removeConnectionMutation.mutateAsync({ clientId: client.client_id, connectionId })
+      showSuccess(`Disconnected ${client.display_name} from ${providerName}`)
     } catch (error) {
       showError(error)
     }
@@ -67,13 +72,13 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
 
   return (
     <InformationCard
-      title="Clients"
-      description="OAuth clients that authenticate through this identity provider."
+      title="Connected Clients"
+      description="Downstream OAuth clients with this identity provider enabled as a login option."
       icon={AppWindow}
       action={
-        <Button onClick={handleAddClient} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Client
+        <Button onClick={() => setConnectDialogOpen(true)} size="sm">
+          <Link2 className="mr-2 h-4 w-4" />
+          Connect a client
         </Button>
       }
     >
@@ -84,37 +89,39 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
           <p className="py-8 text-center text-sm text-destructive">Failed to load clients</p>
         )}
 
-        {data && data.rows.length === 0 && (
+        {data && connectedClients.length === 0 && (
           <EmptyState
             icon={AppWindow}
-            title="No clients"
-            description={`No clients are configured for ${providerName} yet.`}
+            title="No connected clients"
+            description={`No downstream clients have ${providerName} enabled as a login option yet.`}
           />
         )}
 
-        {data && data.rows.length > 0 && data.rows.map((client) => {
+        {data && connectedClients.length > 0 && connectedClients.map((client) => {
+          const connection = getProviderConnection(client)
+          const canDisconnect = !connection?.identity_provider.is_system
           const actions: RowActionItem[] = [
             {
-              key: "edit",
-              label: "Edit Client",
-              icon: Pencil,
-              onSelect: () => navigate(`/${tenantId}/clients/${client.client_id}/edit`),
+              key: "view",
+              label: "View Client",
+              icon: Eye,
+              onSelect: () => navigate(`/${tenantId}/clients/${client.client_id}`),
             },
           ]
 
-          if (!client.is_system) {
+          if (canDisconnect) {
             actions.push({
-              key: "delete",
-              label: "Delete Client",
-              icon: Trash2,
+              key: "disconnect",
+              label: "Disconnect",
+              icon: Unlink,
               destructive: true,
-              onSelect: () => removeClient(client),
+              onSelect: () => disconnectClient(client),
               confirm: {
-                title: "Delete Client",
-                description: "This action cannot be undone. This will permanently delete the client.",
+                title: "Disconnect Client",
+                description: `This will remove ${providerName} as a login option for this client. The client itself will not be deleted.`,
                 destructive: true,
                 itemName: client.name,
-                confirmText: "Delete",
+                confirmText: "Disconnect",
               },
             })
           }
@@ -170,6 +177,13 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
           </div>
         )}
       </div>
+      <ConnectClientDialog
+        open={connectDialogOpen}
+        onOpenChange={setConnectDialogOpen}
+        providerId={providerId}
+        providerName={providerName}
+        existingClientIds={connectedClientIds}
+      />
     </InformationCard>
   )
 }

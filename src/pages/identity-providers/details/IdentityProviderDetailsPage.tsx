@@ -1,27 +1,37 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { Settings, Braces, AppWindow } from "lucide-react"
+import { AppWindow, KeyRound, Settings2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useIdentityProvider } from "@/hooks/useIdentityProviders"
 import {
   IdentityProviderHeader,
-  IdentityProviderInformationTab,
-  IdentityProviderMetadataTab,
+  IdentityProviderConnectionTab,
+  IdentityProviderConfigurationTab,
   IdentityProviderClients,
 } from "./components"
 
 const TABS = [
-  { value: "information", label: "Provider Information", icon: Settings },
-  { value: "clients", label: "Clients", icon: AppWindow },
-  { value: "metadata", label: "Metadata", icon: Braces },
+  { value: "connection", label: "Connection", icon: KeyRound },
+  { value: "configuration", label: "Configuration", icon: Settings2 },
+  { value: "connected-clients", label: "Connected Clients", icon: AppWindow },
 ] as const
+
+const TAB_VALUES = new Set(TABS.map((tab) => tab.value))
+const LEGACY_TAB_MAP: Record<string, (typeof TABS)[number]["value"]> = {
+  information: "connection",
+  metadata: "configuration",
+  clients: "connected-clients",
+}
 
 export default function IdentityProviderDetailsPage() {
   const { tenantId, providerId } = useParams<{ tenantId: string; providerId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const activeTab = searchParams.get("tab") || "information"
+  const requestedTab = searchParams.get("tab") || ""
+  const activeTab = TAB_VALUES.has(requestedTab as (typeof TABS)[number]["value"])
+    ? requestedTab
+    : LEGACY_TAB_MAP[requestedTab] ?? "connection"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
 
   const { data: provider, isLoading, isError } = useIdentityProvider(providerId || "")
@@ -49,19 +59,19 @@ export default function IdentityProviderDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="information" className="mt-4">
-              <IdentityProviderInformationTab provider={provider} />
+            <TabsContent value="connection" className="mt-4">
+              <IdentityProviderConnectionTab provider={provider} />
             </TabsContent>
 
-            <TabsContent value="clients" className="mt-4">
+            <TabsContent value="configuration" className="mt-4">
+              <IdentityProviderConfigurationTab provider={provider} />
+            </TabsContent>
+
+            <TabsContent value="connected-clients" className="mt-4">
               <IdentityProviderClients
                 providerId={providerId!}
                 providerName={provider.display_name}
               />
-            </TabsContent>
-
-            <TabsContent value="metadata" className="mt-4">
-              <IdentityProviderMetadataTab provider={provider} />
             </TabsContent>
           </Tabs>
         </>

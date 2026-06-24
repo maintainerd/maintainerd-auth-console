@@ -28,7 +28,7 @@ export function ClientListing() {
       onCreate={() => navigate(`/${tenantId}/clients/create`)}
       createLabel="New Client"
       emptyTitle="No clients yet"
-      emptyDescription="Register your first client application to let it authenticate users through your identity providers."
+      emptyDescription="Register your first client application, then connect the identity providers it can use for sign-in."
     />
   )
 }

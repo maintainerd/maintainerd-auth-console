@@ -87,7 +87,7 @@ const finishLogin = (account: AccountEntity | null | undefined) => {
         <LoginMFAStep
           challengeToken={mfaChallenge.token}
           allowedMethods={mfaChallenge.methods}
-          tenantId={tenantId}
+          tenantId={tenantId!}
           onVerified={(result) => finishLogin(result.account)}
           onCancel={() => setMfaChallenge(null)}
         />

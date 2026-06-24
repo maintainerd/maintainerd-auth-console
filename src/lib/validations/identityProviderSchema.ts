@@ -5,6 +5,23 @@
 
 import * as yup from 'yup'
 
+const EXTERNAL_PROVIDERS = [
+  'cognito',
+  'auth0',
+  'google',
+  'facebook',
+  'github',
+  'gitlab',
+  'microsoft',
+  'apple',
+  'linkedin',
+  'twitter',
+]
+
+function activeExternalProvider(provider: unknown, status: unknown): boolean {
+  return typeof provider === 'string' && EXTERNAL_PROVIDERS.includes(provider) && status === 'active'
+}
+
 // Identity Provider Form Schema
 export const identityProviderSchema = yup.object({
   name: yup
@@ -52,7 +69,25 @@ export const identityProviderSchema = yup.object({
     .string()
     .oneOf(['active', 'inactive'], 'Invalid status')
     .required('Status is required'),
+  issuer: yup
+    .string()
+    .nullable()
+    .when(['provider', 'status'], ([provider, status], schema) =>
+      activeExternalProvider(provider, status)
+        ? schema.required('Issuer URL is required for active external providers').url('Issuer must be a valid URL')
+        : schema.notRequired()
+    ),
+  clientId: yup
+    .string()
+    .nullable()
+    .when(['provider', 'status'], ([provider, status], schema) =>
+      activeExternalProvider(provider, status)
+        ? schema.required('Client ID is required for active external providers')
+        : schema.notRequired()
+    ),
+  clientSecret: yup.string().nullable(),
+  allowJITProvisioning: yup.boolean().default(false),
+  emailDomains: yup.string().nullable(),
 })
 
 export type IdentityProviderFormData = yup.InferType<typeof identityProviderSchema>
-
