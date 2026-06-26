@@ -93,6 +93,7 @@ export function RowActions({ items }: { items: RowActionItem[] }) {
             description={activeConfirm.confirm.description}
             itemName={activeConfirm.confirm.itemName ?? ""}
             isDeleting={isSubmitting}
+            confirmLabel={activeConfirm.confirm.confirmText}
           />
         ) : (
           <ConfirmationDialog
