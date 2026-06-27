@@ -37,6 +37,8 @@ export type IdentityProviderConnectionFields = {
   provider_client_id: string | null
   allow_jit_provisioning: boolean
   allow_registration: boolean
+  allow_token_federation: boolean
+  allowed_audiences: string[]
   email_domains: string[]
 }
 
@@ -172,6 +174,25 @@ export interface CreateIdentityProviderRequest {
   provider_client_secret?: string
   allow_jit_provisioning?: boolean
   allow_registration: boolean
+  allow_token_federation: boolean
+  allowed_audiences: string[]
+  email_domains?: string[]
+  config: IdentityProviderConfig
+  status: IdentityProviderStatus
+}
+
+export interface UpdateIdentityProviderRequest {
+  name: string
+  display_name: string
+  provider: ProviderOption
+  provider_type: ProviderType
+  issuer?: string | null
+  provider_client_id?: string | null
+  provider_client_secret?: string
+  allow_jit_provisioning?: boolean
+  allow_registration: boolean
+  allow_token_federation: boolean
+  allowed_audiences: string[]
   email_domains?: string[]
   config: IdentityProviderConfig
   status: IdentityProviderStatus

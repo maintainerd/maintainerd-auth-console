@@ -1,6 +1,7 @@
-import { ExternalLink, Settings2 } from "lucide-react"
+import { ExternalLink, Settings2, ShieldCheck } from "lucide-react"
 import { InformationCard } from "@/components/card"
 import { EmptyState } from "@/components/details"
+import { Badge } from "@/components/ui/badge"
 import {
   getPromotedProviderFieldKeys,
   getProviderConfigSchema,
@@ -34,6 +35,61 @@ export function IdentityProviderConfigurationTab({ provider }: IdentityProviderC
   const hasConfigGroups = Boolean(schema && schema.groups.length > 0)
 
   return (
+    <div className="space-y-6">
+    <InformationCard
+      title="Registration & Federation"
+      description="Self-service registration and token federation policies for this provider."
+      icon={ShieldCheck}
+    >
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Allow registration</p>
+            <Badge variant={provider.allow_registration ? "default" : "secondary"}>
+              {provider.allow_registration ? "Enabled" : "Disabled"}
+            </Badge>
+            <p className="text-xs text-muted-foreground">
+              {provider.allow_registration
+                ? "Users can self-register through this provider."
+                : "Self-registration is blocked for this provider."}
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Token federation (Mode B)</p>
+            <Badge variant={provider.allow_token_federation ? "default" : "secondary"}>
+              {provider.allow_token_federation ? "Enabled" : "Disabled"}
+            </Badge>
+            <p className="text-xs text-muted-foreground">
+              {provider.allow_token_federation
+                ? "Accepts foreign OIDC ID tokens from this issuer."
+                : "Foreign token acceptance is off."}
+            </p>
+          </div>
+        </div>
+
+        {provider.allow_token_federation && provider.allowed_audiences.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Allowed audiences</p>
+            <div className="flex flex-wrap gap-1.5">
+              {provider.allowed_audiences.map((aud) => (
+                <span key={aud} className="rounded bg-muted px-2 py-1 font-mono text-xs">
+                  {aud}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {provider.allow_token_federation && provider.allowed_audiences.length === 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Allowed audiences</p>
+            <p className="text-xs text-muted-foreground">—</p>
+          </div>
+        )}
+      </div>
+    </InformationCard>
+
     <InformationCard
       title="Configuration"
       description={schema?.summary ?? "Provider-specific configuration stored as JSON."}
@@ -112,5 +168,6 @@ export function IdentityProviderConfigurationTab({ provider }: IdentityProviderC
         )}
       </div>
     </InformationCard>
+    </div>
   )
 }

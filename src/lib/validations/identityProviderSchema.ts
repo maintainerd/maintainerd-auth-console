@@ -22,6 +22,10 @@ function activeExternalProvider(provider: unknown, status: unknown): boolean {
   return typeof provider === 'string' && EXTERNAL_PROVIDERS.includes(provider) && status === 'active'
 }
 
+function activeTokenFederation(allowTokenFederation: unknown, status: unknown): boolean {
+  return allowTokenFederation === true && status === 'active'
+}
+
 // Identity Provider Form Schema
 export const identityProviderSchema = yup.object({
   name: yup
@@ -88,6 +92,15 @@ export const identityProviderSchema = yup.object({
   clientSecret: yup.string().nullable(),
   allowJITProvisioning: yup.boolean().default(false),
   allowRegistration: yup.boolean().default(true),
+  allowTokenFederation: yup.boolean().default(false),
+  allowedAudiences: yup
+    .string()
+    .nullable()
+    .when(['allowTokenFederation', 'status'], ([allowTokenFederation, status], schema) =>
+      activeTokenFederation(allowTokenFederation, status)
+        ? schema.required('At least one allowed audience is required when token federation is enabled')
+        : schema.notRequired()
+    ),
   emailDomains: yup.string().nullable(),
 })
 

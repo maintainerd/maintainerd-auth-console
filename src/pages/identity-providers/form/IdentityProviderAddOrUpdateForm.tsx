@@ -87,6 +87,8 @@ export default function IdentityProviderAddOrUpdateForm() {
       clientSecret: "",
       allowJITProvisioning: false,
       allowRegistration: true,
+      allowTokenFederation: false,
+      allowedAudiences: "",
       emailDomains: "",
     },
     mode: 'onSubmit',
@@ -114,6 +116,8 @@ export default function IdentityProviderAddOrUpdateForm() {
         clientSecret: "",
         allowJITProvisioning: providerData.allow_jit_provisioning ?? false,
         allowRegistration: providerData.allow_registration ?? true,
+        allowTokenFederation: providerData.allow_token_federation ?? false,
+        allowedAudiences: formatList(providerData.allowed_audiences),
         emailDomains: formatList(providerData.email_domains),
       })
 
@@ -157,6 +161,8 @@ export default function IdentityProviderAddOrUpdateForm() {
         provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
         allow_jit_provisioning: connectionSchema ? Boolean(formData.allowJITProvisioning) : false,
         allow_registration: Boolean(formData.allowRegistration),
+        allow_token_federation: Boolean(formData.allowTokenFederation),
+        allowed_audiences: parseList(formData.allowedAudiences),
         email_domains: connectionSchema ? parseList(formData.emailDomains) : [],
         config,
         status: formData.status as IdentityProviderStatus,
@@ -294,6 +300,40 @@ export default function IdentityProviderAddOrUpdateForm() {
                     onCheckedChange={field.onChange}
                     disabled={fieldsDisabled}
                     containerClassName="rounded-md border p-4"
+                  />
+                )}
+              />
+
+              <Controller
+                name="allowTokenFederation"
+                control={control}
+                render={({ field }) => (
+                  <FormSwitchField
+                    id="allow-token-federation"
+                    label="Allow token federation"
+                    description="Accept foreign OIDC ID tokens from this issuer (Mode B / PDP). Requires issuer URL and at least one allowed audience."
+                    checked={Boolean(field.value)}
+                    onCheckedChange={field.onChange}
+                    disabled={fieldsDisabled}
+                    containerClassName="rounded-md border p-4"
+                  />
+                )}
+              />
+
+              <Controller
+                name="allowedAudiences"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <FormTextareaField
+                    id="allowed-audiences"
+                    label="Allowed audiences"
+                    description='External app client IDs that may present tokens from this issuer. One per line.'
+                    placeholder="my-external-app&#10;another-app"
+                    error={fieldState.error?.message}
+                    disabled={fieldsDisabled}
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
                   />
                 )}
               />
