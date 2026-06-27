@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import { determineTenantIdentifier } from '@/utils/tenant'
-import { SERVICE_UNAVAILABLE_ROUTE } from '@/utils/postAuthRoute'
+import { SERVICE_UNAVAILABLE_ROUTE, isPublicConsoleRoute } from '@/utils/postAuthRoute'
 import AppLoadingScreen from '@/components/layout/AppLoadingScreen'
 import { RouteGuard } from './RouteGuard'
 
@@ -63,15 +63,11 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
     return <AppLoadingScreen branding={currentTenant?.branding} />
   }
 
-  const isExemptFromServiceCheck =
-    location.pathname === SERVICE_UNAVAILABLE_ROUTE ||
-    location.pathname.startsWith('/setup') ||
-    location.pathname === '/login' ||
-    location.pathname === '/reset-password' ||
-    location.pathname.startsWith('/register') ||
-    /^\/[^/]+\/login$/.test(location.pathname)
-
-  if (!currentTenant && tenantError && !isExemptFromServiceCheck) {
+  // Public routes (login / landing, setup wizard, error / callback pages) must
+  // render even when the tenant couldn't be resolved — otherwise logging out
+  // could bounce to service-unavailable instead of the login page. Only
+  // protected routes fall back to the service-unavailable screen.
+  if (!currentTenant && tenantError && !isPublicConsoleRoute(location.pathname)) {
     return <Navigate to={SERVICE_UNAVAILABLE_ROUTE} replace />
   }
 

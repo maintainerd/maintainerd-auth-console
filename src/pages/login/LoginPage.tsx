@@ -1,28 +1,69 @@
-import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import LoginLayout from "@/components/layout/LoginLayout"
-import LoginForm from "./components/LoginForm"
+import { useEffect, useRef, useState } from 'react'
+import { LogIn } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import LoginLayout from '@/components/layout/LoginLayout'
 import { useTenant } from '@/hooks/useTenant'
+import { useToast } from '@/hooks/useToast'
+import { startConsoleOAuthLogin } from '@/services/api/oauth'
 
+/**
+ * Public login page for the console.
+ *
+ * This is an unprotected route: it never auto-redirects. It simply offers a
+ * Sign in button that starts the hosted-identity OAuth2 flow. Logging out lands
+ * the user here, so logout actually sticks instead of immediately bouncing back
+ * through SSO. Automatic OAuth redirects only happen on protected routes.
+ */
 const LoginPage = () => {
-  const { tenantId } = useParams<{ tenantId?: string }>()
-  const { fetchByIdentifier, fetchDefault, currentTenant } = useTenant()
+  const { currentTenant, fetchDefault } = useTenant()
+  const { showError } = useToast()
+  const [redirecting, setRedirecting] = useState(false)
+  const tenantFetchedRef = useRef(false)
 
+  // After logout the tenant context is cleared. Re-resolve the default tenant so
+  // the Sign in button can start OAuth without requiring a full page reload.
   useEffect(() => {
-    if (tenantId) {
-      fetchByIdentifier(tenantId)
-    } else if (!currentTenant) {
-      fetchDefault()
+    if (currentTenant?.identifier || tenantFetchedRef.current) return
+    tenantFetchedRef.current = true
+    fetchDefault().catch(() => {
+      /* surfaced via service-unavailable handling elsewhere */
+    })
+  }, [currentTenant?.identifier, fetchDefault])
+
+  const companyName = currentTenant?.branding?.company_name || 'Maintainerd Auth'
+
+  const handleLogin = async () => {
+    if (!currentTenant?.identifier) return
+    setRedirecting(true)
+    try {
+      await startConsoleOAuthLogin(currentTenant.identifier)
+    } catch (error) {
+      console.error('[console-oauth] sign-in failed to start', error)
+      showError('Unable to start sign in. Please try again.')
+      setRedirecting(false)
     }
-    // Only re-fetch when tenantId changes or component mounts
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenantId])
+  }
 
   return (
     <LoginLayout branding={currentTenant?.branding}>
-      <LoginForm />
+      <div className="flex flex-col gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{companyName} Console</h1>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            Sign in to administer tenants, users, clients, and security settings.
+          </p>
+        </div>
+        <Button
+          className="w-full"
+          onClick={handleLogin}
+          disabled={redirecting || !currentTenant?.identifier}
+        >
+          <LogIn className="mr-2 size-4" />
+          {redirecting ? 'Redirecting…' : 'Sign in'}
+        </Button>
+      </div>
     </LoginLayout>
   )
 }
 
-export default LoginPage;
+export default LoginPage

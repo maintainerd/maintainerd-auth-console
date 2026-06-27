@@ -87,7 +87,7 @@ export function useSetupAdmin() {
         }
         await createAdmin(adminData)
         showSuccess('Admin account created successfully!')
-        navigate('/register/profile')
+        navigate('/')
         return { success: true }
       } catch (error: unknown) {
         if (error instanceof Error) {

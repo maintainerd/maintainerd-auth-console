@@ -12,8 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LogOut, Settings, User } from "lucide-react"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
 import { useParams, useNavigate } from "react-router-dom"
-import { useAuth } from "@/hooks/useAuth"
-import { useToast } from "@/hooks/useToast"
+import { logoutViaIdentity } from "@/services/api/auth"
 import { useAppSelector } from "@/store/hooks"
 import { TenantSwitcher } from "@/components/navigation/TenantSwitcher"
 
@@ -22,19 +21,13 @@ export function TopNav() {
   // URL structure: /{tenantIdentifier}/subpages
   const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
-  const { logout } = useAuth()
-  const { showSuccess, showError } = useToast()
   const profile = useAppSelector((state) => state.auth.profile)
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      showSuccess("Logged out successfully")
-      navigate(tenantId ? `/${tenantId}/login` : "/login")
-    } catch (error) {
-      showError(error, "Logout failed")
-      navigate(tenantId ? `/${tenantId}/login` : "/login")
-    }
+  const handleLogout = () => {
+    // Full logout: ends the hosted-identity SSO session (not just the local
+    // console session) via OIDC end_session, then lands on /login. Hard
+    // navigation avoids the route-guard race that would re-trigger OAuth.
+    logoutViaIdentity()
   }
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-slate-900 text-slate-100">

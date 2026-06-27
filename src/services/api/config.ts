@@ -15,8 +15,25 @@ const getBaseUrl = () => {
   return import.meta.env.VITE_AUTH_API_BASE_URL || 'https://private-api.auth.maintainerd.local/api/v1'
 }
 
+const getPublicBaseUrl = () => {
+  if (import.meta.env.DEV) {
+    // Development: use a relative path so the request goes through the Vite
+    // proxy (/public-api → public-api.auth.maintainerd.local). This keeps the
+    // OAuth bootstrap calls same-origin and avoids cross-origin CORS / browser
+    // cert-trust failures that would otherwise abort the flow before it starts.
+    return '/public-api/api/v1'
+  }
+  return import.meta.env.VITE_AUTH_PUBLIC_API_BASE_URL || 'https://public-api.auth.maintainerd.local/api/v1'
+}
+
+const getIdentityBaseUrl = () => {
+  return (import.meta.env.VITE_AUTH_IDENTITY_BASE_URL || 'https://identity.auth.maintainerd.local').replace(/\/$/, '')
+}
+
 export const API_CONFIG = {
   BASE_URL: getBaseUrl(),
+  PUBLIC_BASE_URL: getPublicBaseUrl(),
+  IDENTITY_BASE_URL: getIdentityBaseUrl(),
   TIMEOUT: 30000, // 30 seconds
   HEADERS: {
     'Content-Type': 'application/json',

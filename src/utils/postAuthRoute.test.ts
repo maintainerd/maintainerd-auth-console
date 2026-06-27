@@ -20,21 +20,17 @@ const account = (overrides: Partial<AccountEntity> = {}): AccountEntity =>
   } as AccountEntity)
 
 describe("resolvePostAuthRoute", () => {
-  it("sends a null account to profile registration", () => {
-    expect(resolvePostAuthRoute(null, tenant())).toBe("/register/profile")
+  it("sends a null account to the current tenant dashboard fallback", () => {
+    expect(resolvePostAuthRoute(null, tenant())).toBe("/acme/dashboard")
   })
 
-  it("requires email verification when unverified and the tenant requires it", () => {
-    expect(resolvePostAuthRoute(account({ email_verified: false }), tenant())).toBe("/email-verification")
+  it("does not gate console routing on email verification", () => {
+    expect(resolvePostAuthRoute(account({ email_verified: false }), tenant())).toBe("/acme/dashboard")
   })
 
-  it("skips verification when the tenant does not require it", () => {
+  it("does not gate console routing on profile setup", () => {
     const t = tenant({ registration_config: { require_email_verification: false } } as Partial<TenantEntity>)
-    expect(resolvePostAuthRoute(account({ email_verified: false, profiles: [] }), t)).toBe("/register/profile")
-  })
-
-  it("sends a verified user without a profile to profile registration", () => {
-    expect(resolvePostAuthRoute(account({ profiles: [] }), tenant())).toBe("/register/profile")
+    expect(resolvePostAuthRoute(account({ email_verified: false, profiles: [] }), t)).toBe("/acme/dashboard")
   })
 
   it("sends a fully-registered user to their tenant dashboard", () => {
@@ -55,8 +51,8 @@ describe("resolveGuardRedirect", () => {
     expect(guard("/no-access", true, account())).toBeNull()
   })
 
-  it("routes the root to login when unauthenticated, dashboard when complete", () => {
-    expect(guard("/", false, null)).toBe("/login")
+  it("leaves unauthenticated root to the OAuth redirector, dashboard when complete", () => {
+    expect(guard("/", false, null)).toBeNull()
     expect(guard("/", true, account())).toBe("/acme/dashboard")
   })
 
@@ -65,24 +61,16 @@ describe("resolveGuardRedirect", () => {
     expect(guard("/login", true, account())).toBe("/acme/dashboard")
   })
 
-  it("sends unauthenticated users off protected pages to login", () => {
-    expect(guard("/acme/dashboard", false, null)).toBe("/login")
+  it("leaves unauthenticated protected pages to the OAuth redirector", () => {
+    expect(guard("/acme/dashboard", false, null)).toBeNull()
   })
 
-  it("forces an unverified user to email verification on protected pages", () => {
-    expect(guard("/acme/dashboard", true, account({ email_verified: false }))).toBe("/email-verification")
+  it("allows unverified users through because verification belongs to identity", () => {
+    expect(guard("/acme/dashboard", true, account({ email_verified: false }))).toBeNull()
   })
 
-  it("forces a profile-less user to profile registration on protected pages", () => {
-    expect(guard("/acme/dashboard", true, account({ profiles: [] }))).toBe("/register/profile")
-  })
-
-  it("allows verifying email without a session (login redirect case)", () => {
-    expect(guard("/email-verification", false, null)).toBeNull()
-  })
-
-  it("moves an already-verified user off the verification page", () => {
-    expect(guard("/email-verification", true, account())).toBe("/acme/dashboard")
+  it("allows profile-less users through because profile completion belongs to identity", () => {
+    expect(guard("/acme/dashboard", true, account({ profiles: [] }))).toBeNull()
   })
 
   it("blocks access to another tenant's pages", () => {
@@ -98,23 +86,5 @@ describe("resolveGuardRedirect", () => {
 
   it("allows the user's own tenant pages", () => {
     expect(guard("/acme/users", true, account())).toBeNull()
-  })
-
-  it("blocks the register page when self-registration is disabled", () => {
-    const disabled = tenant({
-      registration_config: { require_email_verification: false, self_registration_enabled: false },
-    } as Partial<TenantEntity>)
-    expect(
-      resolveGuardRedirect({ pathname: "/register", isAuthenticated: false, account: null, tenant: disabled }),
-    ).toBe("/login")
-  })
-
-  it("allows the register page when self-registration is enabled", () => {
-    const enabled = tenant({
-      registration_config: { require_email_verification: false, self_registration_enabled: true },
-    } as Partial<TenantEntity>)
-    expect(
-      resolveGuardRedirect({ pathname: "/register", isAuthenticated: false, account: null, tenant: enabled }),
-    ).toBeNull()
   })
 })

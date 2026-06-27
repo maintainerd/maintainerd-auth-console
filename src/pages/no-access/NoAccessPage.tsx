@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import LoginLayout from '@/components/layout/LoginLayout'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
-import { resolvePostAuthRoute, LOGIN_ROUTE } from '@/utils/postAuthRoute'
+import { resolvePostAuthRoute } from '@/utils/postAuthRoute'
 
 /**
  * Shown when an authenticated user opens a page they're not allowed to see
@@ -16,7 +16,7 @@ const NoAccessPage = () => {
   const { currentTenant } = useTenant()
 
   const handleBack = () => {
-    navigate(isAuthenticated ? resolvePostAuthRoute(account, currentTenant) : LOGIN_ROUTE, {
+    navigate(isAuthenticated ? resolvePostAuthRoute(account, currentTenant) : '/', {
       replace: true,
     })
   }
@@ -35,7 +35,7 @@ const NoAccessPage = () => {
           </p>
         </div>
         <Button className="w-full" onClick={handleBack}>
-          {isAuthenticated ? 'Back to your dashboard' : 'Back to sign in'}
+          {isAuthenticated ? 'Back to your dashboard' : 'Sign in'}
         </Button>
       </div>
     </LoginLayout>

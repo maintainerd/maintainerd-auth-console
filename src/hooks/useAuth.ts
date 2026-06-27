@@ -4,18 +4,11 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useToast } from '@/hooks/useToast'
 import type { ProfileEntity } from '@/services/api/auth/types'
 import {
-  loginAsync,
-  completeMFALoginAsync,
-  registerAsync,
-  registerInviteAsync,
   logoutAsync,
   validateAuthAsync,
   initializeAuthAsync,
   fetchProfileAsync,
   refreshAccountAsync,
-  forgotPasswordAsync,
-  resetPasswordAsync,
-  type ResetPasswordAsyncRequest
 } from '@/store/auth/actions'
 import {
   clearError,
@@ -28,87 +21,6 @@ export function useAuth() {
   const queryClient = useQueryClient()
   const { showError } = useToast()
   const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
-  const tenantId = useAppSelector((state) => state.tenant.currentTenant?.identifier)
-
-  const login = useCallback(async (email: string, password: string, tenantId: string) => {
-    const result = await dispatch(loginAsync({ username: email, password, tenantId })).unwrap()
-
-    // MFA enrolled: a second factor is required before the session is issued.
-    if (result.mfaRequired) {
-      return {
-        requiresProfileSetup: false,
-        mfaRequired: true,
-        challengeToken: result.mfaChallengeToken ?? '',
-        allowedMethods: result.mfaAllowedMethods ?? [],
-      }
-    }
-
-    const account = result.data
-    return { account, mfaRequired: false }
-  }, [dispatch])
-
-  // completeMFALogin finishes the login MFA second step (acr=2 session) and
-  // returns whether the user still needs to set up a profile.
-  const completeMFALogin = useCallback(async (
-    challengeToken: string,
-    method: string,
-    proof: { code?: string; assertion?: unknown },
-    tenantId: string,
-  ) => {
-    const result = await dispatch(completeMFALoginAsync({
-      mfa_challenge_token: challengeToken,
-      method,
-      code: proof.code,
-      assertion: proof.assertion,
-      tenantId,
-    })).unwrap()
-    return { account: result.data }
-  }, [dispatch])
-
-  const register = useCallback(async (
-    fullname: string,
-    email: string,
-    password: string,
-    phone?: string
-  ) => {
-    if (!tenantId) throw new Error('Tenant context is not initialized')
-
-    const result = await dispatch(registerAsync({
-      fullname,
-      email,
-      password,
-      phone,
-      tenantId,
-    })).unwrap()
-
-    return { data: result.data }
-  }, [dispatch, tenantId])
-
-  const registerInvite = useCallback(async (
-    username: string,
-    password: string,
-  ) => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const inviteToken = searchParams.get('invite_token') || ''
-    const expires = searchParams.get('expires') || ''
-    const sig = searchParams.get('sig') || ''
-    const authFlow = searchParams.get('auth_flow') || undefined
-    const inviteTenantId = searchParams.get('tenant_id') || undefined
-
-    const result = await dispatch(registerInviteAsync({
-      username,
-      password,
-      queryParams: {
-        invite_token: inviteToken,
-        expires,
-        sig,
-        auth_flow: authFlow,
-        tenant_id: inviteTenantId,
-      }
-    })).unwrap()
-
-    return { data: result.data }
-  }, [dispatch])
 
   const logout = useCallback(async () => {
     try {
@@ -161,8 +73,9 @@ export function useAuth() {
   }, [dispatch])
 
   // refreshAccount re-syncs auth state with the live cookie session and returns
-  // the fresh account (or null). Use after register / verify email / create
-  // profile so routing reflects the current email_verified + profiles state.
+  // the fresh account (or null). Use after events that change the account but
+  // happen outside login (e.g. profile creation) so routing reflects the current
+  // email_verified + profiles state.
   const refreshAccount = useCallback(async () => {
     try {
       return await dispatch(refreshAccountAsync()).unwrap()
@@ -175,15 +88,6 @@ export function useAuth() {
     dispatch(setProfile(profileData))
   }, [dispatch])
 
-  const forgotPassword = useCallback(async (email: string) => {
-    if (!tenantId) throw new Error('Tenant context is not initialized')
-    await dispatch(forgotPasswordAsync({ email, tenant_id: tenantId })).unwrap()
-  }, [dispatch, tenantId])
-
-  const resetPassword = useCallback(async (data: ResetPasswordAsyncRequest) => {
-    await dispatch(resetPasswordAsync(data)).unwrap()
-  }, [dispatch])
-
   return {
     // State
     profile,
@@ -193,10 +97,6 @@ export function useAuth() {
     isInitialized,
     error,
     // Actions
-    login,
-    completeMFALogin,
-    register,
-    registerInvite,
     logout,
     checkAuth,
     initializeAuth,
@@ -205,7 +105,5 @@ export function useAuth() {
     fetchProfile,
     refreshAccount,
     updateProfile,
-    forgotPassword,
-    resetPassword
   }
 }

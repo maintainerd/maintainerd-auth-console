@@ -16,16 +16,8 @@ export {
 } from './setupSchema'
 
 // Auth schemas
-export {
-  buildLoginSchema,
-  buildRegisterSchema,
-  buildResetPasswordSchema,
-  forgotPasswordSchema,
-  type LoginFormData,
-  type RegisterFormData,
-  type ForgotPasswordFormData,
-  type ResetPasswordFormData
-} from './authSchema'
+// (removed) login/register/forgot/reset schemas — credential auth now lives in
+// the hosted identity app; the console authenticates via OAuth.
 
 // Service schemas
 export {

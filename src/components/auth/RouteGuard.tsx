@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
-import { resolveGuardRedirect } from '@/utils/postAuthRoute'
+import { resolveGuardRedirect, isPublicConsoleRoute } from '@/utils/postAuthRoute'
+import ConsoleOAuthRedirect from './ConsoleOAuthRedirect'
 
 /**
  * Single runtime redirect authority. Wraps the whole route tree and, on every
@@ -17,9 +18,19 @@ export function RouteGuard({ children }: { children: ReactNode }) {
   const location = useLocation()
   const { isAuthenticated, account } = useAuth()
   const { currentTenant } = useTenant()
+  const pathname = location.pathname
+  const returnTo = `${location.pathname}${location.search}${location.hash}`
+
+  // Unauthenticated visits to a PROTECTED route start the hosted-identity OAuth
+  // flow (deep links are preserved via returnTo). Public routes — the login /
+  // landing page, setup wizard, and error/callback pages — render normally, so
+  // logging out lands on the login page instead of looping back through SSO.
+  if (!isAuthenticated && !isPublicConsoleRoute(pathname)) {
+    return <ConsoleOAuthRedirect returnTo={returnTo === '/' ? '' : returnTo} />
+  }
 
   const target = resolveGuardRedirect({
-    pathname: location.pathname,
+    pathname,
     isAuthenticated,
     account,
     tenant: currentTenant,

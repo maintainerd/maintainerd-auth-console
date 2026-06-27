@@ -56,20 +56,12 @@ export {
 
 // Authentication service functions
 export {
-  login,
-  verifyMFALogin,
-  sendMFALoginSMS,
-  beginMFALoginWebAuthn,
-  register,
-  registerInvite,
   logout,
   fetchProfile,
   fetchAccount,
   createUserProfile,
   createRegisterProfile,
   validateAuthentication,
-  forgotPassword,
-  resetPassword,
 } from './api/auth'
 // `ResetPasswordQueryParams` is a type-only member surfaced through the
 // `./api/auth/types` wildcard above (the `./api/auth` value module does not

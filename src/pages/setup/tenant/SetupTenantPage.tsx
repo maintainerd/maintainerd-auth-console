@@ -14,7 +14,7 @@ const SetupTenantPage = () => {
 
   useEffect(() => {
     if (status?.is_tenant_setup) {
-      navigate('/login', { replace: true })
+      navigate('/', { replace: true })
     }
   }, [status, navigate])
 

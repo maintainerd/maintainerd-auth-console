@@ -4,7 +4,8 @@
  */
 
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
-import { API_CONFIG, API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from './config'
+import { API_CONFIG, API_ENDPOINTS } from './config'
+import { getStoredOAuthSession, storeOAuthSession, clearOAuthSession } from './oauth-session'
 import { requestStepUp } from './stepUp'
 import './debug' // Import debug utilities in development
 
@@ -34,6 +35,22 @@ const axiosInstance = axios.create({
   withCredentials: true, // Include cookies for authentication
 })
 
+axiosInstance.interceptors.request.use((config) => {
+  // On a step-up retry the elevated (acr=2) access token has already been set
+  // on the request explicitly by the response interceptor. Do NOT overwrite it
+  // with the stored (acr=1) session token, or the retried sensitive action would
+  // still be rejected with step_up_required.
+  if ((config as RetriableRequestConfig)._stepUpRetry) {
+    return config
+  }
+  const session = getStoredOAuthSession()
+  if (session?.accessToken) {
+    config.headers = config.headers ?? {}
+    config.headers.Authorization = `${session.tokenType || 'Bearer'} ${session.accessToken}`
+  }
+  return config
+})
+
 // Endpoints where a 401 means a genuine credential failure (not an expired
 // session), so we must NOT attempt a token refresh — including the refresh
 // endpoint itself, to avoid an infinite loop.
@@ -52,17 +69,46 @@ let refreshPromise: Promise<void> | null = null
 
 function refreshSession(): Promise<void> {
   if (!refreshPromise) {
-    // withCredentials sends the httpOnly refresh-token cookie; the
-    // `X-Token-Delivery: cookie` header tells the backend to rotate and
-    // Set-Cookie the new access/refresh tokens (cookie-based session).
-    // `/refresh-token` is NOT in the middleware's form-encoded exempt list, so
-    // it requires `Content-Type: application/json`. Send `{}` (not null) so axios
-    // keeps that header — the actual refresh token rides in the httpOnly cookie.
-    refreshPromise = axiosInstance
-      .post(API_ENDPOINTS.AUTH.REFRESH, {}, {
-        headers: { ...TOKEN_DELIVERY_HEADER },
+    const oauthSession = getStoredOAuthSession()
+    if (!oauthSession?.refreshToken) {
+      return Promise.reject(new ApiError({
+        message: 'No OAuth refresh token available',
+        status: 401,
+        code: 'NO_OAUTH_REFRESH_TOKEN',
+      }))
+    }
+
+    const form = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: oauthSession.refreshToken,
+      client_id: oauthSession.clientId,
+    })
+
+    refreshPromise = axios
+      .post(`${API_CONFIG.PUBLIC_BASE_URL}/oauth/token`, form, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
-      .then(() => undefined)
+      .then((response) => {
+        const data = response.data as {
+          access_token: string
+          refresh_token?: string
+          id_token?: string
+          token_type?: string
+          expires_in?: number
+        }
+        storeOAuthSession({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token || oauthSession.refreshToken,
+          idToken: data.id_token,
+          tokenType: data.token_type || 'Bearer',
+          expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000,
+          clientId: oauthSession.clientId,
+        })
+      })
+      .catch((error) => {
+        clearOAuthSession()
+        throw error
+      })
       .finally(() => {
         refreshPromise = null
       })

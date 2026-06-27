@@ -21,9 +21,8 @@ import {
 } from "@/components/ui/command"
 import { CreateTenantDialog, ConfirmationDialog } from "@/components/dialog"
 import { useTenant } from "@/hooks/useTenant"
-import { useAuth } from "@/hooks/useAuth"
 import { useTenantsList } from "@/hooks/useTenants"
-import { useToast } from "@/hooks/useToast"
+import { logoutAndRedirect } from "@/services/api/auth"
 import type { TenantEntity } from "@/services/api/tenants/types"
 
 /** Small square initial tile, used as a lightweight tenant avatar. */
@@ -43,8 +42,6 @@ function TenantTile({ name, className }: { name?: string; className?: string }) 
 
 export function TenantSwitcher({ className }: { className?: string }) {
   const { tenantId } = useParams<{ tenantId: string }>()
-  const { logout } = useAuth()
-  const { showError } = useToast()
   const [open, setOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [switchTarget, setSwitchTarget] = useState<TenantEntity | null>(null)
@@ -68,16 +65,14 @@ export function TenantSwitcher({ className }: { className?: string }) {
     }
   }
 
-  const handleConfirmSwitch = async () => {
+  const handleConfirmSwitch = () => {
     if (!switchTarget) return
-    try {
-      await logout()
-    } catch {
-      showError("Logout failed — please try again")
-      setSwitchTarget(null)
-      return
-    }
-    window.location.href = `/${switchTarget.identifier}/login`
+    // Switching tenants re-authenticates into the target tenant. Clear the local
+    // session and hard-navigate to the target dashboard (a protected route),
+    // which starts a fresh OAuth flow for that tenant. Doing it synchronously
+    // avoids the SPA render race that could otherwise fire the OAuth redirect for
+    // the *current* route mid-switch.
+    logoutAndRedirect(`/${switchTarget.identifier}/dashboard`)
   }
 
   const handleCreate = () => {

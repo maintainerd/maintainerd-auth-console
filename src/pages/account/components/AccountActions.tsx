@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { logoutViaIdentity } from "@/services/api/auth"
 import { Mail, AtSign, Download, Trash2, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SettingsCard } from "@/components/card"
 import { useToast } from "@/hooks/useToast"
-import { useAuth } from "@/hooks/useAuth"
 import { changeEmail, verifyEmailChange, changeUsername, exportAccountData, deleteAccount } from "@/services/api/account"
 import { useMutation } from "@tanstack/react-query"
 import { StepUpDialog } from "@/components/stepup/StepUpDialog"
@@ -164,9 +163,7 @@ function ChangeUsernameDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 }
 
 function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const { showSuccess, showError } = useToast()
-  const { logout } = useAuth()
-  const navigate = useNavigate()
+  const { showError } = useToast()
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
   const [stepUpOpen, setStepUpOpen] = useState(false)
@@ -175,10 +172,9 @@ function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
   const mutation = useMutation({
     mutationFn: (token: string) => deleteAccount(password, token),
-    onSuccess: async () => {
-      showSuccess("Your account has been deleted")
-      try { await logout() } catch { /* session already gone */ }
-      navigate("/login")
+    onSuccess: () => {
+      // Account is gone; end the identity session and land on the login page.
+      logoutViaIdentity()
     },
     onError: (e) => showError(e),
   })

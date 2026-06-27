@@ -4,7 +4,7 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { loginAsync, completeMFALoginAsync, registerAsync, logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, refreshAccountAsync, forgotPasswordAsync, resetPasswordAsync } from './actions'
+import { logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, refreshAccountAsync } from './actions'
 import type { AuthState } from './types'
 import type { AccountEntity, ProfileEntity } from '@/services/api/auth/types'
 
@@ -26,56 +26,6 @@ function populateAccount(state: AuthState, account: AccountEntity | null) {
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
   builder
-    // Login
-    .addCase(loginAsync.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-    })
-    .addCase(loginAsync.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.error = null
-      // MFA pending: the session is not yet established — stay unauthenticated
-      // until the second step (completeMFALoginAsync) completes.
-      if (action.payload.mfaRequired) {
-        return
-      }
-      populateAccount(state, action.payload.data)
-      state.isAuthenticated = true
-    })
-    .addCase(loginAsync.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.error.message || 'Login failed'
-    })
-    // Complete MFA login (second step → acr=2 session)
-    .addCase(completeMFALoginAsync.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-    })
-    .addCase(completeMFALoginAsync.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.error = null
-      populateAccount(state, action.payload.data)
-      state.isAuthenticated = true
-    })
-    .addCase(completeMFALoginAsync.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.error.message || 'MFA verification failed'
-    })
-    // Register
-    .addCase(registerAsync.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-    })
-    .addCase(registerAsync.fulfilled, (state) => {
-      state.isLoading = false
-      state.error = null
-      // Note: Registration doesn't automatically log the user in
-      // They need to login after successful registration
-    })
-    .addCase(registerAsync.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.error.message || 'Registration failed'
-    })
     // Logout
     .addCase(logoutAsync.pending, (state) => {
       state.isLoading = true
@@ -135,31 +85,5 @@ export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) =
     .addCase(refreshAccountAsync.rejected, (state) => {
       populateAccount(state, null)
       state.isAuthenticated = false
-    })
-    // Forgot Password
-    .addCase(forgotPasswordAsync.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-    })
-    .addCase(forgotPasswordAsync.fulfilled, (state) => {
-      state.isLoading = false
-      state.error = null
-    })
-    .addCase(forgotPasswordAsync.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.error.message || 'Failed to send reset email'
-    })
-    // Reset Password
-    .addCase(resetPasswordAsync.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-    })
-    .addCase(resetPasswordAsync.fulfilled, (state) => {
-      state.isLoading = false
-      state.error = null
-    })
-    .addCase(resetPasswordAsync.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.error.message || 'Failed to reset password'
     })
 }

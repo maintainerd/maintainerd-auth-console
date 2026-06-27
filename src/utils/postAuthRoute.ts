@@ -1,43 +1,58 @@
 /**
  * Post-authentication routing
  *
- * Single source of truth for "where should this user go now?" once we have a
- * session (after login, MFA, registration, or email verification). All callers
- * — LoginForm, RegisterForm, VerifyEmailPage, RegisterProfilePage,
- * RedirectIfAuthenticated — must use this so the registration/verification
- * flow stays consistent.
- *
- * Decision order (mirrors the backend gating):
- *   1. tenant requires email verification AND email not verified → /email-verification
- *   2. no profile yet                                            → /register/profile
- *   3. otherwise                                                 → /{tenant}/dashboard
+ * Single source of truth for console routing after a hosted identity OAuth
+ * login. Registration, email verification, and profile completion now belong
+ * to the public identity surface, so console users land on their tenant
+ * dashboard once an account session is available.
  */
 
 import type { AccountEntity } from '@/services/api/auth/types'
 import type { TenantEntity } from '@/services/api/tenants/types'
 import { getTenantIdentifierFromPath } from '@/utils/tenant'
+import { OAUTH_CALLBACK_ROUTE } from '@/utils/oauthFlow'
 
-export const VERIFY_EMAIL_ROUTE = '/email-verification'
-export const REGISTER_PROFILE_ROUTE = '/register/profile'
-export const REGISTER_ROUTE = '/register'
-export const REGISTER_INVITE_ROUTE = '/register/invite'
 export const LOGIN_ROUTE = '/login'
 export const NO_ACCESS_ROUTE = '/no-access'
 export const SERVICE_UNAVAILABLE_ROUTE = '/service-unavailable'
+// Post-logout landing. The hosted-identity RP-initiated logout redirects here
+// (a registered post_logout_redirect_uri); the route just bounces to /login.
+export const LOGOUT_ROUTE = '/logout'
+// Public landing page. Unauthenticated users rest here (instead of being
+// auto-redirected into the hosted identity OAuth flow) so that logging out
+// doesn't immediately bounce back through SSO and re-authenticate.
+export const LANDING_ROUTE = '/'
 
-// Public auth pages an authenticated, fully-registered user should never sit on.
-const AUTH_PAGES = [
-  LOGIN_ROUTE,
-  REGISTER_ROUTE,
-  REGISTER_INVITE_ROUTE,
-  '/forgot-password',
-  '/reset-password',
-]
+/**
+ * Public (unprotected) console routes. Unauthenticated users may rest on these
+ * WITHOUT being auto-redirected into the hosted-identity OAuth flow:
+ *
+ *  - the landing / login page (`/`, `/login`) — shows a Sign in button
+ *  - the first-run setup wizard (`/setup/*`)
+ *  - the no-access / service-unavailable / OAuth callback pages
+ *
+ * Any other route is protected: an unauthenticated visit starts the OAuth flow.
+ *
+ * This is the single source of truth shared by the bootstrap gate (loading
+ * screen) and the runtime route guard, so they always agree on what is public
+ * and logout reliably lands on the login page instead of looping through SSO.
+ */
+export function isPublicConsoleRoute(pathname: string): boolean {
+  return (
+    pathname === LANDING_ROUTE ||
+    pathname === LOGIN_ROUTE ||
+    pathname === LOGOUT_ROUTE ||
+    pathname === NO_ACCESS_ROUTE ||
+    pathname === SERVICE_UNAVAILABLE_ROUTE ||
+    pathname === OAUTH_CALLBACK_ROUTE ||
+    pathname.startsWith('/setup')
+  )
+}
 
+// The login page (and /:tenantId/login) is an auth page an authenticated user
+// should never sit on — bounce them to their dashboard.
 function isAuthPage(pathname: string): boolean {
-  if (AUTH_PAGES.includes(pathname)) return true
-  // /:tenantId/login is also an auth page
-  return /^\/[^/]+\/login$/.test(pathname)
+  return pathname === LOGIN_ROUTE || /^\/[^/]+\/login$/.test(pathname)
 }
 
 export function dashboardRoute(tenant?: TenantEntity | null): string {
@@ -49,21 +64,7 @@ export function resolvePostAuthRoute(
   account: AccountEntity | null | undefined,
   tenant?: TenantEntity | null,
 ): string {
-  // No account yet (e.g. just-registered session that hasn't loaded /account)
-  // — the profile step is the safe next stop.
-  if (!account) {
-    return REGISTER_PROFILE_ROUTE
-  }
-
-  if (tenant?.registration_config?.require_email_verification && !account.email_verified) {
-    return VERIFY_EMAIL_ROUTE
-  }
-
-  if (!account.profiles?.length) {
-    return REGISTER_PROFILE_ROUTE
-  }
-
-  const accountTenantIdentifier = account.tenant?.identifier
+  const accountTenantIdentifier = account?.tenant?.identifier
   return accountTenantIdentifier ? `/${accountTenantIdentifier}/dashboard` : dashboardRoute(tenant)
 }
 
@@ -80,8 +81,9 @@ export interface GuardContext {
  *
  * Returns a path to redirect to, or `null` to render the requested route.
  * Used by the app bootstrap gate on first load/reload and by the runtime route
- * guard, so all of login / register / email-verification / profile / dashboard
- * gating lives here instead of being scattered across pages.
+ * guard, so login and dashboard/tenant gating lives here instead of being
+ * scattered across pages. (Registration, email verification, and profile
+ * completion belong to the hosted identity surface and no longer render here.)
  *
  * Callers must only invoke this once auth+tenant initialization has completed
  * (otherwise account/tenant are not yet known).
@@ -94,47 +96,22 @@ export function resolveGuardRedirect(ctx: GuardContext): string | null {
     return null
   }
 
-  // Where this session belongs: login (unauth) or the resolved post-auth step.
-  const home = isAuthenticated ? resolvePostAuthRoute(account, tenant) : LOGIN_ROUTE
+  const home = resolvePostAuthRoute(account, tenant)
 
-  // Root → resolved home / login.
+  // Root → resolved home. Unauthenticated routing is handled by RouteGuard,
+  // which starts the hosted identity OAuth flow.
   if (pathname === '/') {
-    return home
+    return isAuthenticated ? home : null
   }
 
-  // Self-registration disabled by the tenant: the register page is off-limits.
-  // (Authenticated users are already bounced to their home by the block below.)
-  if (
-    pathname === REGISTER_ROUTE &&
-    !isAuthenticated &&
-    tenant?.registration_config?.self_registration_enabled === false
-  ) {
-    return LOGIN_ROUTE
-  }
-
-  // Public auth pages: only bounce authenticated users to their home.
+  // The login page is off-limits to authenticated users — send them home.
+  // Unauthenticated users are picked up by RouteGuard's OAuth redirector.
   if (isAuthPage(pathname)) {
     return isAuthenticated ? home : null
   }
 
-  // Email-verification step: an unauthenticated visitor arrived from a login
-  // redirect (no session yet) and is allowed to verify; an authenticated user
-  // only stays if verification is genuinely their current step.
-  if (pathname === VERIFY_EMAIL_ROUTE) {
-    if (!isAuthenticated) return null
-    return home === VERIFY_EMAIL_ROUTE ? null : home
-  }
-
-  // Profile-registration step: requires a session; only stays if it's the step.
-  if (pathname === REGISTER_PROFILE_ROUTE) {
-    if (!isAuthenticated) return LOGIN_ROUTE
-    return home === REGISTER_PROFILE_ROUTE ? null : home
-  }
-
   // Everything else is a tenant-scoped protected page.
-  if (!isAuthenticated) return LOGIN_ROUTE
-  // Registration not finished → send them to the outstanding step.
-  if (home !== dashboardRoute(tenant)) return home
+  if (!isAuthenticated) return null
   // Tenant isolation: the URL's tenant must match the signed-in user's tenant.
   const urlTenant = getTenantIdentifierFromPath(pathname)
   const ownTenant = account?.tenant?.identifier
