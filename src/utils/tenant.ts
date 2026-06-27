@@ -9,6 +9,12 @@
  * @returns Tenant identifier or null if not found
  */
 export function getTenantIdentifierFromPath(pathname: string): string | null {
+  // /{tenantId}/login — the per-tenant login page; extract the tenant identifier.
+  const loginMatch = pathname.match(/^\/([^/]+)\/login$/)
+  if (loginMatch) {
+    return loginMatch[1]
+  }
+
   // Skip public/auth routes that don't require tenant context
   if (pathname.startsWith('/login') ||
       pathname.startsWith('/logout') ||

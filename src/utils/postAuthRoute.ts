@@ -45,7 +45,9 @@ export function isPublicConsoleRoute(pathname: string): boolean {
     pathname === NO_ACCESS_ROUTE ||
     pathname === SERVICE_UNAVAILABLE_ROUTE ||
     pathname === OAUTH_CALLBACK_ROUTE ||
-    pathname.startsWith('/setup')
+    pathname.startsWith('/setup') ||
+    // Per-tenant login: /{tenantId}/login
+    /^\/[^/]+\/login$/.test(pathname)
   )
 }
 

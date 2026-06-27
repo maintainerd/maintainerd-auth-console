@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import LoginLayout from '@/components/layout/LoginLayout'
@@ -13,8 +14,13 @@ import { startConsoleOAuthLogin } from '@/services/api/oauth'
  * Sign in button that starts the hosted-identity OAuth2 flow. Logging out lands
  * the user here, so logout actually sticks instead of immediately bouncing back
  * through SSO. Automatic OAuth redirects only happen on protected routes.
+ *
+ * When rendered at /{tenantId}/login, the route parameter identifies the target
+ * tenant (so multi-tenant login works). Otherwise the default (system) tenant is
+ * used.
  */
 const LoginPage = () => {
+  const { tenantId: tenantIdFromRoute } = useParams<{ tenantId: string }>()
   const { currentTenant, fetchDefault } = useTenant()
   const { showError } = useToast()
   const [redirecting, setRedirecting] = useState(false)
@@ -23,20 +29,21 @@ const LoginPage = () => {
   // After logout the tenant context is cleared. Re-resolve the default tenant so
   // the Sign in button can start OAuth without requiring a full page reload.
   useEffect(() => {
-    if (currentTenant?.identifier || tenantFetchedRef.current) return
+    if (tenantIdFromRoute || currentTenant?.identifier || tenantFetchedRef.current) return
     tenantFetchedRef.current = true
     fetchDefault().catch(() => {
       /* surfaced via service-unavailable handling elsewhere */
     })
-  }, [currentTenant?.identifier, fetchDefault])
+  }, [currentTenant?.identifier, fetchDefault, tenantIdFromRoute])
 
+  const tenantIdentifier = currentTenant?.identifier || tenantIdFromRoute
   const companyName = currentTenant?.branding?.company_name || 'Maintainerd Auth'
 
   const handleLogin = async () => {
-    if (!currentTenant?.identifier) return
+    if (!tenantIdentifier) return
     setRedirecting(true)
     try {
-      await startConsoleOAuthLogin(currentTenant.identifier)
+      await startConsoleOAuthLogin(tenantIdentifier)
     } catch (error) {
       console.error('[console-oauth] sign-in failed to start', error)
       showError('Unable to start sign in. Please try again.')
@@ -56,7 +63,7 @@ const LoginPage = () => {
         <Button
           className="w-full"
           onClick={handleLogin}
-          disabled={redirecting || !currentTenant?.identifier}
+          disabled={redirecting || !tenantIdentifier}
         >
           <LogIn className="mr-2 size-4" />
           {redirecting ? 'Redirecting…' : 'Sign in'}

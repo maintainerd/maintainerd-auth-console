@@ -100,6 +100,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/:tenantId/login" element={<LoginPage />} />
         <Route path="/logout" element={<Navigate to="/login" replace />} />
         <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/service-unavailable" element={<ServiceUnavailablePage />} />
