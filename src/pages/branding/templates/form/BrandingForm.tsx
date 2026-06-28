@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { ArrowLeft, AlertCircle, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
-import { FormInputField, FormSubmitButton } from "@/components/form"
+import { FormInputField, FormSelectField, FormSubmitButton } from "@/components/form"
 import { brandingSchema, type BrandingFormData } from "@/lib/validations"
 import { useBranding, useCreateBranding, useUpdateBranding } from "@/hooks/useBranding"
 import { useToast } from "@/hooks/useToast"
@@ -22,6 +22,12 @@ import {
   metadataFromTokens,
   type ThemeToken,
 } from "../themeTokens"
+
+const LAYOUT_OPTIONS = [
+  { value: "centered", label: "Centered card" },
+  { value: "full_page", label: "Full page" },
+  { value: "split", label: "Split screen" },
+]
 
 export default function BrandingForm() {
   const { tenantId, brandingId } = useParams<{ tenantId: string; brandingId?: string }>()
@@ -47,6 +53,7 @@ export default function BrandingForm() {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -54,6 +61,7 @@ export default function BrandingForm() {
     resolver: yupResolver(brandingSchema),
     defaultValues: {
       name: "",
+      layout: "centered",
       company_name: "",
       logo_url: "",
       favicon_url: "",
@@ -69,6 +77,7 @@ export default function BrandingForm() {
     if (isEditing && branding) {
       reset({
         name: branding.name ?? "",
+        layout: branding.layout ?? "centered",
         company_name: branding.company_name ?? "",
         logo_url: branding.logo_url ?? "",
         favicon_url: branding.favicon_url ?? "",
@@ -87,6 +96,7 @@ export default function BrandingForm() {
   const onSubmit = async (data: BrandingFormData) => {
     const payload = {
       name: data.name.trim(),
+      layout: data.layout,
       company_name: (data.company_name ?? "").trim(),
       logo_url: (data.logo_url ?? "").trim(),
       favicon_url: (data.favicon_url ?? "").trim(),
@@ -212,6 +222,23 @@ export default function BrandingForm() {
                   disabled={isLoading}
                   error={errors.company_name?.message}
                   {...register("company_name")}
+                />
+                <Controller
+                  name="layout"
+                  control={control}
+                  render={({ field }) => (
+                    <FormSelectField
+                      label="Login layout"
+                      options={LAYOUT_OPTIONS}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                      error={errors.layout?.message}
+                      description="Choose how every hosted authentication page is arranged."
+                      required
+                      containerClassName="md:col-span-2"
+                    />
+                  )}
                 />
               </div>
             </CardContent>

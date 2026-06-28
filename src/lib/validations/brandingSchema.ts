@@ -24,6 +24,11 @@ export const brandingSchema = yup.object({
     .required('Name is required')
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name must not exceed 100 characters'),
+  layout: yup
+    .string()
+    .oneOf(['centered', 'full_page', 'split'], 'Select a valid login layout')
+    .required('Login layout is required')
+    .default('centered'),
   company_name: yup
     .string()
     .trim()

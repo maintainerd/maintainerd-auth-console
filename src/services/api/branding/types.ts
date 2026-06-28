@@ -8,6 +8,8 @@
  * company name are dedicated fields.
  */
 
+export type BrandingLayout = "centered" | "full_page" | "split"
+
 /** A branding theme as returned by the admin endpoints.
  *  Note: `branding_id` carries the record UUID — use it for update/activate/delete. */
 export interface Branding {
@@ -15,6 +17,7 @@ export interface Branding {
   name: string
   is_system: boolean
   is_active: boolean
+  layout: BrandingLayout
   company_name: string
   logo_url: string
   favicon_url: string
@@ -29,6 +32,7 @@ export interface Branding {
 /** Payload to create or update a branding theme. */
 export interface BrandingRequest {
   name: string
+  layout: BrandingLayout
   company_name: string
   logo_url: string
   favicon_url: string
