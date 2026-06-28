@@ -87,6 +87,7 @@ export const identityProviderSchema = yup.object({
     ),
   clientSecret: yup.string().nullable(),
   allowJITProvisioning: yup.boolean().default(false),
+  allowRegistration: yup.boolean().default(true),
   emailDomains: yup.string().nullable(),
 })
 

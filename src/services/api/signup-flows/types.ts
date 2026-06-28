@@ -27,6 +27,9 @@ export interface SignupFlow {
   }
   status: SignupFlowStatus
   client_id: string
+  allow_registration: boolean
+  verification_required: boolean
+  required_fields: string
   // Optional branding template (UUID) applied to this flow's auth experience.
   branding_id?: string
   created_at: string
@@ -86,6 +89,9 @@ export interface CreateSignupFlowRequest {
   }
   status?: SignupFlowStatus
   client_id: string
+  allow_registration: boolean
+  verification_required: boolean
+  required_fields: string
   // Optional branding template UUID; omit for the tenant's active branding.
   branding_id?: string
   // Role UUIDs auto-assigned on completion, and client-URI UUIDs to attach as callbacks.
@@ -102,6 +108,9 @@ export interface UpdateSignupFlowRequest {
   }
   status?: SignupFlowStatus
   client_id?: string
+  allow_registration: boolean
+  verification_required: boolean
+  required_fields: string
   // Optional branding template UUID; omit for the tenant's active branding.
   branding_id?: string
   // When present, replaces the flow's role / callback-URI membership to exactly

@@ -86,6 +86,7 @@ export default function IdentityProviderAddOrUpdateForm() {
       clientId: "",
       clientSecret: "",
       allowJITProvisioning: false,
+      allowRegistration: true,
       emailDomains: "",
     },
     mode: 'onSubmit',
@@ -112,6 +113,7 @@ export default function IdentityProviderAddOrUpdateForm() {
         clientId: providerData.provider_client_id ?? "",
         clientSecret: "",
         allowJITProvisioning: providerData.allow_jit_provisioning ?? false,
+        allowRegistration: providerData.allow_registration ?? true,
         emailDomains: formatList(providerData.email_domains),
       })
 
@@ -154,6 +156,7 @@ export default function IdentityProviderAddOrUpdateForm() {
         issuer: connectionSchema ? (formData.issuer ?? "").trim() || null : null,
         provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
         allow_jit_provisioning: connectionSchema ? Boolean(formData.allowJITProvisioning) : false,
+        allow_registration: Boolean(formData.allowRegistration),
         email_domains: connectionSchema ? parseList(formData.emailDomains) : [],
         config,
         status: formData.status as IdentityProviderStatus,
@@ -278,6 +281,22 @@ export default function IdentityProviderAddOrUpdateForm() {
                   )}
                 />
               </div>
+
+              <Controller
+                name="allowRegistration"
+                control={control}
+                render={({ field }) => (
+                  <FormSwitchField
+                    id="allow-registration"
+                    label="Allow registration"
+                    description="Allow clients using this provider to create new accounts. Tenant and auth-flow registration policies still apply."
+                    checked={Boolean(field.value)}
+                    onCheckedChange={field.onChange}
+                    disabled={fieldsDisabled}
+                    containerClassName="rounded-md border p-4"
+                  />
+                )}
+              />
             </CardContent>
           </Card>
 

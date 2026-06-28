@@ -14,6 +14,7 @@ import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
   FormInputField,
+  FormSwitchField,
   FormTextareaField,
   FormSelectField,
   FormSubmitButton,
@@ -41,6 +42,21 @@ const STATUS_OPTIONS: SelectOption[] = [
 
 // Sentinel for "no specific branding" — the flow uses the tenant's active branding.
 const NO_BRANDING = "__none__"
+const REGISTRATION_FIELDS = [
+  { value: "email", label: "Email" },
+  { value: "fullname", label: "Full name" },
+  { value: "phone", label: "Phone" },
+]
+
+function parseRequiredFields(value: string | undefined): string[] {
+  if (!value) return []
+  try {
+    const parsed: unknown = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed.filter((field): field is string => typeof field === "string") : []
+  } catch {
+    return []
+  }
+}
 
 export default function SignupFlowAddOrUpdateForm() {
   const { tenantId, signupFlowId } = useParams<{ tenantId: string; signupFlowId?: string }>()
@@ -69,6 +85,9 @@ export default function SignupFlowAddOrUpdateForm() {
 
   // Auto approved state
   const [autoApproved, setAutoApproved] = useState<boolean>(true)
+  const [allowRegistration, setAllowRegistration] = useState<boolean>(true)
+  const [verificationRequired, setVerificationRequired] = useState<boolean>(false)
+  const [requiredFields, setRequiredFields] = useState<string[]>([])
 
   // Optional branding template applied to this flow (UUID, or the sentinel).
   const [brandingId, setBrandingId] = useState<string>(NO_BRANDING)
@@ -202,6 +221,9 @@ export default function SignupFlowAddOrUpdateForm() {
       
       // Set auto_approved
       setAutoApproved(config.auto_approved ?? true)
+      setAllowRegistration(signupFlowData.allow_registration ?? true)
+      setVerificationRequired(signupFlowData.verification_required ?? false)
+      setRequiredFields(parseRequiredFields(signupFlowData.required_fields))
 
       // Load optional branding
       setBrandingId(signupFlowData.branding_id || NO_BRANDING)
@@ -288,6 +310,9 @@ export default function SignupFlowAddOrUpdateForm() {
         description: data.description,
         status: data.status,
         client_id: data.clientId,
+        allow_registration: allowRegistration,
+        verification_required: verificationRequired,
+        required_fields: JSON.stringify(requiredFields),
         config,
         // Optional — omit when using the tenant's active branding.
         branding_id: brandingId !== NO_BRANDING ? brandingId : undefined,
@@ -481,6 +506,54 @@ export default function SignupFlowAddOrUpdateForm() {
                 disabled={isLoading}
                 description="Optional — the branding applied to this flow's auth experience. Defaults to the tenant's active branding."
               />
+
+              <FormSwitchField
+                id="allow-registration"
+                label="Allow registration"
+                description="Allow self-service account creation through this flow. Turn this off for invite-only clients."
+                checked={allowRegistration}
+                onCheckedChange={setAllowRegistration}
+                disabled={isLoading}
+                containerClassName="rounded-md border p-4"
+              />
+
+              <FormSwitchField
+                id="verification-required"
+                label="Require email verification"
+                description="Require users to verify their email before completing onboarding, even when the tenant-wide policy is less strict."
+                checked={verificationRequired}
+                onCheckedChange={setVerificationRequired}
+                disabled={isLoading}
+                containerClassName="rounded-md border p-4"
+              />
+
+              <div className="space-y-3 rounded-md border p-4">
+                <div>
+                  <Label>Required registration fields</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Username and password are always required. Select any additional fields this flow must collect.
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {REGISTRATION_FIELDS.map((field) => (
+                    <div key={field.value} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`required-${field.value}`}
+                        checked={requiredFields.includes(field.value)}
+                        onCheckedChange={(checked) => {
+                          setRequiredFields((current) => checked === true
+                            ? [...new Set([...current, field.value])]
+                            : current.filter((value) => value !== field.value))
+                        }}
+                        disabled={isLoading}
+                      />
+                      <Label htmlFor={`required-${field.value}`} className="cursor-pointer font-normal">
+                        {field.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Auto Approved */}
               <div className="flex items-start gap-3">

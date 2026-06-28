@@ -63,10 +63,6 @@ export {
   createRegisterProfile,
   validateAuthentication,
 } from './api/auth'
-// `ResetPasswordQueryParams` is a type-only member surfaced through the
-// `./api/auth/types` wildcard above (the `./api/auth` value module does not
-// re-export it).
-
 // Tenant service functions
 export {
   fetchDefaultTenant,

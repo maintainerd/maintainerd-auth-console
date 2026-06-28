@@ -36,7 +36,7 @@ const LoginPage = () => {
     })
   }, [currentTenant?.identifier, fetchDefault, tenantIdFromRoute])
 
-  const tenantIdentifier = currentTenant?.identifier || tenantIdFromRoute
+  const tenantIdentifier = tenantIdFromRoute || currentTenant?.identifier
   const companyName = currentTenant?.branding?.company_name || 'Maintainerd Auth'
 
   const handleLogin = async () => {
