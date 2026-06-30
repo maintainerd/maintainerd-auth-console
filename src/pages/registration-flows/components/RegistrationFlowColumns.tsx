@@ -1,12 +1,12 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Workflow } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import type { SignupFlow } from "@/services/api/signup-flows/types"
-import { SignupFlowActions } from "./SignupFlowActions"
+import type { RegistrationFlow } from "@/services/api/registration-flows/types"
+import { RegistrationFlowActions } from "./RegistrationFlowActions"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { StatusBadge } from "@/components/details/StatusBadge"
 
-export const signupFlowColumns: ColumnDef<SignupFlow>[] = [
+export const registrationFlowColumns: ColumnDef<RegistrationFlow>[] = [
   {
     id: "Name",
     accessorKey: "name",
@@ -72,7 +72,7 @@ export const signupFlowColumns: ColumnDef<SignupFlow>[] = [
     id: "actions",
     cell: ({ row }) => (
       <div className="px-3 py-1">
-        <SignupFlowActions signupFlow={row.original} />
+        <RegistrationFlowActions registrationFlow={row.original} />
       </div>
     ),
     enableSorting: false,

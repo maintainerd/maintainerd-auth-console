@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Power, PowerOff, Fingerprint, Box, Palette, CalendarDays } from "lucide-react"
+import { useNavigate, Link } from "react-router-dom"
+import { Edit, Trash2, MoreVertical, Power, PowerOff, Fingerprint, Box, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,39 +11,31 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
-import { useDeleteSignupFlow, useUpdateSignupFlowStatus } from "@/hooks/useSignupFlows"
-import { useClient } from "@/hooks/useClients"
-import { useBrandings } from "@/hooks/useBranding"
+import { useDeleteRegistrationFlow, useUpdateRegistrationFlowStatus } from "@/hooks/useRegistrationFlows"
 import { useToast } from "@/hooks/useToast"
 import { format } from "date-fns"
-import type { SignupFlow } from "@/services/api/signup-flows/types"
+import type { RegistrationFlow } from "@/services/api/registration-flows/types"
 
-interface SignupFlowHeaderProps {
-  signupFlow: SignupFlow
+interface RegistrationFlowHeaderProps {
+  registrationFlow: RegistrationFlow
   tenantId: string
-  signupFlowId: string
+  registrationFlowId: string
 }
 
-export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupFlowHeaderProps) {
+export function RegistrationFlowHeader({ registrationFlow, tenantId, registrationFlowId }: RegistrationFlowHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const deleteMutation = useDeleteSignupFlow()
-  const updateStatusMutation = useUpdateSignupFlowStatus()
+  const deleteMutation = useDeleteRegistrationFlow()
+  const updateStatusMutation = useUpdateRegistrationFlowStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-  const { data: client } = useClient(signupFlow.client_id || "")
-  const { data: brandings } = useBrandings()
-  const branding = signupFlow.branding_id
-    ? brandings?.find((b) => b.branding_id === signupFlow.branding_id)
-    : undefined
-
-  const isActive = signupFlow.status === "active"
+  const isActive = registrationFlow.status === "active"
 
   const handleDelete = async () => {
     try {
-      await deleteMutation.mutateAsync(signupFlowId)
-      showSuccess("Auth flow deleted successfully")
-      navigate(`/${tenantId}/auth-flows`)
+      await deleteMutation.mutateAsync(registrationFlowId)
+      showSuccess("Registration flow deleted successfully")
+      navigate(`/${tenantId}/registration-flows`)
     } catch (error) {
       showError(error)
     }
@@ -52,8 +44,8 @@ export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupF
   const handleToggleStatus = async () => {
     const newStatus = isActive ? "inactive" : "active"
     try {
-      await updateStatusMutation.mutateAsync({ signupFlowId, data: { status: newStatus } })
-      showSuccess(`Auth flow ${newStatus === "active" ? "activated" : "deactivated"} successfully`)
+      await updateStatusMutation.mutateAsync({ registrationFlowId, data: { status: newStatus } })
+      showSuccess(`Registration flow ${newStatus === "active" ? "activated" : "deactivated"} successfully`)
     } catch (error) {
       showError(error)
     }
@@ -63,24 +55,30 @@ export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupF
     {
       icon: Fingerprint,
       label: "Identifier",
-      value: <span className="font-mono text-xs">{signupFlow.identifier}</span>,
+      value: <span className="font-mono text-xs">{registrationFlow.identifier}</span>,
     },
-    { icon: Box, label: "Client", value: client?.name ?? "—" },
     {
-      icon: Palette,
-      label: "Branding",
-      value: branding?.name ?? (signupFlow.branding_id ? "—" : "Tenant's active branding"),
+      icon: Box,
+      label: "Client",
+      value: registrationFlow.client_id ? (
+        <Link
+          to={`/${tenantId}/clients/${registrationFlow.client_id}`}
+          className="text-primary hover:underline"
+        >
+          {registrationFlow.client_id}
+        </Link>
+      ) : "—",
     },
-    { icon: CalendarDays, label: "Created", value: format(new Date(signupFlow.created_at), "PP") },
-    { icon: CalendarDays, label: "Last updated", value: format(new Date(signupFlow.updated_at), "PP") },
+    { icon: CalendarDays, label: "Created", value: format(new Date(registrationFlow.created_at), "PP") },
+    { icon: CalendarDays, label: "Last updated", value: format(new Date(registrationFlow.updated_at), "PP") },
   ]
 
   return (
     <>
       <DetailHeaderCard
-        title={signupFlow.name}
-        badge={<StatusBadge status={signupFlow.status} />}
-        subtitle={signupFlow.description}
+        title={registrationFlow.name}
+        badge={<StatusBadge status={registrationFlow.status} />}
+        subtitle={registrationFlow.description}
         attributes={attributes}
         actions={
           <>
@@ -89,10 +87,10 @@ export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupF
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/auth-flows/${signupFlowId}/edit`, {
+                navigate(`/${tenantId}/registration-flows/${registrationFlowId}/edit`, {
                   state: {
-                    from: `/${tenantId}/auth-flows/${signupFlowId}`,
-                    backLabel: "Back to Auth Flow Details",
+                    from: `/${tenantId}/registration-flows/${registrationFlowId}`,
+                    backLabel: "Back to Registration Flow Details",
                   },
                 })
               }
@@ -127,7 +125,7 @@ export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupF
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 size-4" />
-                  Delete Auth Flow
+                  Delete Registration Flow
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -139,9 +137,9 @@ export function SignupFlowHeader({ signupFlow, tenantId, signupFlowId }: SignupF
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
-        title="Delete Auth Flow"
-        description="This action cannot be undone. This will permanently delete the auth flow and all associated data."
-        itemName={signupFlow.name}
+        title="Delete Registration Flow"
+        description="This action cannot be undone. This will permanently delete the registration flow and all associated data."
+        itemName={registrationFlow.name}
         isDeleting={deleteMutation.isPending}
       />
     </>

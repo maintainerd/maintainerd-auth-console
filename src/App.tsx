@@ -64,9 +64,9 @@ import { TenantSettingsPage } from './pages/tenant-settings/TenantSettingsPage'
 import TenantsPage from './pages/tenants'
 import TenantDetailsPage from './pages/tenants/details'
 import TenantAddOrUpdateForm from './pages/tenants/form'
-import SignupFlowsPage from './pages/signup-flows'
-import SignupFlowDetailsPage from './pages/signup-flows/details'
-import SignupFlowAddOrUpdateForm from './pages/signup-flows/form'
+import RegistrationFlowsPage from './pages/registration-flows'
+import RegistrationFlowDetailsPage from './pages/registration-flows/details'
+import RegistrationFlowAddOrUpdateForm from './pages/registration-flows/form'
 import LogMonitoringPage from './pages/log-monitoring'
 import AuthEventDetailsPage from './pages/log-monitoring/details/AuthEventDetailsPage'
 import BrandingTemplatesPage from './pages/branding/templates'
@@ -173,10 +173,10 @@ function App() {
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
           <Route path="policies/:policyId/edit" element={<PolicyAddOrUpdateForm />} />
-          <Route path="auth-flows" element={<SignupFlowsPage />} />
-          <Route path="auth-flows/create" element={<SignupFlowAddOrUpdateForm />} />
-          <Route path="auth-flows/:signupFlowId" element={<SignupFlowDetailsPage />} />
-          <Route path="auth-flows/:signupFlowId/edit" element={<SignupFlowAddOrUpdateForm />} />
+          <Route path="registration-flows" element={<RegistrationFlowsPage />} />
+          <Route path="registration-flows/create" element={<RegistrationFlowAddOrUpdateForm />} />
+          <Route path="registration-flows/:registrationFlowId" element={<RegistrationFlowDetailsPage />} />
+          <Route path="registration-flows/:registrationFlowId/edit" element={<RegistrationFlowAddOrUpdateForm />} />
           <Route path="events" element={<DashboardPage />} />
           <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/templates" element={<BrandingTemplatesPage />} />

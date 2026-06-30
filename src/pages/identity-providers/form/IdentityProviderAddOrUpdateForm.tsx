@@ -295,7 +295,7 @@ export default function IdentityProviderAddOrUpdateForm() {
                   <FormSwitchField
                     id="allow-registration"
                     label="Allow registration"
-                    description="Allow clients using this provider to create new accounts. Tenant and auth-flow registration policies still apply."
+                    description="Allow clients using this provider to create new accounts. Tenant and registration-flow registration policies still apply."
                     checked={Boolean(field.value)}
                     onCheckedChange={field.onChange}
                     disabled={fieldsDisabled}

@@ -84,11 +84,11 @@ export {
   type CreateTenantFormData
 } from './tenantSchema'
 
-// Signup Flow schemas
+// Registration Flow schemas
 export {
-  signupFlowSchema,
-  type SignupFlowFormData
-} from './signupFlowSchema'
+  registrationFlowSchema,
+  type RegistrationFlowFormData
+} from './registrationFlowSchema'
 
 // Tenant Settings schemas
 export {

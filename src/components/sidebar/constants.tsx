@@ -52,7 +52,7 @@ export const data = {
           icon: KeyRound,
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
-            { title: "Auth Flows", route: "/auth-flows" },
+            { title: "Registration Flows", route: "/registration-flows" },
           ],
         },
       ],

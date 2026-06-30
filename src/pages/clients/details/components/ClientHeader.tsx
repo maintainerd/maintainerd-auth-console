@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Trash2 } from "lucide-react"
+import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Palette, ShieldCheck, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeleteClient } from "@/hooks/useClients"
+import { useBrandings } from "@/hooks/useBranding"
 import { useToast } from "@/hooks/useToast"
 import { DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
@@ -34,7 +35,12 @@ export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) 
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteClientMutation = useDeleteClient()
+  const { data: brandings } = useBrandings()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const branding = client.branding_id
+    ? brandings?.find((b) => b.branding_id === client.branding_id)
+    : undefined
 
   const handleDelete = async () => {
     try {
@@ -71,6 +77,16 @@ export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) 
       icon: CalendarDays,
       label: "Created",
       value: format(new Date(client.created_at), "PP"),
+    },
+    {
+      icon: Palette,
+      label: "Branding",
+      value: branding?.name ?? (client.branding_id ? "—" : "Tenant's active branding"),
+    },
+    {
+      icon: ShieldCheck,
+      label: "Allow registration",
+      value: client.allow_registration !== false ? "Enabled" : "Disabled",
     },
     {
       icon: CalendarDays,

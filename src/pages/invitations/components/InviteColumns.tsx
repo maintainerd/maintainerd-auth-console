@@ -38,14 +38,14 @@ export const inviteColumns: ColumnDef<Invite>[] = [
     ),
   },
   {
-    id: "Auth flow",
-    accessorKey: "auth_flow_name",
+    id: "Registration flow",
+    accessorKey: "registration_flow_name",
     enableSorting: false,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Auth flow" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Registration flow" />,
     cell: ({ row }) => (
       <div className="px-3 py-1">
         <span className="text-sm">
-          {row.original.auth_flow_name ?? (
+          {row.original.registration_flow_name ?? (
             <span className="text-muted-foreground">Default registration</span>
           )}
         </span>

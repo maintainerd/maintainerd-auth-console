@@ -56,8 +56,8 @@ export default function InviteDetailsPage() {
     ? [
         {
           icon: Workflow,
-          label: "Auth flow",
-          value: invite.auth_flow_name ?? (invite.auth_flow_id ? "—" : "Default registration"),
+          label: "Registration flow",
+          value: invite.registration_flow_name ?? (invite.registration_flow_id ? "—" : "Default registration"),
         },
         { icon: CalendarDays, label: "Invited", value: formatDate(invite.created_at) },
         { icon: CalendarClock, label: "Expires", value: formatDate(invite.expires_at) },
@@ -85,8 +85,8 @@ export default function InviteDetailsPage() {
             title={invite.invited_email}
             badge={<StatusBadge status={invite.status} />}
             subtitle={
-              invite.auth_flow_name
-                ? `Onboards via the "${invite.auth_flow_name}" auth flow`
+              invite.registration_flow_name
+                ? `Onboards via the "${invite.registration_flow_name}" registration flow`
                 : "Onboards via default registration"
             }
             attributes={attributes}

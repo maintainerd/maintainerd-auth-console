@@ -6,23 +6,23 @@ import { InformationCard } from "@/components/card"
 import { SystemBadge } from "@/components/badges"
 import { EmptyState, ListSkeleton, StatusBadge } from "@/components/details"
 import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
-import { useSignupFlowRoles, useRemoveSignupFlowRole } from "@/hooks/useSignupFlows"
+import { useRegistrationFlowRoles, useRemoveRegistrationFlowRole } from "@/hooks/useRegistrationFlows"
 import { useToast } from "@/hooks/useToast"
-import { AssignSignupFlowRolesDialog } from "./AssignSignupFlowRolesDialog"
+import { AssignRegistrationFlowRolesDialog } from "./AssignRegistrationFlowRolesDialog"
 import { type PaginationState } from "@tanstack/react-table"
 
-interface SignupFlowRolesProps {
-  signupFlowId: string
+interface RegistrationFlowRolesProps {
+  registrationFlowId: string
 }
 
-export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
+export function RegistrationFlowRoles({ registrationFlowId }: RegistrationFlowRolesProps) {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const [isAddOpen, setIsAddOpen] = useState(false)
 
   const { showSuccess, showError } = useToast()
-  const removeRoleMutation = useRemoveSignupFlowRole()
+  const removeRoleMutation = useRemoveRegistrationFlowRole()
 
-  const { data, isLoading, isError } = useSignupFlowRoles(signupFlowId, {
+  const { data, isLoading, isError } = useRegistrationFlowRoles(registrationFlowId, {
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
     sort_by: "created_at",
@@ -39,7 +39,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
 
   const removeRole = async (roleId: string) => {
     try {
-      await removeRoleMutation.mutateAsync({ signupFlowId, roleId })
+      await removeRoleMutation.mutateAsync({ registrationFlowId, roleId })
       showSuccess("Role removed successfully")
     } catch (error) {
       showError(error)
@@ -50,7 +50,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
     <>
       <InformationCard
         title="Roles"
-        description="Roles automatically assigned to users who complete this auth flow"
+        description="Roles automatically assigned to users who complete this registration flow"
         icon={Shield}
         action={
           <Button onClick={() => setIsAddOpen(true)} size="sm">
@@ -70,7 +70,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
             <EmptyState
               icon={Shield}
               title="No roles assigned"
-              description="Assign roles to automatically grant them to users who complete this auth flow."
+              description="Assign roles to automatically grant them to users who complete this registration flow."
             />
           )}
 
@@ -86,7 +86,7 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
                     onSelect: () => removeRole(role.role_id),
                     confirm: {
                       title: "Remove Role",
-                      description: `This will remove the role "${role.name}" from this auth flow. The role itself is not deleted.`,
+                      description: `This will remove the role "${role.name}" from this registration flow. The role itself is not deleted.`,
                       confirmText: "Remove",
                     },
                   },
@@ -130,10 +130,10 @@ export function SignupFlowRoles({ signupFlowId }: SignupFlowRolesProps) {
         </div>
       </InformationCard>
 
-      <AssignSignupFlowRolesDialog
+      <AssignRegistrationFlowRolesDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        signupFlowId={signupFlowId}
+        registrationFlowId={registrationFlowId}
         existingRoleIds={existingRoleIds}
       />
     </>

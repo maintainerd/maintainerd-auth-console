@@ -1,9 +1,10 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { Palette, Link2 } from "lucide-react"
+import { Palette, Link2, Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useBranding } from "@/hooks/useBranding"
+import { useClients } from "@/hooks/useClients"
 import { THEME_TOKENS, tokensFromMetadata, tokenId, isHex } from "../themeTokens"
 import { BrandingHeader } from "./components/BrandingHeader"
 import type { Branding } from "@/services/api/branding/types"
@@ -11,6 +12,7 @@ import type { Branding } from "@/services/api/branding/types"
 const TABS = [
   { value: "theme", label: "Theme", icon: Palette },
   { value: "details", label: "Details", icon: Link2 },
+  { value: "clients", label: "Clients", icon: Users },
 ] as const
 
 export default function BrandingDetailsPage() {
@@ -51,6 +53,9 @@ export default function BrandingDetailsPage() {
             </TabsContent>
             <TabsContent value="details" className="mt-4">
               <DetailsTab branding={branding} />
+            </TabsContent>
+            <TabsContent value="clients" className="mt-4">
+              <ClientsTab brandingId={branding.branding_id} tenantId={tenantId!} />
             </TabsContent>
           </Tabs>
         </>
@@ -149,6 +154,57 @@ function DetailsTab({ branding }: { branding: Branding }) {
             </div>
           )
         })}
+      </CardContent>
+    </Card>
+  )
+}
+
+function ClientsTab({ brandingId, tenantId }: { brandingId: string; tenantId: string }) {
+  const { data: clientsData, isLoading } = useClients({ limit: 200 })
+
+  const matchingClients = (clientsData?.rows ?? []).filter(
+    (c) => c.branding_id === brandingId
+  )
+
+  return (
+    <Card className="shadow-xs">
+      <CardHeader>
+        <CardTitle className="text-base">Clients using this branding</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {matchingClients.length > 0
+            ? `${matchingClients.length} client${matchingClients.length !== 1 ? "s" : ""} explicitly using this branding.`
+            : "No clients are explicitly using this branding template."}
+        </p>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Loading clients…</p>
+        ) : matchingClients.length === 0 ? (
+          <div className="py-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Clients without an explicit branding template fall back to the tenant's active branding.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Deleting this branding template will return any using clients to the tenant's active branding fallback.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <ul className="divide-y">
+              {matchingClients.map((client) => (
+                <li key={client.client_id} className="py-2">
+                  <span className="text-sm font-medium">{client.name}</span>
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">
+                    {client.client_id}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground">
+              Deleting this branding template will return these clients to the tenant's active branding fallback.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

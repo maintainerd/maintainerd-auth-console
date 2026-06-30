@@ -1,14 +1,14 @@
-import { SignupFlowListing } from "./components/SignupFlowListing"
+import { RegistrationFlowListing } from "./components/RegistrationFlowListing"
 import { PageContainer, PageHeader } from "@/components/layout"
 
-export default function SignupFlowsPage() {
+export default function RegistrationFlowsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Auth Flows"
+        title="Registration Flows"
         description="Define how users authenticate and onboard into your applications, with automatic role assignment per flow."
       />
-      <SignupFlowListing />
+      <RegistrationFlowListing />
     </PageContainer>
   )
 }

@@ -12,14 +12,14 @@ export interface Invite {
   expires_at: string | null
   used_at: string | null
   created_at: string
-  // Optional auth flow attached to the invite (absent = default registration).
-  auth_flow_id?: string
-  auth_flow_name?: string
+  // Optional registration flow attached to the invite (absent = default registration).
+  registration_flow_id?: string
+  registration_flow_name?: string
 }
 
-/** Payload to send an invitation. auth_flow_uuid is optional — when omitted the
+/** Payload to send an invitation. registration_flow_uuid is optional — when omitted the
  * invitee onboards with only the default registered role and the active branding. */
 export interface SendInviteRequest {
   email: string
-  auth_flow_uuid?: string
+  registration_flow_uuid?: string
 }

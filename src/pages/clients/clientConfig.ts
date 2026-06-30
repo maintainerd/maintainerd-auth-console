@@ -41,7 +41,7 @@ export const COMMON_CLIENT_CONFIG_KEYS = new Set([
   "token_endpoint_auth_method",
 ])
 
-const AUTH_FLOW_KEYS = new Set([
+const REGISTRATION_FLOW_KEYS = new Set([
   "grant_types",
   "response_types",
   "token_endpoint_auth_method",
@@ -99,7 +99,7 @@ export function getClientConfigSections(config: Record<string, unknown>): Config
     {
       title: "Authorization Flow",
       description: "OAuth and OIDC behavior supported by this client.",
-      entries: collectEntries(commonConfig, AUTH_FLOW_KEYS),
+      entries: collectEntries(commonConfig, REGISTRATION_FLOW_KEYS),
     },
     {
       title: "Token Settings",

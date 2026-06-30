@@ -12,28 +12,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useRoles } from "@/hooks/useRoles"
-import { useAssignSignupFlowRoles } from "@/hooks/useSignupFlows"
+import { useAssignRegistrationFlowRoles } from "@/hooks/useRegistrationFlows"
 import { useToast } from "@/hooks/useToast"
 import { SelectableOptionRow } from "../../components/SelectableOptionRow"
 
-interface AssignSignupFlowRolesDialogProps {
+interface AssignRegistrationFlowRolesDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  signupFlowId: string
+  registrationFlowId: string
   existingRoleIds: string[]
 }
 
-export function AssignSignupFlowRolesDialog({
+export function AssignRegistrationFlowRolesDialog({
   open,
   onOpenChange,
-  signupFlowId,
+  registrationFlowId,
   existingRoleIds,
-}: AssignSignupFlowRolesDialogProps) {
+}: AssignRegistrationFlowRolesDialogProps) {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
 
   const { showSuccess, showError } = useToast()
-  const assignRolesMutation = useAssignSignupFlowRoles()
+  const assignRolesMutation = useAssignRegistrationFlowRoles()
 
   // Fetch all roles
   const { data: rolesData, isLoading: isLoadingRoles } = useRoles({
@@ -82,7 +82,7 @@ export function AssignSignupFlowRolesDialog({
 
     try {
       await assignRolesMutation.mutateAsync({
-        signupFlowId,
+        registrationFlowId,
         data: { role_uuids: selectedRoles }
       })
 
@@ -110,9 +110,9 @@ export function AssignSignupFlowRolesDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Assign Roles to Auth Flow</DialogTitle>
+          <DialogTitle>Assign Roles to Registration Flow</DialogTitle>
           <DialogDescription>
-            Select roles to assign to this auth flow. Already assigned roles are not shown.
+            Select roles to assign to this registration flow. Already assigned roles are not shown.
           </DialogDescription>
         </DialogHeader>
 

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom"
 import { AppSidebar } from "@/components/sidebar/AppSideBar"
 import { TopNav } from "@/components/navigation/TopNav"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { ConsoleBrandingProvider } from "@/components/theme/ConsoleBrandingProvider"
 import { cn } from "@/lib/utils"
 
 interface PrivateLayoutProps {
@@ -13,6 +14,7 @@ interface PrivateLayoutProps {
 // centrally by AppBootstrap → RouteGuard; this layout only renders the chrome.
 export function PrivateLayout({ fullWidth = false }: PrivateLayoutProps) {
   return (
+    <ConsoleBrandingProvider>
     <div className="min-h-screen flex flex-col bg-background">
       {/* Wider sidebar (default is 16rem) to suit the larger menu text/icons */}
       <SidebarProvider style={{ "--sidebar-width": "17rem" } as CSSProperties}>
@@ -30,5 +32,6 @@ export function PrivateLayout({ fullWidth = false }: PrivateLayoutProps) {
         </div>
       </SidebarProvider>
     </div>
+    </ConsoleBrandingProvider>
   )
 }

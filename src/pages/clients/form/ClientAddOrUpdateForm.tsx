@@ -28,6 +28,7 @@ import {
   useUpdateClientUri
 } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
+import { useBrandings } from "@/hooks/useBranding"
 import type {
   CreateClientRequest,
   UpdateClientRequest,
@@ -110,6 +111,17 @@ export default function ClientAddOrUpdateForm() {
   const [pkceRequired, setPkceRequired] = useState<boolean>(true)
   const [accessTokenLifetime, setAccessTokenLifetime] = useState<number>(3600)
   const [refreshTokenLifetime, setRefreshTokenLifetime] = useState<number>(604800)
+  const [allowRegistration, setAllowRegistration] = useState<boolean>(true)
+  const NO_BRANDING = "__none__"
+  const [brandingId, setBrandingId] = useState<string>(NO_BRANDING)
+  const { data: brandings } = useBrandings()
+  const brandingOptions: SelectOption[] = [
+    { value: NO_BRANDING, label: "Use tenant's active branding" },
+    ...(brandings ?? []).map((b) => ({
+      value: b.branding_id,
+      label: b.is_active ? `${b.name} (active)` : b.name,
+    })),
+  ]
   const [refreshTokenRotation, setRefreshTokenRotation] = useState<boolean>(false)
   const [multiResourceRefreshToken, setMultiResourceRefreshToken] = useState<boolean>(false)
 
@@ -193,6 +205,8 @@ export default function ClientAddOrUpdateForm() {
         domain: clientData.domain ?? "",
         status: clientData.status,
       })
+      setAllowRegistration(clientData.allow_registration ?? true)
+      setBrandingId(clientData.branding_id || NO_BRANDING)
       // Mark the hydrated type as current so the defaults effect doesn't
       // overwrite the loaded OAuth configuration below.
       prevTypeRef.current = clientData.client_type
@@ -416,6 +430,8 @@ export default function ClientAddOrUpdateForm() {
           client_type: formData.clientType as ClientType,
           domain: formData.domain,
           status: formData.status as ClientStatus,
+          branding_id: brandingId !== NO_BRANDING ? brandingId : undefined,
+          allow_registration: allowRegistration,
           config,
         }
 
@@ -427,6 +443,8 @@ export default function ClientAddOrUpdateForm() {
           client_type: formData.clientType as ClientType,
           domain: formData.domain,
           status: formData.status as ClientStatus,
+          branding_id: brandingId !== NO_BRANDING ? brandingId : undefined,
+          allow_registration: allowRegistration,
           config,
         }
 
@@ -666,6 +684,27 @@ export default function ClientAddOrUpdateForm() {
                   onCheckedChange={setRequireConsent}
                   disabled={clientData?.is_system || isLoading}
                 />
+
+                <FormSelectField
+                  label="Branding template"
+                  placeholder="Select branding"
+                  options={brandingOptions}
+                  value={brandingId}
+                  onValueChange={setBrandingId}
+                  disabled={isLoading}
+                  description="Optional — the branding applied to this client's login and registration pages. Defaults to the tenant's active branding."
+                />
+
+                <FormSwitchField
+                  id="allow-registration"
+                  label="Allow registration"
+                  description="Allow self-service registration for this client. Does not affect login for existing users or invite acceptance."
+                  checked={allowRegistration}
+                  onCheckedChange={setAllowRegistration}
+                  disabled={isLoading}
+                  containerClassName="rounded-md border p-4"
+                />
+
                 {capability.pkce !== "none" && (
                   <FormSwitchField
                     id="pkceRequired"

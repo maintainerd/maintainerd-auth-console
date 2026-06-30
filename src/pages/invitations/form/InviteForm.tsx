@@ -11,7 +11,7 @@ import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import { FormInputField, FormSelectField, FormSubmitButton, type SelectOption } from "@/components/form"
 import { useSendInvite } from "@/hooks/useInvites"
-import { useSignupFlows } from "@/hooks/useSignupFlows"
+import { useRegistrationFlows } from "@/hooks/useRegistrationFlows"
 import { useEmailConfigStatus } from "@/hooks/useNotifier"
 import { useToast } from "@/hooks/useToast"
 
@@ -21,7 +21,7 @@ const inviteSchema = yup.object({
 
 type InviteFormData = yup.InferType<typeof inviteSchema>
 
-// "default registration" — no auth flow attached.
+// "default registration" — no registration flow attached.
 const NO_FLOW = "__none__"
 
 export default function InviteForm() {
@@ -31,16 +31,16 @@ export default function InviteForm() {
   const listUrl = `/${tenantId}/invites`
 
   const sendMutation = useSendInvite()
-  const [authFlowId, setAuthFlowId] = useState<string>(NO_FLOW)
+  const [registrationFlowId, setRegistrationFlowId] = useState<string>(NO_FLOW)
 
   // Invitations are delivered by email — warn the admin if email isn't configured.
   const { data: emailStatus } = useEmailConfigStatus()
   const emailNotConfigured = emailStatus ? !emailStatus.configured : false
 
-  const { data: flowsData } = useSignupFlows({ page: 1, limit: 100, sort_by: "name", sort_order: "asc" })
+  const { data: flowsData } = useRegistrationFlows({ page: 1, limit: 100, sort_by: "name", sort_order: "asc", status: "active" })
   const flowOptions: SelectOption[] = [
-    { value: NO_FLOW, label: "Default registration (no auth flow)" },
-    ...(flowsData?.rows ?? []).map((f) => ({ value: f.signup_flow_id, label: f.name })),
+    { value: NO_FLOW, label: "Default registration (no registration flow)" },
+    ...(flowsData?.rows ?? []).map((f) => ({ value: f.registration_flow_id, label: f.name })),
   ]
 
   const {
@@ -60,7 +60,7 @@ export default function InviteForm() {
     try {
       await sendMutation.mutateAsync({
         email: data.email.trim(),
-        auth_flow_uuid: authFlowId !== NO_FLOW ? authFlowId : undefined,
+        registration_flow_uuid: registrationFlowId !== NO_FLOW ? registrationFlowId : undefined,
       })
       showSuccess(`Invitation sent to ${data.email.trim()}`)
       navigate(listUrl)
@@ -118,13 +118,13 @@ export default function InviteForm() {
               />
 
               <FormSelectField
-                label="Auth flow"
-                placeholder="Select auth flow"
+                label="Registration flow"
+                placeholder="Select registration flow"
                 options={flowOptions}
-                value={authFlowId}
-                onValueChange={setAuthFlowId}
+                value={registrationFlowId}
+                onValueChange={setRegistrationFlowId}
                 disabled={isLoading}
-                description="Optional — attaches the flow's branding and auto-assigns its roles on completion. Leave as default for normal registration (registered role under the default client, no special branding)."
+                description="Optional — default registration assigns only the registered role. Selecting a flow adds that flow's additional roles on completion."
               />
             </CardContent>
           </Card>

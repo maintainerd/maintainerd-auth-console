@@ -85,6 +85,8 @@ export type Client = {
   status: ClientStatus
   is_default: boolean
   is_system: boolean
+  branding_id?: string | null
+  allow_registration: boolean
   // Security posture / per-client overrides. null = inherits the tenant default.
   require_pkce?: boolean | null
   required_acr?: RequiredAcr | null
@@ -147,6 +149,8 @@ export interface ClientResponse {
   status: ClientStatus
   is_default: boolean
   is_system: boolean
+  branding_id?: string | null
+  allow_registration: boolean
   // Security posture / per-client overrides. null = inherits the tenant default.
   require_pkce?: boolean | null
   required_acr?: RequiredAcr | null
@@ -178,6 +182,8 @@ export interface CreateClientRequest {
   client_type: ClientType
   domain: string
   identity_provider_id?: string
+  branding_id?: string
+  allow_registration?: boolean
   status: ClientStatus
   config: Record<string, unknown>
 }
@@ -190,6 +196,8 @@ export interface UpdateClientRequest {
   display_name: string
   client_type: ClientType
   domain: string
+  branding_id?: string
+  allow_registration?: boolean
   status: ClientStatus
   config: Record<string, unknown>
 }
