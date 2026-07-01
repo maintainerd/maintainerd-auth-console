@@ -3,7 +3,7 @@
  * Handles tenant API calls and storage operations
  */
 
-import { get, post, put, patch, deleteRequest } from '../client'
+import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { TenantEntity, TenantResponse, TenantListResponse, TenantListParams, CreateTenantRequest, UpdateTenantRequest } from './types'
 
@@ -87,7 +87,7 @@ export async function updateTenantStatus(
   tenantId: string,
   status: string,
 ): Promise<void> {
-  await patch(`${API_ENDPOINTS.TENANT}s/${tenantId}/status`, { status })
+  await put(`${API_ENDPOINTS.TENANT}s/${tenantId}/status`, { status })
 }
 
 export async function deleteTenant(tenantId: string): Promise<void> {
