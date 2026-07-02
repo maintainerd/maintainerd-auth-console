@@ -139,6 +139,23 @@ export async function removeClientIdentityProvider(
   throw new Error(response.message || 'Failed to disconnect identity provider')
 }
 
+export interface UpdateClientIdentityProviderRequest {
+  is_default?: boolean
+  enabled?: boolean
+  display_order?: number
+}
+
+export async function updateClientIdentityProvider(
+  clientId: string,
+  connectionId: string,
+  data: UpdateClientIdentityProviderRequest,
+): Promise<ClientResponse> {
+  const endpoint = `${API_ENDPOINTS.CLIENT}/${clientId}/identity_providers/${connectionId}`
+  const response = await put<ApiResponse<ClientResponse>>(endpoint, data)
+  if (response.success && response.data) return response.data
+  throw new Error(response.message || 'Failed to update identity provider connection')
+}
+
 /**
  * Update client status
  */

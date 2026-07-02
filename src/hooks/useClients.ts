@@ -12,6 +12,7 @@ import {
   deleteClient,
   addClientIdentityProvider,
   removeClientIdentityProvider,
+  updateClientIdentityProvider,
   updateClientStatus,
   rotateClientSecret,
   fetchClientConfig,
@@ -168,6 +169,20 @@ export function useRemoveClientIdentityProvider() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) })
       queryClient.invalidateQueries({ queryKey: clientKeys.lists() })
+    },
+  })
+}
+
+export function useUpdateClientIdentityProvider() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ clientId, connectionId, data }: {
+      clientId: string
+      connectionId: string
+      data: { is_default?: boolean; enabled?: boolean; display_order?: number }
+    }) => updateClientIdentityProvider(clientId, connectionId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) })
     },
   })
 }

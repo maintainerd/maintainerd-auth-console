@@ -1,15 +1,17 @@
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { format } from "date-fns"
-import { Building2, Eye, Link2, Unlink } from "lucide-react"
+import { Building2, Eye, Link2, Unlink, Settings, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
 import { InformationCard } from "@/components/card"
 import { EmptyState, StatusBadge } from "@/components/details"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { SystemBadge } from "@/components/badges"
 import { PROVIDER_LABELS, ProviderLogo } from "@/components/provider-config"
-import { useRemoveClientIdentityProvider } from "@/hooks/useClients"
+import { useRemoveClientIdentityProvider, useUpdateClientIdentityProvider } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
 import type { ClientResponse, ClientIdentityProviderConnection } from "@/services/api/clients/types"
 import { ConnectProviderDialog } from "./ConnectProviderDialog"
@@ -23,7 +25,9 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const removeConnectionMutation = useRemoveClientIdentityProvider()
+  const updateConnectionMutation = useUpdateClientIdentityProvider()
   const [connectDialogOpen, setConnectDialogOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const connections = [...(client.connections ?? [])].sort((a, b) => a.display_order - b.display_order)
   const connectedProviderIds = connections.map((connection) => connection.identity_provider.identity_provider_id)
@@ -37,6 +41,24 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
         connectionId: connection.client_identity_provider_id,
       })
       showSuccess(`Disconnected ${connection.identity_provider.display_name} from ${client.display_name}`)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const toggleEdit = (id: string) => {
+    setEditingId(editingId === id ? null : id)
+  }
+
+  const updateConnection = async (connection: ClientIdentityProviderConnection, data: { is_default?: boolean; enabled?: boolean; display_order?: number }) => {
+    if (!clientId) return
+    try {
+      await updateConnectionMutation.mutateAsync({
+        clientId,
+        connectionId: connection.client_identity_provider_id,
+        data,
+      })
+      showSuccess("Connection updated")
     } catch (error) {
       showError(error)
     }
@@ -70,6 +92,12 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
                 label: "View Provider",
                 icon: Eye,
                 onSelect: () => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}`),
+              },
+              {
+                key: "edit",
+                label: editingId === connection.client_identity_provider_id ? "Done" : "Edit Connection",
+                icon: editingId === connection.client_identity_provider_id ? Check : Settings,
+                onSelect: () => toggleEdit(connection.client_identity_provider_id),
               },
             ]
 
@@ -135,6 +163,37 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
                     <p>{format(new Date(connection.created_at), "PPpp")}</p>
                   </div>
                 </div>
+
+                {editingId === connection.client_identity_provider_id && (
+                  <div className="mt-3 border-t pt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium">Default</span>
+                      <Switch
+                        checked={connection.is_default}
+                        onCheckedChange={(v) => updateConnection(connection, { is_default: v })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium">Enabled</span>
+                      <Switch
+                        checked={connection.enabled}
+                        onCheckedChange={(v) => updateConnection(connection, { enabled: v })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium">Display Order</span>
+                      <Input
+                        type="number"
+                        className="w-20 h-7 text-xs"
+                        defaultValue={connection.display_order}
+                        onBlur={(e) => {
+                          const v = parseInt(e.target.value, 10)
+                          if (!isNaN(v)) updateConnection(connection, { display_order: v })
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })
