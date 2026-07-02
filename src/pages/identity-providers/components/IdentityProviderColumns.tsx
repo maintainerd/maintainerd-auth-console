@@ -76,6 +76,23 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
+    id: "token_federation",
+    accessorKey: "allow_token_federation",
+    header: "Federation",
+    cell: ({ row }) => {
+      if (row.original.allow_token_federation) {
+        return (
+          <div className="px-3 py-1">
+            <Badge variant="outline" className="text-xs border-blue-200 bg-blue-50 text-blue-700">
+              Token Federation
+            </Badge>
+          </div>
+        )
+      }
+      return null
+    },
+  },
+  {
     id: "created_at",
     accessorKey: "created_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
