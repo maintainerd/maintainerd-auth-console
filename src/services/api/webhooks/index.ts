@@ -167,3 +167,28 @@ export async function removeWebhookSubscription(
     throw new Error(response.message || 'Failed to remove subscription')
   }
 }
+
+export interface DeliveryHistoryItem {
+  delivery_history_uuid: string
+  event_type: string
+  attempt_count: number
+  final_status: string
+  response_status?: number | null
+  response_summary?: string
+  is_replay: boolean
+  created_at: string
+}
+
+export async function fetchDeliveryHistory(webhookId: string): Promise<DeliveryHistoryItem[]> {
+  const response = await get<ApiResponse<DeliveryHistoryItem[]>>(
+    `${API_ENDPOINTS.WEBHOOK_ENDPOINT}/${webhookId}/deliveries`
+  )
+  return response.data ?? []
+}
+
+export async function replayDelivery(deliveryHistoryUuid: string): Promise<{ message: string }> {
+  const response = await post<ApiResponse<{ message: string }>>(API_ENDPOINTS.WEBHOOK_REPLAY, {
+    delivery_history_uuid: deliveryHistoryUuid,
+  })
+  return response.data ?? { message: response.message ?? "Replay initiated" }
+}

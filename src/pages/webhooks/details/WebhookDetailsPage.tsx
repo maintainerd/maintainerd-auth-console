@@ -1,13 +1,15 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { AppWindow, Radio } from "lucide-react"
+import { AppWindow, Radio, History } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useWebhook } from "@/hooks/useWebhooks"
 import { WebhookHeader, WebhookInformation, WebhookEvents } from "./components"
+import { WebhookDeliveries } from "./components/WebhookDeliveries"
 
 const TABS = [
   { value: "overview", label: "Overview", icon: AppWindow },
   { value: "events", label: "Events", icon: Radio },
+  { value: "deliveries", label: "Deliveries", icon: History },
 ] as const
 
 type WebhookDetailsTab = typeof TABS[number]["value"]
@@ -59,6 +61,10 @@ export default function WebhookDetailsPage() {
 
             <TabsContent value="events" className="mt-4">
               <WebhookEvents webhookId={webhookId!} />
+            </TabsContent>
+
+            <TabsContent value="deliveries" className="mt-4">
+              <WebhookDeliveries webhookId={webhookId!} />
             </TabsContent>
           </Tabs>
         </>
