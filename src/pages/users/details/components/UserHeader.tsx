@@ -1,5 +1,5 @@
 import { useState } from "react"
-import {
+  import {
   Edit,
   Trash2,
   MoreVertical,
@@ -14,6 +14,7 @@ import {
   Play,
   Pause,
   Ban,
+  KeyRound,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -34,6 +35,7 @@ import {
   useCompleteUserAccount,
   useResetUserMfa,
   useUpdateUserStatus,
+  useForcePasswordChange,
 } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { User, UserStatus } from "@/services/api/users/types"
@@ -82,11 +84,13 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const completeAccountMutation = useCompleteUserAccount()
   const resetMfaMutation = useResetUserMfa()
   const updateStatusMutation = useUpdateUserStatus()
+  const forcePasswordChangeMutation = useForcePasswordChange()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
+  const [showForcePasswordDialog, setShowForcePasswordDialog] = useState(false)
   const [statusAction, setStatusAction] = useState<{ status: UserStatus; title: string; description: string } | null>(null)
 
   const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
@@ -231,6 +235,10 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
                   <ShieldOff className="mr-2 size-4" />
                   Reset MFA
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowForcePasswordDialog(true)}>
+                  <KeyRound className="mr-2 size-4" />
+                  Force Password Change
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
@@ -292,6 +300,16 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         description="This removes all of the user's multi-factor authentication enrollments. They'll be prompted to set up MFA again on next sign-in. Continue?"
         confirmText="Reset MFA"
         isLoading={resetMfaMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showForcePasswordDialog}
+        onOpenChange={setShowForcePasswordDialog}
+        onConfirm={() => runAction(() => forcePasswordChangeMutation.mutateAsync(userId), "Password change forced successfully")}
+        title="Force Password Change"
+        description="This forces the user to change their password on their next login. Continue?"
+        confirmText="Force Change"
+        isLoading={forcePasswordChangeMutation.isPending}
       />
 
       <ConfirmationDialog

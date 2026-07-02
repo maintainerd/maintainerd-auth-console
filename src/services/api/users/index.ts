@@ -155,3 +155,13 @@ export const revokeUserSession = (userId: string, sessionId: string): Promise<vo
 // MFA: the user's MFA configuration (TOTP, WebAuthn keys, backup codes).
 export const fetchUserMFA = (userId: string): Promise<UserMFAResponse> =>
   get<ApiResponse<UserMFAResponse>>(`${base}/${userId}/mfa`).then((r) => unwrap(r, 'fetch user MFA'))
+
+export const forcePasswordChange = (userId: string): Promise<void> =>
+  put<ApiResponse<void>>(`${base}/${userId}/force-password-change`, {}).then((r) =>
+    assertSuccess(r, 'force password change'),
+  )
+
+export const unlinkUserIdentity = (userId: string, identityId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/identities/${identityId}`).then((r) =>
+    assertSuccess(r, 'unlink identity'),
+  )

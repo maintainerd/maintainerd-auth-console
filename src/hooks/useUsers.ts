@@ -31,6 +31,8 @@ import {
   fetchUserSessions,
   revokeUserSession,
   fetchUserMFA,
+  forcePasswordChange,
+  unlinkUserIdentity,
 } from '@/services/api/users'
 import type {
   UserQueryParams,
@@ -424,5 +426,27 @@ export function useUserMFA(userId: string) {
     queryKey: userKeys.mfa(userId),
     queryFn: () => fetchUserMFA(userId),
     enabled: !!userId,
+  })
+}
+
+export function useForcePasswordChange() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => forcePasswordChange(userId),
+    onSuccess: (_data, userId) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+    },
+  })
+}
+
+export function useUnlinkUserIdentity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, identityId }: { userId: string; identityId: string }) =>
+      unlinkUserIdentity(userId, identityId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.identitiesList(variables.userId) })
+    },
   })
 }

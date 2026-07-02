@@ -1,17 +1,44 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import { Key, Calendar, Globe } from "lucide-react"
+import { Key, Calendar, Globe, Unlink } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, usePaginationTable } from "@/components/data-table"
-import { useUserIdentities } from "@/hooks/useUsers"
+import { useUserIdentities, useUnlinkUserIdentity } from "@/hooks/useUsers"
+import { useToast } from "@/hooks/useToast"
 import type { UserIdentity } from "@/services/api/users/types"
 import { type PaginationState } from "@tanstack/react-table"
 
 interface UserIdentitiesProps {
   userId: string
 }
+
+export function UserIdentities({ userId }: UserIdentitiesProps) {
+  const { showSuccess, showError } = useToast()
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  const { data, isLoading, isError } = useUserIdentities(userId, {
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize,
+    sort_by: 'created_at',
+    sort_order: 'desc',
+  })
+
+  const unlinkMutation = useUnlinkUserIdentity()
+
+  const handleUnlink = async (identityId: string) => {
+    try {
+      await unlinkMutation.mutateAsync({ userId, identityId })
+      showSuccess("Identity unlinked")
+    } catch (error) {
+      showError(error)
+    }
+  }
 
 export function UserIdentities({ userId }: UserIdentitiesProps) {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -110,9 +137,20 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="size-3" />
-                      Connected {format(new Date(identity.created_at), "PPP")}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="size-3" />
+                        Connected {format(new Date(identity.created_at), "PPP")}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7"
+                        disabled={unlinkMutation.isPending}
+                        onClick={() => handleUnlink(identity.user_identity_id)}
+                      >
+                        <Unlink className="size-3 mr-1" /> Unlink
+                      </Button>
                     </div>
                   </div>
                 </div>
