@@ -10,6 +10,7 @@ const { useUserIdentitiesMock } = vi.hoisted(() => ({
 
 vi.mock("@/hooks/useUsers", () => ({
   useUserIdentities: (...args: unknown[]) => useUserIdentitiesMock(...args),
+  useUnlinkUserIdentity: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
 }))
 
 function makeIdentity(overrides: Partial<UserIdentity> = {}): UserIdentity {

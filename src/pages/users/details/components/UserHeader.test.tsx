@@ -40,6 +40,7 @@ vi.mock("@/hooks/useUsers", () => {
     useCompleteUserAccount: () => ({ mutateAsync: completeAccountMutateAsync, isPending: false }),
     useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
     useUpdateUserStatus: () => ({ mutateAsync: updateStatusMutateAsync, isPending: false }),
+    useForcePasswordChange: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false }),
   }
 })
 
