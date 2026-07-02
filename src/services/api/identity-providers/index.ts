@@ -111,6 +111,17 @@ export async function updateIdentityProviderStatus(identityProviderId: string, d
   throw new Error(response.message || 'Failed to update identity provider status')
 }
 
+export interface TestConnectionResult {
+  success: boolean
+  checks?: { label: string; passed: boolean; message?: string }[]
+  message?: string
+}
+
+export async function testIdentityProviderConnection(data: Record<string, unknown>): Promise<TestConnectionResult> {
+  const response = await post<ApiResponse<TestConnectionResult>>(API_ENDPOINTS.IDENTITY_PROVIDER_TEST, data)
+  return (response.data ?? { success: false, message: response.message ?? "Unknown error" }) as TestConnectionResult
+}
+
 // Export as identity provider object
 export const identityProviderService = {
   fetchIdentityProviders,

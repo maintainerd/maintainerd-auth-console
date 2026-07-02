@@ -79,6 +79,7 @@ export const API_ENDPOINTS = {
   PERMISSION: '/permissions',
   POLICY: '/policies',
   IDENTITY_PROVIDER: '/identity_providers',
+  IDENTITY_PROVIDER_TEST: '/identity_providers/test',
   CLIENT: '/clients',
   API_KEY: '/api_keys',
   ROLE: '/roles',

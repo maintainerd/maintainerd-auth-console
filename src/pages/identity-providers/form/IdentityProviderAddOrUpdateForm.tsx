@@ -1,7 +1,8 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
+import { useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DetailsContainer } from "@/components/container"
@@ -26,6 +27,7 @@ import { identityProviderSchema, type IdentityProviderFormData } from "@/lib/val
 import { useAppSelector } from "@/store/hooks"
 import { useIdentityProvider, useCreateIdentityProvider, useUpdateIdentityProvider } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
+import { testIdentityProviderConnection, type TestConnectionResult } from "@/services/api/identity-providers"
 import type { ProviderOption, IdentityProviderStatus } from "@/services/api/identity-providers/types"
 
 const PROVIDER_OPTIONS: SelectOption[] = PROVIDER_SELECT_OPTIONS
@@ -65,6 +67,13 @@ export default function IdentityProviderAddOrUpdateForm() {
   const { data: providerData, isLoading: isFetchingProvider } = useIdentityProvider(providerId || '')
   const createProviderMutation = useCreateIdentityProvider()
   const updateProviderMutation = useUpdateIdentityProvider()
+  const [testResult, setTestResult] = useState<TestConnectionResult | null>(null)
+
+  const testConnectionMutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) => testIdentityProviderConnection(data),
+    onSuccess: (result) => setTestResult(result),
+    onError: (err: any) => setTestResult({ success: false, message: err?.message ?? "Connection test failed" }),
+  })
 
   // React Hook Form setup
   const {
@@ -73,6 +82,7 @@ export default function IdentityProviderAddOrUpdateForm() {
     control,
     reset,
     watch,
+    getValues,
     setError,
     formState: { errors, isSubmitting }
   } = useForm<IdentityProviderFormData>({
@@ -189,6 +199,25 @@ export default function IdentityProviderAddOrUpdateForm() {
 
   const isLoading = createProviderMutation.isPending || updateProviderMutation.isPending || isFetchingProvider
   const fieldsDisabled = providerData?.is_system || isLoading
+
+  const handleTestConnection = async () => {
+    setTestResult(null)
+    const formData = getValues()
+    const config = providerConfig.buildConfig()
+    const providerType = getProviderKind(formData.provider)
+    const clientSecret = (formData.clientSecret ?? "").trim()
+    const payload: Record<string, unknown> = {
+      name: formData.name || "",
+      provider: formData.provider,
+      provider_type: providerType,
+      issuer: connectionSchema ? (formData.issuer ?? "").trim() || null : null,
+      provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
+      ...(clientSecret ? { provider_client_secret: clientSecret } : {}),
+      config,
+      allowed_audiences: parseList(formData.allowedAudiences),
+    }
+    testConnectionMutation.mutate(payload)
+  }
 
   // Loading state
   if (isEditing && isFetchingProvider) {
@@ -431,22 +460,45 @@ export default function IdentityProviderAddOrUpdateForm() {
           />
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-between gap-3">
             <Button
               type="button"
-              variant="outline"
-              onClick={() => navigate(backTo)}
-              disabled={isLoading}
+              variant="secondary"
+              onClick={handleTestConnection}
+              disabled={isLoading || testConnectionMutation.isPending}
             >
-              Cancel
+              {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
             </Button>
-            <FormSubmitButton
-              isSubmitting={isLoading || isSubmitting}
-              disabled={providerData?.is_system}
-              submittingText="Saving..."
-              submitText={isEditing ? "Update Provider" : "Create Provider"}
-            />
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(backTo)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <FormSubmitButton
+                isSubmitting={isLoading || isSubmitting}
+                disabled={providerData?.is_system}
+                submittingText="Saving..."
+                submitText={isEditing ? "Update Provider" : "Create Provider"}
+              />
+            </div>
           </div>
+          {testResult && (
+            <div className={`rounded p-3 mt-2 text-sm ${testResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+              <p className="font-medium mb-1">{testResult.success ? "Connection test passed" : "Connection test failed"}</p>
+              {testResult.message && <p className="text-muted-foreground mb-2">{testResult.message}</p>}
+              {testResult.checks?.map((c, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className={c.passed ? "text-green-600" : "text-red-600"}>{c.passed ? "✓" : "✗"}</span>
+                  <span>{c.label}</span>
+                  {c.message && <span className="text-muted-foreground">— {c.message}</span>}
+                </div>
+              ))}
+            </div>
+          )}
         </form>
       </div>
     </DetailsContainer>
