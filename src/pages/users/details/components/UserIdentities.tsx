@@ -40,19 +40,6 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
     }
   }
 
-export function UserIdentities({ userId }: UserIdentitiesProps) {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-
-  const { data, isLoading, isError } = useUserIdentities(userId, {
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-    sort_by: 'created_at',
-    sort_order: 'desc',
-  })
-
   const table = usePaginationTable({
     pagination,
     onPaginationChange: setPagination,

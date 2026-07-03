@@ -179,8 +179,6 @@ function App() {
           <Route path="registration-flows/create" element={<RegistrationFlowAddOrUpdateForm />} />
           <Route path="registration-flows/:registrationFlowId" element={<RegistrationFlowDetailsPage />} />
           <Route path="registration-flows/:registrationFlowId/edit" element={<RegistrationFlowAddOrUpdateForm />} />
-          <Route path="events" element={<DashboardPage />} />
-          <Route path="branding" element={<DashboardPage />} />
           <Route path="branding/templates" element={<BrandingTemplatesPage />} />
           <Route path="branding/templates/create" element={<BrandingForm />} />
           <Route path="branding/templates/:brandingId" element={<BrandingDetailsPage />} />

@@ -199,24 +199,6 @@ export interface UpdateIdentityProviderRequest {
 }
 
 /**
- * Update identity provider request interface
- */
-export interface UpdateIdentityProviderRequest {
-  name: string
-  display_name: string
-  provider: ProviderOption
-  provider_type: ProviderType
-  issuer?: string | null
-  provider_client_id?: string | null
-  provider_client_secret?: string
-  allow_jit_provisioning?: boolean
-  allow_registration: boolean
-  email_domains?: string[]
-  config: IdentityProviderConfig
-  status: IdentityProviderStatus
-}
-
-/**
  * Update identity provider status request interface
  */
 export interface UpdateIdentityProviderStatusRequest {
