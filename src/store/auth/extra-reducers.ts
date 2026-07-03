@@ -4,7 +4,7 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { logoutAsync, validateAuthAsync, initializeAuthAsync, fetchProfileAsync, refreshAccountAsync } from './actions'
+import { validateAuthAsync, initializeAuthAsync, fetchProfileAsync, refreshAccountAsync } from './actions'
 import type { AuthState } from './types'
 import type { AccountEntity, ProfileEntity } from '@/services/api/auth/types'
 
@@ -26,22 +26,6 @@ function populateAccount(state: AuthState, account: AccountEntity | null) {
 
 export const authExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
   builder
-    // Logout
-    .addCase(logoutAsync.pending, (state) => {
-      state.isLoading = true
-    })
-    .addCase(logoutAsync.fulfilled, (state) => {
-      state.isLoading = false
-      populateAccount(state, null)
-      state.isAuthenticated = false
-      state.error = null
-    })
-    .addCase(logoutAsync.rejected, (state, action) => {
-      state.isLoading = false
-      populateAccount(state, null)
-      state.isAuthenticated = false
-      state.error = action.error.message || 'Logout failed'
-    })
     // Validate
     .addCase(validateAuthAsync.fulfilled, (state, action) => {
       populateAccount(state, action.payload)

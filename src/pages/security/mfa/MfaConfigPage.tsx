@@ -56,7 +56,7 @@ export default function MfaConfigPage() {
   const { showSuccess, showError } = useToast()
   const backTo = `/${tenantId}/security/mfa`
 
-  const { data: savedConfig, isLoading } = useMfaConfig()
+  const { data: savedConfig, isLoading, isError } = useMfaConfig()
   const updateMutation = useUpdateMfaConfig()
 
   const { handleSubmit, watch, setValue, control, formState: { errors, isSubmitting } } = useForm<MfaConfigFormData>({
@@ -153,6 +153,21 @@ export default function MfaConfigPage() {
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isError) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Multi-Factor Auth" title="Configure MFA" description="Set MFA enforcement, methods, and policies." />
+          <Card className="shadow-xs">
+            <CardContent className="py-12 text-center text-sm text-destructive">
+              Failed to load MFA configuration.
             </CardContent>
           </Card>
         </div>

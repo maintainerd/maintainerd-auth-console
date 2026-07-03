@@ -109,8 +109,8 @@ export default function PasskeySetupPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" className="size-8" onClick={() => downloadMutation.mutate(key.credential_uuid)} disabled={downloadMutation.isPending} title="Download passkey"><Download className="size-4" /></Button>
-                    <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => setPendingDelete(key)} title="Remove passkey"><Trash2 className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" className="size-8" onClick={() => downloadMutation.mutate(key.credential_uuid)} disabled={downloadMutation.isPending} title="Download passkey" aria-label={`Download passkey ${key.name}`}><Download className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => setPendingDelete(key)} title="Remove passkey" aria-label={`Remove passkey ${key.name}`}><Trash2 className="size-4" /></Button>
                   </div>
                 </div>
               ))}

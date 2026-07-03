@@ -19,8 +19,7 @@ export const registrationFlowSchema = yup.object({
       /^[a-z0-9][a-z0-9-_]*$/,
       'Identifier must contain only lowercase letters, numbers, hyphens, and underscores'
     )
-    .nullable()
-    .optional(),
+    .nullable(),
   description: yup
     .string()
     .required('Description is required')

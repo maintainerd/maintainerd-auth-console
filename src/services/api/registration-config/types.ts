@@ -27,9 +27,3 @@ export interface RegistrationConfigResponse {
   data: RegistrationConfig
   message: string
 }
-
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message: string
-}

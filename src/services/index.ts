@@ -46,7 +46,6 @@ export type * from './api/api-keys/types'
 export {
   createTenant,
   createAdmin,
-  createProfile,
   getSetupStatus,
   completeSetup,
   getDefaultTenantMetadata,
@@ -56,7 +55,6 @@ export {
 
 // Authentication service functions
 export {
-  logout,
   fetchProfile,
   fetchAccount,
   createUserProfile,
@@ -123,6 +121,3 @@ export {
   updateApiKeyStatus,
   fetchApiKeyConfig
 } from './api/api-keys'
-
-// Add more services as they are created
-// export { userService, UserService } from './user_service'

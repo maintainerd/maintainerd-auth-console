@@ -1,6 +1,7 @@
 import { createColumnHelper } from "@tanstack/react-table"
 import { format } from "date-fns"
-import { DataTableColumnHeader, DataTableBadgeStatus } from "@/components/data-table"
+import { DataTableColumnHeader } from "@/components/data-table"
+import { StatusBadge } from "@/components/details"
 import type { PermissionEntity } from "@/services/api/permissions/types"
 
 const columnHelper = createColumnHelper<PermissionEntity>()
@@ -14,14 +15,14 @@ export const permissionColumns = [
     header: "Description",
     cell: ({ getValue }) => <span className="text-muted-foreground text-sm">{getValue() ?? "—"}</span>,
   }),
-  columnHelper.accessor("api.display_name" as any, {
+  columnHelper.display({
     id: "api",
     header: "API",
     cell: ({ row }) => <span className="text-sm">{row.original.api?.display_name ?? row.original.api?.name ?? "—"}</span>,
   }),
   columnHelper.accessor("status", {
     header: "Status",
-    cell: ({ getValue }) => <DataTableBadgeStatus status={getValue()} />,
+    cell: ({ getValue }) => <StatusBadge status={getValue()} />,
   }),
   columnHelper.accessor("is_system", {
     header: "Type",

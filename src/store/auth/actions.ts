@@ -1,16 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import {
-  logout as authLogout,
   fetchAccount,
   validateAuthentication as validateAuth,
 } from '@/services'
-
-export const logoutAsync = createAsyncThunk(
-  'auth/logout',
-  async () => {
-    await authLogout()
-  }
-)
 
 export const validateAuthAsync = createAsyncThunk(
   'auth/validate',

@@ -78,7 +78,7 @@ export function useUpdateSmsTemplate() {
  */
 export function useUpdateSmsTemplateStatus() {
   const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateSmsTemplateStatusRequest }) =>
@@ -88,5 +88,6 @@ export function useUpdateSmsTemplateStatus() {
       queryClient.invalidateQueries({ queryKey: smsTemplateKeys.detail(result.smsTemplateId) })
       showSuccess(`SMS template ${result.status === 'active' ? 'activated' : 'deactivated'} successfully`)
     },
+    onError: (e) => showError(e),
   })
 }

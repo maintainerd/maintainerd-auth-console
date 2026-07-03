@@ -4,27 +4,70 @@
  */
 
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
-import { API_CONFIG, API_ENDPOINTS } from './config'
-import { getStoredOAuthSession, storeOAuthSession, clearOAuthSession } from './oauth-session'
+import { API_CONFIG, API_ENDPOINTS, TOKEN_DELIVERY_HEADER } from './config'
+import { clearOAuthSession } from './oauth-session'
 import { requestStepUp } from './stepUp'
-import './debug' // Import debug utilities in development
+
+// Debug helpers are development-only — never ship them in a production bundle.
+if (import.meta.env.DEV) {
+  void import('./debug')
+}
 
 // Custom error class
 export class ApiError extends Error {
   public status: number
   public code?: string
+  public retryAfter?: number
   public responseData?: {
     error: string | object
     details?: string | object
     success?: boolean
   }
 
-  constructor({ message, status, code }: { message: string; status: number; code?: string }) {
+  constructor({ message, status, code, retryAfter }: { message: string; status: number; code?: string; retryAfter?: number }) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.retryAfter = retryAfter
   }
+}
+
+// Maps an HTTP status to a distinct, user-facing message. Never surface the raw
+// `HTTP <status>` string to users — it leaks nothing useful and reads like a bug.
+function friendlyMessageForStatus(status: number): string {
+  switch (status) {
+    case 400:
+      return 'The request was invalid. Please check your input and try again.'
+    case 401:
+      return 'Your session has expired. Please sign in again.'
+    case 403:
+      return 'You do not have permission to perform this action.'
+    case 404:
+      return 'The requested resource could not be found.'
+    case 409:
+      return 'This action conflicts with the current state. Please refresh and try again.'
+    case 422:
+      return 'Some of the information provided was invalid. Please review and try again.'
+    case 429:
+      return 'Too many requests. Please wait a moment and try again.'
+    default:
+      if (status >= 500) return 'The server ran into a problem. Please try again in a moment.'
+      return 'Something went wrong. Please try again.'
+  }
+}
+
+// Parses a `Retry-After` header (delta-seconds or an HTTP date) into seconds.
+function parseRetryAfter(value: unknown): number | undefined {
+  if (typeof value !== 'string' || value.trim() === '') return undefined
+  const seconds = Number(value)
+  if (Number.isFinite(seconds) && seconds >= 0) return Math.ceil(seconds)
+  const dateMs = Date.parse(value)
+  if (!Number.isNaN(dateMs)) {
+    const delta = Math.ceil((dateMs - Date.now()) / 1000)
+    return delta > 0 ? delta : 0
+  }
+  return undefined
 }
 
 // Create axios instance with default configuration
@@ -35,21 +78,12 @@ const axiosInstance = axios.create({
   withCredentials: true, // Include cookies for authentication
 })
 
-axiosInstance.interceptors.request.use((config) => {
-  // On a step-up retry the elevated (acr=2) access token has already been set
-  // on the request explicitly by the response interceptor. Do NOT overwrite it
-  // with the stored (acr=1) session token, or the retried sensitive action would
-  // still be rejected with step_up_required.
-  if ((config as RetriableRequestConfig)._stepUpRetry) {
-    return config
-  }
-  const session = getStoredOAuthSession()
-  if (session?.accessToken) {
-    config.headers = config.headers ?? {}
-    config.headers.Authorization = `${session.tokenType || 'Bearer'} ${session.accessToken}`
-  }
-  return config
-})
+// Authentication now rides entirely on httpOnly cookies (withCredentials above).
+// The access / refresh / id tokens are delivered as cookies via
+// `X-Token-Delivery: cookie` on the token-exchange and refresh requests, so
+// there is no Authorization header to attach from JS on normal requests — the
+// only exception is the step-up retry below, which attaches a short-lived
+// elevated (acr=2) access token returned in the step-up response body.
 
 // Endpoints where a 401 means a genuine credential failure (not an expired
 // session), so we must NOT attempt a token refresh — including the refresh
@@ -69,42 +103,25 @@ let refreshPromise: Promise<void> | null = null
 
 function refreshSession(): Promise<void> {
   if (!refreshPromise) {
-    const oauthSession = getStoredOAuthSession()
-    if (!oauthSession?.refreshToken) {
-      return Promise.reject(new ApiError({
-        message: 'No OAuth refresh token available',
-        status: 401,
-        code: 'NO_OAUTH_REFRESH_TOKEN',
-      }))
-    }
-
-    const form = new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: oauthSession.refreshToken,
-      client_id: oauthSession.clientId,
-    })
-
+    // Cookie-based rotation: `withCredentials` sends the httpOnly refresh-token
+    // cookie and `X-Token-Delivery: cookie` tells the backend to rotate and
+    // Set-Cookie the fresh access/id/refresh tokens. The refresh token rides in
+    // the cookie, never in localStorage. Send `{}` (not null) so axios keeps the
+    // `Content-Type: application/json` header the backend requires on POST.
+    //
+    // TODO(auth-cookies): `/refresh-token` lives on the public API and its
+    // `__Secure-refresh_token` cookie is scoped to `/api/v1/refresh-token`. In
+    // deployments where the console reaches the public API on a different origin
+    // (or via the `/public-api` proxy prefix) the cookie path may not match this
+    // request path, so silent refresh can fail and the user is bounced back
+    // through the hosted-identity login. The console, private API, and public API
+    // must be served same-site for httpOnly cookie auth to round-trip fully.
     refreshPromise = axios
-      .post(`${API_CONFIG.PUBLIC_BASE_URL}/oauth/token`, form, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      .post(`${API_CONFIG.PUBLIC_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`, {}, {
+        headers: { ...TOKEN_DELIVERY_HEADER },
+        withCredentials: true,
       })
-      .then((response) => {
-        const data = response.data as {
-          access_token: string
-          refresh_token?: string
-          id_token?: string
-          token_type?: string
-          expires_in?: number
-        }
-        storeOAuthSession({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token || oauthSession.refreshToken,
-          idToken: data.id_token,
-          tokenType: data.token_type || 'Bearer',
-          expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000,
-          clientId: oauthSession.clientId,
-        })
-      })
+      .then(() => undefined)
       .catch((error) => {
         clearOAuthSession()
         throw error
@@ -158,19 +175,32 @@ axiosInstance.interceptors.response.use(
 
     if (error.response) {
       // Server responded with error status
+      const status = error.response.status
       const data = error.response.data as {
         error?: string
         details?: string | object
         success?: boolean
         code?: string
       } | undefined
-      const errorMessage = data?.error || `HTTP ${error.response.status}: ${error.response.statusText}`
+
+      const retryAfter = status === 429
+        ? parseRetryAfter(error.response.headers?.['retry-after'])
+        : undefined
+
+      // Prefer a meaningful message from the backend; otherwise fall back to a
+      // distinct per-status message. Never expose the raw `HTTP <status>` text.
+      const backendMessage = typeof data?.error === 'string' && data.error.trim() !== '' ? data.error : undefined
+      let errorMessage = backendMessage || friendlyMessageForStatus(status)
+      if (status === 429 && !backendMessage && retryAfter && retryAfter > 0) {
+        errorMessage = `Too many requests. Please try again in ${retryAfter} second${retryAfter === 1 ? '' : 's'}.`
+      }
       const errorDetails = data?.details || undefined
 
       const apiError = new ApiError({
         message: errorMessage,
-        status: error.response.status,
+        status,
         code: data?.code,
+        retryAfter,
       })
 
       // Attach the original response data for more detailed error handling

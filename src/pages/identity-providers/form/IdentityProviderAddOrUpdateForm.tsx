@@ -72,7 +72,7 @@ export default function IdentityProviderAddOrUpdateForm() {
   const testConnectionMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => testIdentityProviderConnection(data),
     onSuccess: (result) => setTestResult(result),
-    onError: (err: any) => setTestResult({ success: false, message: err?.message ?? "Connection test failed" }),
+    onError: (err: unknown) => setTestResult({ success: false, message: err instanceof Error ? err.message : "Connection test failed" }),
   })
 
   // React Hook Form setup

@@ -45,6 +45,12 @@ export function FormCheckboxField({
           checked={checked}
           onCheckedChange={onCheckedChange}
           disabled={disabled}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={
+            error ? `${fieldId}-error` :
+            description ? `${fieldId}-description` :
+            undefined
+          }
         />
         <div className="flex flex-col gap-1">
           <FieldLabel
@@ -54,7 +60,7 @@ export function FormCheckboxField({
             {label}
           </FieldLabel>
           {description && (
-            <FieldDescription className={cn(descriptionClassName)}>
+            <FieldDescription id={`${fieldId}-description`} className={cn(descriptionClassName)}>
               {description}
             </FieldDescription>
           )}
@@ -62,7 +68,7 @@ export function FormCheckboxField({
       </div>
 
       {error && (
-        <FieldError className={cn("text-red-600", errorClassName)}>
+        <FieldError id={`${fieldId}-error`} className={cn("text-red-600", errorClassName)}>
           {error}
         </FieldError>
       )}

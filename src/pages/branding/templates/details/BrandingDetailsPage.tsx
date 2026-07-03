@@ -55,7 +55,7 @@ export default function BrandingDetailsPage() {
               <DetailsTab branding={branding} />
             </TabsContent>
             <TabsContent value="clients" className="mt-4">
-              <ClientsTab brandingId={branding.branding_id} tenantId={tenantId!} />
+              <ClientsTab brandingId={branding.branding_id} />
             </TabsContent>
           </Tabs>
         </>
@@ -159,7 +159,7 @@ function DetailsTab({ branding }: { branding: Branding }) {
   )
 }
 
-function ClientsTab({ brandingId, tenantId }: { brandingId: string; tenantId: string }) {
+function ClientsTab({ brandingId }: { brandingId: string }) {
   const { data: clientsData, isLoading } = useClients({ limit: 200 })
 
   const matchingClients = (clientsData?.rows ?? []).filter(

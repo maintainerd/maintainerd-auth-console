@@ -37,9 +37,3 @@ export interface MfaConfigResponse {
   data: MfaConfig
   message: string
 }
-
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message: string
-}

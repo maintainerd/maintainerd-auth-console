@@ -18,7 +18,7 @@ export default function LockoutConfigPage() {
   const { showSuccess, showError } = useToast()
   const backTo = `/${tenantId}/security/lockout`
 
-  const { data: savedConfig, isLoading } = useLockoutConfig()
+  const { data: savedConfig, isLoading, isError } = useLockoutConfig()
   const updateMutation = useUpdateLockoutConfig()
 
   const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<LockoutConfigFormData>({
@@ -88,6 +88,21 @@ export default function LockoutConfigPage() {
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isError) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Account Lockout" title="Configure Account Lockout" description="Set lockout policies and behavior." />
+          <Card className="shadow-xs">
+            <CardContent className="py-12 text-center text-sm text-destructive">
+              Failed to load lockout configuration.
             </CardContent>
           </Card>
         </div>

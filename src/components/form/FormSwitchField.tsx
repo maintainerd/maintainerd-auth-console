@@ -55,7 +55,7 @@ export function FormSwitchField({
             {label}
           </FieldLabel>
           {description && (
-            <FieldDescription className={cn("text-sm", descriptionClassName)}>
+            <FieldDescription id={`${fieldId}-description`} className={cn("text-sm", descriptionClassName)}>
               {description}
             </FieldDescription>
           )}
@@ -66,11 +66,17 @@ export function FormSwitchField({
           onCheckedChange={onCheckedChange}
           disabled={disabled}
           className={switchClassName}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={
+            error ? `${fieldId}-error` :
+            description ? `${fieldId}-description` :
+            undefined
+          }
         />
       </div>
 
       {error && (
-        <FieldError className={cn("text-red-600", errorClassName)}>
+        <FieldError id={`${fieldId}-error`} className={cn("text-red-600", errorClassName)}>
           {error}
         </FieldError>
       )}

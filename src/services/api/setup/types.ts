@@ -61,7 +61,7 @@ export interface AdminData {
 
 export type CreateAdminResponse = ApiResponse<AdminData>
 
-export interface CreateProfileRequest {
+export interface SetupCreateProfileRequest {
   first_name: string
   middle_name?: string
   last_name?: string

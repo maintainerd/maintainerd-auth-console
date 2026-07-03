@@ -98,8 +98,13 @@ export const fetchUserSettings = async (): Promise<UserSettings> => {
   try {
     const r = await get<ApiResponse<UserSettings>>("/user-settings")
     return r.success && r.data ? r.data : {}
-  } catch {
-    return {}
+  } catch (err: unknown) {
+    // Only a 404 (no settings row yet) is a "return defaults" case. Any other
+    // failure (401/403/5xx) must surface so callers don't silently show an empty
+    // preferences form on a real error.
+    const apiErr = err as { status?: number }
+    if (apiErr?.status === 404) return {}
+    throw err
   }
 }
 

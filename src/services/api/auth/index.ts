@@ -5,23 +5,14 @@
 
 import { post, get } from '../client'
 import { API_CONFIG, API_ENDPOINTS } from '../config'
-import { clearOAuthSession, getStoredOAuthSession } from '../oauth-session'
+import { clearOAuthSession, getStoredOAuthSession, getSessionIdTokenHint } from '../oauth-session'
 import type { ApiResponse } from '../types'
-import type { ProfileEntity, AccountEntity, LogoutResponse, CreateProfileRequest, CreateProfileResponse, ProfileResponse } from './types'
+import type { ProfileEntity, AccountEntity, CreateProfileRequest, CreateProfileResponse, ProfileResponse } from './types'
 
 type AccountResponse = ApiResponse<AccountEntity>
 
 /**
- * Logout user (local only — clears the stored OAuth session).
- * @returns Promise<LogoutResponse>
- */
-export async function logout(): Promise<LogoutResponse> {
-  clearOAuthSession()
-  return { success: true, message: 'Logout successful' }
-}
-
-/**
- * Local-only logout: clears the console's stored OAuth tokens and performs a
+ * Local-only logout: clears the console's stored OAuth session marker and performs a
  * full-document navigation to `to` (defaults to the public `/login` page).
  *
  * This does NOT end the hosted-identity SSO session — use it for flows that want
@@ -55,10 +46,14 @@ export function logoutAndRedirect(to: string = '/login'): void {
  */
 export function logoutViaIdentity(): void {
   const session = getStoredOAuthSession()
+  // Best-effort id_token_hint: the id_token now lives in an httpOnly cookie and
+  // is only readable from JS for the current page session. Logout still works
+  // without it — client_id plus the backend session cookie identify the session.
+  const idTokenHint = getSessionIdTokenHint()
   clearOAuthSession()
 
   const params = new URLSearchParams()
-  if (session?.idToken) params.set('id_token_hint', session.idToken)
+  if (idTokenHint) params.set('id_token_hint', idTokenHint)
   if (session?.clientId) params.set('client_id', session.clientId)
   params.set('post_logout_redirect_uri', `${window.location.origin}/logout`)
 
@@ -78,8 +73,12 @@ export async function fetchProfile(): Promise<ProfileEntity | null> {
     }
 
     return null
-  } catch {
-    return null
+  } catch (err: unknown) {
+    // A missing profile (404) is expected for newly registered users — return
+    // null. Any other error (401/403/5xx) is a real failure and must propagate.
+    const apiErr = err as { status?: number }
+    if (apiErr?.status === 404) return null
+    throw err
   }
 }
 
@@ -131,12 +130,18 @@ export async function fetchAccount(): Promise<AccountEntity | null> {
     const response = await get<AccountResponse>(API_ENDPOINTS.AUTH.ACCOUNT)
     if (response.success && response.data) return response.data
     return null
-  } catch { return null }
+  } catch (err: unknown) {
+    // Mirror validateAuthentication: a genuine auth failure (401/403) must
+    // propagate so the caller can react (e.g. redirect to login); other errors
+    // resolve to null.
+    const apiErr = err as { status?: number }
+    if (apiErr?.status === 401 || apiErr?.status === 403) throw err
+    return null
+  }
 }
 
 // Export functions as an object for backward compatibility
 export const authService = {
-  logout,
   fetchProfile,
   fetchAccount,
   createUserProfile,

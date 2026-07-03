@@ -12,7 +12,7 @@ import { rateLimitConfigSchema, type RateLimitConfigFormData } from '@/lib/valid
 
 export default function RateLimitConfigPage() {
   const { showSuccess, showError } = useToast()
-  const { data: savedConfig, isLoading } = useRateLimitConfig()
+  const { data: savedConfig, isLoading, isError } = useRateLimitConfig()
   const updateMutation = useUpdateRateLimitConfig()
 
   const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<RateLimitConfigFormData>({
@@ -47,6 +47,16 @@ export default function RateLimitConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <p className="text-muted-foreground">Loading rate limit configuration...</p>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isError) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-sm text-destructive">Failed to load rate limit configuration.</p>
         </div>
       </DetailsContainer>
     )

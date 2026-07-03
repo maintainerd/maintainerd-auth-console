@@ -31,9 +31,3 @@ export interface ThreatDetectionSettingsResponse {
   data: ThreatDetectionSettings
   message: string
 }
-
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message: string
-}

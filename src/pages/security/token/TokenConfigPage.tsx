@@ -36,7 +36,7 @@ export default function TokenConfigPage() {
   const { showSuccess, showError } = useToast()
   const backTo = `/${tenantId}/security/token`
 
-  const { data: savedConfig, isLoading } = useTokenConfig()
+  const { data: savedConfig, isLoading, isError } = useTokenConfig()
   const updateMutation = useUpdateTokenConfig()
 
   const { handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<TokenConfigFormData>({
@@ -100,6 +100,21 @@ export default function TokenConfigPage() {
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isError) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader backUrl={backTo} backLabel="Back to Tokens" title="Configure Tokens" description="Set JWT signing, PKCE, and token claims." />
+          <Card className="shadow-xs">
+            <CardContent className="py-12 text-center text-sm text-destructive">
+              Failed to load token configuration.
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { API_CONFIG } from '../config'
-import { storeOAuthSession } from '../oauth-session'
+import { API_CONFIG, TOKEN_DELIVERY_HEADER } from '../config'
+import { storeOAuthSession, setSessionIdTokenHint } from '../oauth-session'
 import { buildConsoleAuthorizeUrl, consumePendingOAuthFlow, discardPendingOAuthFlow } from '@/utils/oauthFlow'
 import type { ApiResponse } from '../types'
 
@@ -137,17 +137,26 @@ export async function exchangeAuthorizationCode(params: {
     client_id: params.clientId,
   })
 
+  // `X-Token-Delivery: cookie` asks the backend to deliver the access/id/refresh
+  // tokens as httpOnly cookies (Set-Cookie) instead of only in the response body,
+  // and `withCredentials` lets the browser store them. The tokens are therefore
+  // NEVER persisted in localStorage — only a non-secret client marker is.
+  //
+  // TODO(auth-cookies): the RP token endpoint (`POST /oauth/token`,
+  // authorization_code grant) does not yet honor `X-Token-Delivery: cookie` on
+  // the backend — only `/refresh-token` and the login/broker-callback paths call
+  // `SetAuthCookies`. Until `/oauth/token` sets cookies here, the console's
+  // authenticated session depends on the backend delivering the httpOnly cookies
+  // on this exchange; the header is sent so it works transparently once the
+  // backend adds cookie delivery to this grant. We intentionally do not fall back
+  // to storing the tokens in localStorage.
   const response = await axios.post<OAuthTokenResponse>(`${API_CONFIG.PUBLIC_BASE_URL}/oauth/token`, form, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...TOKEN_DELIVERY_HEADER },
     withCredentials: true,
   })
 
-  storeOAuthSession({
-    accessToken: response.data.access_token,
-    refreshToken: response.data.refresh_token,
-    idToken: response.data.id_token,
-    tokenType: response.data.token_type || 'Bearer',
-    expiresAt: Date.now() + (response.data.expires_in ?? 3600) * 1000,
-    clientId: params.clientId,
-  })
+  // Persist only the non-secret client id (needed for RP-initiated logout). Keep
+  // the id_token as an in-memory logout hint for this page session only.
+  storeOAuthSession({ clientId: params.clientId })
+  setSessionIdTokenHint(response.data.id_token)
 }

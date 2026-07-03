@@ -19,9 +19,3 @@ export interface TokenConfigResponse {
   data: TokenConfig
   message: string
 }
-
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message: string
-}

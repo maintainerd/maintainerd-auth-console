@@ -65,9 +65,15 @@ export const FormPasswordField = forwardRef<HTMLInputElement, FormPasswordFieldP
               showToggle && "pr-10",
               className
             )}
+            aria-invalid={error ? "true" : "false"}
+            aria-describedby={
+              error ? `${fieldId}-error` :
+              description ? `${fieldId}-description` :
+              undefined
+            }
             {...props}
           />
-          
+
           {showToggle && (
             <Button
               type="button"
@@ -75,7 +81,6 @@ export const FormPasswordField = forwardRef<HTMLInputElement, FormPasswordFieldP
               size="sm"
               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
               onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -90,13 +95,13 @@ export const FormPasswordField = forwardRef<HTMLInputElement, FormPasswordFieldP
         </div>
 
         {description && (
-          <FieldDescription className={cn(descriptionClassName)}>
+          <FieldDescription id={`${fieldId}-description`} className={cn(descriptionClassName)}>
             {description}
           </FieldDescription>
         )}
-        
+
         {error && (
-          <FieldError className={cn("text-red-600", errorClassName)}>
+          <FieldError id={`${fieldId}-error`} className={cn("text-red-600", errorClassName)}>
             {error}
           </FieldError>
         )}

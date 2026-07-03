@@ -45,7 +45,7 @@ function clearBranding() {
 
 export function ConsoleBrandingProvider({ children }: Props) {
   const tenantId = useAppSelector((state) => state.tenant.currentTenant?.tenant_id)
-  const prevTenantRef = useRef<string | undefined>()
+  const prevTenantRef = useRef<string | undefined>(undefined)
 
   const { data: brandings } = useBrandings()
   const activeBranding = brandings?.find((b) => b.is_active)

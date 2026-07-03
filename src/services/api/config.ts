@@ -3,16 +3,36 @@
  * Centralized configuration for API endpoints and settings
  */
 
+// Runtime environment injected by docker-entrypoint.sh into window.__ENV__.
+// Lets a single built image target different API origins per deployment without
+// a rebuild. Values are optional; build-time import.meta.env is the fallback.
+declare global {
+  interface Window {
+    __ENV__?: Record<string, string | undefined>
+  }
+}
+
+function runtimeEnv(key: string): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  const value = window.__ENV__?.[key]
+  // Ignore empty placeholders left by the local-dev config.js.
+  return value && value.trim() !== '' ? value : undefined
+}
+
 // Get base URL from environment variables
 // In development, use relative path to go through Vite proxy
-// In production, use the full API URL
+// In production, prefer runtime config, then the build-time value, then a default.
 const getBaseUrl = () => {
   if (import.meta.env.DEV) {
     // Development: use relative path to go through Vite proxy
     return '/api/v1'
   }
-  // Production: use environment variable or fallback
-  return import.meta.env.VITE_AUTH_API_BASE_URL || 'https://private-api.auth.maintainerd.local/api/v1'
+  // Production: runtime injection wins, then build-time env, then fallback.
+  return (
+    runtimeEnv('VITE_AUTH_API_BASE_URL') ||
+    import.meta.env.VITE_AUTH_API_BASE_URL ||
+    'https://private-api.auth.maintainerd.local/api/v1'
+  )
 }
 
 const getPublicBaseUrl = () => {
@@ -23,11 +43,19 @@ const getPublicBaseUrl = () => {
     // cert-trust failures that would otherwise abort the flow before it starts.
     return '/public-api/api/v1'
   }
-  return import.meta.env.VITE_AUTH_PUBLIC_API_BASE_URL || 'https://public-api.auth.maintainerd.local/api/v1'
+  return (
+    runtimeEnv('VITE_AUTH_PUBLIC_API_BASE_URL') ||
+    import.meta.env.VITE_AUTH_PUBLIC_API_BASE_URL ||
+    'https://public-api.auth.maintainerd.local/api/v1'
+  )
 }
 
 const getIdentityBaseUrl = () => {
-  return (import.meta.env.VITE_AUTH_IDENTITY_BASE_URL || 'https://identity.auth.maintainerd.local').replace(/\/$/, '')
+  return (
+    runtimeEnv('VITE_AUTH_IDENTITY_BASE_URL') ||
+    import.meta.env.VITE_AUTH_IDENTITY_BASE_URL ||
+    'https://identity.auth.maintainerd.local'
+  ).replace(/\/$/, '')
 }
 
 export const API_CONFIG = {
@@ -51,7 +79,6 @@ export const API_ENDPOINTS = {
     STATUS: '/setup/status',
     CREATE_TENANT: '/setup/create_tenant',
     CREATE_ADMIN: '/setup/create_admin',
-    CREATE_PROFILE: '/setup/create_profile',
     COMPLETE: '/setup/complete',
   },
   AUTH: {

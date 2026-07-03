@@ -1,10 +1,8 @@
 import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { useToast } from '@/hooks/useToast'
 import type { ProfileEntity } from '@/services/api/auth/types'
 import {
-  logoutAsync,
   validateAuthAsync,
   initializeAuthAsync,
   fetchProfileAsync,
@@ -14,26 +12,11 @@ import {
   clearError,
   setProfile
 } from '@/store/auth/reducers'
-import { clearTenant } from '@/store/tenant/reducers'
 
 export function useAuth() {
   const dispatch = useAppDispatch()
   const queryClient = useQueryClient()
-  const { showError } = useToast()
   const { profile, account, isAuthenticated, isLoading, isInitialized, error } = useAppSelector((state) => state.auth)
-
-  const logout = useCallback(async () => {
-    try {
-      await dispatch(logoutAsync()).unwrap()
-      dispatch(clearTenant())
-      queryClient.clear()
-    } catch (error) {
-      showError('Logout failed')
-      dispatch(clearTenant())
-      queryClient.clear()
-      throw error
-    }
-  }, [dispatch, queryClient, showError])
 
   const checkAuth = useCallback(async () => {
     try {
@@ -97,7 +80,6 @@ export function useAuth() {
     isInitialized,
     error,
     // Actions
-    logout,
     checkAuth,
     initializeAuth,
     clearAuthError,

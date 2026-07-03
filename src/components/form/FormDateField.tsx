@@ -89,6 +89,12 @@ export const FormDateField = forwardRef<HTMLButtonElement, FormDateFieldProps>(
               ref={ref}
               variant="outline"
               disabled={disabled}
+              aria-invalid={error ? "true" : "false"}
+              aria-describedby={
+                error ? `${fieldId}-error` :
+                description ? `${fieldId}-description` :
+                undefined
+              }
               className={cn(
                 "w-full justify-between font-normal",
                 !selectedDate && "text-muted-foreground",
@@ -137,13 +143,13 @@ export const FormDateField = forwardRef<HTMLButtonElement, FormDateFieldProps>(
         />
 
         {description && (
-          <FieldDescription className={cn(descriptionClassName)}>
+          <FieldDescription id={`${fieldId}-description`} className={cn(descriptionClassName)}>
             {description}
           </FieldDescription>
         )}
 
         {error && (
-          <FieldError className={cn("text-red-600", errorClassName)}>
+          <FieldError id={`${fieldId}-error`} className={cn("text-red-600", errorClassName)}>
             {error}
           </FieldError>
         )}

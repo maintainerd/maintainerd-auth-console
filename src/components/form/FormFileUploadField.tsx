@@ -52,7 +52,16 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
   ) => {
     const [dragActive, setDragActive] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(value || null)
+    // Local rejection message (e.g. oversize file) surfaced through FieldError,
+    // separate from the parent-controlled `error` prop.
+    const [rejectionError, setRejectionError] = useState<string | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+
+    // Generate ID if not provided so the label/input/error are properly linked.
+    const fieldId = label.toLowerCase().replace(/\s+/g, '-')
+
+    // Parent-provided validation error takes precedence over a local rejection.
+    const displayError = error || rejectionError
 
     const setInputRef = useCallback((node: HTMLInputElement | null) => {
       inputRef.current = node
@@ -67,12 +76,17 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
       if (!files || files.length === 0) return
 
       const file = files[0]
-      
-      // Validate file size
+
+      // Validate file size — surface a rejection message instead of failing silently.
       if (file.size > maxSize) {
-        // You might want to show an error here
+        setRejectionError(
+          `File is too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB.`
+        )
         return
       }
+
+      // Clear any previous rejection now that a valid file was chosen.
+      setRejectionError(null)
 
       // Create preview URL
       if (preview) {
@@ -137,7 +151,7 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
 
     return (
       <Field className={cn(containerClassName)}>
-        <FieldLabel className={cn(labelClassName)}>
+        <FieldLabel htmlFor={fieldId} className={cn(labelClassName)}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </FieldLabel>
@@ -170,7 +184,7 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
             className={cn(
               "relative border-2 border-dashed rounded-lg p-6 transition-colors",
               dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25",
-              error && "border-red-500",
+              displayError && "border-red-500",
               uploading && "opacity-50 pointer-events-none"
             )}
             onDragEnter={handleDrag}
@@ -180,11 +194,18 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
           >
             <input
               ref={setInputRef}
+              id={fieldId}
               type="file"
               accept={accept}
               onChange={handleChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               disabled={uploading}
+              aria-invalid={displayError ? "true" : "false"}
+              aria-describedby={
+                displayError ? `${fieldId}-error` :
+                description ? `${fieldId}-description` :
+                undefined
+              }
               {...props}
             />
             
@@ -212,15 +233,15 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
           </div>
         </div>
 
-        {description && !error && (
-          <FieldDescription className={cn("text-muted-foreground", descriptionClassName)}>
+        {description && !displayError && (
+          <FieldDescription id={`${fieldId}-description`} className={cn("text-muted-foreground", descriptionClassName)}>
             {description}
           </FieldDescription>
         )}
-        
-        {error && (
-          <FieldError className={cn(errorClassName)}>
-            {error}
+
+        {displayError && (
+          <FieldError id={`${fieldId}-error`} className={cn(errorClassName)}>
+            {displayError}
           </FieldError>
         )}
       </Field>

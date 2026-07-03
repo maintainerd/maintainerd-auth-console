@@ -139,7 +139,7 @@ export function useAssignRegistrationFlowRoles() {
 
   return useMutation({
     mutationFn: ({ registrationFlowId, data }: { registrationFlowId: string; data: { role_uuids: string[] } }) =>
-      assignRegistrationFlowRoles(registrationFlowId, data),
+      assignRegistrationFlowRoles(registrationFlowId, data.role_uuids),
     onSuccess: (_, variables) => {
       // Invalidate the roles list for this registration flow
       queryClient.invalidateQueries({ queryKey: registrationFlowKeys.rolesList(variables.registrationFlowId) })

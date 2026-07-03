@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { StepUpProvider } from './components/stepup/StepUpProvider'
@@ -6,90 +7,100 @@ import 'react-toastify/dist/ReactToastify.css'
 import '@/styles/toast.css'
 import { queryClient } from '@/lib/queryClient'
 import { AppBootstrap } from './components/auth/AppBootstrap'
-import NoAccessPage from './pages/no-access/NoAccessPage'
-import ServiceUnavailablePage from './pages/service-unavailable/ServiceUnavailablePage'
+import { PrivateLayout } from './components/layout/PrivateLayout'
+import AppLoadingScreen from './components/layout/AppLoadingScreen'
+import ErrorBoundary from './components/ErrorBoundary'
+
+// The app shell (bootstrap, layout, login landing) stays eager so the first
+// paint is immediate. Every route page below is code-split via React.lazy so
+// the initial bundle only carries the shell + the current route's chunk.
 import LoginPage from './pages/login/LoginPage'
 import OAuthCallbackPage from './pages/auth/OAuthCallbackPage'
-import SetupTenantPage from './pages/setup/tenant'
-import SetupAdminPage from './pages/setup/admin'
-import DashboardPage from './pages/dashboard'
-import { PrivateLayout } from './components/layout/PrivateLayout'
-import UsersPage from './pages/users'
-import UserDetailsPage from './pages/users/details'
-import InvitationsPage from './pages/invitations'
-import InviteForm from './pages/invitations/form/InviteForm'
-import InviteDetailsPage from './pages/invitations/details/InviteDetailsPage'
-import UserAddOrUpdateForm from './pages/users/form'
-import RolesPage from './pages/roles'
 
-import ServicesPage from './pages/services'
-import ServiceDetailsPage from './pages/services/details'
-import ServiceAddOrUpdateForm from './pages/services/form'
-import ApisPage from './pages/apis'
-import ApiDetailsPage from './pages/apis/details'
-import ApiAddOrUpdateForm from './pages/apis/form'
-import PermissionsPage from './pages/permissions/PermissionsPage'
-import RoleDetailsPage from './pages/roles/details'
-import RoleAddOrUpdateForm from './pages/roles/form'
-
-import IdentityProvidersPage from './pages/identity-providers'
-import IdentityProviderDetailsPage from './pages/identity-providers/details'
-import IdentityProviderAddOrUpdateForm from './pages/identity-providers/form'
-import ClientsPage from './pages/clients'
-import ClientDetailsPage from './pages/clients/details'
-import ClientAddOrUpdateForm from './pages/clients/form'
-import WebhooksPage from './pages/webhooks'
-import WebhookDetailsPage from './pages/webhooks/details'
-import WebhookAddOrUpdateForm from './pages/webhooks/form'
-import EventTypesPage from './pages/event-types'
-import { EventRoutesPage } from './pages/event-routes'
-import ApiKeysPage from './pages/api-keys'
-import ApiKeyDetailsPage from './pages/api-keys/details'
-import ApiKeyAddOrUpdateForm from './pages/api-keys/form'
-import PoliciesPage from './pages/policies'
-import PolicyDetailsPage from './pages/policies/details'
-import PolicyAddOrUpdateForm from './pages/policies/form'
-import MfaConfigPage from './pages/security/mfa/MfaConfigPage'
-import MfaViewPage from './pages/security/mfa/MfaViewPage'
-import PasswordPoliciesPage, { PasswordPoliciesFormPage } from './pages/security/password-policies'
-import SessionManagementPage, { SessionManagementFormPage } from './pages/security/session-management'
-import TokenViewPage from './pages/security/token/TokenViewPage'
-import TokenConfigPage from './pages/security/token/TokenConfigPage'
-import LockoutViewPage from './pages/security/lockout/LockoutViewPage'
-import LockoutConfigPage from './pages/security/lockout/LockoutConfigPage'
-import RegistrationViewPage from './pages/security/registration/RegistrationViewPage'
-import RegistrationConfigPage from './pages/security/registration/RegistrationConfigPage'
-import ThreatDetectionPage, { ThreatDetectionFormPage } from './pages/security/threat-detection'
-import IpRestrictionsPage from './pages/security/ip-restrictions'
-import { TenantSettingsPage } from './pages/tenant-settings/TenantSettingsPage'
-import TenantsPage from './pages/tenants'
-import TenantDetailsPage from './pages/tenants/details'
-import TenantAddOrUpdateForm from './pages/tenants/form'
-import RegistrationFlowsPage from './pages/registration-flows'
-import RegistrationFlowDetailsPage from './pages/registration-flows/details'
-import RegistrationFlowAddOrUpdateForm from './pages/registration-flows/form'
-import LogMonitoringPage from './pages/log-monitoring'
-import AuthEventDetailsPage from './pages/log-monitoring/details/AuthEventDetailsPage'
-import BrandingTemplatesPage from './pages/branding/templates'
-import BrandingDetailsPage from './pages/branding/templates/details/BrandingDetailsPage'
-import BrandingForm from './pages/branding/templates/form/BrandingForm'
-import EmailTemplatesPage from './pages/branding/email-templates'
-import EmailTemplateDetailsPage from './pages/branding/email-templates/details'
-import EmailTemplateForm from './pages/branding/email-templates/form'
-import SmsTemplatesPage from './pages/branding/sms-templates'
-import SmsTemplateDetailsPage from './pages/branding/sms-templates/details'
-import SmsTemplateForm from './pages/branding/sms-templates/form'
-import EmailDeliveryPage from './pages/messaging/email/EmailDeliveryPage'
-import EmailConfigPage from './pages/messaging/email/EmailConfigPage'
-import SMSDeliveryPage from './pages/messaging/sms/SMSDeliveryPage'
-import SMSConfigPage from './pages/messaging/sms/SMSConfigPage'
-import MFAPage, { MFAIndex } from './pages/account/MFAPage'
-import TOTPSetupPage from './pages/account/TOTPSetupPage'
-import PasskeySetupPage from './pages/account/PasskeySetupPage'
-import SMSSetupPage from './pages/account/SMSSetupPage'
-import EmailOtpSetupPage from './pages/account/EmailOtpSetupPage'
-import ProfilePage from './pages/account/ProfilePage'
-import SettingsPage from './pages/account/SettingsPage'
+const NoAccessPage = lazy(() => import('./pages/no-access/NoAccessPage'))
+const ServiceUnavailablePage = lazy(() => import('./pages/service-unavailable/ServiceUnavailablePage'))
+const SetupTenantPage = lazy(() => import('./pages/setup/tenant'))
+const SetupAdminPage = lazy(() => import('./pages/setup/admin'))
+const DashboardPage = lazy(() => import('./pages/dashboard'))
+const UsersPage = lazy(() => import('./pages/users'))
+const UserDetailsPage = lazy(() => import('./pages/users/details'))
+const InvitationsPage = lazy(() => import('./pages/invitations'))
+const InviteForm = lazy(() => import('./pages/invitations/form/InviteForm'))
+const InviteDetailsPage = lazy(() => import('./pages/invitations/details/InviteDetailsPage'))
+const UserAddOrUpdateForm = lazy(() => import('./pages/users/form'))
+const RolesPage = lazy(() => import('./pages/roles'))
+const ServicesPage = lazy(() => import('./pages/services'))
+const ServiceDetailsPage = lazy(() => import('./pages/services/details'))
+const ServiceAddOrUpdateForm = lazy(() => import('./pages/services/form'))
+const ApisPage = lazy(() => import('./pages/apis'))
+const ApiDetailsPage = lazy(() => import('./pages/apis/details'))
+const ApiAddOrUpdateForm = lazy(() => import('./pages/apis/form'))
+const PermissionsPage = lazy(() => import('./pages/permissions/PermissionsPage'))
+const RoleDetailsPage = lazy(() => import('./pages/roles/details'))
+const RoleAddOrUpdateForm = lazy(() => import('./pages/roles/form'))
+const IdentityProvidersPage = lazy(() => import('./pages/identity-providers'))
+const IdentityProviderDetailsPage = lazy(() => import('./pages/identity-providers/details'))
+const IdentityProviderAddOrUpdateForm = lazy(() => import('./pages/identity-providers/form'))
+const ClientsPage = lazy(() => import('./pages/clients'))
+const ClientDetailsPage = lazy(() => import('./pages/clients/details'))
+const ClientAddOrUpdateForm = lazy(() => import('./pages/clients/form'))
+const WebhooksPage = lazy(() => import('./pages/webhooks'))
+const WebhookDetailsPage = lazy(() => import('./pages/webhooks/details'))
+const WebhookAddOrUpdateForm = lazy(() => import('./pages/webhooks/form'))
+const EventTypesPage = lazy(() => import('./pages/event-types'))
+const EventRoutesPage = lazy(() => import('./pages/event-routes').then(m => ({ default: m.EventRoutesPage })))
+const ApiKeysPage = lazy(() => import('./pages/api-keys'))
+const ApiKeyDetailsPage = lazy(() => import('./pages/api-keys/details'))
+const ApiKeyAddOrUpdateForm = lazy(() => import('./pages/api-keys/form'))
+const PoliciesPage = lazy(() => import('./pages/policies'))
+const PolicyDetailsPage = lazy(() => import('./pages/policies/details'))
+const PolicyAddOrUpdateForm = lazy(() => import('./pages/policies/form'))
+const MfaConfigPage = lazy(() => import('./pages/security/mfa/MfaConfigPage'))
+const MfaViewPage = lazy(() => import('./pages/security/mfa/MfaViewPage'))
+const PasswordPoliciesPage = lazy(() => import('./pages/security/password-policies'))
+const PasswordPoliciesFormPage = lazy(() => import('./pages/security/password-policies').then(m => ({ default: m.PasswordPoliciesFormPage })))
+const SessionManagementPage = lazy(() => import('./pages/security/session-management'))
+const SessionManagementFormPage = lazy(() => import('./pages/security/session-management').then(m => ({ default: m.SessionManagementFormPage })))
+const TokenViewPage = lazy(() => import('./pages/security/token/TokenViewPage'))
+const TokenConfigPage = lazy(() => import('./pages/security/token/TokenConfigPage'))
+const LockoutViewPage = lazy(() => import('./pages/security/lockout/LockoutViewPage'))
+const LockoutConfigPage = lazy(() => import('./pages/security/lockout/LockoutConfigPage'))
+const RegistrationViewPage = lazy(() => import('./pages/security/registration/RegistrationViewPage'))
+const RegistrationConfigPage = lazy(() => import('./pages/security/registration/RegistrationConfigPage'))
+const ThreatDetectionPage = lazy(() => import('./pages/security/threat-detection'))
+const ThreatDetectionFormPage = lazy(() => import('./pages/security/threat-detection').then(m => ({ default: m.ThreatDetectionFormPage })))
+const IpRestrictionsPage = lazy(() => import('./pages/security/ip-restrictions'))
+const TenantSettingsPage = lazy(() => import('./pages/tenant-settings/TenantSettingsPage').then(m => ({ default: m.TenantSettingsPage })))
+const TenantsPage = lazy(() => import('./pages/tenants'))
+const TenantDetailsPage = lazy(() => import('./pages/tenants/details'))
+const TenantAddOrUpdateForm = lazy(() => import('./pages/tenants/form'))
+const RegistrationFlowsPage = lazy(() => import('./pages/registration-flows'))
+const RegistrationFlowDetailsPage = lazy(() => import('./pages/registration-flows/details'))
+const RegistrationFlowAddOrUpdateForm = lazy(() => import('./pages/registration-flows/form'))
+const LogMonitoringPage = lazy(() => import('./pages/log-monitoring'))
+const AuthEventDetailsPage = lazy(() => import('./pages/log-monitoring/details/AuthEventDetailsPage'))
+const BrandingTemplatesPage = lazy(() => import('./pages/branding/templates'))
+const BrandingDetailsPage = lazy(() => import('./pages/branding/templates/details/BrandingDetailsPage'))
+const BrandingForm = lazy(() => import('./pages/branding/templates/form/BrandingForm'))
+const EmailTemplatesPage = lazy(() => import('./pages/branding/email-templates'))
+const EmailTemplateDetailsPage = lazy(() => import('./pages/branding/email-templates/details'))
+const EmailTemplateForm = lazy(() => import('./pages/branding/email-templates/form'))
+const SmsTemplatesPage = lazy(() => import('./pages/branding/sms-templates'))
+const SmsTemplateDetailsPage = lazy(() => import('./pages/branding/sms-templates/details'))
+const SmsTemplateForm = lazy(() => import('./pages/branding/sms-templates/form'))
+const EmailDeliveryPage = lazy(() => import('./pages/messaging/email/EmailDeliveryPage'))
+const EmailConfigPage = lazy(() => import('./pages/messaging/email/EmailConfigPage'))
+const SMSDeliveryPage = lazy(() => import('./pages/messaging/sms/SMSDeliveryPage'))
+const SMSConfigPage = lazy(() => import('./pages/messaging/sms/SMSConfigPage'))
+const MFAPage = lazy(() => import('./pages/account/MFAPage'))
+const MFAIndex = lazy(() => import('./pages/account/MFAPage').then(m => ({ default: m.MFAIndex })))
+const TOTPSetupPage = lazy(() => import('./pages/account/TOTPSetupPage'))
+const PasskeySetupPage = lazy(() => import('./pages/account/PasskeySetupPage'))
+const SMSSetupPage = lazy(() => import('./pages/account/SMSSetupPage'))
+const EmailOtpSetupPage = lazy(() => import('./pages/account/EmailOtpSetupPage'))
+const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
+const SettingsPage = lazy(() => import('./pages/account/SettingsPage'))
+const NotFoundPage = lazy(() => import('./pages/not-found/NotFoundPage'))
 
 function App() {
   // Auth + tenant initialization and all redirect gating now live in
@@ -98,6 +109,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <StepUpProvider>
       <AppBootstrap>
+      <ErrorBoundary>
+      <Suspense fallback={<AppLoadingScreen />}>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -202,8 +215,12 @@ function App() {
             <Route path="sms" element={<SMSSetupPage />} />
             <Route path="email-otp" element={<EmailOtpSetupPage />} />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
+      </ErrorBoundary>
       </AppBootstrap>
       <ToastContainer
         position="bottom-right"

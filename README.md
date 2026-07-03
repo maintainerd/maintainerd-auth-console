@@ -24,7 +24,7 @@
 
 ## Overview
 
-Maintainerd Auth Console is the management dashboard for [`maintainerd-auth`](https://github.com/maintainerd/auth) — a multi-tenant authentication and authorization service. It is the operator-facing surface for administering tenants, users, roles, OAuth2 clients, identity providers, policies, and security settings.
+Maintainerd Auth Console is the management dashboard for [`maintainerd-auth`](https://github.com/maintainerd/maintainerd-auth) — a multi-tenant authentication and authorization service. It is the operator-facing surface for administering tenants, users, roles, OAuth2 clients, identity providers, policies, and security settings.
 
 It targets the **internal management API** (`maintainerd-auth` port `:8080`) and is the equivalent of the Auth0 / Okta / Keycloak admin console for the Maintainerd ecosystem.
 
@@ -59,8 +59,8 @@ It can be used in three ways:
 
 ### Prerequisites
 
-- **Node.js 20+** (Vite 7 + React 19)
-- A running [`maintainerd-auth`](https://github.com/maintainerd/auth) backend exposing port `:8080`
+- **Node.js 22** (`>=22 <23`, see `.nvmrc`; Vite 7 + React 19)
+- A running [`maintainerd-auth`](https://github.com/maintainerd/maintainerd-auth) backend exposing port `:8080`
 
 ### Run the console
 
@@ -134,15 +134,27 @@ See [`docs/architecture.md`](docs/architecture.md) for the full breakdown.
 
 ## Configuration
 
-The console is configured via `.env` at the project root. In development, the Vite dev server proxies `/api/*` to the backend, so `VITE_AUTH_API_BASE_URL` is only used for production builds.
+The console is configured via `.env` at the project root (copy `.env.example` to
+`.env` to start). In development, the Vite dev server proxies `/api/*` and
+`/public-api/*` to the backend, so these base URLs are only used for production
+builds. See `.env.example` for the full list.
 
-| Variable                  | Default                                       | Description                                                    |
-| ------------------------- | --------------------------------------------- | -------------------------------------------------------------- |
-| `VITE_AUTH_API_BASE_URL`  | `http://api.maintainerd.auth/api/v1`          | Production base URL of the management API                      |
+| Variable                       | Default                                             | Description                                                     |
+| ------------------------------ | --------------------------------------------------- | --------------------------------------------------------------- |
+| `VITE_AUTH_API_BASE_URL`       | `https://private-api.auth.maintainerd.local/api/v1` | Production base URL of the internal management API (port `:8080`) |
+| `VITE_AUTH_PUBLIC_API_BASE_URL`| `https://public-api.auth.maintainerd.local/api/v1`  | Production base URL of the public API (port `:8081`, OAuth bootstrap) |
+| `VITE_AUTH_IDENTITY_BASE_URL`  | `https://identity.auth.maintainerd.local`           | Base URL of the hosted identity (public login) UI               |
+
+In production these can also be injected at container start via `window.__ENV__`
+(see `docker-entrypoint.sh`), letting a single built image target different API
+origins without a rebuild.
 
 ### Pointing the dev proxy at your backend
 
-`vite.config.ts` ships a proxy targeting `http://api.maintainerd.auth`. If your backend is reachable elsewhere (e.g. bare-metal on `localhost:8080`), update the `target` in `vite.config.ts`:
+`vite.config.ts` ships proxies targeting `https://private-api.auth.maintainerd.local`
+(internal API) and `https://public-api.auth.maintainerd.local` (public API). If
+your backend is reachable elsewhere (e.g. bare-metal on `localhost:8080`), update
+the `target` in `vite.config.ts`:
 
 ```ts
 server: {
@@ -171,7 +183,29 @@ npm run build
 
 Serve it behind the same Nginx (or equivalent) that fronts the management port, so cookies set by `maintainerd-auth` are same-site for the console origin.
 
-For Docker-based deployments, a multi-stage `Dockerfile` (Node build stage + Nginx serve stage) is the standard recipe — see the example in `maintainerd-auth/nginx/` for the proxy configuration that pairs with the console.
+### Run via Docker
+
+The repository ships a production `Dockerfile` (Node build stage → Nginx serve
+stage) with a committed, hardened `nginx.conf` (SPA fallback, gzip, immutable
+asset caching, and CSP + security headers). Nginx listens on port `8080` as a
+non-root user.
+
+```bash
+# Build the image
+docker build -t maintainerd-auth-console .
+
+# Run it, injecting API origins at container start (window.__ENV__)
+docker run --rm -p 8080:8080 \
+  -e VITE_AUTH_API_BASE_URL="https://private-api.auth.maintainerd.local/api/v1" \
+  -e VITE_AUTH_PUBLIC_API_BASE_URL="https://public-api.auth.maintainerd.local/api/v1" \
+  -e VITE_AUTH_IDENTITY_BASE_URL="https://identity.auth.maintainerd.local" \
+  maintainerd-auth-console
+```
+
+`docker-entrypoint.sh` writes `/config.js` from those environment variables on
+start, so the same image can target different environments without a rebuild.
+The full local stack (backend, console, identity, nginx) is wired up in the
+[`maintainerd-dev`](https://github.com/maintainerd/maintainerd-dev) Docker Compose environment.
 
 ---
 
@@ -205,9 +239,9 @@ npm run build    # type-check + production build
 
 ## Related Projects
 
-- [`maintainerd/auth`](https://github.com/maintainerd/auth) — Authentication & authorization backend (the API this console manages)
-- [`maintainerd/core`](https://github.com/maintainerd/core) — Core platform services
-- [`maintainerd/contracts`](https://github.com/maintainerd/contracts) — Shared gRPC contracts
+- [`maintainerd-auth`](https://github.com/maintainerd/maintainerd-auth) — Authentication & authorization backend (the API this console manages)
+- [`maintainerd-auth-identity`](https://github.com/maintainerd/maintainerd-auth-identity) — Hosted identity (public login) UI, the sibling front-end
+- [`maintainerd-dev`](https://github.com/maintainerd/maintainerd-dev) — Local development environment (Docker Compose, nginx, setup scripts)
 
 ---
 

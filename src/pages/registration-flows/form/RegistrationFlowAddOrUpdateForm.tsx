@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -44,16 +42,6 @@ const REGISTRATION_FIELDS = [
   { value: "phone", label: "Phone" },
 ]
 
-function parseRequiredFields(value: string | undefined): string[] {
-  if (!value) return []
-  try {
-    const parsed: unknown = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed.filter((field): field is string => typeof field === "string") : []
-  } catch {
-    return []
-  }
-}
-
 export default function RegistrationFlowAddOrUpdateForm() {
   const { tenantId, registrationFlowId } = useParams<{ tenantId: string; registrationFlowId?: string }>()
   const navigate = useNavigate()
@@ -68,7 +56,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
   }
 
   // Fetch existing registration flow if editing
-  const { data: registrationFlowData, isLoading: isFetchingRegistrationFlow } = useRegistrationFlow(registrationFlowId || '')
+  const { isLoading: isFetchingRegistrationFlow } = useRegistrationFlow(registrationFlowId || '')
   const createRegistrationFlowMutation = useCreateRegistrationFlow()
   const updateRegistrationFlowMutation = useUpdateRegistrationFlow()
 
@@ -105,10 +93,9 @@ export default function RegistrationFlowAddOrUpdateForm() {
     register,
     handleSubmit,
     control,
-    reset,
     formState: { errors, isSubmitting }
   } = useForm<RegistrationFlowFormData>({
-    resolver: yupResolver(registrationFlowSchema),
+    resolver: yupResolver(registrationFlowSchema) as Resolver<RegistrationFlowFormData>,
     defaultValues: {
       name: "",
       description: "",

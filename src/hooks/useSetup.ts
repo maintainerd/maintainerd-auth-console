@@ -5,17 +5,13 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '@/hooks/useToast'
-import { useAppDispatch } from '@/store/hooks'
-import { setProfile } from '@/store/auth/reducers'
 import {
   createTenantWithDefaults,
   createAdmin,
-  createProfile,
   completeSetup,
   getSetupStatus,
 } from '@/services'
-import type { CreateAdminRequest, CreateProfileRequest, SetupStatusData } from '@/services/api/setup/types'
-import type { ProfileEntity } from '@/services/api/auth/types'
+import type { CreateAdminRequest, SetupStatusData } from '@/services/api/setup/types'
 
 export function useSetupStatus() {
   const [status, setStatus] = useState<SetupStatusData | null>(null)
@@ -104,50 +100,6 @@ export function useSetupAdmin() {
   )
 
   return { isLoading, createAdminAccount }
-}
-
-export function useSetupProfile() {
-  const { showError, parseError } = useToast()
-  const dispatch = useAppDispatch()
-  const [isLoading, setIsLoading] = useState(false)
-
-  const createUserProfile = useCallback(
-    async (data: CreateProfileRequest) => {
-      setIsLoading(true)
-      try {
-        const response = await createProfile(data)
-        if (response.success && response.data) {
-          dispatch(setProfile(response.data as unknown as ProfileEntity))
-        }
-        return { success: true, data: response }
-      } catch (error: unknown) {
-        const parsedError = parseError(error)
-        if (parsedError.isValidationError && parsedError.fieldErrors) {
-          const fieldErrorMessages = Object.entries(parsedError.fieldErrors)
-            .map(([field, message]) => `${field}: ${message}`)
-            .join('\n')
-          showError(
-            `${parsedError.message}\n\nField errors:\n${fieldErrorMessages}`,
-            'Validation Failed',
-          )
-        } else if (error instanceof Error) {
-          showError(error, 'Failed to create profile')
-        } else {
-          showError('Unknown error', 'Failed to create profile')
-        }
-        return {
-          success: false,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          fieldErrors: parsedError.fieldErrors,
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [showError, parseError, dispatch],
-  )
-
-  return { isLoading, createUserProfile }
 }
 
 export function useCompleteSetup() {

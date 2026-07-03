@@ -97,9 +97,13 @@ export default function TOTPSetupPage() {
     onError: (e) => showError(e),
   })
 
-  const copyCodes = () => {
-    navigator.clipboard.writeText(backupCodes.join("\n"))
-    showSuccess("Codes copied to clipboard")
+  const copyCodes = async () => {
+    try {
+      await navigator.clipboard.writeText(backupCodes.join("\n"))
+      showSuccess("Codes copied to clipboard")
+    } catch {
+      showError("Couldn't copy codes to clipboard")
+    }
   }
 
   const downloadCodes = () => {

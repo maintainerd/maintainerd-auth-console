@@ -3,6 +3,14 @@ dist
 .git
 .env*
 coverage
+test-results
+playwright-report
+.lighthouseci/
 .agents/
 .claude/
 graphify-out/
+*.log
+.codex
+.opencode
+CLAUDE.md
+AGENTS.md

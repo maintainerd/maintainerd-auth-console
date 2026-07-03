@@ -78,7 +78,7 @@ export function useUpdateEmailTemplate() {
  */
 export function useUpdateEmailTemplateStatus() {
   const queryClient = useQueryClient()
-  const { showSuccess } = useToast()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateEmailTemplateStatusRequest }) =>
@@ -88,5 +88,6 @@ export function useUpdateEmailTemplateStatus() {
       queryClient.invalidateQueries({ queryKey: emailTemplateKeys.detail(result.emailTemplateId) })
       showSuccess(`Email template ${result.status === 'active' ? 'activated' : 'deactivated'} successfully`)
     },
+    onError: (e) => showError(e),
   })
 }

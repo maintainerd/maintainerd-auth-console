@@ -68,7 +68,7 @@ export async function fetchRegistrationFlows(
   if (response.success && response.data) {
     return {
       ...response.data,
-      rows: response.data.rows.map(mapFlow),
+      rows: (response.data.rows as unknown as RawFlow[]).map(mapFlow),
     }
   }
 
@@ -161,7 +161,7 @@ export async function fetchRegistrationFlowRoles(
   const queryParams = new URLSearchParams()
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null) {
         queryParams.append(key, String(value))
       }
     })
@@ -173,7 +173,7 @@ export async function fetchRegistrationFlowRoles(
   if (response.success && response.data) {
     return {
       ...response.data,
-      rows: response.data.rows.map(mapRole),
+      rows: (response.data.rows as unknown as RawFlow[]).map(mapRole),
     }
   }
 
@@ -195,7 +195,7 @@ export async function assignRegistrationFlowRoles(
   if (response.success && response.data) {
     return {
       ...response.data,
-      rows: response.data.rows.map(mapRole),
+      rows: (response.data.rows as unknown as RawFlow[]).map(mapRole),
     }
   }
 

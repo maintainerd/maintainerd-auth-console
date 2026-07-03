@@ -69,6 +69,12 @@ export function FormSelectField({
       >
         <SelectTrigger
           id={fieldId}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={
+            error ? `${fieldId}-error` :
+            description ? `${fieldId}-description` :
+            undefined
+          }
           className={cn(
             "w-full",
             error && "border-red-500 focus:ring-red-500",
@@ -91,13 +97,13 @@ export function FormSelectField({
       </Select>
 
       {description && (
-        <FieldDescription className={cn(descriptionClassName)}>
+        <FieldDescription id={`${fieldId}-description`} className={cn(descriptionClassName)}>
           {description}
         </FieldDescription>
       )}
 
       {error && (
-        <FieldError className={cn("text-red-600", errorClassName)}>
+        <FieldError id={`${fieldId}-error`} className={cn("text-red-600", errorClassName)}>
           {error}
         </FieldError>
       )}
