@@ -19,7 +19,7 @@ export function useTenantMembers(tenantId: string, params: TenantMembersListPara
 export function useAddTenantMember(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ user_id, role }: { user_id: string; role: 'owner' | 'member' }) => 
+    mutationFn: ({ user_id, role }: { user_id: string; role: 'owner' | 'admin' | 'member' }) =>
       addTenantMember(tenantId, user_id, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-members', tenantId] })
@@ -30,7 +30,7 @@ export function useAddTenantMember(tenantId: string) {
 export function useUpdateTenantMemberRole(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tenant_member_id, role }: { tenant_member_id: string; role: 'owner' | 'member' }) =>
+    mutationFn: ({ tenant_member_id, role }: { tenant_member_id: string; role: 'owner' | 'admin' | 'member' }) =>
       updateTenantMemberRole(tenantId, tenant_member_id, role),
     onSuccess: () => {
       // Only invalidate tenant-members query, not tenant query

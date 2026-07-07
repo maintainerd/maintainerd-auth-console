@@ -28,16 +28,10 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     first_name: "John",
     middle_name: "M",
     last_name: "Doe",
-    suffix: "Jr",
     display_name: "Johnny",
-    bio: "hi",
     birthdate: "1990-05-01T00:00:00Z",
     gender: "male",
-    phone: "555",
     email: "john@example.com",
-    address: "1 Main",
-    city: "NYC",
-    country: "US",
     timezone: "UTC",
     language: "en",
     profile_url: "https://example.com/a.png",
@@ -102,13 +96,12 @@ describe("ProfileFormDialog", () => {
     expect(screen.getByText("No custom metadata yet.")).toBeInTheDocument()
   })
 
-  it("loads profile values (incl. middle_name/suffix/profile_url) when editing", () => {
+  it("loads profile values (incl. middle_name/profile_url) when editing", () => {
     renderForm({ profile: makeProfile() })
     expect(screen.getByRole("heading", { name: "Edit Profile" })).toBeInTheDocument()
     expect(screen.getByText("Update the profile information below")).toBeInTheDocument()
     expect(screen.getByDisplayValue("John")).toBeInTheDocument()
     expect(screen.getByDisplayValue("M")).toBeInTheDocument()
-    expect(screen.getByDisplayValue("Jr")).toBeInTheDocument()
     expect(screen.getByDisplayValue("https://example.com/a.png")).toBeInTheDocument()
     // Existing metadata loads into custom fields.
     expect(screen.getByDisplayValue("employee_id")).toBeInTheDocument()
@@ -123,16 +116,10 @@ describe("ProfileFormDialog", () => {
       first_name: "Solo",
       middle_name: "",
       last_name: "",
-      suffix: "",
       display_name: "",
-      bio: "",
       birthdate: undefined,
       gender: "",
-      phone: "",
       email: "",
-      address: "",
-      city: "",
-      country: "",
       timezone: "",
       language: "",
       profile_url: "",

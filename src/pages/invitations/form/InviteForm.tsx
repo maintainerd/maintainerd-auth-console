@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { AlertTriangle } from "lucide-react"
@@ -17,9 +17,10 @@ import { useToast } from "@/hooks/useToast"
 
 const inviteSchema = yup.object({
   email: yup.string().trim().required("Email is required").email("Enter a valid email address"),
+  callback_url: yup.string().url("Must be a valid URL").optional(),
 })
 
-type InviteFormData = yup.InferType<typeof inviteSchema>
+type InviteFormData = { email: string; callback_url?: string }
 
 // "default registration" — no registration flow attached.
 const NO_FLOW = "__none__"
@@ -48,8 +49,8 @@ export default function InviteForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<InviteFormData>({
-    resolver: yupResolver(inviteSchema),
-    defaultValues: { email: "" },
+    resolver: yupResolver(inviteSchema) as unknown as Resolver<InviteFormData>,
+    defaultValues: { email: "", callback_url: "" },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   })
@@ -61,6 +62,7 @@ export default function InviteForm() {
       await sendMutation.mutateAsync({
         email: data.email.trim(),
         registration_flow_uuid: registrationFlowId !== NO_FLOW ? registrationFlowId : undefined,
+        callback_url: data.callback_url || undefined,
       })
       showSuccess(`Invitation sent to ${data.email.trim()}`)
       navigate(listUrl)
@@ -125,6 +127,16 @@ export default function InviteForm() {
                 onValueChange={setRegistrationFlowId}
                 disabled={isLoading}
                 description="Optional — default registration assigns only the registered role. Selecting a flow adds that flow's additional roles on completion."
+              />
+
+              <FormInputField
+                label="Post-registration callback URL"
+                type="url"
+                placeholder="https://…/welcome"
+                disabled={isLoading || registrationFlowId === NO_FLOW}
+                error={errors.callback_url?.message}
+                description="Must exactly match a redirect URI registered on the flow's client."
+                {...register("callback_url")}
               />
             </CardContent>
           </Card>

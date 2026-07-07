@@ -1,9 +1,9 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { AppWindow, Braces, Building2, KeyRound, Link2, Server, Settings } from "lucide-react"
+import { AppWindow, Braces, Building2, KeyRound, Link2, Server, Settings, Shield } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useClient } from "@/hooks/useClients"
-import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris, ClientIdentityProviders } from "./components"
+import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris, ClientIdentityProviders, ClientRoles } from "./components"
 
 const TABS = [
   { value: "overview", label: "Overview", icon: AppWindow },
@@ -12,6 +12,7 @@ const TABS = [
   { value: "config", label: "OAuth & Tokens", icon: Settings },
   { value: "uris", label: "URIs & Origins", icon: Link2 },
   { value: "apis", label: "API Permissions", icon: Server },
+  { value: "roles", label: "Roles", icon: Shield },
   { value: "metadata", label: "Metadata", icon: Braces },
 ] as const
 
@@ -80,6 +81,10 @@ export default function ClientDetailsPage() {
 
             <TabsContent value="apis" className="mt-4">
               <ClientApis clientId={clientId!} />
+            </TabsContent>
+
+            <TabsContent value="roles" className="mt-4">
+              <ClientRoles clientId={clientId!} />
             </TabsContent>
 
             <TabsContent value="metadata" className="mt-4">

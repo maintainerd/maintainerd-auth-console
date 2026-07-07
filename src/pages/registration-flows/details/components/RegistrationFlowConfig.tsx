@@ -7,16 +7,6 @@ interface RegistrationFlowConfigProps {
   registrationFlowId: string
 }
 
-function parseRequiredFields(value: string | undefined): string[] {
-  if (!value) return []
-  try {
-    const parsed: unknown = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed.filter((f): f is string => typeof f === "string") : []
-  } catch {
-    return []
-  }
-}
-
 export function RegistrationFlowConfig({ registrationFlowId }: RegistrationFlowConfigProps) {
   const { data: registrationFlow, isLoading, isError } = useRegistrationFlow(registrationFlowId)
 
@@ -36,7 +26,7 @@ export function RegistrationFlowConfig({ registrationFlowId }: RegistrationFlowC
     )
   }
 
-  const requiredFields = parseRequiredFields(registrationFlow.required_fields)
+  const requiredFields = registrationFlow.required_fields ?? []
 
   return (
     <InformationCard title="Configuration" description="Core registration flow settings" icon={Settings}>

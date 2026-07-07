@@ -32,7 +32,7 @@ export default function BrandingTemplatesPage() {
       <PageContainer>
         <div className="flex items-start justify-between gap-4">
           <PageHeader
-            title="Branding Templates"
+            title="Themes"
             description="Create and manage branding themes. The active template is the style loaded across the auth experience."
           />
           <Button

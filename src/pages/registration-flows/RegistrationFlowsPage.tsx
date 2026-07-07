@@ -5,7 +5,7 @@ export default function RegistrationFlowsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Registration Flows"
+        title="Registration"
         description="Define how users authenticate and onboard into your applications, with automatic role assignment per flow."
       />
       <RegistrationFlowListing />

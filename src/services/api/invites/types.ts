@@ -22,4 +22,5 @@ export interface Invite {
 export interface SendInviteRequest {
   email: string
   registration_flow_uuid?: string
+  callback_url?: string
 }

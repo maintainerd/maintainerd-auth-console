@@ -179,14 +179,9 @@ describe("UserProfiles", () => {
             last_name: "Doe",
             gender: "male",
             email: "john@example.com",
-            phone: "555",
             birthdate: "1990-05-01",
             timezone: "UTC",
             language: "en",
-            address: "1 Main St",
-            city: "NYC",
-            country: "US",
-            bio: "Hello there",
             profile_url: "https://example.com/a.png",
             metadata: { employee_id: "E1" },
           }),
@@ -202,9 +197,7 @@ describe("UserProfiles", () => {
     expect(screen.getByText("Johnny")).toBeInTheDocument()
     expect(screen.getByText("John Doe · Male")).toBeInTheDocument()
     expect(screen.getByText("Default")).toBeInTheDocument()
-    expect(screen.getByText("Hello there")).toBeInTheDocument()
     expect(screen.getByText("john@example.com")).toBeInTheDocument()
-    expect(screen.getByText("1 Main St · NYC, US")).toBeInTheDocument()
     // Metadata row.
     expect(screen.getByText("employee_id")).toBeInTheDocument()
     expect(screen.getByText("E1")).toBeInTheDocument()

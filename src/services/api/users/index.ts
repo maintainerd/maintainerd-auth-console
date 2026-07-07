@@ -32,6 +32,8 @@ import type {
   UserActivityResponse,
   UserSession,
   UserMFAResponse,
+  UserConsentsResponse,
+  TrustedDevicesResponse,
 } from './types'
 
 const userApi = createResourceApi<User, CreateUserRequest, UpdateUserRequest, UserListResponse>(
@@ -164,4 +166,19 @@ export const forcePasswordChange = (userId: string): Promise<void> =>
 export const unlinkUserIdentity = (userId: string, identityId: string): Promise<void> =>
   deleteRequest<ApiResponse<void>>(`${base}/${userId}/identities/${identityId}`).then((r) =>
     assertSuccess(r, 'unlink identity'),
+  )
+
+export const fetchUserConsents = (userId: string): Promise<UserConsentsResponse> =>
+  get<ApiResponse<UserConsentsResponse>>(`${base}/${userId}/consents`).then((r) =>
+    unwrap(r, 'fetch user consents'),
+  )
+
+export const fetchUserTrustedDevices = (userId: string): Promise<TrustedDevicesResponse> =>
+  get<ApiResponse<TrustedDevicesResponse>>(`${base}/${userId}/devices`).then((r) =>
+    unwrap(r, 'fetch user devices'),
+  )
+
+export const createErasureRequest = (userId: string): Promise<void> =>
+  post<ApiResponse<void>>(`${base}/${userId}/erasure-requests`).then((r) =>
+    assertSuccess(r, 'create erasure request'),
   )

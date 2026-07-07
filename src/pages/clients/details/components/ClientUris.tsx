@@ -11,30 +11,30 @@ interface ClientUrisProps {
 }
 
 const URI_LABELS: Record<ClientUriType, string> = {
-  "login-uri": "Login URI",
-  "redirect-uri": "Redirect URIs",
-  "origin-uri": "Allowed Origins",
-  "logout-uri": "Allowed Logout URLs",
-  "cors-origin-uri": "CORS Origins",
+  "login_uri": "Login URI",
+  "redirect_uri": "Redirect URIs",
+  "origin_uri": "Allowed Origins",
+  "logout_uri": "Allowed Logout URLs",
+  "cors_origin_uri": "CORS Origins",
 }
 
 const URI_DESCRIPTIONS: Record<ClientUriType, string> = {
-  "login-uri": "Where users are directed to begin login.",
-  "redirect-uri": "Where users return after authentication.",
-  "origin-uri": "Browser origins allowed to call this client.",
-  "logout-uri": "Where users can return after logout.",
-  "cors-origin-uri": "Origins allowed for cross-origin authentication.",
+  "login_uri": "Where users are directed to begin login.",
+  "redirect_uri": "Where users return after authentication.",
+  "origin_uri": "Browser origins allowed to call this client.",
+  "logout_uri": "Where users can return after logout.",
+  "cors_origin_uri": "Origins allowed for cross-origin authentication.",
 }
 
 export function ClientUris({ client }: ClientUrisProps) {
   const uris = client.uris ?? []
   const capability = getClientTypeCapability(client.client_type)
   const orderedTypes: ClientUriType[] = [
-    ...(capability.showLoginUri ? ["login-uri" as ClientUriType] : []),
-    ...(capability.showRedirectUris ? ["redirect-uri" as ClientUriType] : []),
-    ...(capability.showAllowedOrigins ? ["origin-uri" as ClientUriType] : []),
-    ...(capability.showLogoutUrls ? ["logout-uri" as ClientUriType] : []),
-    ...(capability.showCors ? ["cors-origin-uri" as ClientUriType] : []),
+    ...(capability.showLoginUri ? ["login_uri" as ClientUriType] : []),
+    ...(capability.showRedirectUris ? ["redirect_uri" as ClientUriType] : []),
+    ...(capability.showAllowedOrigins ? ["origin_uri" as ClientUriType] : []),
+    ...(capability.showLogoutUrls ? ["logout_uri" as ClientUriType] : []),
+    ...(capability.showCors ? ["cors_origin_uri" as ClientUriType] : []),
   ]
   const remainingTypes = [...new Set(uris.map((uri) => uri.type))]
     .filter((type) => !orderedTypes.includes(type))

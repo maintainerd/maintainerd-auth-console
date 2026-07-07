@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchEventRoutes,
+  fetchEventRouteById,
   createEventRoute,
   updateEventRoute,
   deleteEventRoute,
@@ -20,6 +21,14 @@ export function useEventRoutes() {
   return useQuery({
     queryKey: eventRouteKeys.list(),
     queryFn: fetchEventRoutes,
+  })
+}
+
+export function useEventRoute(routeId: string | undefined) {
+  return useQuery({
+    queryKey: ['event-routes', routeId],
+    queryFn: () => fetchEventRouteById(routeId!),
+    enabled: !!routeId,
   })
 }
 

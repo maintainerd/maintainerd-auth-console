@@ -49,12 +49,6 @@ export {
   type ClientFormData
 } from './clientSchema'
 
-// API Key schemas
-export {
-  apiKeySchema,
-  type ApiKeyFormData
-} from './apiKeySchema'
-
 // Role schemas
 export {
   roleSchema,

@@ -1,14 +1,15 @@
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
-import { FileText, Server } from "lucide-react"
+import { FileText, Server, History } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { usePolicy } from "@/hooks/usePolicies"
 import { useServicesByPolicy } from "./hooks/useServicesByPolicy"
-import { PolicyHeader, PolicyStatementsTab, PolicyServicesTab } from "./components"
+import { PolicyHeader, PolicyStatementsTab, PolicyServicesTab, PolicyHistoryTab } from "./components"
 
 const TABS = [
   { value: "statements", label: "Statements", icon: FileText },
   { value: "services", label: "Services", icon: Server },
+  { value: "history", label: "History", icon: History },
 ] as const
 
 export default function PolicyDetailsPage() {
@@ -64,6 +65,9 @@ export default function PolicyDetailsPage() {
             </TabsContent>
             <TabsContent value="services" className="mt-4">
               <PolicyServicesTab policyId={policyId!} />
+            </TabsContent>
+            <TabsContent value="history" className="mt-4">
+              <PolicyHistoryTab policyId={policyId!} />
             </TabsContent>
           </Tabs>
         </>

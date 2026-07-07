@@ -36,7 +36,7 @@ export default function ThreatViewPage() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Attack Protection"
+          title="Threat Protection"
           description="Brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring."
         />
 
@@ -70,7 +70,7 @@ export default function ThreatViewPage() {
                     <ShieldAlert className="size-6" />
                   </div>
                   <div className="min-w-0 space-y-1">
-                    <h1 className="text-lg font-semibold tracking-tight">Attack Protection</h1>
+                    <h1 className="text-lg font-semibold tracking-tight">Threat Protection</h1>
                   </div>
                 </div>
                 <Button variant="outline" size="sm" className="h-9 gap-2" onClick={() => navigate(configureUrl)}>

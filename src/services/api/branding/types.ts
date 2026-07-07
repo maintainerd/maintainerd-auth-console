@@ -40,4 +40,6 @@ export interface BrandingRequest {
   privacy_policy_url: string
   terms_of_service_url: string
   metadata: Record<string, unknown>
+  logo_data?: string         // base64-encoded; mutually exclusive with logo_url
+  logo_content_type?: string // "image/png" | "image/jpeg" | "image/webp"
 }

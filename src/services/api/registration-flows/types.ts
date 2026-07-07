@@ -24,7 +24,7 @@ export interface RegistrationFlow {
   status: RegistrationFlowStatus
   client_id: string
   verification_required: boolean
-  required_fields: string
+  required_fields?: string[]
   created_at: string
   updated_at: string
 }
@@ -63,7 +63,7 @@ export interface CreateRegistrationFlowRequest {
   status?: RegistrationFlowStatus
   client_id: string
   verification_required: boolean
-  required_fields: string
+  required_fields?: string[]
   role_ids?: string[]
 }
 
@@ -73,7 +73,7 @@ export interface UpdateRegistrationFlowRequest {
   status?: RegistrationFlowStatus
   client_id?: string
   verification_required: boolean
-  required_fields: string
+  required_fields?: string[]
   role_ids?: string[]
 }
 

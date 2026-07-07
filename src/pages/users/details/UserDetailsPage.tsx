@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { Shield, IdCard, KeyRound, Braces, Monitor, Activity, Smartphone } from "lucide-react"
+import { Shield, IdCard, KeyRound, Braces, Monitor, Activity, Smartphone, FileText } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailLayout } from "@/components/details"
 import { useUser } from "@/hooks/useUsers"
@@ -12,6 +12,8 @@ import {
   UserActivity,
   UserSessions,
   UserMFA,
+  UserConsents,
+  UserTrustedDevices,
 } from "./components"
 
 const TABS = [
@@ -21,6 +23,8 @@ const TABS = [
   { value: "mfa", label: "MFA", icon: Smartphone },
   { value: "sessions", label: "Sessions", icon: Monitor },
   { value: "activity", label: "Activity", icon: Activity },
+  { value: "consents", label: "Consents", icon: FileText },
+  { value: "devices", label: "Trusted Devices", icon: Smartphone },
   { value: "metadata", label: "Metadata", icon: Braces },
 ] as const
 
@@ -72,6 +76,12 @@ export default function UserDetailsPage() {
         </TabsContent>
         <TabsContent value="activity" className="mt-4">
           <UserActivity userId={userId!} />
+        </TabsContent>
+        <TabsContent value="consents" className="mt-4">
+          <UserConsents userId={userId!} />
+        </TabsContent>
+        <TabsContent value="devices" className="mt-4">
+          <UserTrustedDevices userId={userId!} />
         </TabsContent>
         <TabsContent value="metadata" className="mt-4">
           <UserMetadata user={user!} />

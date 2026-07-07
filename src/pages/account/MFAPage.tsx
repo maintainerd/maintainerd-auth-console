@@ -17,7 +17,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 // Where the user can arrive from, by `?from=` key. Determines where the hub's
 // "Back" returns to. Defaults to the dashboard when absent/unknown.
 const MFA_ORIGINS: Record<string, { path: string; label: string }> = {
-  dashboard: { path: "/dashboard", label: "Back to Get Started" },
+  dashboard: { path: "/dashboard", label: "Back to Dashboard" },
   settings: { path: "/account/settings?tab=security", label: "Back to Settings" },
 }
 

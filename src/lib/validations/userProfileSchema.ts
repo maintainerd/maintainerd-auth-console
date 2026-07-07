@@ -30,23 +30,9 @@ export const userProfileSchema = yup.object({
     .max(100, 'First name must be at most 100 characters'),
   middle_name: optionalString().max(100, 'Middle name must be at most 100 characters'),
   last_name: optionalString().max(100, 'Last name must be at most 100 characters'),
-  suffix: optionalString().max(50, 'Suffix must be at most 50 characters'),
   display_name: optionalString().max(100, 'Display name must be at most 100 characters'),
   birthdate: optionalString().matches(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate must be in YYYY-MM-DD format'),
   gender: optionalString().oneOf(GENDER_VALUES as unknown as string[], 'Invalid gender'),
-  bio: optionalString().max(1000, 'Bio must be at most 1000 characters'),
-  phone: optionalString().max(20, 'Phone must be at most 20 characters'),
-  address: optionalString().max(500, 'Address must be at most 500 characters'),
-  city: optionalString().max(100, 'City must be at most 100 characters'),
-  country: yup
-    .string()
-    .transform((value: unknown) => {
-      if (typeof value !== 'string') return undefined
-      const trimmed = value.trim()
-      return trimmed === '' ? undefined : trimmed.toUpperCase()
-    })
-    .optional()
-    .length(2, 'Country must be a 2-letter ISO code (e.g., US)'),
   profile_url: optionalString()
     .test('is-http-url', 'Enter a valid URL starting with http:// or https://', (value) => {
       if (!value) return true

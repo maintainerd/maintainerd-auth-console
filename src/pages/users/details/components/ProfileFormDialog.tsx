@@ -15,12 +15,11 @@ import {
 } from "@/components/ui/dialog"
 import {
   FormInputField,
-  FormTextareaField,
   FormSelectField,
   FormDateField,
 } from "@/components/form"
 import { userProfileSchema } from "@/lib/validations"
-import { countryOptions, genderOptions } from "@/lib/constants"
+import { genderOptions } from "@/lib/constants"
 import { useCreateUserProfile, useUpdateUserProfile } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import { useMetadataFields } from "@/hooks/useMetadataFields"
@@ -67,15 +66,9 @@ export function ProfileFormDialog({
       first_name: "",
       middle_name: undefined,
       last_name: "",
-      suffix: undefined,
       display_name: undefined,
       birthdate: undefined,
       gender: undefined,
-      bio: undefined,
-      phone: undefined,
-      address: undefined,
-      city: undefined,
-      country: undefined,
       profile_url: undefined,
     },
     mode: 'onSubmit',
@@ -88,15 +81,9 @@ export function ProfileFormDialog({
         first_name: profile.first_name,
         middle_name: profile.middle_name || undefined,
         last_name: profile.last_name || undefined,
-        suffix: profile.suffix || undefined,
         display_name: profile.display_name || undefined,
         birthdate: profile.birthdate ? profile.birthdate.split('T')[0] : undefined,
         gender: profile.gender || undefined,
-        bio: profile.bio || undefined,
-        phone: profile.phone || undefined,
-        address: profile.address || undefined,
-        city: profile.city || undefined,
-        country: profile.country || undefined,
         profile_url: profile.profile_url || undefined,
       })
 
@@ -106,15 +93,9 @@ export function ProfileFormDialog({
         first_name: "",
         middle_name: undefined,
         last_name: "",
-        suffix: undefined,
         display_name: undefined,
         birthdate: undefined,
         gender: undefined,
-        bio: undefined,
-        phone: undefined,
-        address: undefined,
-        city: undefined,
-        country: undefined,
         profile_url: undefined,
       })
       resetFields(null)
@@ -136,15 +117,9 @@ export function ProfileFormDialog({
         first_name: data.first_name,
         middle_name: data.middle_name,
         last_name: data.last_name,
-        suffix: data.suffix,
         display_name: data.display_name,
         birthdate: data.birthdate,
         gender: data.gender,
-        bio: data.bio,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        country: data.country,
         profile_url: data.profile_url,
         metadata: metadataPayload,
       }
@@ -209,13 +184,6 @@ export function ProfileFormDialog({
                 error={errors.last_name?.message}
                 {...register("last_name")}
               />
-              <FormInputField
-                label="Suffix"
-                placeholder="Jr., Sr., etc."
-                maxLength={50}
-                error={errors.suffix?.message}
-                {...register("suffix")}
-              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -265,63 +233,6 @@ export function ProfileFormDialog({
               />
             </div>
 
-            <FormTextareaField
-              label="Bio"
-              placeholder="Tell us about yourself..."
-              maxLength={1000}
-              error={errors.bio?.message}
-              {...register("bio")}
-            />
-          </div>
-
-          {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Contact Information</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField
-                label="Phone"
-                type="tel"
-                placeholder="+1 555 123 4567"
-                maxLength={20}
-                error={errors.phone?.message}
-                {...register("phone")}
-              />
-            </div>
-          </div>
-
-          {/* Location Information */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Location</h3>
-            <FormInputField
-              label="Address"
-              placeholder="123 Main St"
-              maxLength={500}
-              error={errors.address?.message}
-              {...register("address")}
-            />
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField
-                label="City"
-                placeholder="New York"
-                maxLength={100}
-                error={errors.city?.message}
-                {...register("city")}
-              />
-              <Controller
-                name="country"
-                control={control}
-                render={({ field }) => (
-                  <FormSelectField
-                    label="Country"
-                    placeholder="Select country"
-                    options={countryOptions}
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                    error={errors.country?.message}
-                  />
-                )}
-              />
-            </div>
           </div>
 
           {/* Custom Metadata */}

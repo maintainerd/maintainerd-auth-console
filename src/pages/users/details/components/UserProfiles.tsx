@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { User, Calendar, Mail, Phone, MapPin, Globe, Clock, Languages, Check, Plus, type LucideIcon } from "lucide-react"
+import { User, Calendar, Mail, Globe, Clock, Languages, Check, Plus, type LucideIcon } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
@@ -107,7 +107,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
   // Name fields are optional on the backend, so compose without interpolating
   // "undefined". Prefer the display name; fall back to the composed legal name.
   const legalName = (p: UserProfile) =>
-    [p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(" ").trim()
+    [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ").trim()
   const profileName = (p: UserProfile) => p.display_name?.trim() || legalName(p) || "Unnamed profile"
   const initials = (name: string) =>
     name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("")
@@ -152,14 +152,9 @@ export function UserProfiles({ userId }: UserProfilesProps) {
 
                 const attributes: { icon: LucideIcon; value: string }[] = []
                 if (profile.email) attributes.push({ icon: Mail, value: profile.email })
-                if (profile.phone) attributes.push({ icon: Phone, value: profile.phone })
                 if (profile.birthdate) attributes.push({ icon: Calendar, value: formatDate(profile.birthdate) })
                 if (profile.timezone) attributes.push({ icon: Clock, value: profile.timezone })
                 if (profile.language) attributes.push({ icon: Languages, value: profile.language })
-                const location = [profile.address, [profile.city, profile.country].filter(Boolean).join(", ")]
-                  .filter(Boolean)
-                  .join(" · ")
-                if (location) attributes.push({ icon: MapPin, value: location })
 
                 return (
                   <div
@@ -206,9 +201,6 @@ export function UserProfiles({ userId }: UserProfilesProps) {
                         onSetAsDefault={handleSetAsDefault}
                       />
                     </div>
-
-                    {/* Bio */}
-                    {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
 
                     {/* Attributes */}
                     {attributes.length > 0 && (

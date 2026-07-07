@@ -24,7 +24,10 @@ import {
   addClientApis,
   removeClientApi,
   addClientApiPermissions,
-  removeClientApiPermission
+  removeClientApiPermission,
+  fetchClientRoles,
+  addClientRole,
+  removeClientRole,
 } from '@/services/api/clients'
 import type {
   ClientQueryParams,
@@ -51,6 +54,7 @@ export const clientKeys = {
   config: (id: string) => [...clientKeys.all, 'config', id] as const,
   uris: (id: string) => [...clientKeys.all, 'uris', id] as const,
   apis: (id: string) => [...clientKeys.all, 'apis', id] as const,
+  roles: (id: string) => [...clientKeys.all, 'roles', id] as const,
 }
 
 /**
@@ -360,6 +364,43 @@ export function useRemoveClientApiPermission() {
     onSuccess: (_, variables) => {
       // Invalidate client APIs to refetch
       queryClient.invalidateQueries({ queryKey: clientKeys.apis(variables.clientId) })
+    },
+  })
+}
+
+/**
+ * Hook to fetch roles assigned to a client
+ */
+export function useClientRoles(clientId: string) {
+  return useQuery({
+    queryKey: clientKeys.roles(clientId),
+    queryFn: () => fetchClientRoles(clientId),
+    enabled: !!clientId,
+  })
+}
+
+/**
+ * Hook to add a role to a client
+ */
+export function useAddClientRole(clientId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (roleUuid: string) => addClientRole(clientId, roleUuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.roles(clientId) })
+    },
+  })
+}
+
+/**
+ * Hook to remove a role from a client
+ */
+export function useRemoveClientRole(clientId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (roleUuid: string) => removeClientRole(clientId, roleUuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.roles(clientId) })
     },
   })
 }

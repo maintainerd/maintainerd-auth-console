@@ -15,6 +15,7 @@ import { useState } from "react"
   Pause,
   Ban,
   KeyRound,
+  Eraser,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -36,6 +37,7 @@ import {
   useResetUserMfa,
   useUpdateUserStatus,
   useForcePasswordChange,
+  useCreateErasureRequest,
 } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { User, UserStatus } from "@/services/api/users/types"
@@ -85,12 +87,14 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
   const resetMfaMutation = useResetUserMfa()
   const updateStatusMutation = useUpdateUserStatus()
   const forcePasswordChangeMutation = useForcePasswordChange()
+  const erasureRequestMutation = useCreateErasureRequest()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
   const [showForcePasswordDialog, setShowForcePasswordDialog] = useState(false)
+  const [showErasureDialog, setShowErasureDialog] = useState(false)
   const [statusAction, setStatusAction] = useState<{ status: UserStatus; title: string; description: string } | null>(null)
 
   const runAction = async (mutate: () => Promise<unknown>, successMessage: string) => {
@@ -239,6 +243,13 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
                   <KeyRound className="mr-2 size-4" />
                   Force Password Change
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setShowErasureDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Eraser className="mr-2 size-4" />
+                  Erase User Data
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
@@ -325,6 +336,21 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
         title={statusAction?.title ?? ""}
         description={statusAction?.description ?? ""}
         isLoading={updateStatusMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showErasureDialog}
+        onOpenChange={setShowErasureDialog}
+        onConfirm={() =>
+          runAction(
+            () => erasureRequestMutation.mutateAsync(userId),
+            "Data erasure request submitted",
+          ).then(() => setShowErasureDialog(false))
+        }
+        title="Erase User Data"
+        description="This schedules anonymization of all personal data for this user in 30 days. The account cannot be restored after erasure begins."
+        confirmText="Schedule Erasure"
+        isLoading={erasureRequestMutation.isPending}
       />
 
     </>

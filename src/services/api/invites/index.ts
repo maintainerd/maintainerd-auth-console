@@ -32,3 +32,9 @@ export async function revokeInvite(inviteId: string): Promise<void> {
   const r = await deleteRequest<ApiResponse<void>>(`${API_ENDPOINTS.INVITE}/${inviteId}`)
   assertSuccess(r, 'revoke invite')
 }
+
+// Fetch a single invitation by ID.
+export async function fetchInviteById(inviteId: string): Promise<Invite> {
+  const r = await get<ApiResponse<Invite>>(`${API_ENDPOINTS.INVITE}/${inviteId}`)
+  return unwrap(r, 'fetch invite')
+}

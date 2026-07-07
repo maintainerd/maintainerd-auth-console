@@ -81,7 +81,7 @@ export default function ThreatDetectionPage() {
     return (
       <DetailsContainer>
         <div className="flex flex-col gap-6">
-          <FormPageHeader backUrl={backTo} backLabel="Back to Attack Protection" title="Configure Attack Protection" description="Set threat detection and risk policies." />
+          <FormPageHeader backUrl={backTo} backLabel="Back to Threat Protection" title="Configure Threat Protection" description="Set threat detection and risk policies." />
           <Card className="shadow-xs">
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
@@ -102,8 +102,8 @@ export default function ThreatDetectionPage() {
       <div className="flex flex-col gap-6">
         <FormPageHeader
           backUrl={backTo}
-          backLabel="Back to Attack Protection"
-          title="Configure Attack Protection"
+          backLabel="Back to Threat Protection"
+          title="Configure Threat Protection"
           description="Configure brute-force detection, velocity checks, risk-based step-up, and compromised credential monitoring."
         />
 

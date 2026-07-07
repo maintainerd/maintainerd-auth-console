@@ -36,7 +36,7 @@ export function AddMemberDialog({ open, onOpenChange, tenantId: propTenantId }: 
   const tenantId = propTenantId || currentTenant?.tenant_id || ''
   const { showSuccess, showError } = useToast()
   const [selectedUserId, setSelectedUserId] = useState<string>("")
-  const [role, setRole] = useState<'owner' | 'member'>('member')
+  const [role, setRole] = useState<'owner' | 'admin' | 'member'>('member')
   const [userSearchQuery, setUserSearchQuery] = useState("")
   
   const addMemberMutation = useAddTenantMember(tenantId)
@@ -124,12 +124,13 @@ export function AddMemberDialog({ open, onOpenChange, tenantId: propTenantId }: 
               <Label htmlFor="role">
                 Member Role <span className="text-destructive">*</span>
               </Label>
-              <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'member')}>
+              <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'admin' | 'member')}>
                 <SelectTrigger id="role">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="owner">Owner</SelectItem>
                 </SelectContent>
               </Select>

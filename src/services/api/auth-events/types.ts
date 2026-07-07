@@ -27,6 +27,7 @@ export interface AuthEventQueryParams {
   limit?: number
   sort_by?: string
   sort_order?: 'asc' | 'desc'
+  after_id?: number
 }
 
 export interface AuthEventListResponse {

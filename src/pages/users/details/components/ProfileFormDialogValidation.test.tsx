@@ -33,16 +33,10 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     first_name: "John",
     middle_name: "M",
     last_name: "Doe",
-    suffix: "Jr",
     display_name: "Johnny",
-    bio: "hi",
     birthdate: "1990-05-01T00:00:00Z",
     gender: "male",
-    phone: "555",
     email: "john@example.com",
-    address: "1 Main",
-    city: "NYC",
-    country: "US",
     timezone: "UTC",
     language: "en",
     profile_url: "https://example.com/a.png",
@@ -86,17 +80,9 @@ describe("ProfileFormDialog validation", () => {
       first_name: "Zelphie",
       middle_name: tooLong(100),
       last_name: tooLong(100),
-      suffix: tooLong(50),
       display_name: tooLong(100),
       profile_url: "ftp://bad",
-      bio: tooLong(1000),
-      phone: tooLong(20),
-      address: tooLong(500),
-      city: tooLong(100),
       gender: "not_a_gender",
-      country: "USA",
-      // Parseable by Date (so the calendar doesn't choke) but not YYYY-MM-DD.
-      // Parseable by Date (so the calendar does not choke) but not YYYY-MM-DD.
       birthdate: "01/05/1990",
     })
     renderForm({ profile: bad })
@@ -107,17 +93,11 @@ describe("ProfileFormDialog validation", () => {
 
     expect(await screen.findByText("Middle name must be at most 100 characters")).toBeInTheDocument()
     expect(screen.getByText("Last name must be at most 100 characters")).toBeInTheDocument()
-    expect(screen.getByText("Suffix must be at most 50 characters")).toBeInTheDocument()
     expect(screen.getByText("Display name must be at most 100 characters")).toBeInTheDocument()
     expect(
       screen.getByText("Enter a valid URL starting with http:// or https://"),
     ).toBeInTheDocument()
-    expect(screen.getByText("Bio must be at most 1000 characters")).toBeInTheDocument()
-    expect(screen.getByText("Phone must be at most 20 characters")).toBeInTheDocument()
-    expect(screen.getByText("Address must be at most 500 characters")).toBeInTheDocument()
-    expect(screen.getByText("City must be at most 100 characters")).toBeInTheDocument()
     expect(screen.getByText("Invalid gender")).toBeInTheDocument()
-    expect(screen.getByText("Country must be a 2-letter ISO code (e.g., US)")).toBeInTheDocument()
     expect(screen.getByText("Birthdate must be in YYYY-MM-DD format")).toBeInTheDocument()
     expect(updateMutateAsync).not.toHaveBeenCalled()
   }, 10000)

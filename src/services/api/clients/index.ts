@@ -6,6 +6,7 @@
 import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import type { ApiResponse } from '../types'
+import type { Role } from '../roles/types'
 import type {
   ClientQueryParams,
   ClientListResponse,
@@ -330,6 +331,36 @@ export async function removeClientApiPermission(
   if (!response.success) {
     throw new Error(response.message || 'Failed to remove permission from client API')
   }
+}
+
+/**
+ * Fetch roles assigned to a client
+ */
+export async function fetchClientRoles(clientId: string): Promise<Role[]> {
+  const response = await get<ApiResponse<Role[]>>(API_ENDPOINTS.CLIENT_ROLES(clientId))
+  if (response.success && response.data) return response.data
+  throw new Error(response.message || 'Failed to fetch client roles')
+}
+
+/**
+ * Assign a role to a client
+ */
+export async function addClientRole(clientId: string, roleUuid: string): Promise<void> {
+  const response = await post<ApiResponse<void>>(
+    API_ENDPOINTS.CLIENT_ROLES(clientId),
+    { role_uuid: roleUuid },
+  )
+  if (!response.success) throw new Error(response.message || 'Failed to add client role')
+}
+
+/**
+ * Remove a role from a client
+ */
+export async function removeClientRole(clientId: string, roleUuid: string): Promise<void> {
+  const response = await deleteRequest<ApiResponse<void>>(
+    `${API_ENDPOINTS.CLIENT_ROLES(clientId)}/${roleUuid}`,
+  )
+  if (!response.success) throw new Error(response.message || 'Failed to remove client role')
 }
 
 // Export as client object

@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { fetchPolicies, fetchPolicyById, createPolicy, updatePolicy, deletePolicy, updatePolicyStatus } from '@/services/api/policies'
+import { fetchPolicies, fetchPolicyById, createPolicy, updatePolicy, deletePolicy, updatePolicyStatus, fetchPolicyHistory } from '@/services/api/policies'
 import type {
   PolicyQueryParams,
   CreatePolicyRequest,
@@ -21,6 +21,7 @@ export const policyKeys = {
   list: (params?: PolicyQueryParams) => [...policyKeys.lists(), params] as const,
   details: () => [...policyKeys.all, 'detail'] as const,
   detail: (id: string) => [...policyKeys.details(), id] as const,
+  history: (id: string) => [...policyKeys.all, 'history', id] as const,
 }
 
 /**
@@ -108,6 +109,17 @@ export function useDeletePolicy() {
       // Invalidate policies list to refetch
       queryClient.invalidateQueries({ queryKey: policyKeys.lists() })
     },
+  })
+}
+
+/**
+ * Hook to fetch the version history of a policy
+ */
+export function usePolicyHistory(policyId: string) {
+  return useQuery({
+    queryKey: policyKeys.history(policyId),
+    queryFn: () => fetchPolicyHistory(policyId),
+    enabled: !!policyId,
   })
 }
 

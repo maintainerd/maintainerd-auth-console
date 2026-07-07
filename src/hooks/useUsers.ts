@@ -33,6 +33,9 @@ import {
   fetchUserMFA,
   forcePasswordChange,
   unlinkUserIdentity,
+  fetchUserConsents,
+  fetchUserTrustedDevices,
+  createErasureRequest,
 } from '@/services/api/users'
 import type {
   UserQueryParams,
@@ -448,5 +451,36 @@ export function useUnlinkUserIdentity() {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.userId) })
       queryClient.invalidateQueries({ queryKey: userKeys.identitiesList(variables.userId) })
     },
+  })
+}
+
+/**
+ * Hook to fetch consents for a user
+ */
+export function useUserConsents(userId: string) {
+  return useQuery({
+    queryKey: [...userKeys.all, 'consents', userId] as const,
+    queryFn: () => fetchUserConsents(userId),
+    enabled: !!userId,
+  })
+}
+
+/**
+ * Hook to fetch trusted devices for a user
+ */
+export function useUserTrustedDevices(userId: string) {
+  return useQuery({
+    queryKey: [...userKeys.all, 'devices', userId] as const,
+    queryFn: () => fetchUserTrustedDevices(userId),
+    enabled: !!userId,
+  })
+}
+
+/**
+ * Hook to create a data erasure request for a user
+ */
+export function useCreateErasureRequest() {
+  return useMutation({
+    mutationFn: (userId: string) => createErasureRequest(userId),
   })
 }

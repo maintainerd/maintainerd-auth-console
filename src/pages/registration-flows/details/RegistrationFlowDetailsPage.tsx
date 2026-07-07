@@ -26,7 +26,7 @@ export default function RegistrationFlowDetailsPage() {
 
   return (
     <DetailLayout
-      backLabel={navState.backLabel ?? "Back to Registration Flows"}
+      backLabel={navState.backLabel ?? "Back to Registration"}
       onBack={() => navigate(navState.from ?? `/${tenantId}/registration-flows`)}
       isLoading={isLoading}
       isError={isError || !registrationFlow}

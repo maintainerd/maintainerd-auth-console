@@ -29,6 +29,7 @@ export type ProviderOption =
   | 'apple'
   | 'linkedin'
   | 'twitter'
+  | 'saml'
 
 export type IdentityProviderConfig = Record<string, unknown>
 
@@ -57,6 +58,7 @@ export type IdentityProvider = IdentityProviderConnectionFields & {
   is_system: boolean
   created_at: string
   updated_at: string
+  certificate_expires_at?: string | null
 }
 
 /**
@@ -92,6 +94,7 @@ export type IdentityProviderDetail = IdentityProviderConnectionFields & {
   is_system: boolean
   created_at: string
   updated_at: string
+  certificate_expires_at?: string | null
 }
 
 /**

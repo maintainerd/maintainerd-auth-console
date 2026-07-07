@@ -40,7 +40,6 @@ export type * from './api/services/types'
 export type * from './api/api/types'
 export type * from './api/policies/types'
 export type * from './api/clients/types'
-export type * from './api/api-keys/types'
 
 // Setup service functions
 export {
@@ -111,13 +110,3 @@ export {
   updateClientStatus
 } from './api/clients'
 
-// API Key service functions
-export {
-  fetchApiKeys,
-  fetchApiKeyById,
-  createApiKey,
-  updateApiKey,
-  deleteApiKey,
-  updateApiKeyStatus,
-  fetchApiKeyConfig
-} from './api/api-keys'

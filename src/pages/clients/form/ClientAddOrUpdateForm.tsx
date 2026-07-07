@@ -218,27 +218,27 @@ export default function ClientAddOrUpdateForm() {
     if (isEditing && clientData?.uris) {
       const uris = clientData.uris
 
-      const loginUriData = uris.find(u => u.type === 'login-uri')
+      const loginUriData = uris.find(u => u.type === 'login_uri')
       if (loginUriData) {
         setLoginUri({ uri: loginUriData.uri, id: loginUriData.uri_id })
       }
 
-      const redirectUrisData = uris.filter(u => u.type === 'redirect-uri')
+      const redirectUrisData = uris.filter(u => u.type === 'redirect_uri')
       if (redirectUrisData.length > 0) {
         setRedirectUris(redirectUrisData.map(u => ({ uri: u.uri, id: u.uri_id })))
       }
 
-      const allowedOriginsData = uris.filter(u => u.type === 'origin-uri')
+      const allowedOriginsData = uris.filter(u => u.type === 'origin_uri')
       if (allowedOriginsData.length > 0) {
         setAllowedOrigins(allowedOriginsData.map(u => ({ uri: u.uri, id: u.uri_id })))
       }
 
-      const allowedLogoutUrlsData = uris.filter(u => u.type === 'logout-uri')
+      const allowedLogoutUrlsData = uris.filter(u => u.type === 'logout_uri')
       if (allowedLogoutUrlsData.length > 0) {
         setAllowedLogoutUrls(allowedLogoutUrlsData.map(u => ({ uri: u.uri, id: u.uri_id })))
       }
 
-      const corsAllowedOriginsData = uris.filter(u => u.type === 'cors-origin-uri')
+      const corsAllowedOriginsData = uris.filter(u => u.type === 'cors_origin_uri')
       if (corsAllowedOriginsData.length > 0) {
         setCorsAllowedOrigins(corsAllowedOriginsData.map(u => ({ uri: u.uri, id: u.uri_id })))
       }
@@ -473,19 +473,19 @@ export default function ClientAddOrUpdateForm() {
         }
 
         if (capability.showLoginUri) {
-          await manageUris([loginUri], 'login-uri')
+          await manageUris([loginUri], 'login_uri')
         }
         if (capability.showRedirectUris) {
-          await manageUris(redirectUris, 'redirect-uri')
+          await manageUris(redirectUris, 'redirect_uri')
         }
         if (capability.showAllowedOrigins) {
-          await manageUris(allowedOrigins, 'origin-uri')
+          await manageUris(allowedOrigins, 'origin_uri')
         }
         if (capability.showLogoutUrls) {
-          await manageUris(allowedLogoutUrls, 'logout-uri')
+          await manageUris(allowedLogoutUrls, 'logout_uri')
         }
         if (capability.showCors && corsEnabled) {
-          await manageUris(corsAllowedOrigins, 'cors-origin-uri')
+          await manageUris(corsAllowedOrigins, 'cors_origin_uri')
         }
       }
 

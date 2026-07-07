@@ -27,16 +27,10 @@ export type UserProfile = {
   // The backend returns these as optional (omitempty) top-level fields.
   middle_name?: string
   last_name?: string
-  suffix?: string
   display_name?: string
-  bio?: string
   birthdate?: string
   gender?: string
-  phone?: string
   email?: string
-  address?: string
-  city?: string
-  country?: string
   timezone?: string
   language?: string
   profile_url?: string
@@ -76,6 +70,13 @@ export type User = {
   }
   created_at: string
   updated_at: string
+  last_login_at?: string | null
+  login_count?: number
+  email_verified_at?: string | null
+  phone_verified_at?: string | null
+  external_id?: string | null
+  created_by?: string | null
+  updated_by?: string | null
 }
 
 /**
@@ -115,6 +116,8 @@ export type UserIdentity = {
   }
   created_at: string
   updated_at: string
+  jit_provisioned_at?: string | null
+  provisioning_source?: 'jit' | 'scim' | 'manual' | 'invite' | 'import' | null
 }
 
 /**
@@ -133,6 +136,7 @@ export interface UserQueryParams {
   limit?: number
   sort_by?: string
   sort_order?: 'asc' | 'desc'
+  after_id?: number
 }
 
 /**
@@ -257,16 +261,10 @@ export interface CreateUserProfileRequest {
   first_name: string
   middle_name?: string
   last_name?: string
-  suffix?: string
   display_name?: string
   birthdate?: string
   gender?: string
-  bio?: string
-  phone?: string
   email?: string
-  address?: string
-  city?: string
-  country?: string
   timezone?: string
   language?: string
   profile_url?: string
@@ -280,16 +278,10 @@ export interface UpdateUserProfileRequest {
   first_name?: string
   middle_name?: string
   last_name?: string
-  suffix?: string
   display_name?: string
   birthdate?: string
   gender?: string
-  bio?: string
-  phone?: string
   email?: string
-  address?: string
-  city?: string
-  country?: string
   timezone?: string
   language?: string
   profile_url?: string
@@ -360,7 +352,40 @@ export interface UserMFAResponse {
 export interface UserMFAWebAuthnKey {
   credential_uuid: string
   name: string
-  transport?: string
+  transport?: string[]
+  is_discoverable_credential?: boolean
   last_used_at?: string | null
   created_at: string
+}
+
+export interface UserConsent {
+  uuid: string
+  consent_type: string
+  policy_version: string
+  accepted: boolean
+  ip_address?: string | null
+  user_agent?: string | null
+  created_at: string
+}
+
+export interface UserConsentsResponse {
+  rows: UserConsent[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
+
+export interface TrustedDevice {
+  uuid: string
+  trusted_until: string | null
+  created_at: string
+}
+
+export interface TrustedDevicesResponse {
+  rows: TrustedDevice[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
 }

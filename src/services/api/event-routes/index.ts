@@ -25,3 +25,8 @@ export async function deleteEventRoute(uuid: string): Promise<void> {
   const r = await deleteRequest<ApiResponse<void>>(`${BASE}/${uuid}`)
   assertSuccess(r, 'delete event route')
 }
+
+export async function fetchEventRouteById(routeId: string): Promise<EventRoute> {
+  const r = await get<ApiResponse<EventRoute>>(`${BASE}/${routeId}`)
+  return unwrap(r, 'fetch event route')
+}

@@ -49,9 +49,8 @@ const WebhookDetailsPage = lazy(() => import('./pages/webhooks/details'))
 const WebhookAddOrUpdateForm = lazy(() => import('./pages/webhooks/form'))
 const EventTypesPage = lazy(() => import('./pages/event-types'))
 const EventRoutesPage = lazy(() => import('./pages/event-routes').then(m => ({ default: m.EventRoutesPage })))
-const ApiKeysPage = lazy(() => import('./pages/api-keys'))
-const ApiKeyDetailsPage = lazy(() => import('./pages/api-keys/details'))
-const ApiKeyAddOrUpdateForm = lazy(() => import('./pages/api-keys/form'))
+const WorkloadIdentityPage = lazy(() => import('./pages/workload-identity'))
+const AuditLogPage = lazy(() => import('./pages/audit-log'))
 const PoliciesPage = lazy(() => import('./pages/policies'))
 const PolicyDetailsPage = lazy(() => import('./pages/policies/details'))
 const PolicyAddOrUpdateForm = lazy(() => import('./pages/policies/form'))
@@ -180,10 +179,8 @@ function App() {
           <Route path="webhooks/:webhookId/edit" element={<WebhookAddOrUpdateForm />} />
           <Route path="events/types" element={<EventTypesPage />} />
           <Route path="events/routes" element={<EventRoutesPage />} />
-          <Route path="api-keys" element={<ApiKeysPage />} />
-          <Route path="api-keys/create" element={<ApiKeyAddOrUpdateForm />} />
-          <Route path="api-keys/:id" element={<ApiKeyDetailsPage />} />
-          <Route path="api-keys/:id/edit" element={<ApiKeyAddOrUpdateForm />} />
+          <Route path="workload-identity" element={<WorkloadIdentityPage />} />
+          <Route path="audit-log" element={<AuditLogPage />} />
           <Route path="policies" element={<PoliciesPage />} />
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />

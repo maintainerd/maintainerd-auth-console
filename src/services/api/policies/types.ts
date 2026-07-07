@@ -124,3 +124,18 @@ export interface UpdatePolicyRequest {
 export interface UpdatePolicyStatusRequest {
   status: PolicyStatus
 }
+
+export interface PolicyVersionHistory {
+  version_number: number
+  document: PolicyDocument
+  snapshot_at: string
+  changed_by_user_id?: string | null
+}
+
+export interface PolicyVersionHistoryListResponse {
+  rows: PolicyVersionHistory[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}

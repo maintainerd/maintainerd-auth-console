@@ -34,7 +34,7 @@ export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: p
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
   const tenantId = propTenantId || currentTenant?.tenant_id || ''
   const { showSuccess, showError } = useToast()
-  const [role, setRole] = useState<'owner' | 'member'>(member.role)
+  const [role, setRole] = useState<'owner' | 'admin' | 'member'>(member.role)
   
   const updateRoleMutation = useUpdateTenantMemberRole(tenantId)
 
@@ -76,7 +76,7 @@ export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: p
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'member')}>
+              <Select value={role} onValueChange={(value) => setRole(value as 'owner' | 'admin' | 'member')}>
                 <SelectTrigger id="role">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -86,6 +86,9 @@ export function UpdateMemberRoleDialog({ open, onOpenChange, member, tenantId: p
                     disabled={member.role !== 'owner' && hasOwner}
                   >
                     Owner
+                  </SelectItem>
+                  <SelectItem value="admin">
+                    Admin
                   </SelectItem>
                   <SelectItem
                     value="member"

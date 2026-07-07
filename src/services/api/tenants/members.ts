@@ -19,7 +19,7 @@ export interface TenantMemberUser {
 
 export interface TenantMember {
   tenant_member_id: string
-  role: 'owner' | 'member'
+  role: 'owner' | 'admin' | 'member'
   user: TenantMemberUser
   created_at: string
   updated_at: string
@@ -58,11 +58,11 @@ export async function fetchTenantMembers(tenantId: string, params: TenantMembers
   return get<TenantMembersListResponse>(url)
 }
 
-export async function addTenantMember(tenantId: string, user_id: string, role: 'owner' | 'member') {
+export async function addTenantMember(tenantId: string, user_id: string, role: 'owner' | 'admin' | 'member') {
   return post(`${API_ENDPOINTS.TENANT}s/${tenantId}/members`, { user_id, role })
 }
 
-export async function updateTenantMemberRole(tenantId: string, tenant_member_id: string, role: 'owner' | 'member') {
+export async function updateTenantMemberRole(tenantId: string, tenant_member_id: string, role: 'owner' | 'admin' | 'member') {
   return patch(`${API_ENDPOINTS.TENANT}s/${tenantId}/members/${tenant_member_id}/role`, { role })
 }
 

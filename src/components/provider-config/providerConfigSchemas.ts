@@ -70,6 +70,7 @@ export interface ProviderConnectionSchema {
 /** Human-friendly provider names, shared across forms, tables, and detail pages. */
 export const PROVIDER_LABELS: Record<string, string> = {
   maintainerd: "Maintainerd",
+  saml: "SAML 2.0",
   cognito: "AWS Cognito",
   auth0: "Auth0",
   microsoft: "Microsoft Entra ID",
@@ -85,6 +86,7 @@ export const PROVIDER_LABELS: Record<string, string> = {
 /** Display order for the provider dropdown — identity providers first, then social. */
 export const PROVIDER_ORDER: ProviderOption[] = [
   "maintainerd",
+  "saml",
   "cognito",
   "auth0",
   "microsoft",
@@ -492,6 +494,62 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
             type: "text",
             placeholder: "2",
             description: "X API version. Optional.",
+          },
+        ],
+      },
+    ],
+  },
+
+  saml: {
+    kind: "enterprise",
+    summary: "Connect a SAML 2.0 identity provider. Maintainerd acts as the service provider and validates assertions signed by your enterprise IdP.",
+    groups: [
+      {
+        title: "Identity Provider",
+        description: "Endpoints and credentials provided by your SAML IdP.",
+        fields: [
+          {
+            key: "sso_url",
+            label: "SSO URL",
+            type: "url",
+            required: true,
+            placeholder: "https://idp.example.com/saml2/sso",
+            description: "Single sign-on URL where Maintainerd sends authentication requests.",
+          },
+          {
+            key: "entity_id",
+            label: "IdP Entity ID",
+            type: "text",
+            placeholder: "https://idp.example.com/saml2/metadata",
+            description: "Unique identifier for the identity provider (from its metadata).",
+          },
+          {
+            key: "certificate",
+            label: "X.509 Certificate",
+            type: "text",
+            required: true,
+            placeholder: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+            description: "Public certificate used to verify SAML assertion signatures.",
+          },
+        ],
+      },
+      {
+        title: "Options",
+        description: "Attribute mapping and assertion handling.",
+        fields: [
+          {
+            key: "name_id_format",
+            label: "NameID Format",
+            type: "text",
+            placeholder: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+            description: "NameID format requested in authentication requests. Optional.",
+          },
+          {
+            key: "email_attribute",
+            label: "Email Attribute",
+            type: "text",
+            placeholder: "email",
+            description: "SAML attribute name that carries the user's email. Defaults to NameID.",
           },
         ],
       },

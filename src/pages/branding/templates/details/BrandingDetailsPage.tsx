@@ -27,7 +27,7 @@ export default function BrandingDetailsPage() {
 
   return (
     <DetailLayout
-      backLabel="Back to Branding Templates"
+      backLabel="Back to Themes"
       onBack={() => navigate(`/${tenantId}/branding/templates`)}
       isLoading={isLoading}
       isError={isError || !branding}

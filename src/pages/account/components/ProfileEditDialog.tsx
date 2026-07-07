@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FormInputField, FormTextareaField, FormSelectField, FormDateField } from "@/components/form"
+import { FormInputField, FormSelectField, FormDateField } from "@/components/form"
 import { userProfileSchema, type UserProfileFormData } from "@/lib/validations"
-import { countryOptions, genderOptions } from "@/lib/constants"
+import { genderOptions } from "@/lib/constants"
 import { useToast } from "@/hooks/useToast"
 import { useAppDispatch } from "@/store/hooks"
 import { setProfile } from "@/store/auth/slice"
@@ -30,15 +30,9 @@ function toDefaults(p: AccountProfile): UserProfileFormData {
     first_name: p.first_name ?? "",
     middle_name: p.middle_name || undefined,
     last_name: p.last_name || undefined,
-    suffix: p.suffix || undefined,
     display_name: p.display_name || undefined,
     birthdate: p.birthdate ? p.birthdate.split("T")[0] : undefined,
     gender: p.gender || undefined,
-    bio: p.bio || undefined,
-    phone: p.phone || undefined,
-    address: p.address || undefined,
-    city: p.city || undefined,
-    country: p.country || undefined,
     profile_url: p.profile_url || undefined,
   }
 }
@@ -70,14 +64,9 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
         first_name: updated.first_name ?? "",
         last_name: updated.last_name ?? "",
         display_name: updated.display_name ?? "",
-        bio: updated.bio,
         birthdate: updated.birthdate ?? undefined,
         gender: updated.gender,
-        phone: updated.phone,
         email: updated.email ?? "",
-        address: updated.address,
-        city: updated.city,
-        country: updated.country,
         timezone: updated.timezone,
         language: updated.language,
         created_at: updated.created_at ?? "",
@@ -109,7 +98,6 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
               <FormInputField label="First Name" placeholder="John" maxLength={100} error={errors.first_name?.message} required {...register("first_name")} />
               <FormInputField label="Middle Name" placeholder="Michael" maxLength={100} error={errors.middle_name?.message} {...register("middle_name")} />
               <FormInputField label="Last Name" placeholder="Doe" maxLength={100} error={errors.last_name?.message} {...register("last_name")} />
-              <FormInputField label="Suffix" placeholder="Jr., Sr., etc." maxLength={50} error={errors.suffix?.message} {...register("suffix")} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -126,30 +114,6 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: ProfileEditDi
               <FormInputField label="Profile Picture URL" placeholder="https://example.com/avatar.png" maxLength={1000} error={errors.profile_url?.message} {...register("profile_url")} />
             </div>
 
-            <FormTextareaField label="Bio" placeholder="Tell us about yourself..." maxLength={1000} error={errors.bio?.message} {...register("bio")} />
-          </div>
-
-          {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Contact Information</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField label="Phone" type="tel" placeholder="+1 555 123 4567" maxLength={20} error={errors.phone?.message} {...register("phone")} />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Your sign-in email and username are managed in Settings → Security. Timezone and language live in Settings → Preferences.
-            </p>
-          </div>
-
-          {/* Location */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Location</h3>
-            <FormInputField label="Address" placeholder="123 Main St" maxLength={500} error={errors.address?.message} {...register("address")} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormInputField label="City" placeholder="New York" maxLength={100} error={errors.city?.message} {...register("city")} />
-              <Controller name="country" control={control} render={({ field }) => (
-                <FormSelectField label="Country" placeholder="Select country" options={countryOptions} value={field.value || ""} onValueChange={field.onChange} error={errors.country?.message} />
-              )} />
-            </div>
           </div>
 
           <DialogFooter>

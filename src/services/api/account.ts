@@ -71,12 +71,6 @@ export interface UserSettings {
   timezone?: string
   preferred_language?: string
   locale?: string
-  preferred_contact_method?: string
-  marketing_email_consent?: boolean
-  sms_notifications_consent?: boolean
-  push_notifications_consent?: boolean
-  profile_visibility?: string
-  data_processing_consent?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -85,11 +79,6 @@ export interface UpdateUserSettingsRequest {
   timezone?: string
   preferred_language?: string
   locale?: string
-  preferred_contact_method?: string
-  marketing_email_consent?: boolean
-  sms_notifications_consent?: boolean
-  push_notifications_consent?: boolean
-  profile_visibility?: string
 }
 
 // Returns an empty object when the user has no settings row yet (first visit),

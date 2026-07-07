@@ -33,13 +33,13 @@ export function RegistrationFlowActions({ registrationFlow }: RegistrationFlowAc
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}`, { state: { from: location.pathname, backLabel: "Back to Registration Flows" } }),
+      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
     },
     {
       key: "edit",
       label: "Edit Registration Flow",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}/edit`, { state: { from: location.pathname, backLabel: "Back to Registration Flows" } }),
+      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}/edit`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
     },
     isActive
       ? {

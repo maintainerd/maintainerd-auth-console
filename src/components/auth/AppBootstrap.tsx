@@ -47,6 +47,13 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
         return
       }
       lastTenantIdentifierRef.current = tenantIdentifier
+
+      // Setup routes have no tenant yet — skip initialization entirely.
+      if (location.pathname.startsWith('/setup')) {
+        setTenantSettled(true)
+        return
+      }
+
       try {
         await initializeFromLocation(location.pathname, location.search)
       } catch {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Controller, useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -43,13 +43,19 @@ export default function BrandingForm() {
   const listUrl = `/${tenantId}/branding/templates`
   const navState = location.state as { from?: string; backLabel?: string } | null
   const backTo = navState?.from ?? listUrl
-  const backLabel = navState?.backLabel ?? "Back to Branding Templates"
+  const backLabel = navState?.backLabel ?? "Back to Themes"
 
   const { data: branding, isLoading: isFetching } = useBranding(brandingId)
   const createMutation = useCreateBranding()
   const updateMutation = useUpdateBranding()
 
   const [tokens, setTokens] = useState<Record<string, string>>({ ...DEFAULT_TOKENS })
+  const [logoMode, setLogoMode] = useState<'url' | 'file'>('url')
+  const [logoData, setLogoData] = useState<string | null>(null)
+  const [logoContentType, setLogoContentType] = useState<string | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoFileError, setLogoFileError] = useState<string | null>(null)
+  const logoFileRef = useRef<HTMLInputElement | null>(null)
 
   const {
     register,
@@ -86,10 +92,36 @@ export default function BrandingForm() {
         terms_of_service_url: branding.terms_of_service_url ?? "",
       })
       setTokens(tokensFromMetadata(branding.metadata))
+      setLogoMode('url')
+      setLogoData(null)
+      setLogoPreview(null)
+      setLogoContentType(null)
+      setLogoFileError(null)
     }
   }, [isEditing, branding, reset])
 
   const setToken = (id: string, value: string) => setTokens((t) => ({ ...t, [id]: value }))
+
+  const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLogoFileError(null)
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setLogoFileError('Only PNG, JPEG, or WebP images are allowed.')
+      return
+    }
+    if (file.size > 262144) {
+      setLogoFileError('File must be 256 KB or smaller.')
+      return
+    }
+    const base64 = await toBase64(file)
+    setLogoData(base64)
+    setLogoContentType(file.type)
+    const reader = new FileReader()
+    reader.onload = () => setLogoPreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
 
   const isLoading = createMutation.isPending || updateMutation.isPending || isSubmitting
 
@@ -98,12 +130,14 @@ export default function BrandingForm() {
       name: data.name.trim(),
       layout: data.layout,
       company_name: (data.company_name ?? "").trim(),
-      logo_url: (data.logo_url ?? "").trim(),
+      logo_url: logoMode === 'url' ? (data.logo_url ?? "").trim() : "",
       favicon_url: (data.favicon_url ?? "").trim(),
       support_url: (data.support_url ?? "").trim(),
       privacy_policy_url: (data.privacy_policy_url ?? "").trim(),
       terms_of_service_url: (data.terms_of_service_url ?? "").trim(),
       metadata: metadataFromTokens(tokens),
+      logo_data: logoMode === 'file' && logoData ? logoData : undefined,
+      logo_content_type: logoMode === 'file' && logoContentType ? logoContentType : undefined,
     }
 
     try {
@@ -252,13 +286,60 @@ export default function BrandingForm() {
               </p>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormInputField
-                label="Logo URL"
-                placeholder="https://…/logo.svg"
-                disabled={isLoading}
-                error={errors.logo_url?.message}
-                {...register("logo_url")}
-              />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium leading-none">Logo</span>
+                  <div className="flex rounded-md border text-xs overflow-hidden">
+                    <button
+                      type="button"
+                      className={`px-3 py-1.5 transition-colors ${logoMode === 'url' ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+                      onClick={() => setLogoMode('url')}
+                      disabled={isLoading}
+                    >
+                      URL
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-3 py-1.5 transition-colors ${logoMode === 'file' ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+                      onClick={() => setLogoMode('file')}
+                      disabled={isLoading}
+                    >
+                      Upload
+                    </button>
+                  </div>
+                </div>
+                {logoMode === 'url' ? (
+                  <FormInputField
+                    label="Logo URL"
+                    placeholder="https://…/logo.svg"
+                    disabled={isLoading}
+                    error={errors.logo_url?.message}
+                    {...register("logo_url")}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      ref={logoFileRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      disabled={isLoading}
+                      onChange={handleLogoFileChange}
+                      className="text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-muted file:px-3 file:py-1 file:text-xs file:font-medium file:cursor-pointer cursor-pointer"
+                    />
+                    {logoFileError && (
+                      <p className="text-xs text-destructive">{logoFileError}</p>
+                    )}
+                    {logoPreview && (
+                      <img
+                        src={logoPreview}
+                        alt="Logo preview"
+                        className="mt-1 h-12 w-auto rounded-md border object-contain"
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground">PNG, JPEG, or WebP — max 256 KB.</p>
+                  </div>
+                )}
+              </div>
               <FormInputField
                 label="Favicon URL"
                 placeholder="https://…/favicon.ico"
@@ -322,6 +403,15 @@ export default function BrandingForm() {
       </div>
     </DetailsContainer>
   )
+}
+
+function toBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve((reader.result as string).split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 }
 
 function ThemeTokenRow({

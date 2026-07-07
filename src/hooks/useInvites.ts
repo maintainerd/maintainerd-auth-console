@@ -4,7 +4,7 @@
 
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchInvites, sendInvite, resendInvite, revokeInvite } from '@/services/api/invites'
+import { fetchInvites, sendInvite, resendInvite, revokeInvite, fetchInviteById } from '@/services/api/invites'
 import type { Invite, SendInviteRequest } from '@/services/api/invites/types'
 import type { ServerListResult } from '@/components/data-table'
 
@@ -20,11 +20,13 @@ export function useInvites() {
   })
 }
 
-// Single invitation, derived from the list (there is no GET-by-id endpoint).
+// Single invitation fetched from the dedicated GET-by-id endpoint.
 export function useInvite(inviteId: string | undefined) {
-  const query = useInvites()
-  const data = inviteId ? query.data?.find((i) => i.invite_id === inviteId) : undefined
-  return { ...query, data }
+  return useQuery({
+    queryKey: [...inviteKeys.all, inviteId],
+    queryFn: () => fetchInviteById(inviteId!),
+    enabled: !!inviteId,
+  })
 }
 
 /**

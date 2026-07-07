@@ -21,13 +21,12 @@ export const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  // Sidebar navigation grouped into labeled sections (enterprise IA).
   navSections: [
     {
       label: "Overview",
       items: [
         {
-          title: "Get Started",
+          title: "Dashboard",
           route: "/dashboard",
           icon: LayoutDashboard,
         },
@@ -52,7 +51,7 @@ export const data = {
           icon: KeyRound,
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
-            { title: "Registration Flows", route: "/registration-flows" },
+            { title: "Registration", route: "/registration-flows" },
           ],
         },
       ],
@@ -66,7 +65,7 @@ export const data = {
           icon: Layers,
           items: [
             { title: "Clients", route: "/clients" },
-            { title: "API Keys", route: "/api-keys" },
+            { title: "Workload Identity", route: "/workload-identity" },
           ],
         },
         {
@@ -95,7 +94,7 @@ export const data = {
             { title: "Sessions", route: "/security/session" },
             { title: "Tokens", route: "/security/token" },
             { title: "Registration", route: "/security/registration" },
-            { title: "Attack Protection", route: "/security/threat" },
+            { title: "Threat Protection", route: "/security/threat" },
             { title: "IP Restrictions", route: "/security/ip-restrictions" },
           ],
         },
@@ -109,7 +108,7 @@ export const data = {
           route: "/branding",
           icon: Palette,
           items: [
-            { title: "Branding Templates", route: "/branding/templates" },
+            { title: "Themes", route: "/branding/templates" },
             { title: "Email Templates", route: "/branding/email-templates" },
             { title: "SMS Templates", route: "/branding/sms-templates" },
           ],
@@ -140,8 +139,12 @@ export const data = {
         },
         {
           title: "Monitoring",
-          route: "/logs",
+          route: "/monitoring",
           icon: TrendingUp,
+          items: [
+            { title: "Sign-in Logs", route: "/logs" },
+            { title: "Audit Log", route: "/audit-log" },
+          ],
         },
       ],
     },
@@ -149,12 +152,9 @@ export const data = {
       label: "Administration",
       items: [
         {
-          title: "Organization",
-          route: "/organization",
+          title: "Tenants",
+          route: "/tenants",
           icon: Building2,
-            items: [
-              { title: "Tenants", route: "/tenants" },
-            ],
         },
         {
           title: "Settings",
@@ -166,12 +166,12 @@ export const data = {
   ],
   navSecondary: [
     {
-      title: "Give Support",
+      title: "Support",
       url: "#",
       icon: LifeBuoy,
     },
     {
-      title: "Give Feedback",
+      title: "Feedback",
       url: "#",
       icon: MessageSquare,
     },

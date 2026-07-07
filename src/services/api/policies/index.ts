@@ -13,7 +13,9 @@ import type {
   PolicyDetail,
   CreatePolicyRequest,
   UpdatePolicyRequest,
-  UpdatePolicyStatusRequest
+  UpdatePolicyStatusRequest,
+  PolicyVersionHistory,
+  PolicyVersionHistoryListResponse,
 } from './types'
 import type { ServiceListResponse, ServiceQueryParams } from '../services/types'
 
@@ -137,6 +139,26 @@ export async function fetchServicesByPolicy(policyId: string, params?: ServiceQu
   }
 
   throw new Error(response.message || 'Failed to fetch services')
+}
+
+/**
+ * Fetch the version history of a policy
+ */
+export async function fetchPolicyHistory(policyId: string): Promise<PolicyVersionHistoryListResponse> {
+  const endpoint = `${API_ENDPOINTS.POLICY_HISTORY(policyId)}`
+  const response = await get<ApiResponse<PolicyVersionHistoryListResponse>>(endpoint)
+  if (response.success && response.data) return response.data
+  throw new Error(response.message || 'Failed to fetch policy history')
+}
+
+/**
+ * Fetch a specific version of a policy
+ */
+export async function fetchPolicyHistoryVersion(policyId: string, version: number): Promise<PolicyVersionHistory> {
+  const endpoint = `${API_ENDPOINTS.POLICY_HISTORY(policyId)}/${version}`
+  const response = await get<ApiResponse<PolicyVersionHistory>>(endpoint)
+  if (response.success && response.data) return response.data
+  throw new Error(response.message || 'Failed to fetch policy version')
 }
 
 // Export as policy object

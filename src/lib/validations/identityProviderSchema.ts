@@ -16,6 +16,7 @@ const EXTERNAL_PROVIDERS = [
   'apple',
   'linkedin',
   'twitter',
+  'saml',
 ]
 
 function activeExternalProvider(provider: unknown, status: unknown): boolean {
@@ -65,6 +66,7 @@ export const identityProviderSchema = yup.object({
         'apple',
         'linkedin',
         'twitter',
+        'saml',
       ],
       'Invalid provider'
     )

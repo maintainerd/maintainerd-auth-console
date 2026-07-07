@@ -135,7 +135,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
         status: data.status,
         client_id: data.clientId,
         verification_required: verificationRequired,
-        required_fields: JSON.stringify(requiredFields),
+        required_fields: requiredFields,
         role_ids: selectedRoleIds,
       }
 
@@ -190,7 +190,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
         {/* Header */}
         <FormPageHeader
           backUrl={isEditing ? `/${tenantId}/registration-flows/${registrationFlowId}` : navState.from ?? `/${tenantId}/registration-flows`}
-          backLabel={isEditing ? "Back to Registration Flows" : navState.backLabel ?? "Back to Registration Flows"}
+          backLabel={isEditing ? "Back to Registration" : navState.backLabel ?? "Back to Registration"}
           title={isEditing ? "Edit Registration Flow" : "Create New Registration Flow"}
           description={isEditing
             ? "Update registration flow configuration and settings"

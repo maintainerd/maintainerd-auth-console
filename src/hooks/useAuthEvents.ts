@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchAuthEvents, fetchAuthEventById } from '@/services/api/auth-events'
+import { fetchAuthEvents, fetchAuthEventById, fetchAuthEventCount } from '@/services/api/auth-events'
 import type { AuthEventQueryParams } from '@/services/api/auth-events/types'
 
 export const authEventKeys = {
@@ -26,5 +26,13 @@ export function useAuthEvent(eventId: string) {
     queryKey: authEventKeys.detail(eventId),
     queryFn: () => fetchAuthEventById(eventId),
     enabled: !!eventId,
+  })
+}
+
+export function useAuthEventCount(eventType: string) {
+  return useQuery({
+    queryKey: ['auth-events', 'count', eventType],
+    queryFn: () => fetchAuthEventCount(eventType),
+    enabled: !!eventType,
   })
 }

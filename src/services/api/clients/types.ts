@@ -30,7 +30,7 @@ export type RequiredAcr = '1' | '2'
 /**
  * Client URI type enum
  */
-export type ClientUriType = 'redirect-uri' | 'origin-uri' | 'logout-uri' | 'login-uri' | 'cors-origin-uri'
+export type ClientUriType = 'redirect_uri' | 'origin_uri' | 'logout_uri' | 'login_uri' | 'cors_origin_uri'
 
 /**
  * URI type (used in client list response)
@@ -94,6 +94,10 @@ export type Client = {
   session_absolute_timeout?: number | null
   created_at: string
   updated_at: string
+  backchannel_logout_uri?: string | null
+  frontchannel_logout_uri?: string | null
+  backchannel_logout_session_required?: boolean
+  dpop_required?: boolean
 }
 
 export type RotateClientSecretRequest = {
@@ -158,6 +162,10 @@ export interface ClientResponse {
   session_absolute_timeout?: number | null
   created_at: string
   updated_at: string
+  backchannel_logout_uri?: string | null
+  frontchannel_logout_uri?: string | null
+  backchannel_logout_session_required?: boolean
+  dpop_required?: boolean
 }
 
 /**
@@ -186,6 +194,10 @@ export interface CreateClientRequest {
   allow_registration?: boolean
   status: ClientStatus
   config: Record<string, unknown>
+  backchannel_logout_uri?: string | null
+  frontchannel_logout_uri?: string | null
+  backchannel_logout_session_required?: boolean
+  dpop_required?: boolean
 }
 
 /**
@@ -200,6 +212,10 @@ export interface UpdateClientRequest {
   allow_registration?: boolean
   status: ClientStatus
   config: Record<string, unknown>
+  backchannel_logout_uri?: string | null
+  frontchannel_logout_uri?: string | null
+  backchannel_logout_session_required?: boolean
+  dpop_required?: boolean
 }
 
 /**
