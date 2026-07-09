@@ -1,3 +1,8 @@
+/**
+ * Workload Identity Federation API
+ * Handles workload identity federation API calls
+ */
+
 import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
 import { unwrap, assertSuccess } from '../_lib/unwrap'
@@ -12,6 +17,9 @@ import type {
 
 const BASE = API_ENDPOINTS.WORKLOAD_IDENTITY_FEDERATIONS
 
+/**
+ * Fetch workload identity federations with optional filters and pagination
+ */
 export async function fetchWorkloadIdentities(
   params?: WorkloadIdentityQueryParams,
 ): Promise<WorkloadIdentityListResponse> {
@@ -28,13 +36,19 @@ export async function fetchWorkloadIdentities(
   return unwrap(r, 'fetch workload identity federations')
 }
 
+/**
+ * Fetch a single workload identity federation by UUID
+ */
 export async function fetchWorkloadIdentityById(
-  id: string,
+  federationId: string,
 ): Promise<WorkloadIdentityFederation> {
-  const r = await get<ApiResponse<WorkloadIdentityFederation>>(`${BASE}/${id}`)
+  const r = await get<ApiResponse<WorkloadIdentityFederation>>(`${BASE}/${federationId}`)
   return unwrap(r, 'fetch workload identity federation')
 }
 
+/**
+ * Create a new workload identity federation
+ */
 export async function createWorkloadIdentity(
   data: CreateWorkloadIdentityRequest,
 ): Promise<WorkloadIdentityFederation> {
@@ -42,15 +56,21 @@ export async function createWorkloadIdentity(
   return unwrap(r, 'create workload identity federation')
 }
 
+/**
+ * Update an existing workload identity federation
+ */
 export async function updateWorkloadIdentity(
-  id: string,
+  federationId: string,
   data: UpdateWorkloadIdentityRequest,
 ): Promise<WorkloadIdentityFederation> {
-  const r = await put<ApiResponse<WorkloadIdentityFederation>>(`${BASE}/${id}`, data)
+  const r = await put<ApiResponse<WorkloadIdentityFederation>>(`${BASE}/${federationId}`, data)
   return unwrap(r, 'update workload identity federation')
 }
 
-export async function deleteWorkloadIdentity(id: string): Promise<void> {
-  const r = await deleteRequest<ApiResponse<void>>(`${BASE}/${id}`)
+/**
+ * Delete a workload identity federation
+ */
+export async function deleteWorkloadIdentity(federationId: string): Promise<void> {
+  const r = await deleteRequest<ApiResponse<void>>(`${BASE}/${federationId}`)
   assertSuccess(r, 'delete workload identity federation')
 }

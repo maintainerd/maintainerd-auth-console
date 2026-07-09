@@ -18,33 +18,33 @@ import { DetailsContainer } from "@/components/container"
 import { PageContainer, PageHeader } from "@/components/layout"
 import {
   FormInputField,
+  FormSelectField,
   FormSwitchField,
   FormSubmitButton,
 } from "@/components/form"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useToast } from "@/hooks/useToast"
+import { useClients } from "@/hooks/useClients"
 import {
   useWorkloadIdentities,
   useCreateWorkloadIdentity,
   useUpdateWorkloadIdentity,
   useDeleteWorkloadIdentity,
 } from "@/hooks/useWorkloadIdentity"
-import type {
-  WorkloadIdentityFederation,
-  CreateWorkloadIdentityRequest,
-} from "@/services/api/workload-identity/types"
+import type { WorkloadIdentityFederation } from "@/services/api/workload-identity/types"
 
 const schema = yup.object({
+  client_uuid: yup.string().required("Client is required"),
   name: yup.string().required("Name is required"),
   description: yup.string().optional(),
   issuer_url: yup
     .string()
     .url("Must be a valid URL")
     .required("Issuer URL is required"),
-  audience: yup.string().optional(),
-  subject_claim: yup.string().required("Subject claim is required").default("sub"),
-  subject_pattern: yup.string().optional(),
+  audience: yup.string().required("Audience is required"),
+  subject_claim: yup.string().optional().default("sub"),
+  subject_pattern: yup.string().required("Subject pattern is required"),
   allowed_scopes: yup.string().optional(),
   attribute_mapping: yup.string().optional(),
   is_active: yup.boolean().default(true),
@@ -62,10 +62,14 @@ function parseAllowedScopes(val?: string | null): string[] | undefined {
 
 function parseAttributeMapping(
   val?: string | null,
-): Record<string, unknown> | undefined {
+): Record<string, string> | undefined {
   if (!val) return undefined
   try {
-    return JSON.parse(val) as Record<string, unknown>
+    const parsed = JSON.parse(val)
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return undefined
+    }
+    return parsed as Record<string, string>
   } catch {
     return undefined
   }
@@ -76,7 +80,7 @@ function serializeAllowedScopes(scopes?: string[] | null): string {
 }
 
 function serializeAttributeMapping(
-  obj?: Record<string, unknown> | null,
+  obj?: Record<string, string> | null,
 ): string {
   if (!obj) return ""
   return JSON.stringify(obj, null, 2)
@@ -88,9 +92,15 @@ export default function WorkloadIdentityPage() {
   const [editing, setEditing] = useState<WorkloadIdentityFederation | null>(null)
 
   const { data, isLoading } = useWorkloadIdentities({ page: 1, limit: 50 })
+  const { data: clientsData } = useClients({ page: 1, limit: 100 })
   const createMutation = useCreateWorkloadIdentity()
   const updateMutation = useUpdateWorkloadIdentity()
   const deleteMutation = useDeleteWorkloadIdentity()
+
+  const clientOptions = (clientsData?.rows ?? []).map((c) => ({
+    value: c.client_id,
+    label: c.display_name || c.name,
+  }))
 
   const {
     register,
@@ -101,9 +111,12 @@ export default function WorkloadIdentityPage() {
   } = useForm<WorkloadFormData>({
     resolver: yupResolver(schema) as unknown as Resolver<WorkloadFormData>,
     defaultValues: {
+      client_uuid: "",
       name: "",
       issuer_url: "",
+      audience: "",
       subject_claim: "sub",
+      subject_pattern: "",
       is_active: true,
     },
   })
@@ -111,6 +124,7 @@ export default function WorkloadIdentityPage() {
   const openCreate = () => {
     setEditing(null)
     reset({
+      client_uuid: "",
       name: "",
       description: "",
       issuer_url: "",
@@ -127,12 +141,13 @@ export default function WorkloadIdentityPage() {
   const openEdit = (item: WorkloadIdentityFederation) => {
     setEditing(item)
     reset({
+      client_uuid: item.client_uuid,
       name: item.name,
       description: item.description ?? "",
       issuer_url: item.issuer_url,
-      audience: item.audience ?? "",
+      audience: item.audience,
       subject_claim: item.subject_claim,
-      subject_pattern: item.subject_pattern ?? "",
+      subject_pattern: item.subject_pattern,
       allowed_scopes: serializeAllowedScopes(item.allowed_scopes),
       attribute_mapping: serializeAttributeMapping(item.attribute_mapping),
       is_active: item.is_active,
@@ -141,23 +156,36 @@ export default function WorkloadIdentityPage() {
   }
 
   const onSubmit = async (formData: WorkloadFormData) => {
-    const payload: CreateWorkloadIdentityRequest = {
-      name: formData.name,
-      description: formData.description || undefined,
-      issuer_url: formData.issuer_url,
-      audience: formData.audience || undefined,
-      subject_claim: formData.subject_claim,
-      subject_pattern: formData.subject_pattern || undefined,
-      allowed_scopes: parseAllowedScopes(formData.allowed_scopes),
-      attribute_mapping: parseAttributeMapping(formData.attribute_mapping),
-      is_active: formData.is_active,
-    }
     try {
       if (editing) {
-        await updateMutation.mutateAsync({ id: editing.uuid, data: payload })
+        await updateMutation.mutateAsync({
+          federationId: editing.workload_identity_federation_uuid,
+          data: {
+            name: formData.name,
+            description: formData.description || undefined,
+            issuer_url: formData.issuer_url,
+            audience: formData.audience,
+            subject_claim: formData.subject_claim || undefined,
+            subject_pattern: formData.subject_pattern,
+            allowed_scopes: parseAllowedScopes(formData.allowed_scopes),
+            attribute_mapping: parseAttributeMapping(formData.attribute_mapping),
+            is_active: formData.is_active,
+          },
+        })
         showSuccess("Federation updated")
       } else {
-        await createMutation.mutateAsync(payload)
+        await createMutation.mutateAsync({
+          client_uuid: formData.client_uuid,
+          name: formData.name,
+          description: formData.description || undefined,
+          issuer_url: formData.issuer_url,
+          audience: formData.audience,
+          subject_claim: formData.subject_claim || undefined,
+          subject_pattern: formData.subject_pattern,
+          allowed_scopes: parseAllowedScopes(formData.allowed_scopes),
+          attribute_mapping: parseAttributeMapping(formData.attribute_mapping),
+          is_active: formData.is_active,
+        })
         showSuccess("Federation created")
       }
       setDialogOpen(false)
@@ -180,7 +208,7 @@ export default function WorkloadIdentityPage() {
       destructive: true,
       onSelect: async () => {
         try {
-          await deleteMutation.mutateAsync(item.uuid)
+          await deleteMutation.mutateAsync(item.workload_identity_federation_uuid)
           showSuccess("Federation deleted")
         } catch (err) {
           showError(err)
@@ -230,7 +258,7 @@ export default function WorkloadIdentityPage() {
         {items.length > 0 && (
           <div className="space-y-3">
             {items.map((item) => (
-              <Card key={item.uuid} className="shadow-xs">
+              <Card key={item.workload_identity_federation_uuid} className="shadow-xs">
                 <CardContent className="flex items-start justify-between gap-3 p-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -252,13 +280,14 @@ export default function WorkloadIdentityPage() {
                     </p>
                     <div className="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
                       <span>
+                        Audience: <code>{item.audience}</code>
+                      </span>
+                      <span>
                         Subject claim: <code>{item.subject_claim}</code>
                       </span>
-                      {item.audience && (
-                        <span>
-                          Audience: <code>{item.audience}</code>
-                        </span>
-                      )}
+                      <span>
+                        Pattern: <code>{item.subject_pattern}</code>
+                      </span>
                       <span>Created {format(new Date(item.created_at), "PP")}</span>
                     </div>
                   </div>
@@ -278,6 +307,23 @@ export default function WorkloadIdentityPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Controller
+              name="client_uuid"
+              control={control}
+              render={({ field }) => (
+                <FormSelectField
+                  label="Client"
+                  placeholder="Select a client"
+                  options={clientOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  required
+                  disabled={isSubmitting || !!editing}
+                  error={errors.client_uuid?.message}
+                  description={editing ? "Client cannot be changed after creation" : undefined}
+                />
+              )}
+            />
             <FormInputField
               label="Name"
               required
@@ -301,6 +347,7 @@ export default function WorkloadIdentityPage() {
             />
             <FormInputField
               label="Audience"
+              required
               disabled={isSubmitting}
               error={errors.audience?.message}
               {...register("audience")}
@@ -316,6 +363,7 @@ export default function WorkloadIdentityPage() {
               <FormInputField
                 label="Subject pattern"
                 placeholder="service-*"
+                required
                 disabled={isSubmitting}
                 error={errors.subject_pattern?.message}
                 {...register("subject_pattern")}

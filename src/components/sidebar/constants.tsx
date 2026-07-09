@@ -3,8 +3,6 @@ import {
 	Shield,
 	Users,
 	Webhook,
-	MessageSquare,
-	LifeBuoy,
 	LayoutDashboard,
 	Palette,
 	Server,
@@ -162,18 +160,6 @@ export const data = {
           icon: Settings,
         },
       ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: MessageSquare,
     },
   ],
 }
