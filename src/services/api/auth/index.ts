@@ -30,26 +30,43 @@ export function logoutAndRedirect(to: string = '/login'): void {
 }
 
 /**
- * Full logout: ends the hosted-identity SSO session, not just the local console
- * session.
+ * Full logout: ends BOTH the console's own backend session and the hosted-identity
+ * SSO session.
  *
- * Clears the local OAuth tokens, then redirects the browser through identity's
- * RP-initiated logout (OIDC `end_session`) carrying `id_token_hint`, `client_id`,
- * and a registered `post_logout_redirect_uri`. Identity forwards the request to
- * the backend, which revokes the refresh tokens AND clears the `__Host-*`
- * session cookies, then redirects back to the console.
+ * The console holds its own `__Host-*` session cookies — issued by the private
+ * API during the OAuth authorization-code exchange — that are scoped to the
+ * private-API host and are independent of identity's SSO cookies (scoped to the
+ * public-API host). Ending only the SSO session leaves the console's own session
+ * cookie alive, so `initializeAuth` (GET /account) re-authenticates the user on
+ * the next load and logout appears not to stick.
  *
- * Without this the identity session cookie survives logout and the next "Sign
- * in" silently re-authenticates the user (the SSO logout loop). The
- * post_logout_redirect_uri must be a URI registered for the console client
+ * So we log out in two steps:
+ *   1. POST /logout on the console's API → revokes the refresh token and clears
+ *      the console's `__Host-*` cookies (best-effort).
+ *   2. Redirect through identity's RP-initiated logout (OIDC `end_session`)
+ *      carrying `id_token_hint`, `client_id`, and a registered
+ *      `post_logout_redirect_uri`, which clears identity's SSO cookies and
+ *      redirects back to the console `/logout` route.
+ *
+ * The post_logout_redirect_uri must be a URI registered for the console client
  * (the client_uri seed registers `<console-origin>/logout`).
  */
-export function logoutViaIdentity(): void {
+export async function logoutViaIdentity(): Promise<void> {
   const session = getStoredOAuthSession()
   // Best-effort id_token_hint: the id_token now lives in an httpOnly cookie and
   // is only readable from JS for the current page session. Logout still works
   // without it — client_id plus the backend session cookie identify the session.
   const idTokenHint = getSessionIdTokenHint()
+
+  // 1. End the console's own backend session (revoke refresh token + clear the
+  //    private-API cookies). Best-effort: proceed to SSO logout even if this
+  //    fails (e.g. the session was already gone, as after account deletion).
+  try {
+    await post(API_ENDPOINTS.AUTH.LOGOUT)
+  } catch {
+    /* ignore — still end the SSO session below */
+  }
+
   clearOAuthSession()
 
   const params = new URLSearchParams()
@@ -58,6 +75,32 @@ export function logoutViaIdentity(): void {
   params.set('post_logout_redirect_uri', `${window.location.origin}/logout`)
 
   window.location.replace(`${API_CONFIG.IDENTITY_BASE_URL}/oauth/end_session?${params.toString()}`)
+}
+
+/**
+ * App-only sign-out (the default logout for the console).
+ *
+ * Ends ONLY the console's own session — it does NOT touch identity's SSO, so
+ * other apps stay signed in and this app doesn't perform a global logout:
+ *   1. POST /logout on the console's API → revokes the refresh token and clears
+ *      the console's session cookies. Best-effort.
+ *   2. clear the client-side OAuth marker.
+ *   3. hard-navigate to the public `/login` page.
+ *
+ * Crucially it does NOT redirect through identity's `end_session`, so nothing
+ * auto-reauthenticates — the user lands on the login page and must click
+ * "Sign in" to start OAuth again (which is a one-click SSO if still signed into
+ * identity). The hard navigation forces a fresh bootstrap that reads the now
+ * cleared session, so logout sticks instead of the guard bouncing back in.
+ */
+export async function logout(to: string = '/login'): Promise<void> {
+  try {
+    await post(API_ENDPOINTS.AUTH.LOGOUT)
+  } catch {
+    /* best-effort — still clear client state and land on /login */
+  }
+  clearOAuthSession()
+  window.location.replace(to)
 }
 
 /**
