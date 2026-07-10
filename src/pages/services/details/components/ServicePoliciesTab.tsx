@@ -14,10 +14,9 @@ import type { Policy } from "@/services/api/policies/types"
 
 interface ServicePoliciesTabProps {
   serviceId: string
-  tenantId: string
 }
 
-export function ServicePoliciesTab({ serviceId, tenantId }: ServicePoliciesTabProps) {
+export function ServicePoliciesTab({ serviceId }: ServicePoliciesTabProps) {
   const navigate = useNavigate()
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -41,7 +40,7 @@ export function ServicePoliciesTab({ serviceId, tenantId }: ServicePoliciesTabPr
 
   const { removePolicy } = useServicePolicyMutations(serviceId)
 
-  const navState = { from: `/${tenantId}/services/${serviceId}`, backLabel: "Back to Service Details" }
+  const navState = { from: `/services/${serviceId}`, backLabel: "Back to Service Details" }
   const existingPolicyIds = data?.rows.map((p) => p.policy_id) ?? []
 
   const policyActions = (policy: Policy): RowActionItem[] => {
@@ -50,7 +49,7 @@ export function ServicePoliciesTab({ serviceId, tenantId }: ServicePoliciesTabPr
         key: "view",
         label: "View Details",
         icon: Eye,
-        onSelect: () => navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState }),
+        onSelect: () => navigate(`/policies/${policy.policy_id}`, { state: navState }),
       },
     ]
 
@@ -111,13 +110,13 @@ export function ServicePoliciesTab({ serviceId, tenantId }: ServicePoliciesTabPr
                   onClick={(e) => {
                     const target = e.target as HTMLElement
                     if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                    navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState })
+                    navigate(`/policies/${policy.policy_id}`, { state: navState })
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault()
-                      navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: navState })
+                      navigate(`/policies/${policy.policy_id}`, { state: navState })
                     }
                   }}
                   className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"

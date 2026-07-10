@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Send, Ban } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useResendInvite, useRevokeInvite } from "@/hooks/useInvites"
@@ -10,7 +10,6 @@ interface InviteActionsProps {
 }
 
 export function InviteActions({ invite }: InviteActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const resendMutation = useResendInvite()
@@ -21,7 +20,7 @@ export function InviteActions({ invite }: InviteActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/invites/${invite.invite_id}`),
+      onSelect: () => navigate(`/invites/${invite.invite_id}`),
     },
   ]
 

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { UserPlus, Globe, Shield, Clock, Settings, Check, X, Hash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,10 +28,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function RegistrationViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useRegistrationConfig()
-  const configureUrl = `/${tenantId}/security/registration/configure`
+  const configureUrl = `/security/registration/configure`
 
   return (
     <DetailsContainer>

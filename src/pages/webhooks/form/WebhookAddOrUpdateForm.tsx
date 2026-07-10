@@ -30,7 +30,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function WebhookAddOrUpdateForm() {
-  const { tenantId, webhookId } = useParams<{ tenantId: string; webhookId?: string }>()
+  const { webhookId } = useParams<{ webhookId?: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
 
@@ -103,7 +103,7 @@ export default function WebhookAddOrUpdateForm() {
           setRevealedSecret(updated.signing_secret)
           return
         }
-        navigate(`/${tenantId}/webhooks/${webhookId}`)
+        navigate(`/webhooks/${webhookId}`)
       } else {
         const createData: CreateWebhookRequest = {
           url: data.url,
@@ -121,7 +121,7 @@ export default function WebhookAddOrUpdateForm() {
           setRevealedSecret(created.signing_secret)
           return
         }
-        navigate(`/${tenantId}/webhooks/${created.webhook_endpoint_id}`)
+        navigate(`/webhooks/${created.webhook_endpoint_id}`)
       }
     } catch (error) {
       showError(error, "Failed to save webhook")
@@ -130,9 +130,9 @@ export default function WebhookAddOrUpdateForm() {
 
   const handleCancel = () => {
     if (isEditing && webhookId) {
-      navigate(`/${tenantId}/webhooks/${webhookId}`)
+      navigate(`/webhooks/${webhookId}`)
     } else {
-      navigate(`/${tenantId}/webhooks`)
+      navigate(`/webhooks`)
     }
   }
 
@@ -168,7 +168,7 @@ export default function WebhookAddOrUpdateForm() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader
-            backUrl={`/${tenantId}/webhooks`}
+            backUrl={`/webhooks`}
             backLabel="Back to Webhooks"
             title="Save your signing secret"
             description="This is the only time the signing secret will be shown."
@@ -206,8 +206,8 @@ export default function WebhookAddOrUpdateForm() {
                   onClick={() =>
                     navigate(
                       savedWebhookId
-                        ? `/${tenantId}/webhooks/${savedWebhookId}`
-                        : `/${tenantId}/webhooks`,
+                        ? `/webhooks/${savedWebhookId}`
+                        : `/webhooks`,
                     )
                   }
                 >
@@ -225,7 +225,7 @@ export default function WebhookAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/webhooks/${webhookId}` : `/${tenantId}/webhooks`}
+          backUrl={isEditing ? `/webhooks/${webhookId}` : `/webhooks`}
           backLabel="Back to Webhooks"
           title={isEditing ? "Edit Webhook" : "Create New Webhook"}
           description={

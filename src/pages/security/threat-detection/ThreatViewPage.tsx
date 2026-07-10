@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { ShieldAlert, Hash, Settings, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,10 +27,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function ThreatViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useThreatDetectionSettings()
-  const configureUrl = `/${tenantId}/security/threat/configure`
+  const configureUrl = `/security/threat/configure`
 
   return (
     <DetailsContainer>

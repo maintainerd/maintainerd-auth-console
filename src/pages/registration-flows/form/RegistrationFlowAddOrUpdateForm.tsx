@@ -43,7 +43,7 @@ const REGISTRATION_FIELDS = [
 ]
 
 export default function RegistrationFlowAddOrUpdateForm() {
-  const { tenantId, registrationFlowId } = useParams<{ tenantId: string; registrationFlowId?: string }>()
+  const { registrationFlowId } = useParams<{ registrationFlowId?: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
 
@@ -149,7 +149,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
       }
 
       showSuccess(isEditing ? "Registration flow updated successfully" : "Registration flow created successfully")
-      navigate(`/${tenantId}/registration-flows/${flowId}`)
+      navigate(`/registration-flows/${flowId}`)
     } catch (error) {
       showError(error)
     }
@@ -157,9 +157,9 @@ export default function RegistrationFlowAddOrUpdateForm() {
 
   const handleCancel = () => {
     if (isEditing && registrationFlowId) {
-      navigate(`/${tenantId}/registration-flows/${registrationFlowId}`)
+      navigate(`/registration-flows/${registrationFlowId}`)
     } else {
-      navigate(navState.from ?? `/${tenantId}/registration-flows`)
+      navigate(navState.from ?? `/registration-flows`)
     }
   }
 
@@ -189,7 +189,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
       <div className="flex flex-col gap-6">
         {/* Header */}
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/registration-flows/${registrationFlowId}` : navState.from ?? `/${tenantId}/registration-flows`}
+          backUrl={isEditing ? `/registration-flows/${registrationFlowId}` : navState.from ?? `/registration-flows`}
           backLabel={isEditing ? "Back to Registration" : navState.backLabel ?? "Back to Registration"}
           title={isEditing ? "Edit Registration Flow" : "Create New Registration Flow"}
           description={isEditing

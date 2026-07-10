@@ -10,7 +10,7 @@ const TABS = [
 ] as const
 
 export default function ApiDetailsPage() {
-  const { tenantId, apiId } = useParams<{ tenantId: string; apiId: string }>()
+  const { apiId } = useParams<{ apiId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -22,13 +22,13 @@ export default function ApiDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to APIs"
-      onBack={() => navigate(`/${tenantId}/apis`)}
+      onBack={() => navigate(`/apis`)}
       isLoading={isLoading}
       isError={isError || !api}
       notFoundTitle="API not found"
       notFoundDescription="The API you're looking for doesn't exist or may have been removed."
     >
-      <ApiHeader api={api!} tenantId={tenantId!} apiId={apiId!} />
+      <ApiHeader api={api!} apiId={apiId!} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,7 +44,6 @@ interface ServiceToolbarProps {
 }
 
 export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange, table }: ServiceToolbarProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
@@ -77,8 +76,8 @@ export function ServiceToolbar({ filter, setFilter, filters, onFiltersChange, ta
 
   // Action handlers
   const handleCreateService = React.useCallback(() => {
-    navigate(`/${tenantId}/services/create`)
-  }, [navigate, tenantId])
+    navigate(`/services/create`)
+  }, [navigate])
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

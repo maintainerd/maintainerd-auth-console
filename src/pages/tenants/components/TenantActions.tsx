@@ -1,5 +1,5 @@
 import { Eye, Edit, Trash2, Play, Pause, Ban, type LucideIcon } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteTenant, useUpdateTenantStatus } from "@/hooks/useTenants"
 import { useToast } from "@/hooks/useToast"
@@ -56,7 +56,6 @@ const STATUS_ACTIONS: Record<TenantStatus, StatusAction[]> = {
 }
 
 export function TenantActions({ tenant, onEdit }: TenantActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateTenantStatus()
@@ -76,7 +75,7 @@ export function TenantActions({ tenant, onEdit }: TenantActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/tenants/${tenant.tenant_id}`),
+      onSelect: () => navigate(`/tenants/${tenant.tenant_id}`),
     },
     {
       key: "edit",

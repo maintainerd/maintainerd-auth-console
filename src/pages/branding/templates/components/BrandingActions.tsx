@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, CheckCircle2 } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useActivateBranding, useDeleteBranding } from "@/hooks/useBranding"
@@ -10,13 +10,12 @@ interface BrandingActionsProps {
 }
 
 export function BrandingActions({ branding }: BrandingActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const activateMutation = useActivateBranding()
   const deleteMutation = useDeleteBranding()
 
-  const base = `/${tenantId}/branding/templates`
+  const base = `/branding/templates`
 
   const items: RowActionItem[] = [
     {

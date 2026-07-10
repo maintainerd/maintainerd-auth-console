@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { logoutViaIdentity } from "@/services/api/auth"
+import { logout } from "@/services/api/auth"
 import { Mail, AtSign, Download, Trash2, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -173,8 +173,8 @@ function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const mutation = useMutation({
     mutationFn: (token: string) => deleteAccount(password, token),
     onSuccess: () => {
-      // Account is gone; end the identity session and land on the login page.
-      logoutViaIdentity()
+      // Account is gone; end the console session locally and land on login.
+      logout()
     },
     onError: (e) => showError(e),
   })

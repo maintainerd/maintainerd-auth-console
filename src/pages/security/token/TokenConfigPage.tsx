@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
@@ -31,10 +31,9 @@ const KNOWN_CLAIMS = [
 ]
 
 export default function TokenConfigPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/security/token`
+  const backTo = `/security/token`
 
   const { data: savedConfig, isLoading, isError } = useTokenConfig()
   const updateMutation = useUpdateTokenConfig()

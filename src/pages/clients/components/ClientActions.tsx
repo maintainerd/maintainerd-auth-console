@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateClientStatus, useDeleteClient } from "@/hooks/useClients"
@@ -10,7 +10,6 @@ interface ClientActionsProps {
 }
 
 export function ClientActions({ client }: ClientActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateClientStatus()
@@ -35,13 +34,13 @@ export function ClientActions({ client }: ClientActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/clients/${client.client_id}`),
+      onSelect: () => navigate(`/clients/${client.client_id}`),
     },
     {
       key: "edit",
       label: "Edit Client",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/clients/${client.client_id}/edit`),
+      onSelect: () => navigate(`/clients/${client.client_id}/edit`),
     },
     ...(isActive
       ? [

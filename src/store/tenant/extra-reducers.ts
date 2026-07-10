@@ -4,12 +4,14 @@
  */
 
 import type { ActionReducerMapBuilder } from '@reduxjs/toolkit'
-import { 
-  fetchTenantAsync, 
-  fetchDefaultTenantAsync, 
-  fetchTenantByIdentifierAsync, 
-  initializeTenantAsync 
+import {
+  fetchTenantAsync,
+  fetchDefaultTenantAsync,
+  fetchTenantByIdentifierAsync,
+  initializeTenantAsync,
+  bootstrapTenantAsync
 } from './actions'
+import type { TenantEntity } from '@/services/api/tenants/types'
 import type { TenantState } from './types'
 
 export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantState>) => {
@@ -69,5 +71,42 @@ export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantState
     .addCase(initializeTenantAsync.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.error.message || 'Failed to initialize tenant'
+    })
+    // Bootstrap tenant from host (new backend tenant-bootstrap endpoint).
+    .addCase(bootstrapTenantAsync.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    .addCase(bootstrapTenantAsync.fulfilled, (state, action) => {
+      const data = action.payload
+      // Normalize the bootstrap tenant into the shared TenantEntity shape so
+      // every existing consumer keeps working: map `tenant_uuid` → `tenant_id`
+      // and fold the sibling `branding` into the tenant. Fields the public
+      // surface omits (is_default, timestamps, password/registration config) are
+      // not needed for console rendering.
+      const t = data.tenant
+      const normalized: TenantEntity = {
+        tenant_id: t.tenant_uuid,
+        name: t.name,
+        display_name: t.display_name,
+        description: t.description,
+        status: t.status,
+        is_default: false,
+        is_system: t.is_system,
+        created_at: '',
+        updated_at: '',
+        branding: data.branding,
+      }
+      state.isLoading = false
+      state.currentTenant = normalized
+      state.surface = data.surface
+      state.identityUrl = data.identity_url
+      state.consoleUrl = data.console_url
+      state.consoleClient = data.client ?? null
+      state.error = null
+    })
+    .addCase(bootstrapTenantAsync.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.error.message || 'Failed to bootstrap tenant'
     })
 }

@@ -29,7 +29,7 @@ const TABS = [
 ] as const
 
 export default function UserDetailsPage() {
-  const { tenantId, userId } = useParams<{ tenantId: string; userId: string }>()
+  const { userId } = useParams<{ userId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -41,13 +41,13 @@ export default function UserDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Users"
-      onBack={() => navigate(`/${tenantId}/users`)}
+      onBack={() => navigate(`/users`)}
       isLoading={isLoading}
       isError={isError || !user}
       notFoundTitle="User not found"
       notFoundDescription="The user you're looking for doesn't exist or may have been removed."
     >
-      <UserHeader user={user!} tenantId={tenantId!} userId={userId!} />
+      <UserHeader user={user!} userId={userId!} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>

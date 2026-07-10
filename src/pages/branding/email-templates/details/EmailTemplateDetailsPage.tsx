@@ -6,7 +6,7 @@ import { useEmailTemplate } from "@/hooks/useEmailTemplates"
 import { EmailTemplateHeader, EmailTemplateContent, EmailTemplatePreview } from "./components"
 
 export default function EmailTemplateDetailsPage() {
-  const { tenantId, templateId } = useParams<{ tenantId: string; templateId: string }>()
+  const { templateId } = useParams<{ templateId: string }>()
   const navigate = useNavigate()
 
   const { data: template, isLoading, isError } = useEmailTemplate(templateId || '')
@@ -14,7 +14,7 @@ export default function EmailTemplateDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Email Templates"
-      onBack={() => navigate(`/${tenantId}/branding/email-templates`)}
+      onBack={() => navigate(`/branding/email-templates`)}
       isLoading={isLoading}
       isError={isError || !template}
       notFoundTitle="Email template not found"
@@ -22,7 +22,7 @@ export default function EmailTemplateDetailsPage() {
     >
       {template && (
         <>
-          <EmailTemplateHeader template={template} tenantId={tenantId!} templateId={templateId!} />
+          <EmailTemplateHeader template={template} templateId={templateId!} />
 
           <Tabs defaultValue="content">
             <TabsList>

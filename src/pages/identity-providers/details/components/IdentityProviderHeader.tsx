@@ -19,11 +19,10 @@ import type { IdentityProviderDetail } from "@/services/api/identity-providers/t
 
 interface IdentityProviderHeaderProps {
   provider: IdentityProviderDetail
-  tenantId: string
   providerId: string
 }
 
-export function IdentityProviderHeader({ provider, tenantId, providerId }: IdentityProviderHeaderProps) {
+export function IdentityProviderHeader({ provider, providerId }: IdentityProviderHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteProviderMutation = useDeleteIdentityProvider()
@@ -33,7 +32,7 @@ export function IdentityProviderHeader({ provider, tenantId, providerId }: Ident
     try {
       await deleteProviderMutation.mutateAsync(providerId)
       showSuccess("Identity provider deleted successfully")
-      navigate(`/${tenantId}/providers/identity`)
+      navigate(`/providers/identity`)
     } catch (error) {
       showError(error)
     }
@@ -119,8 +118,8 @@ export function IdentityProviderHeader({ provider, tenantId, providerId }: Ident
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/providers/identity/${providerId}/edit`, {
-                  state: { from: `/${tenantId}/providers/identity/${providerId}`, backLabel: "Back to Provider Details" },
+                navigate(`/providers/identity/${providerId}/edit`, {
+                  state: { from: `/providers/identity/${providerId}`, backLabel: "Back to Provider Details" },
                 })
               }
             >

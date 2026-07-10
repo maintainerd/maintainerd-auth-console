@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { StatusBadge } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
@@ -19,11 +19,10 @@ const PREVIEW_KEYS = [
 
 export function BrandingCard({ branding }: { branding: Branding }) {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   const tokens = tokensFromMetadata(branding.metadata)
   const palette = PREVIEW_KEYS.map((k) => tokens[k]).filter(isHex)
-  const open = () => navigate(`/${tenantId}/branding/templates/${branding.branding_id}`)
+  const open = () => navigate(`/branding/templates/${branding.branding_id}`)
 
   return (
     <Card

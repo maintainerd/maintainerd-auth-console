@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { ShieldAlert, Hash, Clock, Settings, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,10 +28,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function LockoutViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useLockoutConfig()
-  const configureUrl = `/${tenantId}/security/lockout/configure`
+  const configureUrl = `/security/lockout/configure`
 
   return (
     <DetailsContainer>

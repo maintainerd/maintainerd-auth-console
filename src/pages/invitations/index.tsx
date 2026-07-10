@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { PageContainer, PageHeader } from "@/components/layout"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
@@ -13,7 +13,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export default function InvitationsPage() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <PageContainer>
@@ -29,8 +28,8 @@ export default function InvitationsPage() {
         searchPlaceholder="Search invitations by email..."
         useData={useInvitesList}
         filterGroups={FILTER_GROUPS}
-        onRowClick={(invite) => navigate(`/${tenantId}/invites/${invite.invite_id}`)}
-        onCreate={() => navigate(`/${tenantId}/invites/create`)}
+        onRowClick={(invite) => navigate(`/invites/${invite.invite_id}`)}
+        onCreate={() => navigate(`/invites/create`)}
         createLabel="Invite User"
       />
     </PageContainer>

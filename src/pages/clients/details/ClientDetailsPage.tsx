@@ -21,7 +21,7 @@ type ClientDetailsTab = typeof TABS[number]["value"]
 const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
 
 export default function ClientDetailsPage() {
-  const { tenantId, clientId } = useParams<{ tenantId: string; clientId: string }>()
+  const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -39,7 +39,7 @@ export default function ClientDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Clients"
-      onBack={() => navigate(`/${tenantId}/clients`)}
+      onBack={() => navigate(`/clients`)}
       isLoading={isLoading}
       isError={isError || !clientData}
       notFoundTitle="Client not found"
@@ -47,7 +47,7 @@ export default function ClientDetailsPage() {
     >
       {clientData && (
         <>
-          <ClientHeader client={clientData} tenantId={tenantId!} clientId={clientId!} />
+          <ClientHeader client={clientData} clientId={clientId!} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">

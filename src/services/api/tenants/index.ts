@@ -5,7 +5,40 @@
 
 import { get, post, put, deleteRequest } from '../client'
 import { API_ENDPOINTS } from '../config'
-import type { TenantEntity, TenantResponse, TenantListResponse, TenantListParams, CreateTenantRequest, UpdateTenantRequest } from './types'
+import type {
+  TenantEntity,
+  TenantResponse,
+  TenantListResponse,
+  TenantListParams,
+  CreateTenantRequest,
+  UpdateTenantRequest,
+  TenantBootstrapData,
+  TenantBootstrapResponse,
+} from './types'
+
+/**
+ * Bootstrap the console for the current host.
+ *
+ * Calls the CONTROL plane `GET /api/v1/tenant?domain=<host>` via the same `get()`
+ * client every other console admin call uses, which resolves the tenant from the
+ * FULL host (the console no longer parses a slug client-side) and returns the
+ * tenant summary, branding, surface, the per-tenant identity/console origins,
+ * and — for a console host — the tenant's CONSOLE OAuth client used to start the
+ * login flow.
+ *
+ * IMPORTANT: the `?domain=` form is what returns this shape; omitting it returns
+ * the legacy shape without a client. Always pass the domain.
+ */
+export async function fetchTenantBootstrap(domain: string): Promise<TenantBootstrapData> {
+  const query = new URLSearchParams({ domain }).toString()
+  const response = await get<TenantBootstrapResponse>(`${API_ENDPOINTS.TENANT}?${query}`)
+  if (!response.success || !response.data) {
+    throw new Error(
+      typeof response.error === 'string' ? response.error : 'Failed to bootstrap tenant',
+    )
+  }
+  return response.data
+}
 
 /**
  * Fetch list of tenants
@@ -17,7 +50,6 @@ export async function fetchTenantList(params?: TenantListParams): Promise<Tenant
   const qp: Record<string, string> = {
     name: params?.name ?? '',
     description: params?.description ?? '',
-    identifier: params?.identifier ?? '',
     status: params?.status ?? '',
     is_default: params?.is_default !== undefined ? String(params.is_default) : '',
     is_system: params?.is_system !== undefined ? String(params.is_system) : '',
@@ -138,6 +170,7 @@ export async function fetchTenant(identifier?: string): Promise<TenantEntity> {
 
 // Export functions as an object
 export const tenantService = {
+  fetchTenantBootstrap,
   fetchTenantList,
   fetchTenantById,
   createTenant,

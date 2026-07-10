@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Server, Eye } from "lucide-react"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
@@ -15,7 +15,6 @@ interface PolicyServicesTabProps {
 
 export function PolicyServicesTab({ policyId }: PolicyServicesTabProps) {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -42,8 +41,8 @@ export function PolicyServicesTab({ policyId }: PolicyServicesTabProps) {
       label: "View Details",
       icon: Eye,
       onSelect: () =>
-        navigate(`/${tenantId}/services/${service.service_id}`, {
-          state: { from: `/${tenantId}/policies/${policyId}`, backLabel: "Back to Policy Details" },
+        navigate(`/services/${service.service_id}`, {
+          state: { from: `/policies/${policyId}`, backLabel: "Back to Policy Details" },
         }),
     },
   ]
@@ -79,16 +78,16 @@ export function PolicyServicesTab({ policyId }: PolicyServicesTabProps) {
                 onClick={(e) => {
                   const target = e.target as HTMLElement
                   if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                  navigate(`/${tenantId}/services/${service.service_id}`, {
-                    state: { from: `/${tenantId}/policies/${policyId}`, backLabel: "Back to Policy Details" },
+                  navigate(`/services/${service.service_id}`, {
+                    state: { from: `/policies/${policyId}`, backLabel: "Back to Policy Details" },
                   })
                 }}
                 onKeyDown={(e) => {
                   if (e.target !== e.currentTarget) return
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault()
-                    navigate(`/${tenantId}/services/${service.service_id}`, {
-                      state: { from: `/${tenantId}/policies/${policyId}`, backLabel: "Back to Policy Details" },
+                    navigate(`/services/${service.service_id}`, {
+                      state: { from: `/policies/${policyId}`, backLabel: "Back to Policy Details" },
                     })
                   }
                 }}

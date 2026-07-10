@@ -4,6 +4,7 @@ import {
   fetchDefaultTenant,
   fetchTenantByIdentifier
 } from '@/services'
+import { fetchTenantBootstrap } from '@/services/api/tenants'
 
 export const fetchTenantAsync = createAsyncThunk(
   'tenant/fetch',
@@ -30,5 +31,15 @@ export const initializeTenantAsync = createAsyncThunk(
   'tenant/initialize',
   async (identifier?: string) => {
     return await fetchTenant(identifier)
+  }
+)
+
+// Resolve the tenant for the current host via the backend bootstrap endpoint.
+// The backend resolves the tenant from the FULL host — the console passes the
+// whole host and never parses a slug itself.
+export const bootstrapTenantAsync = createAsyncThunk(
+  'tenant/bootstrap',
+  async (domain: string) => {
+    return await fetchTenantBootstrap(domain)
   }
 )

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Archive, Edit, Eye, Pause, Play, Trash2, XCircle, type LucideIcon } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteService, useUpdateServiceStatus } from "@/hooks/useServices"
@@ -49,7 +49,6 @@ const STATUS_ACTIONS: Record<ServiceStatus, StatusAction> = {
 }
 
 export function ServiceActions({ service }: ServiceActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteServiceMutation = useDeleteService()
@@ -87,8 +86,8 @@ export function ServiceActions({ service }: ServiceActionsProps) {
       label: "View Details",
       icon: Eye,
       onSelect: () =>
-        navigate(`/${tenantId}/services/${service.service_id}`, {
-          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        navigate(`/services/${service.service_id}`, {
+          state: { from: `/services`, backLabel: "Back to Services" },
         }),
     },
     ...(!service.is_system
@@ -98,8 +97,8 @@ export function ServiceActions({ service }: ServiceActionsProps) {
             label: "Edit Service",
             icon: Edit,
             onSelect: () =>
-              navigate(`/${tenantId}/services/${service.service_id}/edit`, {
-                state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+              navigate(`/services/${service.service_id}/edit`, {
+                state: { from: `/services`, backLabel: "Back to Services" },
               }),
           } satisfies RowActionItem,
         ]

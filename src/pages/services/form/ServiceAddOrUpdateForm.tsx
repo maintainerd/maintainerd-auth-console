@@ -28,7 +28,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function ServiceAddOrUpdateForm() {
-  const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId?: string }>()
+  const { serviceId } = useParams<{ serviceId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -39,8 +39,8 @@ export default function ServiceAddOrUpdateForm() {
   // Honour where the user came from so the back button and post-submit
   // navigation return there. Falls back to the listing.
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/services`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/services` ? "Back to Services" : "Back")
+  const backTo = navState?.from ?? `/services`
+  const backLabel = navState?.backLabel ?? (backTo === `/services` ? "Back to Services" : "Back")
 
   // Fetch existing service if editing
   const { data: serviceData, isLoading: isFetchingService } = useService(serviceId || '')

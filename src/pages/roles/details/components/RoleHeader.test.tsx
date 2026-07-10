@@ -45,29 +45,29 @@ describe("RoleHeader", () => {
   })
 
   it("renders the role name and status badge", () => {
-    renderWithProviders(<RoleHeader role={makeRole()} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole()} roleId="r1" />)
     expect(screen.getByText("admin")).toBeInTheDocument()
     expect(screen.getByText("Admin role")).toBeInTheDocument()
     expect(screen.getByText("active")).toBeInTheDocument()
   })
 
   it("shows system and default badges", () => {
-    renderWithProviders(<RoleHeader role={makeRole({ is_system: true, is_default: true })} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole({ is_system: true, is_default: true })} roleId="r1" />)
     expect(screen.getByText("System Role")).toBeInTheDocument()
     expect(screen.getByText("Default role assigned to new users")).toBeInTheDocument()
   })
 
   it("navigates to edit with router state", async () => {
-    renderWithProviders(<RoleHeader role={makeRole()} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole()} roleId="r1" />)
     await u().click(screen.getByRole("button", { name: /edit/i }))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1/edit", expect.objectContaining({
-      state: expect.objectContaining({ from: "/t1/roles/r1" }),
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1/edit", expect.objectContaining({
+      state: expect.objectContaining({ from: "/roles/r1" }),
     }))
   })
 
   it("deletes the role, shows success, and navigates back", async () => {
     deleteMutateAsync.mockResolvedValueOnce(undefined)
-    renderWithProviders(<RoleHeader role={makeRole({ name: "admin" })} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole({ name: "admin" })} roleId="r1" />)
     await u().click(screen.getByRole("button", { name: /open actions/i }))
     await u().click(await screen.findByText("Delete Role"))
 
@@ -77,13 +77,13 @@ describe("RoleHeader", () => {
 
     await waitFor(() => expect(deleteMutateAsync).toHaveBeenCalledWith("r1"))
     expect(showSuccessMock).toHaveBeenCalledWith("Role deleted successfully")
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles")
+    expect(navigateMock).toHaveBeenCalledWith("/roles")
   })
 
   it("shows an error and does not navigate when delete rejects", async () => {
     const err = new Error("fail")
     deleteMutateAsync.mockRejectedValueOnce(err)
-    renderWithProviders(<RoleHeader role={makeRole({ name: "admin" })} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole({ name: "admin" })} roleId="r1" />)
     await u().click(screen.getByRole("button", { name: /open actions/i }))
     await u().click(await screen.findByText("Delete Role"))
 
@@ -96,7 +96,7 @@ describe("RoleHeader", () => {
   })
 
   it("hides the actions menu for system roles", () => {
-    renderWithProviders(<RoleHeader role={makeRole({ is_system: true })} tenantId="t1" roleId="r1" />)
+    renderWithProviders(<RoleHeader role={makeRole({ is_system: true })} roleId="r1" />)
     expect(screen.queryByRole("button", { name: /open actions/i })).not.toBeInTheDocument()
   })
 })

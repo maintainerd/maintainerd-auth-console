@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteRole, useUpdateRoleStatus } from "@/hooks/useRoles"
@@ -10,7 +10,6 @@ interface RoleActionsProps {
 }
 
 export function RoleActions({ role }: RoleActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateRoleStatus()
@@ -32,13 +31,13 @@ export function RoleActions({ role }: RoleActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/roles/${role.role_id}`),
+      onSelect: () => navigate(`/roles/${role.role_id}`),
     },
     {
       key: "edit",
       label: "Edit Role",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/roles/${role.role_id}/edit`),
+      onSelect: () => navigate(`/roles/${role.role_id}/edit`),
     },
     ...(isActive
       ? [

@@ -13,7 +13,7 @@ const TABS = [
 ] as const
 
 export default function RegistrationFlowDetailsPage() {
-  const { tenantId, registrationFlowId } = useParams<{ tenantId: string; registrationFlowId: string }>()
+  const { registrationFlowId } = useParams<{ registrationFlowId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const navState = (location.state || {}) as { from?: string; backLabel?: string }
@@ -27,7 +27,7 @@ export default function RegistrationFlowDetailsPage() {
   return (
     <DetailLayout
       backLabel={navState.backLabel ?? "Back to Registration"}
-      onBack={() => navigate(navState.from ?? `/${tenantId}/registration-flows`)}
+      onBack={() => navigate(navState.from ?? `/registration-flows`)}
       isLoading={isLoading}
       isError={isError || !registrationFlow}
       notFoundTitle="Registration flow not found"
@@ -35,7 +35,7 @@ export default function RegistrationFlowDetailsPage() {
     >
       {registrationFlow && (
         <>
-          <RegistrationFlowHeader registrationFlow={registrationFlow} tenantId={tenantId!} registrationFlowId={registrationFlowId!} />
+          <RegistrationFlowHeader registrationFlow={registrationFlow} registrationFlowId={registrationFlowId!} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>

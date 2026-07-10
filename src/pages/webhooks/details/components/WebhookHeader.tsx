@@ -30,11 +30,10 @@ import type { Webhook } from "@/services/api/webhooks/types"
 
 interface WebhookHeaderProps {
   webhook: Webhook
-  tenantId: string
   webhookId: string
 }
 
-export function WebhookHeader({ webhook, tenantId, webhookId }: WebhookHeaderProps) {
+export function WebhookHeader({ webhook, webhookId }: WebhookHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteWebhookMutation = useDeleteWebhook()
@@ -47,7 +46,7 @@ export function WebhookHeader({ webhook, tenantId, webhookId }: WebhookHeaderPro
     try {
       await deleteWebhookMutation.mutateAsync(webhookId)
       showSuccess("Webhook deleted successfully")
-      navigate(`/${tenantId}/webhooks`)
+      navigate(`/webhooks`)
     } catch (error) {
       showError(error)
     }
@@ -115,7 +114,7 @@ export function WebhookHeader({ webhook, tenantId, webhookId }: WebhookHeaderPro
               variant="outline"
               size="sm"
               className="h-9 gap-2"
-              onClick={() => navigate(`/${tenantId}/webhooks/${webhookId}/edit`)}
+              onClick={() => navigate(`/webhooks/${webhookId}/edit`)}
             >
               <Edit className="size-4" />
               Edit

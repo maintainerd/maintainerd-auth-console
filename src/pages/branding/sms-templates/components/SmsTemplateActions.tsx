@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateSmsTemplateStatus } from "@/hooks/useSmsTemplates"
@@ -9,7 +9,6 @@ interface SmsTemplateActionsProps {
 }
 
 export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const updateStatusMutation = useUpdateSmsTemplateStatus()
 
@@ -20,13 +19,13 @@ export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}`),
+      onSelect: () => navigate(`/branding/sms-templates/${template.smsTemplateId}`),
     },
     {
       key: "edit",
       label: "Edit Template",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/branding/sms-templates/${template.smsTemplateId}/edit`),
+      onSelect: () => navigate(`/branding/sms-templates/${template.smsTemplateId}/edit`),
     },
     ...(isActive
       ? [

@@ -24,7 +24,7 @@ const LEGACY_TAB_MAP: Record<string, (typeof TABS)[number]["value"]> = {
 }
 
 export default function IdentityProviderDetailsPage() {
-  const { tenantId, providerId } = useParams<{ tenantId: string; providerId: string }>()
+  const { providerId } = useParams<{ providerId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -39,7 +39,7 @@ export default function IdentityProviderDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Identity Providers"
-      onBack={() => navigate(`/${tenantId}/providers/identity`)}
+      onBack={() => navigate(`/providers/identity`)}
       isLoading={isLoading}
       isError={isError || !provider}
       notFoundTitle="Identity Provider not found"
@@ -47,7 +47,7 @@ export default function IdentityProviderDetailsPage() {
     >
       {provider && (
         <>
-          <IdentityProviderHeader provider={provider} tenantId={tenantId!} providerId={providerId!} />
+          <IdentityProviderHeader provider={provider} providerId={providerId!} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>

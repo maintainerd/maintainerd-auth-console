@@ -18,7 +18,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
   const actual = await importOriginal()
   return {
     ...actual,
-    useParams: () => ({ tenantId: "t1" }),
+    useParams: () => ({}),
     useNavigate: () => navigateMock,
   }
 })
@@ -57,14 +57,14 @@ describe("RoleActions", () => {
     renderWithProviders(<RoleActions role={makeRole()} />)
     await u().click(screen.getByRole("button", { name: /open menu/i }))
     await u().click(await screen.findByText("View Details"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1")
   })
 
   it("navigates to edit", async () => {
     renderWithProviders(<RoleActions role={makeRole()} />)
     await u().click(screen.getByRole("button", { name: /open menu/i }))
     await u().click(await screen.findByText("Edit Role"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1/edit")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1/edit")
   })
 
   it("deactivates an active role with confirmation", async () => {

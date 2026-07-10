@@ -12,10 +12,10 @@ import { useUpdateSmsTemplateStatus } from "@/hooks/useSmsTemplates"
 import { useToast } from "@/hooks/useToast"
 import type { SmsTemplate, SmsTemplateStatus } from "@/services/api/sms-templates/types"
 
-interface SmsTemplateHeaderProps { template: SmsTemplate; tenantId: string; templateId: string }
+interface SmsTemplateHeaderProps { template: SmsTemplate; templateId: string }
 interface PendingStatusAction { status: SmsTemplateStatus; title: string; description: string }
 
-export function SmsTemplateHeader({ template, tenantId, templateId }: SmsTemplateHeaderProps) {
+export function SmsTemplateHeader({ template, templateId }: SmsTemplateHeaderProps) {
   const navigate = useNavigate()
   const { showError } = useToast()
   const updateStatusMutation = useUpdateSmsTemplateStatus()
@@ -43,7 +43,7 @@ export function SmsTemplateHeader({ template, tenantId, templateId }: SmsTemplat
         attributes={attributes}
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-9 gap-2" onClick={() => navigate(`/${tenantId}/branding/sms-templates/${templateId}/edit`)}>
+            <Button variant="outline" size="sm" className="h-9 gap-2" onClick={() => navigate(`/branding/sms-templates/${templateId}/edit`)}>
               <Edit className="size-4" />Edit
             </Button>
             {canEditStatus && (

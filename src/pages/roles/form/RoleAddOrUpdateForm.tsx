@@ -25,7 +25,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function RoleAddOrUpdateForm() {
-  const { tenantId, roleId } = useParams<{ tenantId: string; roleId?: string }>()
+  const { roleId } = useParams<{ roleId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -36,8 +36,8 @@ export default function RoleAddOrUpdateForm() {
   // Honour where the user came from so the back button and post-submit
   // navigation return there. Falls back to the listing.
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/roles`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/roles` ? "Back to Roles" : "Back")
+  const backTo = navState?.from ?? `/roles`
+  const backLabel = navState?.backLabel ?? (backTo === `/roles` ? "Back to Roles" : "Back")
 
   // Fetch existing role if editing
   const { data: roleData, isLoading: isFetchingRole } = useRole(roleId || "")

@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { SlidersHorizontal, ShieldCheck, ChevronRight } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailsContainer } from "@/components/container"
@@ -12,7 +12,6 @@ import { SecuritySessions } from "./components/SecuritySessions"
 import { AccountActions } from "./components/AccountActions"
 
 export default function SettingsPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get("tab") === "security" ? "security" : "preferences"
@@ -21,7 +20,7 @@ export default function SettingsPage() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={`/${tenantId}/dashboard`}
+          backUrl={`/dashboard`}
           backLabel="Back"
           title="Settings"
           description="Manage your preferences and account security."
@@ -38,7 +37,7 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <MFACard onManage={() => navigate(`/${tenantId}/account/mfa?from=settings`)} />
+            <MFACard onManage={() => navigate(`/account/mfa?from=settings`)} />
             <SecuritySessions />
             <AccountActions />
           </TabsContent>

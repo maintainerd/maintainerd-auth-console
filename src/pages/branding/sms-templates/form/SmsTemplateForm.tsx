@@ -27,10 +27,10 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function SmsTemplateForm() {
-  const { tenantId, templateId } = useParams<{ tenantId: string; templateId: string }>()
+  const { templateId } = useParams<{ templateId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/branding/sms-templates/${templateId}`
+  const backTo = `/branding/sms-templates/${templateId}`
 
   const { data: templateData, isLoading: isFetchingTemplate } = useSmsTemplate(templateId || '')
   const updateMutation = useUpdateSmsTemplate()

@@ -36,8 +36,8 @@ const OAuthCallbackPage = () => {
         codeVerifier: flow.codeVerifier,
       })
 
-      const account = await refreshAccount()
-      navigate(flow.returnTo || resolvePostAuthRoute(account, currentTenant), { replace: true })
+      await refreshAccount()
+      navigate(flow.returnTo || resolvePostAuthRoute(), { replace: true })
     }
 
     run().catch((error) => {

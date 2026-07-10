@@ -18,11 +18,10 @@ import type { RegistrationFlow } from "@/services/api/registration-flows/types"
 
 interface RegistrationFlowHeaderProps {
   registrationFlow: RegistrationFlow
-  tenantId: string
   registrationFlowId: string
 }
 
-export function RegistrationFlowHeader({ registrationFlow, tenantId, registrationFlowId }: RegistrationFlowHeaderProps) {
+export function RegistrationFlowHeader({ registrationFlow, registrationFlowId }: RegistrationFlowHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteMutation = useDeleteRegistrationFlow()
@@ -35,7 +34,7 @@ export function RegistrationFlowHeader({ registrationFlow, tenantId, registratio
     try {
       await deleteMutation.mutateAsync(registrationFlowId)
       showSuccess("Registration flow deleted successfully")
-      navigate(`/${tenantId}/registration-flows`)
+      navigate(`/registration-flows`)
     } catch (error) {
       showError(error)
     }
@@ -62,7 +61,7 @@ export function RegistrationFlowHeader({ registrationFlow, tenantId, registratio
       label: "Client",
       value: registrationFlow.client_id ? (
         <Link
-          to={`/${tenantId}/clients/${registrationFlow.client_id}`}
+          to={`/clients/${registrationFlow.client_id}`}
           className="text-primary hover:underline"
         >
           {registrationFlow.client_id}
@@ -87,9 +86,9 @@ export function RegistrationFlowHeader({ registrationFlow, tenantId, registratio
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/registration-flows/${registrationFlowId}/edit`, {
+                navigate(`/registration-flows/${registrationFlowId}/edit`, {
                   state: {
-                    from: `/${tenantId}/registration-flows/${registrationFlowId}`,
+                    from: `/registration-flows/${registrationFlowId}`,
                     backLabel: "Back to Registration Flow Details",
                   },
                 })

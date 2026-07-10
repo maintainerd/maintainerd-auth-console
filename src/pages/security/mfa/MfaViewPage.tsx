@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { ShieldCheck, Smartphone, Clock, KeyRound, Hash, Settings, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -42,12 +42,11 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function MfaViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useMfaConfig()
 
-  const configureUrl = `/${tenantId}/security/mfa/configure`
+  const configureUrl = `/security/mfa/configure`
 
   return (
     <DetailsContainer>

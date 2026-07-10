@@ -32,7 +32,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function UserAddOrUpdateForm() {
-  const { tenantId, userId } = useParams<{ tenantId: string; userId?: string }>()
+  const { userId } = useParams<{ userId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -59,8 +59,8 @@ export default function UserAddOrUpdateForm() {
   // Honour where the user came from (e.g. the details page) so the back button,
   // Cancel, and post-submit navigation return there. Falls back to the listing.
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/users`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/users` ? "Back to Users" : "Back")
+  const backTo = navState?.from ?? `/users`
+  const backLabel = navState?.backLabel ?? (backTo === `/users` ? "Back to Users" : "Back")
 
   // React Hook Form setup
   const {

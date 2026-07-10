@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Edit, Eye, Trash2, Play, XCircle, type LucideIcon } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteApi, useUpdateApiStatus } from "@/hooks/useApis"
@@ -35,7 +35,6 @@ const STATUS_ACTIONS: Record<ApiStatus, StatusAction> = {
 }
 
 export function ApiActions({ api }: ApiActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteApiMutation = useDeleteApi()
@@ -73,8 +72,8 @@ export function ApiActions({ api }: ApiActionsProps) {
       label: "View Details",
       icon: Eye,
       onSelect: () =>
-        navigate(`/${tenantId}/apis/${api.api_id}`, {
-          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        navigate(`/apis/${api.api_id}`, {
+          state: { from: `/apis`, backLabel: "Back to APIs" },
         }),
     },
     {
@@ -82,8 +81,8 @@ export function ApiActions({ api }: ApiActionsProps) {
       label: "Edit API",
       icon: Edit,
       onSelect: () =>
-        navigate(`/${tenantId}/apis/${api.api_id}/edit`, {
-          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        navigate(`/apis/${api.api_id}/edit`, {
+          state: { from: `/apis`, backLabel: "Back to APIs" },
         }),
     },
     ...statusActions,

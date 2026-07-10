@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Key, Clock, Shield, Settings, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,10 +28,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function TokenViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useTokenConfig()
-  const configureUrl = `/${tenantId}/security/token/configure`
+  const configureUrl = `/security/token/configure`
 
   return (
     <DetailsContainer>

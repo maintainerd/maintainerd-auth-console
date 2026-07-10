@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { emailTemplateColumns } from "./EmailTemplateColumns"
@@ -12,7 +12,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function EmailTemplateListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -22,7 +21,7 @@ export function EmailTemplateListing() {
       searchPlaceholder="Search templates by name or subject..."
       useData={useEmailTemplatesList}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(template) => navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}`)}
+      onRowClick={(template) => navigate(`/branding/email-templates/${template.emailTemplateId}`)}
       emptyTitle="No email templates"
       emptyDescription="Email templates are seeded automatically when a tenant is created."
     />

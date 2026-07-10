@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
-import { determineTenantIdentifier } from '@/utils/tenant'
 import { SERVICE_UNAVAILABLE_ROUTE, isPublicConsoleRoute } from '@/utils/postAuthRoute'
 import AppLoadingScreen from '@/components/layout/AppLoadingScreen'
 import { RouteGuard } from './RouteGuard'
@@ -21,10 +20,10 @@ import { RouteGuard } from './RouteGuard'
 export function AppBootstrap({ children }: { children: ReactNode }) {
   const location = useLocation()
   const { initializeAuth, isInitialized } = useAuth()
-  const { initializeFromLocation, currentTenant, error: tenantError } = useTenant()
+  const { initializeFromHost, currentTenant, error: tenantError } = useTenant()
 
   const authStartedRef = useRef(false)
-  const lastTenantIdentifierRef = useRef<string | null | undefined>(undefined)
+  const tenantStartedRef = useRef(false)
   const [tenantSettled, setTenantSettled] = useState(false)
 
   // Initialize auth once on mount (fetches /account if a session cookie exists).
@@ -36,18 +35,14 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
     })
   }, [initializeAuth])
 
-  // Initialize tenant from the current URL. Re-runs on tenant switches but never
-  // un-settles, so the splash only appears for the very first resolution.
+  // Initialize the tenant from the host subdomain. The subdomain is fixed for
+  // the lifetime of the page, so this runs exactly once — switching tenants is a
+  // full cross-subdomain navigation, which reloads the app.
   useEffect(() => {
-    const run = async () => {
-      const searchParams = new URLSearchParams(location.search)
-      const tenantIdentifier = determineTenantIdentifier(location.pathname, searchParams)
-      if (lastTenantIdentifierRef.current === tenantIdentifier) {
-        setTenantSettled(true)
-        return
-      }
-      lastTenantIdentifierRef.current = tenantIdentifier
+    if (tenantStartedRef.current) return
+    tenantStartedRef.current = true
 
+    const run = async () => {
       // Setup routes have no tenant yet — skip initialization entirely.
       if (location.pathname.startsWith('/setup')) {
         setTenantSettled(true)
@@ -55,15 +50,15 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
       }
 
       try {
-        await initializeFromLocation(location.pathname, location.search)
+        await initializeFromHost()
       } catch {
-        /* error already surfaced in initializeFromLocation */
+        /* error already surfaced in initializeFromHost */
       } finally {
         setTenantSettled(true)
       }
     }
     run()
-  }, [location.pathname, location.search, initializeFromLocation])
+  }, [location.pathname, initializeFromHost])
 
   const ready = isInitialized && tenantSettled
   if (!ready) {

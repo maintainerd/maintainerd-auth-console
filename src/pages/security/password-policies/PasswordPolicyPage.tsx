@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { KeyRound, Hash, Shield, Clock, Settings, Check, X } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
@@ -53,7 +53,6 @@ function BoolBadge({ value, label }: { value: boolean; label: string }) {
 }
 
 export default function PasswordPolicyPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
@@ -61,7 +60,7 @@ export default function PasswordPolicyPage() {
     queryFn: fetchPasswordPolicies,
   })
 
-  const configureUrl = `/${tenantId}/security/password/configure`
+  const configureUrl = `/security/password/configure`
 
   return (
     <DetailsContainer>

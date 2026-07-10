@@ -12,11 +12,11 @@ import { resolvePostAuthRoute } from '@/utils/postAuthRoute'
  */
 const NoAccessPage = () => {
   const navigate = useNavigate()
-  const { isAuthenticated, account } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { currentTenant } = useTenant()
 
   const handleBack = () => {
-    navigate(isAuthenticated ? resolvePostAuthRoute(account, currentTenant) : '/', {
+    navigate(isAuthenticated ? resolvePostAuthRoute() : '/', {
       replace: true,
     })
   }

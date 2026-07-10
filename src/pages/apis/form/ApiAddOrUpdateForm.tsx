@@ -26,7 +26,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function ApiAddOrUpdateForm() {
-  const { tenantId, apiId } = useParams<{ tenantId: string; apiId?: string }>()
+  const { apiId } = useParams<{ apiId?: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const isEditing = !!apiId
@@ -117,7 +117,7 @@ export default function ApiAddOrUpdateForm() {
       }
 
       // Navigate back to APIs list
-      navigate(`/${tenantId}/apis`)
+      navigate(`/apis`)
     } catch (error) {
       showError(error)
     }
@@ -150,7 +150,7 @@ export default function ApiAddOrUpdateForm() {
             The API you're looking for doesn't exist or has been removed.
           </p>
         </div>
-        <Button onClick={() => navigate(`/${tenantId}/apis`)} className="gap-2">
+        <Button onClick={() => navigate(`/apis`)} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to APIs
         </Button>
@@ -162,7 +162,7 @@ export default function ApiAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={`/${tenantId}/apis`}
+          backUrl={`/apis`}
           backLabel="Back to APIs"
           title={pageTitle}
           description={
@@ -259,7 +259,7 @@ export default function ApiAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/${tenantId}/apis`)}
+              onClick={() => navigate(`/apis`)}
               disabled={isLoading}
             >
               Cancel

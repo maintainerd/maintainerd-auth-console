@@ -2,16 +2,6 @@ import axios from 'axios'
 import { API_CONFIG, TOKEN_DELIVERY_HEADER } from '../config'
 import { storeOAuthSession, setSessionIdTokenHint } from '../oauth-session'
 import { buildConsoleAuthorizeUrl, consumePendingOAuthFlow, discardPendingOAuthFlow } from '@/utils/oauthFlow'
-import type { ApiResponse } from '../types'
-
-export interface PublicClient {
-  client_id: string
-  name: string
-  display_name: string
-  client_type: string
-  domain?: string
-  tenant_id: string
-}
 
 interface OAuthTokenResponse {
   access_token: string
@@ -22,28 +12,40 @@ interface OAuthTokenResponse {
   scope?: string
 }
 
-export async function fetchConsoleClient(tenantIdentifier: string): Promise<PublicClient> {
-  const response = await axios.get<ApiResponse<PublicClient>>(`${API_CONFIG.PUBLIC_BASE_URL}/client/console`, {
-    params: { tenant_id: tenantIdentifier },
-    withCredentials: true,
-  })
-  if (!response.data.success || !response.data.data) {
-    throw new Error(typeof response.data.error === 'string' ? response.data.error : 'Console client not found')
+// Inputs for starting a console OAuth flow. `clientId` and `identityUrl` come
+// from the tenant-bootstrap response (control plane). `clientId` is the tenant's
+// console client and is REQUIRED — the console never calls the public plane to
+// discover it. When `identityUrl` is absent `buildConsoleAuthorizeUrl` falls
+// back to the configured identity host.
+export interface ConsoleOAuthStartOptions {
+  tenantId: string
+  clientId?: string
+  identityUrl?: string
+  returnTo?: string
+}
+
+// The console client id must come from the tenant bootstrap response. If the
+// bootstrap didn't return one (e.g. this host isn't a console surface), that's an
+// error — we do NOT fall back to a public-plane lookup.
+function requireConsoleClientId(options: ConsoleOAuthStartOptions): string {
+  if (!options.clientId) {
+    throw new Error('Missing console client id from tenant bootstrap; cannot start OAuth flow')
   }
-  return response.data.data
+  return options.clientId
 }
 
 // startConsoleOAuthLogin kicks off the hosted-identity OAuth2 (authorization
-// code + PKCE) flow: it resolves this tenant's console client, builds the
-// authorize URL, and navigates the browser to the identity app. Shared by the
-// landing page's "Sign in" button and the route guard's auto-redirect for
-// unauthenticated access to a protected page.
-export async function startConsoleOAuthLogin(tenantIdentifier: string, returnTo = ''): Promise<void> {
-  const client = await fetchConsoleClient(tenantIdentifier)
+// code + PKCE) flow: using the bootstrapped console client + per-tenant identity
+// origin, it builds the authorize URL and navigates the browser to the identity
+// app. Shared by the landing page's "Sign in" button and the route guard's
+// auto-redirect for unauthenticated access to a protected page.
+export async function startConsoleOAuthLogin(options: ConsoleOAuthStartOptions): Promise<void> {
+  const clientId = requireConsoleClientId(options)
   const authorizeUrl = await buildConsoleAuthorizeUrl({
-    clientId: client.client_id,
-    tenantId: tenantIdentifier,
-    returnTo,
+    clientId,
+    tenantId: options.tenantId,
+    returnTo: options.returnTo ?? '',
+    identityBaseUrl: options.identityUrl,
   })
   window.location.assign(authorizeUrl)
 }
@@ -59,15 +61,18 @@ type SilentOAuthMessage = {
 // succeeds for an existing same-site SSO session with prior consent. Any
 // login/consent requirement resolves false so the caller can use the normal
 // visible authorization redirect.
-export async function tryConsoleSilentOAuthLogin(tenantIdentifier: string, returnTo = ''): Promise<boolean> {
-  const client = await fetchConsoleClient(tenantIdentifier)
+export async function tryConsoleSilentOAuthLogin(options: ConsoleOAuthStartOptions): Promise<boolean> {
+  const clientId = requireConsoleClientId(options)
   const authorizeUrl = await buildConsoleAuthorizeUrl({
-    clientId: client.client_id,
-    tenantId: tenantIdentifier,
-    returnTo,
+    clientId,
+    tenantId: options.tenantId,
+    returnTo: options.returnTo ?? '',
+    identityBaseUrl: options.identityUrl,
     prompt: 'none',
   })
-  const expectedIdentityOrigin = new URL(API_CONFIG.IDENTITY_BASE_URL).origin
+  // The iframe posts back from the per-tenant identity origin; validate against
+  // that same origin (falling back to the configured identity host).
+  const expectedIdentityOrigin = new URL(options.identityUrl || API_CONFIG.IDENTITY_BASE_URL).origin
   const iframe = document.createElement('iframe')
   iframe.hidden = true
   iframe.setAttribute('aria-hidden', 'true')

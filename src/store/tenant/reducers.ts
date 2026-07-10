@@ -9,6 +9,7 @@ export {
   fetchTenantAsync,
   fetchDefaultTenantAsync,
   fetchTenantByIdentifierAsync,
-  initializeTenantAsync
+  initializeTenantAsync,
+  bootstrapTenantAsync
 } from './actions'
-export type { TenantState } from './types'
+export type { TenantState, TenantSurface } from './types'

@@ -18,10 +18,9 @@ import type { TenantEntity } from "@/services/api/tenants/types"
 
 interface TenantHeaderProps {
   tenant: TenantEntity
-  tenantId: string
 }
 
-export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
+export function TenantHeader({ tenant }: TenantHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteTenantMutation = useDeleteTenant()
@@ -31,7 +30,7 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
     try {
       await deleteTenantMutation.mutateAsync(tenant.tenant_id)
       showSuccess("Tenant deleted successfully")
-      navigate(`/${tenantId}/tenants`)
+      navigate(`/tenants`)
     } catch (error) {
       showError(error)
     }
@@ -47,11 +46,6 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
       icon: Hash,
       label: "Name",
       value: <span className="font-mono text-xs">{tenant.name}</span>,
-    },
-    {
-      icon: Building2,
-      label: "Identifier",
-      value: <span className="font-mono text-xs">{tenant.identifier}</span>,
     },
     {
       icon: User,
@@ -96,7 +90,7 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
         }
         subtitle={
           <span className="font-mono text-xs text-muted-foreground">
-            {tenant.identifier}
+            {tenant.name}
           </span>
         }
         attributes={attributes}
@@ -107,9 +101,9 @@ export function TenantHeader({ tenant, tenantId }: TenantHeaderProps) {
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/tenants/${tenant.tenant_id}/edit`, {
+                navigate(`/tenants/${tenant.tenant_id}/edit`, {
                   state: {
-                    from: `/${tenantId}/tenants/${tenant.tenant_id}`,
+                    from: `/tenants/${tenant.tenant_id}`,
                     backLabel: "Back to Tenant Details",
                   },
                 })

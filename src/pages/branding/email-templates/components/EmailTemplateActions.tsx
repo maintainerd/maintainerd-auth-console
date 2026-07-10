@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateEmailTemplateStatus } from "@/hooks/useEmailTemplates"
@@ -9,7 +9,6 @@ interface EmailTemplateActionsProps {
 }
 
 export function EmailTemplateActions({ template }: EmailTemplateActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const updateStatusMutation = useUpdateEmailTemplateStatus()
 
@@ -20,13 +19,13 @@ export function EmailTemplateActions({ template }: EmailTemplateActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}`),
+      onSelect: () => navigate(`/branding/email-templates/${template.emailTemplateId}`),
     },
     {
       key: "edit",
       label: "Edit Template",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/branding/email-templates/${template.emailTemplateId}/edit`),
+      onSelect: () => navigate(`/branding/email-templates/${template.emailTemplateId}/edit`),
     },
     ...(isActive
       ? [

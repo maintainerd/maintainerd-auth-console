@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { ReactNode } from "react"
 import { Edit, Mail, Phone, CalendarDays, User, MapPin } from "lucide-react"
 import { format } from "date-fns"
@@ -21,7 +21,6 @@ const GENDER_LABELS: Record<string, string> = {
 }
 
 export default function ProfilePage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [editOpen, setEditOpen] = useState(false)
 
@@ -42,7 +41,7 @@ export default function ProfilePage() {
   return (
     <DetailLayout
       backLabel="Back"
-      onBack={() => navigate(`/${tenantId}/dashboard`)}
+      onBack={() => navigate(`/dashboard`)}
       isLoading={isLoading}
       isError={isError || !data}
       notFoundTitle="Profile not found"

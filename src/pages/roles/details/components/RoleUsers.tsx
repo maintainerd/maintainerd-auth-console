@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Users, Mail, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
@@ -16,7 +16,6 @@ interface RoleUsersProps {
 }
 
 export function RoleUsers({ roleId }: RoleUsersProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const removeRoleMutation = useRemoveUserRole()
@@ -103,13 +102,13 @@ export function RoleUsers({ roleId }: RoleUsersProps) {
                   // portaled items), so only the row body navigates.
                   const target = e.target as HTMLElement
                   if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                  navigate(`/${tenantId}/users/${user.user_id}`)
+                  navigate(`/users/${user.user_id}`)
                 }}
                 onKeyDown={(e) => {
                   if (e.target !== e.currentTarget) return
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault()
-                    navigate(`/${tenantId}/users/${user.user_id}`)
+                    navigate(`/users/${user.user_id}`)
                   }
                 }}
                 className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"

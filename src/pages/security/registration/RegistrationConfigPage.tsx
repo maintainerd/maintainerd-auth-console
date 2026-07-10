@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
@@ -13,10 +13,9 @@ import { useToast } from '@/hooks/useToast'
 import { registrationConfigSchema, type RegistrationConfigFormData } from '@/lib/validations'
 
 export default function RegistrationConfigPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/security/registration`
+  const backTo = `/security/registration`
 
   const { data: savedConfig, isLoading } = useRegistrationConfig()
   const updateMutation = useUpdateRegistrationConfig()

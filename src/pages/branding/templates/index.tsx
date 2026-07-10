@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Palette, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,6 @@ import { BrandingCard } from "./components/BrandingCard"
 
 export default function BrandingTemplatesPage() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const { data, isLoading, isError } = useBrandings()
   const [search, setSearch] = useState("")
 
@@ -37,7 +36,7 @@ export default function BrandingTemplatesPage() {
           />
           <Button
             className="shrink-0"
-            onClick={() => navigate(`/${tenantId}/branding/templates/create`)}
+            onClick={() => navigate(`/branding/templates/create`)}
           >
             <Plus className="size-4 mr-2" />
             New Template

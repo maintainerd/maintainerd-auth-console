@@ -55,11 +55,11 @@ function Harness({ options, onResult }: HarnessProps) {
   )
 }
 
-function renderHarness(props: HarnessProps, route = "/t1") {
+function renderHarness(props: HarnessProps, route = "/") {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
-        <Route path="/:tenantId/*" element={<Harness {...props} />} />
+        <Route path="/*" element={<Harness {...props} />} />
       </Routes>
     </MemoryRouter>,
   )

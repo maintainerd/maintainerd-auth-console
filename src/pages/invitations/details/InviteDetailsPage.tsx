@@ -24,7 +24,7 @@ function formatDate(value?: string | null) {
 }
 
 export default function InviteDetailsPage() {
-  const { tenantId, inviteId } = useParams<{ tenantId: string; inviteId: string }>()
+  const { inviteId } = useParams<{ inviteId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const resendMutation = useResendInvite()
@@ -68,7 +68,7 @@ export default function InviteDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Invitations"
-      onBack={() => navigate(`/${tenantId}/invites`)}
+      onBack={() => navigate(`/invites`)}
       isLoading={isLoading}
       isError={isError || !invite}
       notFoundTitle="Invitation not found"

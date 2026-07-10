@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useParams } from "react-router-dom"
 import { Check, ChevronsUpDown, Plus, Shield } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -23,6 +22,7 @@ import { CreateTenantDialog, ConfirmationDialog } from "@/components/dialog"
 import { useTenant } from "@/hooks/useTenant"
 import { useTenantsList } from "@/hooks/useTenants"
 import { logoutAndRedirect } from "@/services/api/auth"
+import { tenantConsoleUrl } from "@/utils/tenant"
 import type { TenantEntity } from "@/services/api/tenants/types"
 
 /** Small square initial tile, used as a lightweight tenant avatar. */
@@ -41,38 +41,41 @@ function TenantTile({ name, className }: { name?: string; className?: string }) 
 }
 
 export function TenantSwitcher({ className }: { className?: string }) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const [open, setOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [switchTarget, setSwitchTarget] = useState<TenantEntity | null>(null)
 
-  // Current tenant comes from the store (resolved from the URL on app init), so
-  // the label is always correct — even if the active tenant is beyond the list cap.
+  // The current tenant comes from the store (resolved from the host subdomain on
+  // app init), so the label is always correct — even if the active tenant is
+  // beyond the list cap.
   const { currentTenant, isLoading: tenantLoading } = useTenant()
   const { data: tenantsData, isLoading: tenantsLoading } = useTenantsList({ limit: 100 })
   const tenants = (tenantsData?.data?.rows as TenantEntity[]) || []
 
-  // Never fall back to "the first tenant" — that would show the wrong tenant.
-  const active =
-    currentTenant ?? tenants.find((t) => t.identifier === tenantId) ?? null
-  const label = active?.name ?? tenantId ?? "Select tenant"
+  // The active tenant is the one the backend resolved for this host (stored in
+  // `currentTenant`). Never fall back to "the first tenant" — that would show
+  // the wrong tenant.
+  const active = currentTenant ?? null
+  const label = active?.name ?? "Select tenant"
   const showSkeleton = !active && (tenantLoading || tenantsLoading)
 
   const handleSelect = (tenant: TenantEntity) => {
     setOpen(false)
-    if (tenant.identifier !== tenantId) {
+    if (tenant.tenant_id !== active?.tenant_id) {
       setSwitchTarget(tenant)
     }
   }
 
   const handleConfirmSwitch = () => {
     if (!switchTarget) return
-    // Switching tenants re-authenticates into the target tenant. Clear the local
-    // session and hard-navigate to the target dashboard (a protected route),
-    // which starts a fresh OAuth flow for that tenant. Doing it synchronously
-    // avoids the SPA render race that could otherwise fire the OAuth redirect for
-    // the *current* route mid-switch.
-    logoutAndRedirect(`/${switchTarget.identifier}/dashboard`)
+    // Switching tenants re-authenticates into the target tenant, which lives on a
+    // different console subdomain. Clear the local session and hard-navigate to
+    // the target tenant's dashboard (a protected route), which starts a fresh
+    // OAuth flow there. The system tenant has no slug (null). Doing it
+    // synchronously avoids the SPA render race that could otherwise fire the
+    // OAuth redirect for the *current* route mid-switch.
+    const targetSlug = switchTarget.is_system ? null : switchTarget.name
+    logoutAndRedirect(tenantConsoleUrl(targetSlug, "/dashboard"))
   }
 
   const handleCreate = () => {
@@ -127,11 +130,11 @@ export function TenantSwitcher({ className }: { className?: string }) {
                   <CommandEmpty>No tenants found.</CommandEmpty>
                   <CommandGroup heading="Switch tenant">
                     {tenants.map((tenant) => {
-                      const isActive = tenant.identifier === active?.identifier
+                      const isActive = tenant.tenant_id === active?.tenant_id
                       return (
                         <CommandItem
                           key={tenant.tenant_id}
-                          value={`${tenant.name} ${tenant.identifier}`}
+                          value={`${tenant.name}`}
                           onSelect={() => handleSelect(tenant)}
                           className="cursor-pointer gap-2"
                         >

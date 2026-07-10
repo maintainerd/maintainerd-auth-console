@@ -1,6 +1,6 @@
 import { type LucideIcon, ChevronRight } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-import { Link, useLocation, useParams } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 import {
   SidebarGroup,
@@ -33,15 +33,10 @@ export type NavSection = {
 
 export function NavMain({ sections }: { sections: NavSection[] }) {
   const location = useLocation()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
-  // Helper function to build tenant-based routes
-  const buildRoute = (route: string) => {
-    if (!tenantId) return route
-    // Remove leading slash if present and build tenant route
-    const cleanRoute = route.startsWith('/') ? route.slice(1) : route
-    return `/${tenantId}/${cleanRoute}`
-  }
+  // Routes are flat (the tenant lives in the host subdomain), so this just
+  // normalizes to a leading-slash absolute path.
+  const buildRoute = (route: string) => (route.startsWith('/') ? route : `/${route}`)
 
   const isActive = (route: string) => location.pathname === buildRoute(route)
 
@@ -66,7 +61,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
     }
     return set
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sections, location.pathname, tenantId])
+  }, [sections, location.pathname])
 
   const [openItems, setOpenItems] = useState<Set<string>>(() => new Set(activeGroups))
 

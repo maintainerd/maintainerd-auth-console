@@ -15,7 +15,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
   const actual = await importOriginal()
   return {
     ...actual,
-    useParams: () => ({ tenantId: "t1" }),
+    useParams: () => ({}),
     useNavigate: () => navigateMock,
   }
 })

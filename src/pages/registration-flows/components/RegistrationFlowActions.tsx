@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteRegistrationFlow, useUpdateRegistrationFlowStatus } from "@/hooks/useRegistrationFlows"
@@ -10,7 +10,6 @@ interface RegistrationFlowActionsProps {
 }
 
 export function RegistrationFlowActions({ registrationFlow }: RegistrationFlowActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -33,13 +32,13 @@ export function RegistrationFlowActions({ registrationFlow }: RegistrationFlowAc
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
+      onSelect: () => navigate(`/registration-flows/${registrationFlow.registration_flow_id}`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
     },
     {
       key: "edit",
       label: "Edit Registration Flow",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/registration-flows/${registrationFlow.registration_flow_id}/edit`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
+      onSelect: () => navigate(`/registration-flows/${registrationFlow.registration_flow_id}/edit`, { state: { from: location.pathname, backLabel: "Back to Registration" } }),
     },
     isActive
       ? {

@@ -17,7 +17,7 @@ type WebhookDetailsTab = typeof TABS[number]["value"]
 const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
 
 export default function WebhookDetailsPage() {
-  const { tenantId, webhookId } = useParams<{ tenantId: string; webhookId: string }>()
+  const { webhookId } = useParams<{ webhookId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -35,7 +35,7 @@ export default function WebhookDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Webhooks"
-      onBack={() => navigate(`/${tenantId}/webhooks`)}
+      onBack={() => navigate(`/webhooks`)}
       isLoading={isLoading}
       isError={isError || !webhook}
       notFoundTitle="Webhook not found"
@@ -43,7 +43,7 @@ export default function WebhookDetailsPage() {
     >
       {webhook && (
         <>
-          <WebhookHeader webhook={webhook} tenantId={tenantId!} webhookId={webhookId!} />
+          <WebhookHeader webhook={webhook} webhookId={webhookId!} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">

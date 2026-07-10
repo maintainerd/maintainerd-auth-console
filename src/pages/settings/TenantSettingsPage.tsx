@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,10 +16,12 @@ import { GeneralSettings, MembersSettings, AdvancedSettings } from "./components
 
 export default function TenantSettingsPage() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const { showSuccess, showError } = useToast()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
+  // The tenant being edited is the one resolved from the host subdomain; API
+  // calls key off its UUID.
+  const tenantId = currentTenant?.tenant_id
 
   const updateTenantMutation = useUpdateTenant()
   const deleteTenantMutation = useDeleteTenant()
@@ -91,7 +93,7 @@ export default function TenantSettingsPage() {
     await deleteTenantMutation.mutateAsync(tenantId)
     setDeleteDialogOpen(false)
     // Navigate to dashboard after deletion
-    navigate(`/${tenantId}/dashboard`)
+    navigate(`/dashboard`)
   }
 
   if (!tenantId || !currentTenant) {

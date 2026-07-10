@@ -16,7 +16,7 @@ const TABS = [
 ] as const
 
 export default function BrandingDetailsPage() {
-  const { tenantId, brandingId } = useParams<{ tenantId: string; brandingId: string }>()
+  const { brandingId } = useParams<{ brandingId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -28,7 +28,7 @@ export default function BrandingDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Themes"
-      onBack={() => navigate(`/${tenantId}/branding/templates`)}
+      onBack={() => navigate(`/branding/templates`)}
       isLoading={isLoading}
       isError={isError || !branding}
       notFoundTitle="Branding not found"
@@ -36,7 +36,7 @@ export default function BrandingDetailsPage() {
     >
       {branding && (
         <>
-          <BrandingHeader branding={branding} tenantId={tenantId!} brandingId={brandingId!} />
+          <BrandingHeader branding={branding} brandingId={brandingId!} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>

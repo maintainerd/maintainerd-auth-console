@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { clientColumns } from "./ClientColumns"
@@ -14,7 +14,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function ClientListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -24,8 +23,8 @@ export function ClientListing() {
       searchPlaceholder="Search clients by name or display name..."
       useData={useClientsList}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(client) => navigate(`/${tenantId}/clients/${client.client_id}`)}
-      onCreate={() => navigate(`/${tenantId}/clients/create`)}
+      onRowClick={(client) => navigate(`/clients/${client.client_id}`)}
+      onCreate={() => navigate(`/clients/create`)}
       createLabel="New Client"
       emptyTitle="No clients yet"
       emptyDescription="Register your first client application, then connect the identity providers it can use for sign-in."

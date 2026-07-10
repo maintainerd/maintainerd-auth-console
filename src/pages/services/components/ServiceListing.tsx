@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { serviceColumns } from "./ServiceColumns"
@@ -13,7 +13,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function ServiceListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -24,13 +23,13 @@ export function ServiceListing() {
       useData={useServicesList}
       filterGroups={FILTER_GROUPS}
       onRowClick={(service) =>
-        navigate(`/${tenantId}/services/${service.service_id}`, {
-          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        navigate(`/services/${service.service_id}`, {
+          state: { from: `/services`, backLabel: "Back to Services" },
         })
       }
       onCreate={() =>
-        navigate(`/${tenantId}/services/create`, {
-          state: { from: `/${tenantId}/services`, backLabel: "Back to Services" },
+        navigate(`/services/create`, {
+          state: { from: `/services`, backLabel: "Back to Services" },
         })
       }
       createLabel="New Service"

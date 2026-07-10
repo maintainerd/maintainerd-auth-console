@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Shield, Calendar, Plus, Trash2, Eye } from "lucide-react"
@@ -19,7 +19,6 @@ interface UserRolesProps {
 
 export function UserRoles({ userId }: UserRolesProps) {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -56,7 +55,7 @@ export function UserRoles({ userId }: UserRolesProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/roles/${role.role_id}`),
+      onSelect: () => navigate(`/roles/${role.role_id}`),
     },
     {
       key: "remove",
@@ -116,13 +115,13 @@ export function UserRoles({ userId }: UserRolesProps) {
                   // portaled items), so only the row body navigates.
                   const target = e.target as HTMLElement
                   if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                  navigate(`/${tenantId}/roles/${role.role_id}`)
+                  navigate(`/roles/${role.role_id}`)
                 }}
                 onKeyDown={(e) => {
                   if (e.target !== e.currentTarget) return
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault()
-                    navigate(`/${tenantId}/roles/${role.role_id}`)
+                    navigate(`/roles/${role.role_id}`)
                   }
                 }}
                 className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"

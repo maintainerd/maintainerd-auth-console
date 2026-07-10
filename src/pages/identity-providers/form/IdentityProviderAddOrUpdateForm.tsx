@@ -49,7 +49,7 @@ function formatList(values: string[] | null | undefined): string {
 }
 
 export default function IdentityProviderAddOrUpdateForm() {
-  const { tenantId, providerId } = useParams<{ tenantId: string; providerId?: string }>()
+  const { providerId } = useParams<{ providerId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -60,7 +60,7 @@ export default function IdentityProviderAddOrUpdateForm() {
   // Honour where we came from (e.g. the details page) so the back button,
   // cancel, and post-save all return there. Falls back to the listing.
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/providers/identity`
+  const backTo = navState?.from ?? `/providers/identity`
   const backLabel = navState?.backLabel ?? "Back to Identity Providers"
 
   // Fetch existing provider if editing

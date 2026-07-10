@@ -58,25 +58,25 @@ describe("UserDetailsPage", () => {
 
   it("shows the loading skeleton while the user query is loading", () => {
     useUserMock.mockReturnValue({ data: undefined, isLoading: true, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     expect(screen.queryByTestId("user-header")).not.toBeInTheDocument()
   })
 
   it("shows the not-found state on error", () => {
     useUserMock.mockReturnValue({ data: undefined, isLoading: false, isError: true })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     expect(screen.getByRole("heading", { name: "User not found" })).toBeInTheDocument()
   })
 
   it("shows the not-found state when there is no user (no error)", () => {
     useUserMock.mockReturnValue({ data: undefined, isLoading: false, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     expect(screen.getByRole("heading", { name: "User not found" })).toBeInTheDocument()
   })
 
   it("renders the header and the default Profiles tab on success", () => {
     useUserMock.mockReturnValue({ data: makeUser(), isLoading: false, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     expect(screen.getByTestId("user-header")).toHaveTextContent("jdoe")
     expect(screen.getByTestId("tab-profiles")).toBeInTheDocument()
     // useUser is called with the userId param.
@@ -86,8 +86,8 @@ describe("UserDetailsPage", () => {
   it("honors the ?tab query param to select a non-default tab", () => {
     useUserMock.mockReturnValue({ data: makeUser(), isLoading: false, isError: false })
     renderWithProviders(<UserDetailsPage />, {
-      route: "/t1/users/u1?tab=roles",
-      path: "/:tenantId/users/:userId",
+      route: "/users/u1?tab=roles",
+      path: "/users/:userId",
     })
     expect(screen.getByTestId("tab-roles")).toBeInTheDocument()
   })
@@ -95,7 +95,7 @@ describe("UserDetailsPage", () => {
   it("switches tabs and updates the search params", async () => {
     const u = user()
     useUserMock.mockReturnValue({ data: makeUser(), isLoading: false, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     await u.click(screen.getByRole("tab", { name: /metadata/i }))
     expect(screen.getByTestId("tab-metadata")).toBeInTheDocument()
   })
@@ -103,14 +103,14 @@ describe("UserDetailsPage", () => {
   it("navigates back to the users list via the back action", async () => {
     const u = user()
     useUserMock.mockReturnValue({ data: makeUser(), isLoading: false, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1/users/u1", path: "/:tenantId/users/:userId" })
+    renderWithProviders(<UserDetailsPage />, { route: "/users/u1", path: "/users/:userId" })
     await u.click(screen.getByRole("button", { name: /back to users/i }))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   it("falls back to an empty userId when the route param is missing", () => {
     useUserMock.mockReturnValue({ data: undefined, isLoading: true, isError: false })
-    renderWithProviders(<UserDetailsPage />, { route: "/t1", path: "/:tenantId/*" })
+    renderWithProviders(<UserDetailsPage />, { route: "/", path: "/*" })
     expect(useUserMock).toHaveBeenCalledWith("")
   })
 })

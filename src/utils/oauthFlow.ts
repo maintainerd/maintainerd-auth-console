@@ -68,6 +68,10 @@ export async function buildConsoleAuthorizeUrl(params: {
   clientId: string
   tenantId: string
   returnTo: string
+  // Per-tenant hosted-identity origin from the tenant-bootstrap response. This is
+  // the real source of the identity host; `API_CONFIG.IDENTITY_BASE_URL` is only
+  // a last-resort fallback when the bootstrap did not provide one.
+  identityBaseUrl?: string
   prompt?: 'none'
 }): Promise<string> {
   const state = randomOAuthValue()
@@ -96,5 +100,6 @@ export async function buildConsoleAuthorizeUrl(params: {
 
   if (params.prompt) query.set('prompt', params.prompt)
 
-  return `${API_CONFIG.IDENTITY_BASE_URL}/authorize?${query.toString()}`
+  const identityBase = (params.identityBaseUrl || API_CONFIG.IDENTITY_BASE_URL).replace(/\/$/, '')
+  return `${identityBase}/authorize?${query.toString()}`
 }

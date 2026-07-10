@@ -11,7 +11,7 @@ const TABS = [
 ] as const
 
 export default function ServiceDetailsPage() {
-  const { tenantId, serviceId } = useParams<{ tenantId: string; serviceId: string }>()
+  const { serviceId } = useParams<{ serviceId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -23,13 +23,13 @@ export default function ServiceDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Services"
-      onBack={() => navigate(`/${tenantId}/services`)}
+      onBack={() => navigate(`/services`)}
       isLoading={isLoading}
       isError={isError || !service}
       notFoundTitle="Service not found"
       notFoundDescription="The service you're looking for doesn't exist or may have been removed."
     >
-      <ServiceHeader service={service!} tenantId={tenantId!} serviceId={serviceId!} />
+      <ServiceHeader service={service!} serviceId={serviceId!} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
@@ -42,10 +42,10 @@ export default function ServiceDetailsPage() {
         </TabsList>
 
         <TabsContent value="apis" className="mt-4">
-          <ServiceApisTab tenantId={tenantId!} serviceId={serviceId!} />
+          <ServiceApisTab serviceId={serviceId!} />
         </TabsContent>
         <TabsContent value="policies" className="mt-4">
-          <ServicePoliciesTab serviceId={serviceId!} tenantId={tenantId!} />
+          <ServicePoliciesTab serviceId={serviceId!} />
         </TabsContent>
       </Tabs>
     </DetailLayout>

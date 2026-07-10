@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { AppWindow, Eye, Globe, Link2, Unlink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
@@ -24,7 +24,6 @@ interface IdentityProviderClientsProps {
 }
 
 export function IdentityProviderClients({ providerId, providerName }: IdentityProviderClientsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const removeConnectionMutation = useRemoveClientIdentityProvider()
@@ -105,7 +104,7 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
               key: "view",
               label: "View Client",
               icon: Eye,
-              onSelect: () => navigate(`/${tenantId}/clients/${client.client_id}`),
+              onSelect: () => navigate(`/clients/${client.client_id}`),
             },
           ]
 
@@ -134,13 +133,13 @@ export function IdentityProviderClients({ providerId, providerName }: IdentityPr
               onClick={(e) => {
                 const target = e.target as HTMLElement
                 if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                navigate(`/${tenantId}/clients/${client.client_id}`)
+                navigate(`/clients/${client.client_id}`)
               }}
               onKeyDown={(e) => {
                 if (e.target !== e.currentTarget) return
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault()
-                  navigate(`/${tenantId}/clients/${client.client_id}`)
+                  navigate(`/clients/${client.client_id}`)
                 }
               }}
               className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"

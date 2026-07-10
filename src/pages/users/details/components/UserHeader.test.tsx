@@ -82,7 +82,7 @@ describe("UserHeader", () => {
 
   function setup(overrides: Partial<User> = {}) {
     return renderWithProviders(
-      <UserHeader user={makeUser(overrides)} tenantId="t1" userId="u1" />,
+      <UserHeader user={makeUser(overrides)} userId="u1" />,
     )
   }
 
@@ -96,7 +96,6 @@ describe("UserHeader", () => {
         name: "Acme",
         display_name: "Acme Inc",
         description: "",
-        identifier: "acme",
         status: "active",
         is_public: true,
         is_system: false,
@@ -137,8 +136,8 @@ describe("UserHeader", () => {
     const u = user()
     setup()
     await u.click(screen.getByRole("button", { name: /^edit$/i }))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users/u1/edit", {
-      state: { from: "/t1/users/u1", backLabel: "Back to User Details" },
+    expect(navigateMock).toHaveBeenCalledWith("/users/u1/edit", {
+      state: { from: "/users/u1", backLabel: "Back to User Details" },
     })
   })
 
@@ -209,7 +208,7 @@ describe("UserHeader", () => {
 
     await waitFor(() => expect(deleteMutateAsync).toHaveBeenCalledWith("u1"))
     expect(showSuccessMock).toHaveBeenCalledWith("User deleted successfully")
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   it("shows an error and does not navigate when delete rejects", async () => {
@@ -225,6 +224,6 @@ describe("UserHeader", () => {
     await u.click(within(dialog).getByRole("button", { name: "Delete" }))
 
     await waitFor(() => expect(showErrorMock).toHaveBeenCalledWith(err))
-    expect(navigateMock).not.toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).not.toHaveBeenCalledWith("/users")
   })
 })

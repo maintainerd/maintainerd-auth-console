@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Mail, Server, UserRound, CalendarDays, Settings, FlaskConical } from "lucide-react"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
@@ -21,7 +21,6 @@ const PROVIDER_LABELS: Record<string, string> = {
 }
 
 export default function EmailDeliveryPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
@@ -34,7 +33,7 @@ export default function EmailDeliveryPage() {
   const notConfigured = (!data && !isLoading && !isError) || (data && !isConfigured) || isError
   const providerLabel = PROVIDER_LABELS[data?.provider ?? ""] ?? data?.provider
   const isSmtp = data?.provider === "smtp"
-  const configureUrl = `/${tenantId}/messaging/email/configure`
+  const configureUrl = `/messaging/email/configure`
 
   const attributes: DetailAttribute[] = data && isConfigured
     ? [

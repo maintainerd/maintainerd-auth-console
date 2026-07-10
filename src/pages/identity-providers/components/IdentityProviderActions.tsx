@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useDeleteIdentityProvider, useUpdateIdentityProviderStatus } from "@/hooks/useIdentityProviders"
@@ -10,7 +10,6 @@ interface IdentityProviderActionsProps {
 }
 
 export function IdentityProviderActions({ provider }: IdentityProviderActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateIdentityProviderStatus()
@@ -35,13 +34,13 @@ export function IdentityProviderActions({ provider }: IdentityProviderActionsPro
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}`),
+      onSelect: () => navigate(`/providers/identity/${provider.identity_provider_id}`),
     },
     {
       key: "edit",
       label: "Edit Provider",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}/edit`),
+      onSelect: () => navigate(`/providers/identity/${provider.identity_provider_id}/edit`),
     },
     ...(isActive
       ? [

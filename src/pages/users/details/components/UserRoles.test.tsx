@@ -132,7 +132,7 @@ describe("UserRoles", () => {
     })
     renderWithProviders(<UserRoles userId="u1" />)
     await u.click(screen.getByText("Admin"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1")
   })
 
   it("navigates on Enter and Space, but ignores other keys", () => {
@@ -154,7 +154,7 @@ describe("UserRoles", () => {
     row.dispatchEvent(evt("Enter"))
     row.dispatchEvent(evt(" "))
     expect(navigateMock).toHaveBeenCalledTimes(2)
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1")
   })
 
   it("does not navigate when interacting with the actions menu (guard)", async () => {
@@ -194,7 +194,7 @@ describe("UserRoles", () => {
     renderWithProviders(<UserRoles userId="u1" />)
     await u.click(getMenuButton())
     await u.click(await screen.findByText("View Details"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/r1")
   })
 
   it("removes a role from the user and shows success", async () => {

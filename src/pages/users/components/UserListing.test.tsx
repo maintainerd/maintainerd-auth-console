@@ -75,7 +75,7 @@ describe("UserListing", () => {
 
     const cell = screen.getByText("janedoe")
     await user.click(cell)
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/users/u9"))
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/users/u9"))
   })
 
   it("renders the loading state", () => {
@@ -96,7 +96,7 @@ describe("UserListing", () => {
     renderWithProviders(<UserListing />)
 
     await user.click(screen.getByRole("button", { name: /new user/i }))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users/create")
+    expect(navigateMock).toHaveBeenCalledWith("/users/create")
   })
 
   it("typing in the search box debounces into the API params", async () => {

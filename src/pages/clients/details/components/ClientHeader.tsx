@@ -20,7 +20,6 @@ import type { ClientResponse } from "@/services/api/clients/types"
 
 interface ClientHeaderProps {
   client: ClientResponse
-  tenantId: string
   clientId: string
 }
 
@@ -31,7 +30,7 @@ const CLIENT_TYPE_LABELS: Record<string, string> = {
   m2m: "Machine to Machine",
 }
 
-export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) {
+export function ClientHeader({ client, clientId }: ClientHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteClientMutation = useDeleteClient()
@@ -47,7 +46,7 @@ export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) 
       await deleteClientMutation.mutateAsync(clientId)
       showSuccess("Client deleted successfully")
       // Navigate back to clients list
-      navigate(`/${tenantId}/clients`)
+      navigate(`/clients`)
     } catch (error) {
       showError(error)
     }
@@ -124,8 +123,8 @@ export function ClientHeader({ client, tenantId, clientId }: ClientHeaderProps) 
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/clients/${clientId}/edit`, {
-                  state: { from: `/${tenantId}/clients/${clientId}`, backLabel: "Back to Client Details" },
+                navigate(`/clients/${clientId}/edit`, {
+                  state: { from: `/clients/${clientId}`, backLabel: "Back to Client Details" },
                 })
               }
             >

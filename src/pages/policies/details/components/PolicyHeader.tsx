@@ -18,12 +18,11 @@ import type { PolicyDetail } from "@/services/api/policies/types"
 
 interface PolicyHeaderProps {
   policy: PolicyDetail
-  tenantId: string
   policyId: string
   afterDeleteTo?: string
 }
 
-export function PolicyHeader({ policy, tenantId, policyId, afterDeleteTo }: PolicyHeaderProps) {
+export function PolicyHeader({ policy, policyId, afterDeleteTo }: PolicyHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deletePolicyMutation = useDeletePolicy()
@@ -33,7 +32,7 @@ export function PolicyHeader({ policy, tenantId, policyId, afterDeleteTo }: Poli
     try {
       await deletePolicyMutation.mutateAsync(policyId)
       showSuccess("Policy deleted successfully")
-      navigate(afterDeleteTo ?? `/${tenantId}/policies`)
+      navigate(afterDeleteTo ?? `/policies`)
     } catch (error) {
       showError(error)
     }
@@ -91,8 +90,8 @@ export function PolicyHeader({ policy, tenantId, policyId, afterDeleteTo }: Poli
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/policies/${policyId}/edit`, {
-                  state: { from: `/${tenantId}/policies/${policyId}`, backLabel: "Back to Policy Details" },
+                navigate(`/policies/${policyId}/edit`, {
+                  state: { from: `/policies/${policyId}`, backLabel: "Back to Policy Details" },
                 })
               }
             >

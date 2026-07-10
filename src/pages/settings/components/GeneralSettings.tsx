@@ -34,10 +34,10 @@ export function GeneralSettings({ tenant, settings, onUpdate, errors }: GeneralS
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="identifier">Identifier</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
-              id="identifier"
-              value={tenant.identifier}
+              id="name"
+              value={tenant.name}
               disabled
               className="bg-muted"
             />

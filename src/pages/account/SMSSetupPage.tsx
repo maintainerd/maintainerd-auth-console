@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { MessageSquare, Phone, ShieldCheck, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export default function SMSSetupPage() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const { showSuccess, showError } = useToast()
   const queryClient = useQueryClient()
 
@@ -25,7 +24,7 @@ export default function SMSSetupPage() {
   const [code, setCode] = useState("")
   const [showDisable, setShowDisable] = useState(false)
 
-  const hub = `/${tenantId}/account/mfa`
+  const hub = `/account/mfa`
 
   const sendMutation = useMutation({
     mutationFn: (vars: { phone: string }) => beginSMSEnrollment(vars.phone),

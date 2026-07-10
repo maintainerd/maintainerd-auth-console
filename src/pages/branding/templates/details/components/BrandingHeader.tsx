@@ -18,7 +18,6 @@ import type { Branding } from "@/services/api/branding/types"
 
 interface BrandingHeaderProps {
   branding: Branding
-  tenantId: string
   brandingId: string
 }
 
@@ -29,7 +28,7 @@ function primaryColor(b: Branding): string {
   return "#e2e8f0"
 }
 
-export function BrandingHeader({ branding, tenantId, brandingId }: BrandingHeaderProps) {
+export function BrandingHeader({ branding, brandingId }: BrandingHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteMutation = useDeleteBranding()
@@ -37,7 +36,7 @@ export function BrandingHeader({ branding, tenantId, brandingId }: BrandingHeade
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showActivateDialog, setShowActivateDialog] = useState(false)
 
-  const base = `/${tenantId}/branding/templates`
+  const base = `/branding/templates`
 
   const handleDelete = async () => {
     try {

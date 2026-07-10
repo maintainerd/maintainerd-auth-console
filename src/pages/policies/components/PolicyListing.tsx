@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { policyColumns } from "./PolicyColumns"
@@ -13,7 +13,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function PolicyListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -24,13 +23,13 @@ export function PolicyListing() {
       useData={usePoliciesList}
       filterGroups={FILTER_GROUPS}
       onRowClick={(policy) =>
-        navigate(`/${tenantId}/policies/${policy.policy_id}`, {
-          state: { from: `/${tenantId}/policies`, backLabel: "Back to Policies" },
+        navigate(`/policies/${policy.policy_id}`, {
+          state: { from: `/policies`, backLabel: "Back to Policies" },
         })
       }
       onCreate={() =>
-        navigate(`/${tenantId}/policies/create`, {
-          state: { from: `/${tenantId}/policies`, backLabel: "Back to Policies" },
+        navigate(`/policies/create`, {
+          state: { from: `/policies`, backLabel: "Back to Policies" },
         })
       }
       createLabel="New Policy"

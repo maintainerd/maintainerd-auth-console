@@ -27,7 +27,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function TenantAddOrUpdateForm() {
-  const { tenantId, id } = useParams<{ tenantId: string; id?: string }>()
+  const { id } = useParams<{ id?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -36,9 +36,9 @@ export default function TenantAddOrUpdateForm() {
   const isCreating = !isEditing
 
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/tenants`
+  const backTo = navState?.from ?? `/tenants`
   const backLabel =
-    navState?.backLabel ?? (backTo === `/${tenantId}/tenants` ? "Back to Tenants" : "Back")
+    navState?.backLabel ?? (backTo === `/tenants` ? "Back to Tenants" : "Back")
 
   const { data: tenantData, isLoading: isFetchingTenant } = useTenantById(id)
   const createTenantMutation = useCreateTenant()

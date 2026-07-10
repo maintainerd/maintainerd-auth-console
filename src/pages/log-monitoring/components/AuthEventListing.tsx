@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -27,7 +27,6 @@ function buildExportUrl(format: "csv" | "json", searchParams: URLSearchParams): 
 
 export function AuthEventListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const [searchParams] = useSearchParams()
 
   const handleExport = useCallback((format: "csv" | "json") => {
@@ -59,7 +58,7 @@ export function AuthEventListing() {
         filterGroups={FILTER_GROUPS}
         emptyTitle="No auth events yet"
         emptyDescription="Authentication and authorization events will appear here as users interact with the system."
-        onRowClick={(event) => navigate(`/${tenantId}/logs/${event.auth_event_id}`)}
+        onRowClick={(event) => navigate(`/logs/${event.auth_event_id}`)}
       />
     </div>
   )

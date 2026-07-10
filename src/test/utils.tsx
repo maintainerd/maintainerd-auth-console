@@ -27,7 +27,7 @@ interface RenderOptions {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { route = "/t1", path = "/:tenantId/*", queryClient = createTestQueryClient() }: RenderOptions = {},
+  { route = "/", path = "/*", queryClient = createTestQueryClient() }: RenderOptions = {},
 ) {
   return {
     queryClient,

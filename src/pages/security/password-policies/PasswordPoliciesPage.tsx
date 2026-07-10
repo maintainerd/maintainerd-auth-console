@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
@@ -24,10 +24,9 @@ const HASH_OPTIONS = [
 ]
 
 export default function PasswordPoliciesFormPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/security/password`
+  const backTo = `/security/password`
 
   const { data: savedPolicies, isLoading, isError } = usePasswordPolicies()
   const updateMutation = useUpdatePasswordPolicies()

@@ -6,14 +6,14 @@ import { useSmsTemplate } from "@/hooks/useSmsTemplates"
 import { SmsTemplateHeader, SmsTemplateContent } from "./components"
 
 export default function SmsTemplateDetailsPage() {
-  const { tenantId, templateId } = useParams<{ tenantId: string; templateId: string }>()
+  const { templateId } = useParams<{ templateId: string }>()
   const navigate = useNavigate()
   const { data: template, isLoading, isError } = useSmsTemplate(templateId || '')
 
   return (
     <DetailLayout
       backLabel="Back to SMS Templates"
-      onBack={() => navigate(`/${tenantId}/branding/sms-templates`)}
+      onBack={() => navigate(`/branding/sms-templates`)}
       isLoading={isLoading}
       isError={isError || !template}
       notFoundTitle="SMS template not found"
@@ -21,7 +21,7 @@ export default function SmsTemplateDetailsPage() {
     >
       {template && (
         <>
-          <SmsTemplateHeader template={template} tenantId={tenantId!} templateId={templateId!} />
+          <SmsTemplateHeader template={template} templateId={templateId!} />
 
           <Tabs defaultValue="content">
             <TabsList>

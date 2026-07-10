@@ -30,7 +30,7 @@ const LAYOUT_OPTIONS = [
 ]
 
 export default function BrandingForm() {
-  const { tenantId, brandingId } = useParams<{ tenantId: string; brandingId?: string }>()
+  const { brandingId } = useParams<{ brandingId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -40,7 +40,7 @@ export default function BrandingForm() {
 
   // Honour where the user came from so the back button and post-submit
   // navigation return there. Falls back to the listing.
-  const listUrl = `/${tenantId}/branding/templates`
+  const listUrl = `/branding/templates`
   const navState = location.state as { from?: string; backLabel?: string } | null
   const backTo = navState?.from ?? listUrl
   const backLabel = navState?.backLabel ?? "Back to Themes"

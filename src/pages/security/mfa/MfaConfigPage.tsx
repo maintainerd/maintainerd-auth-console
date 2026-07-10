@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
@@ -51,10 +51,9 @@ const mfaConfigSchema = yup.object({
 type MfaConfigFormData = yup.InferType<typeof mfaConfigSchema>
 
 export default function MfaConfigPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/security/mfa`
+  const backTo = `/security/mfa`
 
   const { data: savedConfig, isLoading, isError } = useMfaConfig()
   const updateMutation = useUpdateMfaConfig()

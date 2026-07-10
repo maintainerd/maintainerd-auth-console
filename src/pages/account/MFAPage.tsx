@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams, useNavigate, useLocation, useSearchParams, Outlet } from "react-router-dom"
+import { useNavigate, useLocation, useSearchParams, Outlet } from "react-router-dom"
 import { Key, Smartphone, MessageSquare, Mail, ShieldCheck, ShieldAlert, ChevronRight, KeyRound, ShieldOff } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,6 @@ const MFA_ORIGINS: Record<string, { path: string; label: string }> = {
 }
 
 export default function MFAPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
 
@@ -34,7 +33,7 @@ export default function MFAPage() {
   // "Back" returns to the hub (preserving the origin); from the hub it returns to
   // wherever the user came from (Get Started or Settings).
   const onHub = pathname.replace(/\/$/, "").endsWith("/account/mfa")
-  const backUrl = onHub ? `/${tenantId}${origin.path}` : `/${tenantId}/account/mfa${fromQuery}`
+  const backUrl = onHub ? `${origin.path}` : `/account/mfa${fromQuery}`
   const backLabel = onHub ? origin.label : "Back"
 
   return (
@@ -53,7 +52,6 @@ export default function MFAPage() {
 }
 
 export function MFAIndex() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const fromQuery = searchParams.get("from") ? `?from=${searchParams.get("from")}` : ""
@@ -82,7 +80,7 @@ export function MFAIndex() {
   const passkeyOn = passkeyCount > 0
   const activeCount = [totpOn, smsOn, emailOtpOn, passkeyOn].filter(Boolean).length
   const protected_ = activeCount > 0
-  const base = `/${tenantId}/account/mfa`
+  const base = `/account/mfa`
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { apiColumns } from "./ApiColumns"
@@ -13,7 +13,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function ApiListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -24,13 +23,13 @@ export function ApiListing() {
       useData={useApisList}
       filterGroups={FILTER_GROUPS}
       onRowClick={(api) =>
-        navigate(`/${tenantId}/apis/${api.api_id}`, {
-          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        navigate(`/apis/${api.api_id}`, {
+          state: { from: `/apis`, backLabel: "Back to APIs" },
         })
       }
       onCreate={() =>
-        navigate(`/${tenantId}/apis/create`, {
-          state: { from: `/${tenantId}/apis`, backLabel: "Back to APIs" },
+        navigate(`/apis/create`, {
+          state: { from: `/apis`, backLabel: "Back to APIs" },
         })
       }
       createLabel="New API"

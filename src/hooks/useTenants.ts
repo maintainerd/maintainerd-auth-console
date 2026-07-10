@@ -29,7 +29,6 @@ async function fetchTenantsForListing(
   if (params.name) qp.set("name", params.name)
   if (params.display_name) qp.set("display_name", params.display_name)
   if (params.description) qp.set("description", params.description)
-  if (params.identifier) qp.set("identifier", params.identifier)
   if (params.status) qp.set("status", params.status)
   if (params.is_system !== undefined) qp.set("is_system", String(params.is_system))
   if (params.page) qp.set("page", String(params.page))

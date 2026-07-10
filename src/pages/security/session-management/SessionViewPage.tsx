@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Clock, Hash, Shield, Settings, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,10 +27,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export default function SessionViewPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useSessionSettings()
-  const configureUrl = `/${tenantId}/security/session/configure`
+  const configureUrl = `/security/session/configure`
 
   return (
     <DetailsContainer>

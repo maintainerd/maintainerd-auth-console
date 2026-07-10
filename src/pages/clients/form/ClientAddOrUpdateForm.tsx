@@ -67,7 +67,7 @@ const REQUIRED_ACR_OPTIONS: SelectOption[] = [
 ]
 
 export default function ClientAddOrUpdateForm() {
-  const { tenantId, clientId } = useParams<{ tenantId: string; clientId?: string }>()
+  const { clientId } = useParams<{ clientId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -490,7 +490,7 @@ export default function ClientAddOrUpdateForm() {
       }
 
       showSuccess(isEditing ? "Client updated successfully" : "Client created successfully")
-      navigate(isEditing ? `/${tenantId}/clients/${clientId}` : navState.from ?? `/${tenantId}/clients`)
+      navigate(isEditing ? `/clients/${clientId}` : navState.from ?? `/clients`)
     } catch (error: unknown) {
       showError(error)
     }
@@ -498,9 +498,9 @@ export default function ClientAddOrUpdateForm() {
 
   const handleCancel = () => {
     if (isEditing && clientId) {
-      navigate(`/${tenantId}/clients/${clientId}`)
+      navigate(`/clients/${clientId}`)
     } else {
-      navigate(navState.from ?? `/${tenantId}/clients`)
+      navigate(navState.from ?? `/clients`)
     }
   }
 
@@ -511,7 +511,7 @@ export default function ClientAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={isEditing ? `/${tenantId}/clients/${clientId}` : navState.from ?? `/${tenantId}/clients`}
+          backUrl={isEditing ? `/clients/${clientId}` : navState.from ?? `/clients`}
           backLabel={isEditing ? "Back to Clients" : navState.backLabel ?? "Back to Clients"}
           title={isEditing ? "Edit Client" : "Create New Client"}
           description={isEditing

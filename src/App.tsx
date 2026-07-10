@@ -113,14 +113,13 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/:tenantId/login" element={<LoginPage />} />
         <Route path="/logout" element={<Navigate to="/login" replace />} />
         <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/service-unavailable" element={<ServiceUnavailablePage />} />
         <Route path="/auth/callback" element={<OAuthCallbackPage />} />
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
-        <Route path="/:tenantId" element={<PrivateLayout fullWidth />}>
+        <Route element={<PrivateLayout fullWidth />}>
           <Route path="logs" element={<LogMonitoringPage />} />
           <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />
           <Route path="dashboard" element={<DashboardPage />} />

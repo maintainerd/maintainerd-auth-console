@@ -6,7 +6,7 @@ import { useTenantById } from "@/hooks/useTenants"
 import { TenantHeader, TenantMembers } from "./components"
 
 export default function TenantDetailsPage() {
-  const { tenantId, id } = useParams<{ tenantId: string; id: string }>()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
   const { data: tenant, isLoading, isError } = useTenantById(id)
@@ -14,7 +14,7 @@ export default function TenantDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Tenants"
-      onBack={() => navigate(`/${tenantId}/tenants`)}
+      onBack={() => navigate(`/tenants`)}
       isLoading={isLoading}
       isError={isError || !tenant}
       notFoundTitle="Tenant not found"
@@ -22,7 +22,7 @@ export default function TenantDetailsPage() {
     >
       {tenant && (
         <>
-          <TenantHeader tenant={tenant} tenantId={tenantId!} />
+          <TenantHeader tenant={tenant} />
 
           <Tabs defaultValue="members">
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">

@@ -31,30 +31,33 @@ const getBaseUrl = () => {
   return (
     runtimeEnv('VITE_AUTH_API_BASE_URL') ||
     import.meta.env.VITE_AUTH_API_BASE_URL ||
-    'https://private-api.auth.maintainerd.local/api/v1'
+    'https://console-api.auth.maintainerd.local/api/v1'
   )
 }
 
 const getPublicBaseUrl = () => {
   if (import.meta.env.DEV) {
     // Development: use a relative path so the request goes through the Vite
-    // proxy (/public-api → public-api.auth.maintainerd.local). This keeps the
-    // OAuth bootstrap calls same-origin and avoids cross-origin CORS / browser
+    // proxy (/public-api → identity-api.auth.maintainerd.local). This keeps the OAuth /
+    // tenant-bootstrap calls same-origin and avoids cross-origin CORS / browser
     // cert-trust failures that would otherwise abort the flow before it starts.
     return '/public-api/api/v1'
   }
   return (
     runtimeEnv('VITE_AUTH_PUBLIC_API_BASE_URL') ||
     import.meta.env.VITE_AUTH_PUBLIC_API_BASE_URL ||
-    'https://public-api.auth.maintainerd.local/api/v1'
+    'https://identity-api.auth.maintainerd.local/api/v1'
   )
 }
 
+// Last-resort fallback identity origin. The real identity host is per-tenant and
+// comes from the tenant-bootstrap response (`identity_url`); this env var is only
+// used when that per-tenant value is unavailable.
 const getIdentityBaseUrl = () => {
   return (
     runtimeEnv('VITE_AUTH_IDENTITY_BASE_URL') ||
     import.meta.env.VITE_AUTH_IDENTITY_BASE_URL ||
-    'https://identity.auth.maintainerd.local'
+    'https://auth.maintainerd.local'
   ).replace(/\/$/, '')
 }
 

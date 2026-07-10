@@ -71,7 +71,7 @@ describe("UserActions", () => {
     renderWithProviders(<UserActions user={makeUser()} />)
     await openMenu(u)
     await u.click(await screen.findByText("View Details"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users/u1")
+    expect(navigateMock).toHaveBeenCalledWith("/users/u1")
   })
 
   it("navigates to edit", async () => {
@@ -79,7 +79,7 @@ describe("UserActions", () => {
     renderWithProviders(<UserActions user={makeUser()} />)
     await openMenu(u)
     await u.click(await screen.findByText("Edit User"))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users/u1/edit")
+    expect(navigateMock).toHaveBeenCalledWith("/users/u1/edit")
   })
 
   // Covers each starting status -> the status menu items it offers.

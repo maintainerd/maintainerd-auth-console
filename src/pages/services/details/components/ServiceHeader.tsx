@@ -18,11 +18,10 @@ import type { ServiceResponse } from "@/services/api/services/types"
 
 interface ServiceHeaderProps {
   service: ServiceResponse
-  tenantId: string
   serviceId: string
 }
 
-export function ServiceHeader({ service, tenantId, serviceId }: ServiceHeaderProps) {
+export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteServiceMutation = useDeleteService()
@@ -32,7 +31,7 @@ export function ServiceHeader({ service, tenantId, serviceId }: ServiceHeaderPro
     try {
       await deleteServiceMutation.mutateAsync(serviceId)
       showSuccess("Service deleted successfully")
-      navigate(`/${tenantId}/services`)
+      navigate(`/services`)
     } catch (error) {
       showError(error)
     }
@@ -90,8 +89,8 @@ export function ServiceHeader({ service, tenantId, serviceId }: ServiceHeaderPro
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/services/${serviceId}/edit`, {
-                  state: { from: `/${tenantId}/services/${serviceId}`, backLabel: "Back to Service Details" },
+                navigate(`/services/${serviceId}/edit`, {
+                  state: { from: `/services/${serviceId}`, backLabel: "Back to Service Details" },
                 })
               }
             >

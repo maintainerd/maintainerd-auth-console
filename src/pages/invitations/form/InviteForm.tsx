@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useForm, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -26,10 +26,9 @@ type InviteFormData = { email: string; callback_url?: string }
 const NO_FLOW = "__none__"
 
 export default function InviteForm() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const listUrl = `/${tenantId}/invites`
+  const listUrl = `/invites`
 
   const sendMutation = useSendInvite()
   const [registrationFlowId, setRegistrationFlowId] = useState<string>(NO_FLOW)
@@ -94,7 +93,7 @@ export default function InviteForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(`/${tenantId}/messaging/email`)}
+                onClick={() => navigate(`/messaging/email`)}
               >
                 Configure email delivery
               </Button>

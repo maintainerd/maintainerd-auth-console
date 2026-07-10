@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { roleColumns } from "./RoleColumns"
@@ -12,7 +12,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function RoleListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -22,8 +21,8 @@ export function RoleListing() {
       searchPlaceholder="Search roles by name or description..."
       useData={useRoles}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(role) => navigate(`/${tenantId}/roles/${role.role_id}`)}
-      onCreate={() => navigate(`/${tenantId}/roles/create`)}
+      onRowClick={(role) => navigate(`/roles/${role.role_id}`)}
+      onCreate={() => navigate(`/roles/create`)}
       createLabel="New Role"
     />
   )

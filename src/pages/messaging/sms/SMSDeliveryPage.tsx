@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { MessageSquare, Server, Phone, Hash, CalendarDays, Settings, FlaskConical } from "lucide-react"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
@@ -20,7 +20,6 @@ const PROVIDER_LABELS: Record<string, string> = {
 }
 
 export default function SMSDeliveryPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
@@ -32,7 +31,7 @@ export default function SMSDeliveryPage() {
   const isConfigured = Boolean(data?.provider)
   const notConfigured = (!data && !isLoading && !isError) || (data && !isConfigured) || isError
   const providerLabel = PROVIDER_LABELS[data?.provider ?? ""] ?? data?.provider
-  const configureUrl = `/${tenantId}/messaging/sms/configure`
+  const configureUrl = `/messaging/sms/configure`
 
   const attributes: DetailAttribute[] = data && isConfigured
     ? [

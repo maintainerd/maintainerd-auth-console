@@ -18,11 +18,10 @@ import type { Api } from "@/services/api/api/types"
 
 interface ApiHeaderProps {
   api: Api
-  tenantId: string
   apiId: string
 }
 
-export function ApiHeader({ api, tenantId, apiId }: ApiHeaderProps) {
+export function ApiHeader({ api, apiId }: ApiHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteApiMutation = useDeleteApi()
@@ -32,7 +31,7 @@ export function ApiHeader({ api, tenantId, apiId }: ApiHeaderProps) {
     try {
       await deleteApiMutation.mutateAsync(apiId)
       showSuccess("API deleted successfully")
-      navigate(`/${tenantId}/apis`)
+      navigate(`/apis`)
     } catch (error) {
       showError(error)
     }
@@ -95,8 +94,8 @@ export function ApiHeader({ api, tenantId, apiId }: ApiHeaderProps) {
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/apis/${apiId}/edit`, {
-                  state: { from: `/${tenantId}/apis/${apiId}`, backLabel: "Back to API Details" },
+                navigate(`/apis/${apiId}/edit`, {
+                  state: { from: `/apis/${apiId}`, backLabel: "Back to API Details" },
                 })
               }
             >

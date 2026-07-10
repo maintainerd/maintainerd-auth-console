@@ -11,21 +11,30 @@ import {
   fetchDefaultTenantAsync,
   fetchTenantByIdentifierAsync,
   initializeTenantAsync,
+  bootstrapTenantAsync,
   clearTenant as clearTenantAction,
   clearError
 } from '@/store/tenant/reducers'
-import { determineTenantIdentifier } from '@/utils/tenant'
 
 export function useTenant() {
   const dispatch = useAppDispatch()
   const { showError } = useToast()
-  const { currentTenant, isLoading, error } = useAppSelector((state) => state.tenant)
+  const {
+    currentTenant,
+    surface,
+    identityUrl,
+    consoleUrl,
+    consoleClient,
+    isLoading,
+    error,
+  } = useAppSelector((state) => state.tenant)
 
-  const initializeFromLocation = useCallback(async (pathname: string, search: string) => {
+  // Resolve the tenant for the current host via the backend bootstrap endpoint.
+  // The backend resolves the tenant from the FULL host (including any subdomain),
+  // so we pass `window.location.host` verbatim and never parse a slug here.
+  const initializeFromHost = useCallback(async () => {
     try {
-      const searchParams = new URLSearchParams(search)
-      const tenantIdentifier = determineTenantIdentifier(pathname, searchParams)
-      const result = await dispatch(initializeTenantAsync(tenantIdentifier || undefined)).unwrap()
+      const result = await dispatch(bootstrapTenantAsync(window.location.host)).unwrap()
       return result
     } catch (error) {
       showError('Failed to initialize tenant')
@@ -68,6 +77,10 @@ export function useTenant() {
   return {
     // State
     currentTenant,
+    surface,
+    identityUrl,
+    consoleUrl,
+    consoleClient,
     isLoading,
     error,
     // Actions
@@ -77,7 +90,7 @@ export function useTenant() {
     fetchDefault,
     fetchByIdentifier,
     initializeTenant,
-    initializeFromLocation,
+    initializeFromHost,
     clearTenantError
   }
 }

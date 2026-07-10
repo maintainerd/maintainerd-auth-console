@@ -32,6 +32,19 @@ describe('console OAuth flow', () => {
     expect(pending?.codeVerifier).toBeTruthy()
   })
 
+  it('uses the per-tenant identity origin when one is provided', async () => {
+    const authorizeURL = await buildConsoleAuthorizeUrl({
+      clientId: 'console-client',
+      tenantId: 'acme',
+      returnTo: '',
+      identityBaseUrl: 'https://acme.auth.maintainerd.local/',
+    })
+
+    const url = new URL(authorizeURL)
+    expect(url.origin).toBe('https://acme.auth.maintainerd.local')
+    expect(url.pathname).toBe('/authorize')
+  })
+
   it('only discards the pending request for the matching state', async () => {
     const authorizeURL = await buildConsoleAuthorizeUrl({
       clientId: 'console-client',

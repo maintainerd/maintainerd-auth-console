@@ -33,12 +33,12 @@ export function tenantColumns(
       },
     },
     {
-      id: "Identifier",
-      accessorKey: "identifier",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Identifier" />,
+      id: "Name",
+      accessorKey: "name",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
         <div className="px-3 py-1 font-mono text-sm text-muted-foreground">
-          {row.original.identifier}
+          {row.original.name}
         </div>
       ),
     },

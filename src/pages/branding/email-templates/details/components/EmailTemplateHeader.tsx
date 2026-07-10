@@ -17,7 +17,6 @@ import type { EmailTemplate, EmailTemplateStatus } from "@/services/api/email-te
 
 interface EmailTemplateHeaderProps {
   template: EmailTemplate
-  tenantId: string
   templateId: string
 }
 
@@ -27,7 +26,7 @@ interface PendingStatusAction {
   description: string
 }
 
-export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTemplateHeaderProps) {
+export function EmailTemplateHeader({ template, templateId }: EmailTemplateHeaderProps) {
   const navigate = useNavigate()
   const { showError } = useToast()
   const updateStatusMutation = useUpdateEmailTemplateStatus()
@@ -80,7 +79,7 @@ export function EmailTemplateHeader({ template, tenantId, templateId }: EmailTem
               variant="outline"
               size="sm"
               className="h-9 gap-2"
-              onClick={() => navigate(`/${tenantId}/branding/email-templates/${templateId}/edit`)}
+              onClick={() => navigate(`/branding/email-templates/${templateId}/edit`)}
             >
               <Edit className="size-4" />
               Edit

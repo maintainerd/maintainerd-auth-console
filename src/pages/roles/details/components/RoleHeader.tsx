@@ -17,11 +17,10 @@ import type { Role } from "@/services/api/roles/types"
 
 interface RoleHeaderProps {
   role: Role
-  tenantId: string
   roleId: string
 }
 
-export function RoleHeader({ role, tenantId, roleId }: RoleHeaderProps) {
+export function RoleHeader({ role, roleId }: RoleHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteRoleMutation = useDeleteRole()
@@ -31,7 +30,7 @@ export function RoleHeader({ role, tenantId, roleId }: RoleHeaderProps) {
     try {
       await deleteRoleMutation.mutateAsync(roleId)
       showSuccess("Role deleted successfully")
-      navigate(`/${tenantId}/roles`)
+      navigate(`/roles`)
     } catch (error) {
       showError(error)
     }
@@ -77,8 +76,8 @@ export function RoleHeader({ role, tenantId, roleId }: RoleHeaderProps) {
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/roles/${roleId}/edit`, {
-                  state: { from: `/${tenantId}/roles/${roleId}`, backLabel: "Back to Role Details" },
+                navigate(`/roles/${roleId}/edit`, {
+                  state: { from: `/roles/${roleId}`, backLabel: "Back to Role Details" },
                 })
               }
             >

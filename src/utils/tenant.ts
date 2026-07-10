@@ -1,77 +1,50 @@
 /**
  * Tenant Utilities
- * Helper functions for tenant-related operations
+ *
+ * The console is served per-tenant on a subdomain, and the tenant is now
+ * resolved from the FULL host by the backend tenant-bootstrap endpoint — the
+ * client no longer parses a tenant slug out of the hostname.
+ *
+ * What remains here is a minimal, TLD-agnostic host-builder used only by the
+ * TenantSwitcher: switching tenants crosses a subdomain boundary, so it needs to
+ * build an absolute URL to a *different* tenant's console origin. It anchors on
+ * the fixed `console` label instead of the domain suffix, so it works for the
+ * `.local` dev hosts and the production hosts alike.
  */
 
-/**
- * Extract tenant identifier from the current URL path
- * @param pathname - Current URL pathname (e.g., "/abc123/dashboard")
- * @returns Tenant identifier or null if not found
- */
-export function getTenantIdentifierFromPath(pathname: string): string | null {
-  // /{tenantId}/login — the per-tenant login page; extract the tenant identifier.
-  const loginMatch = pathname.match(/^\/([^/]+)\/login$/)
-  if (loginMatch) {
-    return loginMatch[1]
-  }
+/** The fixed host label that anchors the console, shared by every tenant. */
+const CONSOLE_LABEL = 'console'
 
-  // Skip public/auth routes that don't require tenant context
-  if (pathname.startsWith('/login') ||
-      pathname.startsWith('/logout') ||
-      pathname.startsWith('/auth') ||
-      pathname.startsWith('/register') ||
-      pathname.startsWith('/setup') ||
-      pathname.startsWith('/forgot-password') ||
-      pathname.startsWith('/reset-password') ||
-      pathname.startsWith('/email-verification') ||
-      pathname.startsWith('/no-access') ||
-      pathname.startsWith('/service-unavailable')) {
-    return null
-  }
-
-  // Extract tenant identifier from path like "/{tenantId}/dashboard"
-  const pathSegments = pathname.split('/').filter(Boolean)
-
-  // First segment should be the tenant identifier
-  if (pathSegments.length > 0) {
-    return pathSegments[0]
-  }
-
-  return null
+/** Split a hostname (defaulting to the current one) into its DNS labels. */
+function hostLabels(hostname?: string): string[] {
+  const host = (hostname ?? window.location.hostname).split(':')[0]
+  return host.split('.').filter(Boolean)
 }
 
 /**
- * Get tenant identifier from URL query parameter 't'
- * @param searchParams - URLSearchParams object
- * @returns Tenant identifier or null if not found
+ * The base console host shared by every tenant — the current host with any
+ * leading tenant slug stripped. Both `acme.console.auth.x` and `console.auth.x`
+ * yield `console.auth.x`.
  */
-export function getTenantIdentifierFromQuery(searchParams: URLSearchParams): string | null {
-  return searchParams.get('t') || searchParams.get('tenant_id')
-}
-
-export function tenantAuthRoute(path: string, tenantIdentifier?: string | null): string {
-  return tenantIdentifier ? `${path}?t=${encodeURIComponent(tenantIdentifier)}` : path
+export function baseConsoleHost(hostname?: string): string {
+  const labels = hostLabels(hostname)
+  if (labels[1] === CONSOLE_LABEL) return labels.slice(1).join('.')
+  return labels.join('.')
 }
 
 /**
- * Determine tenant identifier from current location
- * Priority: URL path > query parameter > null
- * @param pathname - Current URL pathname
- * @param searchParams - URLSearchParams object
- * @returns Tenant identifier or null
+ * Build an absolute URL to a (possibly different) tenant's console. Switching
+ * tenants crosses a subdomain boundary, so an in-app path is not enough — we need
+ * the full origin for the target tenant.
+ *
+ * @param slug - target tenant slug, or `null`/empty for the system tenant
+ * @param path - in-console path (defaults to `/`)
  */
-export function determineTenantIdentifier(pathname: string, searchParams: URLSearchParams): string | null {
-  // First try to get from URL path (for authenticated routes)
-  const pathTenant = getTenantIdentifierFromPath(pathname)
-  if (pathTenant) {
-    return pathTenant
-  }
-
-  // Then try to get from query parameter (for login page)
-  const queryTenant = getTenantIdentifierFromQuery(searchParams)
-  if (queryTenant) {
-    return queryTenant
-  }
-
-  return null
+export function tenantConsoleUrl(slug: string | null | undefined, path = '/'): string {
+  const { protocol, port } = window.location
+  const base = baseConsoleHost()
+  const host = slug ? `${slug}.${base}` : base
+  const portSuffix = port ? `:${port}` : ''
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return `${protocol}//${host}${portSuffix}${normalizedPath}`
 }

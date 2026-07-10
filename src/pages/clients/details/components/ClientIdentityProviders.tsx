@@ -21,7 +21,7 @@ interface ClientIdentityProvidersProps {
 }
 
 export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps) {
-  const { tenantId, clientId } = useParams<{ tenantId: string; clientId: string }>()
+  const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const removeConnectionMutation = useRemoveClientIdentityProvider()
@@ -91,7 +91,7 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
                 key: "view",
                 label: "View Provider",
                 icon: Eye,
-                onSelect: () => navigate(`/${tenantId}/providers/identity/${provider.identity_provider_id}`),
+                onSelect: () => navigate(`/providers/identity/${provider.identity_provider_id}`),
               },
               {
                 key: "edit",

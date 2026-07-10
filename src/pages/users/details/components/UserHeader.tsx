@@ -44,7 +44,6 @@ import type { User, UserStatus } from "@/services/api/users/types"
 
 interface UserHeaderProps {
   user: User
-  tenantId: string
   userId: string
 }
 
@@ -77,7 +76,7 @@ function CompletionMark({ label, complete }: { label: string; complete: boolean 
   )
 }
 
-export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
+export function UserHeader({ user, userId }: UserHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteUserMutation = useDeleteUser()
@@ -110,7 +109,7 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
     try {
       await deleteUserMutation.mutateAsync(userId)
       showSuccess("User deleted successfully")
-      navigate(`/${tenantId}/users`)
+      navigate(`/users`)
     } catch (error) {
       showError(error)
     }
@@ -158,8 +157,8 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
             label: "Tenant",
             value: (
               <div className="flex flex-col gap-0.5">
-                <span className="font-medium">{user.tenant.name}</span>
-                <span className="font-mono text-xs text-muted-foreground">{user.tenant.identifier}</span>
+                <span className="font-medium">{user.tenant.display_name}</span>
+                <span className="font-mono text-xs text-muted-foreground">{user.tenant.name}</span>
               </div>
             ),
           } satisfies DetailAttribute,
@@ -188,8 +187,8 @@ export function UserHeader({ user, tenantId, userId }: UserHeaderProps) {
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`/${tenantId}/users/${userId}/edit`, {
-                  state: { from: `/${tenantId}/users/${userId}`, backLabel: "Back to User Details" },
+                navigate(`/users/${userId}/edit`, {
+                  state: { from: `/users/${userId}`, backLabel: "Back to User Details" },
                 })
               }
             >

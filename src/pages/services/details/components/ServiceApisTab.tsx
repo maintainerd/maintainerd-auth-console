@@ -9,16 +9,15 @@ import { type PaginationState } from "@tanstack/react-table"
 import type { Api } from "@/services/api/api/types"
 
 interface ServiceApisTabProps {
-  tenantId: string
   serviceId: string
 }
 
-const navState = (tenantId: string, serviceId: string) => ({
-  from: `/${tenantId}/services/${serviceId}`,
+const navState = (serviceId: string) => ({
+  from: `/services/${serviceId}`,
   backLabel: "Back to Service Details",
 })
 
-export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
+export function ServiceApisTab({ serviceId }: ServiceApisTabProps) {
   const navigate = useNavigate()
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -44,7 +43,7 @@ export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) }),
+      onSelect: () => navigate(`/apis/${api.api_id}`, { state: navState(serviceId) }),
     },
   ]
 
@@ -79,13 +78,13 @@ export function ServiceApisTab({ tenantId, serviceId }: ServiceApisTabProps) {
                 onClick={(e) => {
                   const target = e.target as HTMLElement
                   if (!e.currentTarget.contains(target) || target.closest("button, a")) return
-                  navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) })
+                  navigate(`/apis/${api.api_id}`, { state: navState(serviceId) })
                 }}
                 onKeyDown={(e) => {
                   if (e.target !== e.currentTarget) return
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault()
-                  navigate(`/${tenantId}/apis/${api.api_id}`, { state: navState(tenantId, serviceId) })
+                  navigate(`/apis/${api.api_id}`, { state: navState(serviceId) })
                   }
                 }}
                 className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"

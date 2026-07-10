@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateWebhookStatus, useDeleteWebhook } from "@/hooks/useWebhooks"
@@ -10,7 +10,6 @@ interface WebhookActionsProps {
 }
 
 export function WebhookActions({ webhook }: WebhookActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateWebhookStatus()
@@ -35,13 +34,13 @@ export function WebhookActions({ webhook }: WebhookActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/webhooks/${webhook.webhook_endpoint_id}`),
+      onSelect: () => navigate(`/webhooks/${webhook.webhook_endpoint_id}`),
     },
     {
       key: "edit",
       label: "Edit Webhook",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/webhooks/${webhook.webhook_endpoint_id}/edit`),
+      onSelect: () => navigate(`/webhooks/${webhook.webhook_endpoint_id}/edit`),
     },
     ...(isActive
       ? [

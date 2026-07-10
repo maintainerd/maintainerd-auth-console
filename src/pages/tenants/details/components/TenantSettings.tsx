@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Settings, Gauge, FileText, Wrench } from "lucide-react"
@@ -10,7 +10,6 @@ const ITEMS = [
 ]
 
 export function TenantSettings() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
 
   return (
@@ -24,7 +23,7 @@ export function TenantSettings() {
           <p className="text-sm text-muted-foreground max-w-md">
             Configure operational controls — rate limiting, audit logging, and maintenance mode.
           </p>
-          <Button variant="outline" onClick={() => navigate(`/${tenantId}/settings`)}>
+          <Button variant="outline" onClick={() => navigate(`/settings`)}>
             Open Settings
           </Button>
         </div>
@@ -33,7 +32,7 @@ export function TenantSettings() {
           {ITEMS.map((item) => (
             <button
               key={item.tab}
-              onClick={() => navigate(`/${tenantId}/settings?tab=${item.tab}`)}
+              onClick={() => navigate(`/settings?tab=${item.tab}`)}
               className="flex items-start gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-accent"
             >
               <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">

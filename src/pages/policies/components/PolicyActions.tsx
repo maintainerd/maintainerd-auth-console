@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Play, Pause, Trash2 } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import type { Policy, PolicyStatus } from "@/services/api/policies/types"
@@ -10,7 +10,6 @@ interface PolicyActionsProps {
 }
 
 export function PolicyActions({ policy }: PolicyActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deletePolicyMutation = useDeletePolicy()
@@ -26,19 +25,19 @@ export function PolicyActions({ policy }: PolicyActionsProps) {
   }
 
   const isActive = policy.status === "active"
-  const listingState = { from: `/${tenantId}/policies`, backLabel: "Back to Policies" }
+  const listingState = { from: `/policies`, backLabel: "Back to Policies" }
   const items: RowActionItem[] = [
     {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/policies/${policy.policy_id}`, { state: listingState }),
+      onSelect: () => navigate(`/policies/${policy.policy_id}`, { state: listingState }),
     },
     {
       key: "edit",
       label: "Edit Policy",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/policies/${policy.policy_id}/edit`, { state: listingState }),
+      onSelect: () => navigate(`/policies/${policy.policy_id}/edit`, { state: listingState }),
     },
     ...(isActive
       ? [

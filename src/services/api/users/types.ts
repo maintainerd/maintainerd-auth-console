@@ -60,7 +60,6 @@ export type User = {
     name: string
     display_name: string
     description: string
-    identifier: string
     status: string
     is_public: boolean
     is_system: boolean

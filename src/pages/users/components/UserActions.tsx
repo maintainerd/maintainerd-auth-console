@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Trash2, Play, Pause, Ban, type LucideIcon } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateUserStatus, useDeleteUser } from "@/hooks/useUsers"
@@ -68,7 +68,6 @@ const STATUS_ACTIONS: Record<UserStatus, StatusAction[]> = {
 }
 
 export function UserActions({ user }: UserActionsProps) {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateUserStatus()
@@ -88,13 +87,13 @@ export function UserActions({ user }: UserActionsProps) {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/${tenantId}/users/${user.user_id}`),
+      onSelect: () => navigate(`/users/${user.user_id}`),
     },
     {
       key: "edit",
       label: "Edit User",
       icon: Edit,
-      onSelect: () => navigate(`/${tenantId}/users/${user.user_id}/edit`),
+      onSelect: () => navigate(`/users/${user.user_id}/edit`),
     },
     ...STATUS_ACTIONS[user.status].map(
       (action): RowActionItem => ({

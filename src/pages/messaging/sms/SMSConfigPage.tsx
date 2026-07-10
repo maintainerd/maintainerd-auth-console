@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useForm, Controller, type Resolver, type SubmitHandler } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -53,11 +53,10 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>
 
 export default function SMSConfigPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const queryClient = useQueryClient()
-  const backTo = `/${tenantId}/messaging/sms`
+  const backTo = `/messaging/sms`
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sms-config"],

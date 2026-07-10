@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { permissionColumns } from "./PermissionColumns"
@@ -22,7 +22,6 @@ function usePermissionsList(params: Record<string, unknown>) {
 
 export function PermissionListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -34,7 +33,7 @@ export function PermissionListing() {
       filterGroups={FILTER_GROUPS}
       emptyTitle="No permissions yet"
       emptyDescription="Create permissions to define granular access controls for your APIs."
-      onRowClick={(perm) => navigate(`/${tenantId}/permissions/${perm.permission_id}`)}
+      onRowClick={(perm) => navigate(`/permissions/${perm.permission_id}`)}
     />
   )
 }

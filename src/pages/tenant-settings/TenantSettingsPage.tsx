@@ -1,5 +1,5 @@
 import { Gauge, FileText, Wrench } from "lucide-react"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -36,7 +36,6 @@ function isSettingsTab(value: string | null): value is SettingsTab {
 }
 
 export function TenantSettingsPage() {
-  const { tenantId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedTab = searchParams.get("tab")
   const tab: SettingsTab = isSettingsTab(requestedTab) ? requestedTab : DEFAULT_TAB
@@ -45,7 +44,7 @@ export function TenantSettingsPage() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={`/${tenantId}/dashboard`}
+          backUrl={`/dashboard`}
           backLabel="Back"
           title="Tenant Settings"
           description="Manage operational controls for this tenant."

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { webhookColumns } from "./WebhookColumns"
@@ -12,7 +12,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function WebhookListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -22,8 +21,8 @@ export function WebhookListing() {
       searchPlaceholder="Search webhooks by URL..."
       useData={useWebhooksList}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(webhook) => navigate(`/${tenantId}/webhooks/${webhook.webhook_endpoint_id}`)}
-      onCreate={() => navigate(`/${tenantId}/webhooks/create`)}
+      onRowClick={(webhook) => navigate(`/webhooks/${webhook.webhook_endpoint_id}`)}
+      onCreate={() => navigate(`/webhooks/create`)}
       createLabel="New Webhook"
       emptyTitle="No webhooks yet"
       emptyDescription="Register your first webhook to receive event notifications whenever something happens in your tenant."

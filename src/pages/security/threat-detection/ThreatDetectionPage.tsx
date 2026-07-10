@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@/components/ui/button'
@@ -13,10 +13,9 @@ import { useToast } from '@/hooks/useToast'
 import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } from '@/lib/validations'
 
 export default function ThreatDetectionPage() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/security/threat`
+  const backTo = `/security/threat`
 
   const { data: savedSettings, isLoading } = useThreatDetectionSettings()
   const updateMutation = useUpdateThreatDetectionSettings()

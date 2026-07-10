@@ -14,7 +14,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
   const actual = await importOriginal()
   return {
     ...actual,
-    useParams: () => ({ tenantId: "t1" }),
+    useParams: () => ({}),
     useNavigate: () => navigateMock,
   }
 })
@@ -71,13 +71,13 @@ describe("RoleListing", () => {
     renderWithProviders(<RoleListing />)
     const cell = screen.getByText("viewer")
     await u().click(cell)
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r9"))
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/roles/r9"))
   })
 
   it("clicking New Role navigates to the create route", async () => {
     renderWithProviders(<RoleListing />)
     const buttons = screen.getAllByRole("button", { name: /new role/i })
     await u().click(buttons[0])
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles/create")
+    expect(navigateMock).toHaveBeenCalledWith("/roles/create")
   })
 })

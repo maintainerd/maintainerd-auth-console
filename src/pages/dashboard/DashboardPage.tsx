@@ -20,7 +20,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { fetchMFAStatus } from "@/services/api/mfa"
 import { DetailsContainer } from "@/components/container"
@@ -133,10 +133,9 @@ function MfaStatusBanner({ onSetup }: { onSetup: () => void }) {
 
 const DashboardPage = () => {
   const navigate = useNavigate()
-  const { tenantId } = useParams()
   const { data: summary, isLoading } = useDashboardSummary()
 
-  const to = (path: string) => navigate(`/${tenantId}${path}`)
+  const to = (path: string) => navigate(`${path}`)
 
   const stats = [
     { label: "Total Users", value: summary ? fmt(summary.users.total) : undefined, icon: Users, hero: true },

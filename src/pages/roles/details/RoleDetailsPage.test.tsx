@@ -13,7 +13,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
   const actual = await importOriginal()
   return {
     ...actual,
-    useParams: () => ({ tenantId: "t1", roleId: "r1" }),
+    useParams: () => ({ roleId: "r1" }),
     useNavigate: () => navigateMock,
     useSearchParams: () => [new URLSearchParams(), vi.fn()],
   }

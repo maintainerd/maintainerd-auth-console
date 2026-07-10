@@ -66,10 +66,6 @@ export function TenantOverview({ tenant }: TenantOverviewProps) {
               <span className="font-mono text-xs">{tenant.name}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Identifier</span>
-              <span className="font-mono text-xs">{tenant.identifier}</span>
-            </div>
-            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">System</span>
               <span>{tenant.is_system ? "Yes" : "No"}</span>
             </div>

@@ -35,10 +35,10 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function EmailTemplateForm() {
-  const { tenantId, templateId } = useParams<{ tenantId: string; templateId: string }>()
+  const { templateId } = useParams<{ templateId: string }>()
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/${tenantId}/branding/email-templates/${templateId}`
+  const backTo = `/branding/email-templates/${templateId}`
 
   const { data: templateData, isLoading: isFetchingTemplate } = useEmailTemplate(templateId || '')
   const updateMutation = useUpdateEmailTemplate()

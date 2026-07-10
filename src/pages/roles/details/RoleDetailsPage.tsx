@@ -11,7 +11,7 @@ const TABS = [
 ] as const
 
 export default function RoleDetailsPage() {
-  const { tenantId, roleId } = useParams<{ tenantId: string; roleId: string }>()
+  const { roleId } = useParams<{ roleId: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -23,13 +23,13 @@ export default function RoleDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Roles"
-      onBack={() => navigate(`/${tenantId}/roles`)}
+      onBack={() => navigate(`/roles`)}
       isLoading={isLoading}
       isError={isError || !role}
       notFoundTitle="Role not found"
       notFoundDescription="The role you're looking for doesn't exist or may have been removed."
     >
-      <RoleHeader role={role!} tenantId={tenantId!} roleId={roleId!} />
+      <RoleHeader role={role!} roleId={roleId!} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>

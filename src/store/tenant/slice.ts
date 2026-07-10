@@ -9,6 +9,10 @@ import type { TenantState } from './types'
 
 const initialState: TenantState = {
   currentTenant: null,
+  surface: null,
+  identityUrl: null,
+  consoleUrl: null,
+  consoleClient: null,
   isLoading: false,
   error: null
 }
@@ -22,6 +26,10 @@ const tenantSlice = createSlice({
     },
     clearTenant: (state: TenantState) => {
       state.currentTenant = null
+      state.surface = null
+      state.identityUrl = null
+      state.consoleUrl = null
+      state.consoleClient = null
       state.error = null
     }
   },

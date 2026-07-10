@@ -13,14 +13,14 @@ const TABS = [
 ] as const
 
 export default function PolicyDetailsPage() {
-  const { tenantId, policyId } = useParams<{ tenantId: string; policyId: string }>()
+  const { policyId } = useParams<{ policyId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/policies`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/policies` ? "Back to Policies" : "Back")
+  const backTo = navState?.from ?? `/policies`
+  const backLabel = navState?.backLabel ?? (backTo === `/policies` ? "Back to Policies" : "Back")
 
   const activeTab = searchParams.get("tab") || "statements"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
@@ -44,7 +44,7 @@ export default function PolicyDetailsPage() {
     >
       {policy && (
         <>
-          <PolicyHeader policy={policy} tenantId={tenantId!} policyId={policyId!} afterDeleteTo={backTo} />
+          <PolicyHeader policy={policy} policyId={policyId!} afterDeleteTo={backTo} />
 
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>

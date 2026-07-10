@@ -18,7 +18,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export default function AuthEventDetailsPage() {
-  const { tenantId, eventId } = useParams<{ tenantId: string; eventId: string }>()
+  const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
 
   const { data: event, isLoading, isError } = useAuthEvent(eventId || "")
@@ -34,7 +34,7 @@ export default function AuthEventDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Monitoring"
-      onBack={() => navigate(`/${tenantId}/logs`)}
+      onBack={() => navigate(`/logs`)}
       isLoading={isLoading}
       isError={isError || !event}
       notFoundTitle="Event not found"

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { userColumns } from "./UserColumns"
@@ -12,7 +12,6 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
 
 export function UserListing() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
 
   return (
     <ResourceListing
@@ -22,8 +21,8 @@ export function UserListing() {
       searchPlaceholder="Search users by name, username, email, or phone..."
       useData={useUsers}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(user) => navigate(`/${tenantId}/users/${user.user_id}`)}
-      onCreate={() => navigate(`/${tenantId}/users/create`)}
+      onRowClick={(user) => navigate(`/users/${user.user_id}`)}
+      onCreate={() => navigate(`/users/create`)}
       createLabel="New User"
       emptyTitle="No users yet"
       emptyDescription="Add your first user to start managing accounts, authentication, and security settings."

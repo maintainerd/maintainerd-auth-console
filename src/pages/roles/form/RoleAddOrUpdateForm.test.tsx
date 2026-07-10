@@ -19,7 +19,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
   const actual = await importOriginal()
   return {
     ...actual,
-    useParams: vi.fn(() => ({ tenantId: "t1" })),
+    useParams: vi.fn(() => ({})),
     useNavigate: () => navigateMock,
     useLocation: vi.fn(() => ({ state: null })),
   }
@@ -38,11 +38,11 @@ vi.mock("@/hooks/useToast", () => ({
 const u = () => userEvent.setup({ pointerEventsCheck: 0 })
 
 function setEditMode() {
-  vi.mocked(useParams).mockReturnValue({ tenantId: "t1", roleId: "r1" })
+  vi.mocked(useParams).mockReturnValue({ roleId: "r1" })
 }
 
 function setCreateMode() {
-  vi.mocked(useParams).mockReturnValue({ tenantId: "t1" })
+  vi.mocked(useParams).mockReturnValue({})
 }
 
 function makeRole(overrides: Record<string, unknown> = {}) {
@@ -82,7 +82,7 @@ describe("RoleAddOrUpdateForm", () => {
       ),
     )
     expect(showSuccessMock).toHaveBeenCalledWith("Role created successfully")
-    expect(navigateMock).toHaveBeenCalledWith("/t1/roles")
+    expect(navigateMock).toHaveBeenCalledWith("/roles")
   })
 
   it("shows an error when create rejects", async () => {
@@ -148,10 +148,10 @@ describe("RoleAddOrUpdateForm", () => {
 
   it("back navigation honours location.state", async () => {
     vi.mocked(useLocation).mockReturnValue({
-      pathname: "/t1/roles/create",
+      pathname: "/roles/create",
       search: "",
       hash: "",
-      state: { from: "/t1/roles/r1", backLabel: "Back to Details" },
+      state: { from: "/roles/r1", backLabel: "Back to Details" },
       key: "test",
     })
     createMutateAsync.mockResolvedValueOnce(undefined)
@@ -159,6 +159,6 @@ describe("RoleAddOrUpdateForm", () => {
     await u().type(screen.getByLabelText(/name/i), "viewer")
     await u().type(screen.getByLabelText(/description/i), "Viewer role")
     await u().click(screen.getByRole("button", { name: /create role/i }))
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/roles/r1"))
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/roles/r1"))
   })
 })

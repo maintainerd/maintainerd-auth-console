@@ -25,7 +25,7 @@ vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom")
   return {
     ...actual,
-    useParams: vi.fn(() => ({ tenantId: "t1" })),
+    useParams: vi.fn(() => ({})),
     useNavigate: () => navigateMock,
     useLocation: vi.fn(() => ({ state: null })),
   }
@@ -44,11 +44,11 @@ vi.mock("@/hooks/useToast", () => ({
 const u = () => userEvent.setup({ pointerEventsCheck: 0 })
 
 function setEditMode() {
-  vi.mocked(useParams).mockReturnValue({ tenantId: "t1", userId: "u1" })
+  vi.mocked(useParams).mockReturnValue({ userId: "u1" })
 }
 
 function setCreateMode() {
-  vi.mocked(useParams).mockReturnValue({ tenantId: "t1" })
+  vi.mocked(useParams).mockReturnValue({})
 }
 
 function makeUser(overrides: Record<string, unknown> = {}) {
@@ -108,7 +108,7 @@ describe("UserAddOrUpdateForm", () => {
       ),
     )
     expect(showSuccessMock).toHaveBeenCalledWith("User created successfully")
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   it("shows an error when create rejects", async () => {
@@ -149,7 +149,7 @@ describe("UserAddOrUpdateForm", () => {
     expect(screen.getByText("User not found")).toBeInTheDocument()
     const backButtons = screen.getAllByRole("button", { name: /back to users/i })
     await u().click(backButtons[backButtons.length - 1])
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   // ── Edit mode: pre-fill and submit ───────────────────────────────────────
@@ -185,7 +185,7 @@ describe("UserAddOrUpdateForm", () => {
       }),
     )
     expect(showSuccessMock).toHaveBeenCalledWith("User updated successfully")
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   it("titles the edit page with the username when the user has no full name", async () => {
@@ -282,12 +282,12 @@ describe("UserAddOrUpdateForm", () => {
   it("cancel button navigates back", async () => {
     renderWithProviders(<UserAddOrUpdateForm />)
     await u().click(screen.getByRole("button", { name: "Cancel" }))
-    expect(navigateMock).toHaveBeenCalledWith("/t1/users")
+    expect(navigateMock).toHaveBeenCalledWith("/users")
   })
 
   it("back navigation honours location.state", async () => {
     vi.mocked(useLocation).mockReturnValue({
-      state: { from: "/t1/users/u1", backLabel: "Back to Details" },
+      state: { from: "/users/u1", backLabel: "Back to Details" },
     } as unknown as ReturnType<typeof useLocation>)
     createMutateAsync.mockResolvedValueOnce(undefined)
     renderWithProviders(<UserAddOrUpdateForm />)
@@ -295,12 +295,12 @@ describe("UserAddOrUpdateForm", () => {
     await u().type(screen.getByLabelText(/email/i), "new@test.com")
     await u().type(screen.getByLabelText(/password/i), "P@ssword1")
     await u().click(screen.getByRole("button", { name: /create user/i }))
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/t1/users/u1"))
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/users/u1"))
   })
 
   it("falls back to a generic 'Back' label when navigated from a non-default page without a label", () => {
     vi.mocked(useLocation).mockReturnValue({
-      state: { from: "/t1/users/u1" },
+      state: { from: "/users/u1" },
     } as unknown as ReturnType<typeof useLocation>)
     renderWithProviders(<UserAddOrUpdateForm />)
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument()

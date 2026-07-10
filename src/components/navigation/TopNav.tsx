@@ -11,13 +11,12 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ChevronDown, LogOut, Settings, User } from "lucide-react"
 import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
-import { useParams, useNavigate } from "react-router-dom"
-import { logoutViaIdentity } from "@/services/api/auth"
+import { useNavigate } from "react-router-dom"
+import { logout } from "@/services/api/auth"
 import { useAppSelector } from "@/store/hooks"
 import { TenantSwitcher } from "@/components/navigation/TenantSwitcher"
 
 export function TopNav() {
-  const { tenantId } = useParams<{ tenantId: string }>()
   const navigate = useNavigate()
   const profile = useAppSelector((state) => state.auth.profile)
 
@@ -69,20 +68,20 @@ export function TopNav() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => tenantId && navigate(`/${tenantId}/account/profile`)}
+                onClick={() => navigate(`/account/profile`)}
               >
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => tenantId && navigate(`/${tenantId}/account/settings`)}
+                onClick={() => navigate(`/account/settings`)}
               >
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onClick={logoutViaIdentity}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

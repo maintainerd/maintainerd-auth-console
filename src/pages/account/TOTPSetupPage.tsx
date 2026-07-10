@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Smartphone, ShieldCheck, RefreshCw, Copy, Download, EyeOff, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,7 +25,6 @@ function QRCodeImage({ url }: { url: string }) {
 
 export default function TOTPSetupPage() {
   const navigate = useNavigate()
-  const { tenantId } = useParams<{ tenantId: string }>()
   const { showSuccess, showError } = useToast()
   const queryClient = useQueryClient()
 
@@ -42,7 +41,7 @@ export default function TOTPSetupPage() {
   const [returnToHubOnClose, setReturnToHubOnClose] = useState(false)
   const [showDisable, setShowDisable] = useState(false)
 
-  const hub = `/${tenantId}/account/mfa`
+  const hub = `/account/mfa`
 
   const { data: codesData } = useQuery({
     queryKey: ["mfa", "backup-codes"],

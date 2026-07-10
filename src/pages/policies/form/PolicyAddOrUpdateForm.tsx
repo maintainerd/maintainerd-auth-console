@@ -27,7 +27,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 ]
 
 export default function PolicyAddOrUpdateForm() {
-  const { tenantId, policyId } = useParams<{ tenantId: string; policyId?: string }>()
+  const { policyId } = useParams<{ policyId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
   const { showSuccess, showError } = useToast()
@@ -37,8 +37,8 @@ export default function PolicyAddOrUpdateForm() {
 
   // Honour where the user came from so back/cancel/save return there.
   const navState = location.state as { from?: string; backLabel?: string } | null
-  const backTo = navState?.from ?? `/${tenantId}/policies`
-  const backLabel = navState?.backLabel ?? (backTo === `/${tenantId}/policies` ? "Back to Policies" : "Back")
+  const backTo = navState?.from ?? `/policies`
+  const backLabel = navState?.backLabel ?? (backTo === `/policies` ? "Back to Policies" : "Back")
 
   // Fetch existing policy if editing
   const { data: policyData, isLoading: isFetchingPolicy } = usePolicy(policyId || '')
