@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { AppWindow, Radio, History } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useWebhook } from "@/hooks/useWebhooks"
 import { WebhookHeader, WebhookInformation, WebhookEvents } from "./components"
@@ -45,7 +46,7 @@ export default function WebhookDetailsPage() {
         <>
           <WebhookHeader webhook={webhook} webhookId={webhookId!} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="h-8 flex-none gap-2 px-3">
@@ -55,18 +56,18 @@ export default function WebhookDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="overview" className="mt-4">
+            <TabsContent value="overview">
               <WebhookInformation webhook={webhook} />
             </TabsContent>
 
-            <TabsContent value="events" className="mt-4">
+            <TabsContent value="events">
               <WebhookEvents webhookId={webhookId!} />
             </TabsContent>
 
-            <TabsContent value="deliveries" className="mt-4">
+            <TabsContent value="deliveries">
               <WebhookDeliveries webhookId={webhookId!} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

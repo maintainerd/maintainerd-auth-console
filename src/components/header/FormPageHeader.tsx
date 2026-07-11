@@ -65,7 +65,7 @@ export function FormPageHeader({
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
             
             {/* System Badge */}
             {showSystemBadge && (
@@ -79,7 +79,7 @@ export function FormPageHeader({
             {customBadge}
           </div>
           
-          <p className="text-muted-foreground">{description}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         
         {/* Optional header actions (e.g., delete button) */}

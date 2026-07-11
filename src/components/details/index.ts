@@ -1,4 +1,5 @@
 export { DetailLayout } from './DetailLayout'
+export { DetailTabs } from './DetailTabs'
 export { DetailHeaderCard, type DetailAttribute } from './DetailHeaderCard'
 export { StatusBadge } from './StatusBadge'
 export { EmptyState } from './EmptyState'

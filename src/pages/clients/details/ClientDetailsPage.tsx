@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { AppWindow, Braces, Building2, KeyRound, Link2, Server, Settings, Shield } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useClient } from "@/hooks/useClients"
 import { ClientHeader, ClientInformation, ClientCredentials, ClientConfig, ClientMetadata, ClientApis, ClientUris, ClientIdentityProviders, ClientRoles } from "./components"
@@ -49,7 +50,7 @@ export default function ClientDetailsPage() {
         <>
           <ClientHeader client={clientData} clientId={clientId!} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="h-8 flex-none gap-2 px-3">
@@ -59,38 +60,38 @@ export default function ClientDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="overview" className="mt-4">
+            <TabsContent value="overview">
               <ClientInformation client={clientData} />
             </TabsContent>
 
-            <TabsContent value="identity-providers" className="mt-4">
+            <TabsContent value="identity-providers">
               <ClientIdentityProviders client={clientData} />
             </TabsContent>
 
-            <TabsContent value="credentials" className="mt-4">
+            <TabsContent value="credentials">
               <ClientCredentials client={clientData} />
             </TabsContent>
 
-            <TabsContent value="config" className="mt-4">
+            <TabsContent value="config">
               <ClientConfig clientId={clientId!} />
             </TabsContent>
 
-            <TabsContent value="uris" className="mt-4">
+            <TabsContent value="uris">
               <ClientUris client={clientData} />
             </TabsContent>
 
-            <TabsContent value="apis" className="mt-4">
+            <TabsContent value="apis">
               <ClientApis clientId={clientId!} />
             </TabsContent>
 
-            <TabsContent value="roles" className="mt-4">
+            <TabsContent value="roles">
               <ClientRoles clientId={clientId!} />
             </TabsContent>
 
-            <TabsContent value="metadata" className="mt-4">
+            <TabsContent value="metadata">
               <ClientMetadata clientId={clientId!} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

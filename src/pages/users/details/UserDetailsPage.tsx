@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Shield, IdCard, KeyRound, Braces, Monitor, Activity, Smartphone, FileText } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useUser } from "@/hooks/useUsers"
 import {
@@ -49,7 +50,7 @@ export default function UserDetailsPage() {
     >
       <UserHeader user={user!} userId={userId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -59,34 +60,34 @@ export default function UserDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="profiles" className="mt-2">
+        <TabsContent value="profiles">
           <UserProfiles userId={userId!} />
         </TabsContent>
-        <TabsContent value="roles" className="mt-2">
+        <TabsContent value="roles">
           <UserRoles userId={userId!} />
         </TabsContent>
-        <TabsContent value="identities" className="mt-2">
+        <TabsContent value="identities">
           <UserIdentities userId={userId!} />
         </TabsContent>
-        <TabsContent value="mfa" className="mt-2">
+        <TabsContent value="mfa">
           <UserMFA userId={userId!} />
         </TabsContent>
-        <TabsContent value="sessions" className="mt-2">
+        <TabsContent value="sessions">
           <UserSessions userId={userId!} />
         </TabsContent>
-        <TabsContent value="activity" className="mt-2">
+        <TabsContent value="activity">
           <UserActivity userId={userId!} />
         </TabsContent>
-        <TabsContent value="consents" className="mt-2">
+        <TabsContent value="consents">
           <UserConsents userId={userId!} />
         </TabsContent>
-        <TabsContent value="devices" className="mt-2">
+        <TabsContent value="devices">
           <UserTrustedDevices userId={userId!} />
         </TabsContent>
-        <TabsContent value="metadata" className="mt-2">
+        <TabsContent value="metadata">
           <UserMetadata user={user!} />
         </TabsContent>
-      </Tabs>
+      </DetailTabs>
     </DetailLayout>
   )
 }

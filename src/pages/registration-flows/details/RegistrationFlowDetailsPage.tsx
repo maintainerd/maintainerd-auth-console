@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { Settings, Shield } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useRegistrationFlow } from "@/hooks/useRegistrationFlows"
 import { RegistrationFlowHeader } from "./components/RegistrationFlowHeader"
@@ -37,7 +38,7 @@ export default function RegistrationFlowDetailsPage() {
         <>
           <RegistrationFlowHeader registrationFlow={registrationFlow} registrationFlowId={registrationFlowId!} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="gap-2">
@@ -47,13 +48,13 @@ export default function RegistrationFlowDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="config" className="mt-4">
+            <TabsContent value="config">
               <RegistrationFlowConfig registrationFlowId={registrationFlowId!} />
             </TabsContent>
-            <TabsContent value="roles" className="mt-4">
+            <TabsContent value="roles">
               <RegistrationFlowRoles registrationFlowId={registrationFlowId!} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

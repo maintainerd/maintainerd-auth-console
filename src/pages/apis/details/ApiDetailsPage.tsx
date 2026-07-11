@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Key } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useApi } from "@/hooks/useApis"
 import { ApiHeader, ApiPermissionsTab } from "./components"
@@ -30,7 +31,7 @@ export default function ApiDetailsPage() {
     >
       <ApiHeader api={api!} apiId={apiId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -40,10 +41,10 @@ export default function ApiDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="permissions" className="mt-4">
+        <TabsContent value="permissions">
           <ApiPermissionsTab apiId={apiId!} />
         </TabsContent>
-      </Tabs>
+      </DetailTabs>
     </DetailLayout>
   )
 }

@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Server, FileText } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useService } from "@/hooks/useServices"
 import { ServiceHeader, ServiceApisTab, ServicePoliciesTab } from "./components"
@@ -31,7 +32,7 @@ export default function ServiceDetailsPage() {
     >
       <ServiceHeader service={service!} serviceId={serviceId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -41,13 +42,13 @@ export default function ServiceDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="apis" className="mt-4">
+        <TabsContent value="apis">
           <ServiceApisTab serviceId={serviceId!} />
         </TabsContent>
-        <TabsContent value="policies" className="mt-4">
+        <TabsContent value="policies">
           <ServicePoliciesTab serviceId={serviceId!} />
         </TabsContent>
-      </Tabs>
+      </DetailTabs>
     </DetailLayout>
   )
 }

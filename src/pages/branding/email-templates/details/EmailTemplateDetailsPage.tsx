@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { FileText, Eye } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useEmailTemplate } from "@/hooks/useEmailTemplates"
 import { EmailTemplateHeader, EmailTemplateContent, EmailTemplatePreview } from "./components"
@@ -24,7 +25,7 @@ export default function EmailTemplateDetailsPage() {
         <>
           <EmailTemplateHeader template={template} templateId={templateId!} />
 
-          <Tabs defaultValue="content">
+          <DetailTabs defaultValue="content">
             <TabsList>
               <TabsTrigger value="content" className="gap-2">
                 <FileText className="size-4" />
@@ -36,14 +37,14 @@ export default function EmailTemplateDetailsPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="content" className="mt-4">
+            <TabsContent value="content">
               <EmailTemplateContent template={template} />
             </TabsContent>
 
-            <TabsContent value="preview" className="mt-4">
+            <TabsContent value="preview">
               <EmailTemplatePreview template={template} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

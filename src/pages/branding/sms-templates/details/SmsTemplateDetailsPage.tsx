@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { FileText } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useSmsTemplate } from "@/hooks/useSmsTemplates"
 import { SmsTemplateHeader, SmsTemplateContent } from "./components"
@@ -23,16 +24,16 @@ export default function SmsTemplateDetailsPage() {
         <>
           <SmsTemplateHeader template={template} templateId={templateId!} />
 
-          <Tabs defaultValue="content">
+          <DetailTabs defaultValue="content">
             <TabsList>
               <TabsTrigger value="content" className="gap-2">
                 <FileText className="size-4" />Content
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="content" className="mt-4">
+            <TabsContent value="content">
               <SmsTemplateContent template={template} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

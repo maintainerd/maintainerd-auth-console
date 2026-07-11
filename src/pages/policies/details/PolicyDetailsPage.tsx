@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { FileText, Server, History } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { usePolicy } from "@/hooks/usePolicies"
 import { useServicesByPolicy } from "./hooks/useServicesByPolicy"
@@ -46,7 +47,7 @@ export default function PolicyDetailsPage() {
         <>
           <PolicyHeader policy={policy} policyId={policyId!} afterDeleteTo={backTo} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="gap-2">
@@ -57,19 +58,19 @@ export default function PolicyDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="statements" className="mt-4">
+            <TabsContent value="statements">
               <PolicyStatementsTab
                 documentVersion={policy.document.version}
                 statements={policy.document.statement}
               />
             </TabsContent>
-            <TabsContent value="services" className="mt-4">
+            <TabsContent value="services">
               <PolicyServicesTab policyId={policyId!} />
             </TabsContent>
-            <TabsContent value="history" className="mt-4">
+            <TabsContent value="history">
               <PolicyHistoryTab policyId={policyId!} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

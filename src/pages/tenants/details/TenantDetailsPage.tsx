@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { Users } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useTenantById } from "@/hooks/useTenants"
 import { TenantHeader, TenantMembers } from "./components"
@@ -24,7 +25,7 @@ export default function TenantDetailsPage() {
         <>
           <TenantHeader tenant={tenant} />
 
-          <Tabs defaultValue="members">
+          <DetailTabs defaultValue="members">
             <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">
               <TabsTrigger value="members" className="h-8 flex-none gap-2 px-3">
                 <Users className="size-4" />
@@ -32,10 +33,10 @@ export default function TenantDetailsPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="members" className="mt-4">
+            <TabsContent value="members">
               <TenantMembers isSystemTenant={tenant.is_system} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

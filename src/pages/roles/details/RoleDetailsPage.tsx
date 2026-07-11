@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Shield, Users } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useRole } from "@/hooks/useRoles"
 import { RoleHeader, RolePermissionsTab, RoleUsers } from "./components"
@@ -31,7 +32,7 @@ export default function RoleDetailsPage() {
     >
       <RoleHeader role={role!} roleId={roleId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -41,13 +42,13 @@ export default function RoleDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="permissions" className="mt-2">
+        <TabsContent value="permissions">
           <RolePermissionsTab roleId={roleId!} />
         </TabsContent>
-        <TabsContent value="users" className="mt-2">
+        <TabsContent value="users">
           <RoleUsers roleId={roleId!} />
         </TabsContent>
-      </Tabs>
+      </DetailTabs>
     </DetailLayout>
   )
 }

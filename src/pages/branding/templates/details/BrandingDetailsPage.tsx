@@ -1,7 +1,8 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Palette, Link2, Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useBranding } from "@/hooks/useBranding"
 import { useClients } from "@/hooks/useClients"
@@ -38,7 +39,7 @@ export default function BrandingDetailsPage() {
         <>
           <BrandingHeader branding={branding} brandingId={brandingId!} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="gap-2">
@@ -48,16 +49,16 @@ export default function BrandingDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="theme" className="mt-4">
+            <TabsContent value="theme">
               <ThemeTab branding={branding} />
             </TabsContent>
-            <TabsContent value="details" className="mt-4">
+            <TabsContent value="details">
               <DetailsTab branding={branding} />
             </TabsContent>
-            <TabsContent value="clients" className="mt-4">
+            <TabsContent value="clients">
               <ClientsTab brandingId={branding.branding_id} />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>

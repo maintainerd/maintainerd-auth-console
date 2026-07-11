@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { AppWindow, KeyRound, Settings2 } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DetailTabs } from "@/components/details/DetailTabs"
 import { DetailLayout } from "@/components/details"
 import { useIdentityProvider } from "@/hooks/useIdentityProviders"
 import {
@@ -49,7 +50,7 @@ export default function IdentityProviderDetailsPage() {
         <>
           <IdentityProviderHeader provider={provider} providerId={providerId!} />
 
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList>
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="gap-2">
@@ -59,21 +60,21 @@ export default function IdentityProviderDetailsPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="connection" className="mt-4">
+            <TabsContent value="connection">
               <IdentityProviderConnectionTab provider={provider} />
             </TabsContent>
 
-            <TabsContent value="configuration" className="mt-4">
+            <TabsContent value="configuration">
               <IdentityProviderConfigurationTab provider={provider} />
             </TabsContent>
 
-            <TabsContent value="connected-clients" className="mt-4">
+            <TabsContent value="connected-clients">
               <IdentityProviderClients
                 providerId={providerId!}
                 providerName={provider.display_name}
               />
             </TabsContent>
-          </Tabs>
+          </DetailTabs>
         </>
       )}
     </DetailLayout>
