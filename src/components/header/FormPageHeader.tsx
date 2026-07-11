@@ -54,9 +54,9 @@ export function FormPageHeader({
           variant="ghost"
           size="sm"
           onClick={() => navigate(backUrl)}
-          className="gap-2"
+          className="-ml-2 w-fit gap-2 text-muted-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           {backLabel}
         </Button>
       </div>

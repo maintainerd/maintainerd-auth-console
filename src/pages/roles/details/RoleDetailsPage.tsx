@@ -31,7 +31,7 @@ export default function RoleDetailsPage() {
     >
       <RoleHeader role={role!} roleId={roleId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -41,10 +41,10 @@ export default function RoleDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="permissions" className="mt-4">
+        <TabsContent value="permissions" className="mt-2">
           <RolePermissionsTab roleId={roleId!} />
         </TabsContent>
-        <TabsContent value="users" className="mt-4">
+        <TabsContent value="users" className="mt-2">
           <RoleUsers roleId={roleId!} />
         </TabsContent>
       </Tabs>

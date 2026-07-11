@@ -14,11 +14,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar
       collapsible="icon"
       {...props}
-      className="[&_[data-sidebar=sidebar]]:bg-white [&_[data-sidebar=sidebar]]:overflow-y-auto"
+      className="[&_[data-sidebar=sidebar]]:bg-[#fcfcfc] [&_[data-sidebar=sidebar]]:overflow-y-auto"
     >
       {/* Coolify-style brand block: logo at the top of the side nav, with the
           tenant switcher directly beneath it. */}
-      <SidebarHeader className="gap-4 bg-white px-3 pt-6 pb-2">
+      <SidebarHeader className="gap-4 bg-[#fcfcfc] px-3 pt-6 pb-2">
         <div className="flex items-center gap-2.5 px-2">
           <MaintainedAuthIcon width={30} height={30} className="shrink-0" />
           <span className="text-lg font-semibold tracking-tight text-slate-900 group-data-[collapsible=icon]:hidden">
@@ -36,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* The whole sidebar (header + nav) scrolls as one: the panel owns the
           scroll (overflow-y-auto above), so the content is not its own scroll
           region (flex-none + overflow-visible). */}
-      <SidebarContent className="flex-none overflow-visible px-3 pb-4 pt-2 gap-1 bg-white">
+      <SidebarContent className="flex-none overflow-visible px-3 pb-4 pt-2 gap-1 bg-[#fcfcfc]">
         <NavMain sections={data.navSections} />
       </SidebarContent>
     </Sidebar>

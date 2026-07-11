@@ -42,7 +42,7 @@ export function TopNav() {
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
-    <header className="sticky top-0 z-10 flex h-[72px] items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
+    <header className="sticky top-0 z-10 flex h-[72px] items-center gap-3 border-b border-slate-200 bg-[#fcfcfc] px-4 sm:px-6">
       {/* Mobile-only drawer toggle (desktop keeps the sidebar always visible). */}
       <SidebarTrigger className="md:hidden size-9 text-slate-600" />
 

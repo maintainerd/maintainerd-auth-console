@@ -49,7 +49,7 @@ export default function UserDetailsPage() {
     >
       <UserHeader user={user!} userId={userId!} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
         <TabsList>
           {TABS.map(({ value, label, icon: Icon }) => (
             <TabsTrigger key={value} value={value} className="gap-2">
@@ -59,31 +59,31 @@ export default function UserDetailsPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="profiles" className="mt-4">
+        <TabsContent value="profiles" className="mt-2">
           <UserProfiles userId={userId!} />
         </TabsContent>
-        <TabsContent value="roles" className="mt-4">
+        <TabsContent value="roles" className="mt-2">
           <UserRoles userId={userId!} />
         </TabsContent>
-        <TabsContent value="identities" className="mt-4">
+        <TabsContent value="identities" className="mt-2">
           <UserIdentities userId={userId!} />
         </TabsContent>
-        <TabsContent value="mfa" className="mt-4">
+        <TabsContent value="mfa" className="mt-2">
           <UserMFA userId={userId!} />
         </TabsContent>
-        <TabsContent value="sessions" className="mt-4">
+        <TabsContent value="sessions" className="mt-2">
           <UserSessions userId={userId!} />
         </TabsContent>
-        <TabsContent value="activity" className="mt-4">
+        <TabsContent value="activity" className="mt-2">
           <UserActivity userId={userId!} />
         </TabsContent>
-        <TabsContent value="consents" className="mt-4">
+        <TabsContent value="consents" className="mt-2">
           <UserConsents userId={userId!} />
         </TabsContent>
-        <TabsContent value="devices" className="mt-4">
+        <TabsContent value="devices" className="mt-2">
           <UserTrustedDevices userId={userId!} />
         </TabsContent>
-        <TabsContent value="metadata" className="mt-4">
+        <TabsContent value="metadata" className="mt-2">
           <UserMetadata user={user!} />
         </TabsContent>
       </Tabs>
