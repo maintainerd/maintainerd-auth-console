@@ -182,7 +182,7 @@ const FormFileUploadField = forwardRef<HTMLInputElement, FormFileUploadFieldProp
           {/* Upload Area */}
           <div
             className={cn(
-              "relative border-2 border-dashed rounded-lg p-6 transition-colors",
+              "relative border border-dashed rounded-lg p-6 transition-colors",
               dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25",
               displayError && "border-red-500",
               uploading && "opacity-50 pointer-events-none"

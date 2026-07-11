@@ -1,14 +1,14 @@
 import { UserListing } from "./components/UserListing"
-import { PageContainer, PageHeader } from "@/components/layout"
+import { PageHeader } from "@/components/layout"
 
 export default function UsersPage() {
   return (
-    <PageContainer>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <PageHeader
         title="Users"
         description="Manage user accounts, authentication settings, and security features like 2FA and email verification."
       />
-      <UserListing />
-    </PageContainer>
+      <UserListing tableInCard />
+    </div>
   )
 }

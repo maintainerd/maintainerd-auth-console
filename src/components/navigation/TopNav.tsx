@@ -9,13 +9,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ChevronDown, LogOut, Settings, User } from "lucide-react"
-import MaintainedAuthIcon from "../icon/MaintainedAuthIcon"
+import {
+  BookOpen,
+  ChevronDown,
+  Code2,
+  HelpCircle,
+  LogOut,
+  MessageSquare,
+  Settings,
+  User,
+} from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { logout } from "@/services/api/auth"
 import { useAppSelector } from "@/store/hooks"
-import { TenantSwitcher } from "@/components/navigation/TenantSwitcher"
+import { Breadcrumbs } from "@/components/navigation/Breadcrumbs"
+import { CreateMenu } from "@/components/navigation/CreateMenu"
 
+const resourceLinks = [
+  { title: "Documentation", icon: BookOpen, href: "#" },
+  { title: "API Reference", icon: Code2, href: "#" },
+  { title: "Community", icon: MessageSquare, href: "#" },
+]
+
+// Slim content header (Coolify-style). The brand and tenant switcher live at the
+// top of the sidebar; this bar keeps the sidebar collapse toggle, the breadcrumb,
+// and the right-side actions (help resources + user menu).
 export function TopNav() {
   const navigate = useNavigate()
   const profile = useAppSelector((state) => state.auth.profile)
@@ -24,71 +42,84 @@ export function TopNav() {
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-slate-900 text-slate-100">
-      <div className="flex h-14 items-center px-4">
-        {/* Mobile sidebar trigger */}
-        <SidebarTrigger className="md:hidden mr-2 size-9" />
+    <header className="sticky top-0 z-10 flex h-[72px] items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
+      {/* Mobile-only drawer toggle (desktop keeps the sidebar always visible). */}
+      <SidebarTrigger className="md:hidden size-9 text-slate-600" />
 
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <MaintainedAuthIcon width={30} height={30} className="shrink-0" />
-          <span className="hidden text-lg font-semibold sm:inline">M9d-Auth</span>
-        </div>
+      {/* Breadcrumb — where we are now */}
+      <Breadcrumbs />
 
-        {/* Tenant selector */}
-        <TenantSwitcher className="ml-4" />
+      {/* Right actions: create + help resources + profile */}
+      <div className="ml-auto flex items-center gap-2">
+        <CreateMenu />
 
-        {/* Profile dropdown */}
-        <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 px-2 hover:bg-white/10 text-slate-100 hover:text-white"
-              >
-                <Avatar className="h-7 w-7 shrink-0">
-                  <AvatarImage src={undefined} alt={displayName} />
-                  <AvatarFallback className="bg-white/10 text-white text-xs">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
-                <ChevronDown className="h-4 w-4 text-slate-400" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{displayName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {profile?.email || ""}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => navigate(`/account/profile`)}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Profile
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Help & resources">
+              <HelpCircle className="size-5 text-slate-500" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-48" align="end">
+            <DropdownMenuLabel className="font-normal text-muted-foreground">
+              Resources
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {resourceLinks.map((link) => (
+              <DropdownMenuItem key={link.title} asChild className="cursor-pointer">
+                <a href={link.href} target="_blank" rel="noopener noreferrer">
+                  <link.icon className="mr-2 h-4 w-4" />
+                  {link.title}
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => navigate(`/account/settings`)}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
+              <Avatar className="h-7 w-7 shrink-0">
+                <AvatarImage src={undefined} alt={displayName} />
+                <AvatarFallback className="bg-slate-200 text-slate-700 text-xs">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{displayName}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {profile?.email || ""}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => navigate(`/account/profile`)}
+            >
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => navigate(`/account/settings`)}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </nav>
+    </header>
   )
 }

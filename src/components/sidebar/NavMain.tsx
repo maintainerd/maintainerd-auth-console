@@ -38,7 +38,12 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
   // normalizes to a leading-slash absolute path.
   const buildRoute = (route: string) => (route.startsWith('/') ? route : `/${route}`)
 
-  const isActive = (route: string) => location.pathname === buildRoute(route)
+  // Active on the exact route or any of its sub-paths (e.g. /user-management is
+  // active on /user-management/users; /users is active on /users/:id).
+  const isActive = (route: string) => {
+    const r = buildRoute(route)
+    return location.pathname === r || location.pathname.startsWith(`${r}/`)
+  }
 
   const isParentActive = (item: NavItem) => {
     // Check if current route matches the parent route
@@ -86,7 +91,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
   return (
     <>
       {sections.map((section, index) => (
-        <SidebarGroup key={section.label ?? index} className="py-1">
+        <SidebarGroup key={section.label ?? index} className="px-0 py-1">
           {section.label && (
             <SidebarGroupLabel className="h-7 text-xs">{section.label}</SidebarGroupLabel>
           )}
@@ -99,12 +104,12 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                       <SidebarMenuButton
                         onClick={() => toggleItem(item.title)}
                         tooltip={item.title}
-                        className={`h-8 px-3 text-sm [&>svg]:size-4 ${isParentActive(item) ? "font-bold text-blue-600 hover:text-blue-600" : ""}`}
+                        className={`h-8 px-2 text-sm [&>svg]:size-4 ${isParentActive(item) ? "font-medium text-blue-700 hover:text-blue-700" : ""}`}
                       >
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                         <ChevronRight
-                          className={`ml-auto h-5 w-5 transition-transform ${
+                          className={`ml-auto h-4 w-4 text-muted-foreground transition-transform ${
                             openItems.has(item.title) ? "rotate-90" : ""
                           }`}
                         />
@@ -116,7 +121,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive(subItem.route)}
-                                className={`h-8 px-3 text-sm ${isActive(subItem.route) ? "bg-blue-50 text-blue-600 font-medium hover:bg-blue-50 hover:text-blue-600 data-[active=true]:bg-blue-50" : ""}`}
+                                className={`h-8 px-2 text-sm ${isActive(subItem.route) ? "bg-blue-100 text-blue-700 font-medium hover:bg-blue-100 hover:text-blue-700 data-[active=true]:bg-blue-100" : ""}`}
                               >
                                 <Link to={buildRoute(subItem.route)}>
                                   <span>{subItem.title}</span>
@@ -131,7 +136,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
-                      className={`h-8 px-3 text-sm [&>svg]:size-4 ${isActive(item.route) ? "bg-blue-50 font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-600" : ""}`}
+                      className={`h-8 px-2 text-sm [&>svg]:size-4 ${isActive(item.route) ? "bg-blue-100 font-medium text-blue-700 hover:bg-blue-100 hover:text-blue-700" : ""}`}
                     >
                       <Link to={buildRoute(item.route)}>
                         {item.icon && <item.icon />}

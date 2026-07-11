@@ -34,22 +34,23 @@ export function DataTable<TData>({
   onRowClick,
 }: DataTableProps<TData>) {
   return (
-    <Table className="border-b text-sm">
+    <Table className="border-b border-slate-200 text-sm [&_tr]:border-slate-200">
       <colgroup>
         {table.getAllLeafColumns().map((col) => (
           <col key={col.id} style={col.id === "actions" ? { width: 56 } : undefined} />
         ))}
       </colgroup>
       {/* On mobile the header is hidden and each row stacks into one column;
-          the normal table layout returns at md+. The header carries a single
-          bottom rule (2px) — a touch heavier than the 1px row separators. */}
-      <TableHeader className="hidden md:table-header-group [&_tr]:border-b-2 [&_tr]:hover:bg-transparent">
+          the normal table layout returns at md+. The header carries a single 1px
+          bottom rule, slightly darker (slate-300) than the row separators so it
+          still reads as the header divider without being heavy. */}
+      <TableHeader className="hidden md:table-header-group [&_tr]:border-b [&_tr]:bg-[#f6f6f7] [&_tr]:hover:bg-[#f6f6f7]">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const isActionsHeader = header.column.id === "actions"
                 return (
-                  <TableHead key={header.id} className={cn("h-11 text-xs", isActionsHeader && "w-14 text-right")}>
+                  <TableHead key={header.id} className={cn("h-9 text-xs", isActionsHeader && "w-14 text-right")}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -114,7 +115,7 @@ export function DataTable<TData>({
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        "md:table-cell md:px-3 md:py-2.5",
+                        "md:table-cell md:px-3 md:py-3",
                         isActions
                           ? // Mobile: pinned to the card's top-right, level with the name.
                             "absolute right-3 top-3 p-0 md:static md:w-14 md:pl-0 md:text-right"

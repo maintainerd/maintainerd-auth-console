@@ -29,6 +29,10 @@ interface ResourceListingProps<TRow, TParams> {
   emptyTitle?: string
   /** Empty-state supporting copy shown alongside `emptyTitle`. */
   emptyDescription?: string
+  /** When true, the table is wrapped in its own bordered card while the toolbar
+   *  (above) and pagination (below) render outside it. The page must NOT add its
+   *  own encapsulating card in this mode. */
+  tableInCard?: boolean
 }
 
 /**
@@ -50,6 +54,7 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
   defaultPageSize,
   emptyTitle = "Nothing here yet",
   emptyDescription,
+  tableInCard = false,
 }: ResourceListingProps<TRow, TParams>) {
   const { table, isLoading, error, search, setSearch, filters, setFilters, activeFilters, clearFilters } =
     useServerDataTable<TRow, TParams>({
@@ -105,19 +110,36 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
         createLabel={createLabel}
       />
       <DataTableActiveFilters activeFilters={activeFilters} onClearAll={clearFilters} />
-      {/* The table bleeds past the card's px-8 to touch its side edges (-mx-8),
-          while the first/last columns re-pad to the same 32px gutter so cell
-          content stays aligned with the toolbar and pagination above/below. */}
-      <div className="-mx-6 md:[&_td:first-child]:pl-6 md:[&_td:last-child]:pr-6 md:[&_th:first-child]:pl-6 md:[&_th:last-child]:pr-6">
-        <DataTable
-          table={table}
-          columnCount={columns.length}
-          isLoading={isLoading}
-          error={error}
-          emptyState={emptyState}
-          onRowClick={onRowClick}
-        />
-      </div>
+      {tableInCard ? (
+        // Table in its own bordered card; the toolbar (above) and pagination
+        // (below) sit outside it. Cells re-pad to a 16px gutter, and the table's
+        // own bottom rule + last-row rule are dropped so the card border is the
+        // single bottom line.
+        <div className="overflow-hidden rounded-[2px] border border-slate-200 bg-white [&_table]:border-b-0 [&_tbody_tr:last-child]:border-b-0 md:[&_td:first-child]:pl-4 md:[&_td:last-child]:pr-4 md:[&_th:first-child]:pl-4 md:[&_th:last-child]:pr-4">
+          <DataTable
+            table={table}
+            columnCount={columns.length}
+            isLoading={isLoading}
+            error={error}
+            emptyState={emptyState}
+            onRowClick={onRowClick}
+          />
+        </div>
+      ) : (
+        // The table bleeds past the card's px-6 to touch its side edges (-mx-6),
+        // while the first/last columns re-pad to the same 24px gutter so cell
+        // content stays aligned with the toolbar and pagination above/below.
+        <div className="-mx-6 md:[&_td:first-child]:pl-6 md:[&_td:last-child]:pr-6 md:[&_th:first-child]:pl-6 md:[&_th:last-child]:pr-6">
+          <DataTable
+            table={table}
+            columnCount={columns.length}
+            isLoading={isLoading}
+            error={error}
+            emptyState={emptyState}
+            onRowClick={onRowClick}
+          />
+        </div>
+      )}
       <DataTablePagination table={table} />
     </div>
   )

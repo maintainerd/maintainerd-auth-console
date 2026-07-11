@@ -10,11 +10,12 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive", "pending", "suspended"] },
 ]
 
-export function UserListing() {
+export function UserListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={userColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}

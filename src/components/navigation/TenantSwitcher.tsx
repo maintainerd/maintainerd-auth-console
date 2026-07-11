@@ -92,23 +92,23 @@ export function TenantSwitcher({ className }: { className?: string }) {
             role="combobox"
             aria-expanded={open}
             aria-label="Switch tenant"
-            className="h-9 gap-2 px-2 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            className="h-10 w-full justify-start gap-2 rounded-md border border-slate-200 bg-white px-2 text-foreground hover:bg-slate-50"
           >
             {showSkeleton ? (
               <>
-                <Skeleton className="size-6 rounded-md bg-primary-foreground/20" />
-                <Skeleton className="h-4 w-24 bg-primary-foreground/20" />
+                <Skeleton className="size-6 rounded-md bg-muted" />
+                <Skeleton className="h-4 w-24 bg-muted" />
               </>
             ) : (
               <>
                 <TenantTile
                   name={label}
-                  className="bg-primary-foreground/15 text-primary-foreground"
+                  className="bg-blue-100 text-blue-700"
                 />
-                <span className="max-w-[7rem] truncate text-sm font-medium sm:max-w-[10rem]">{label}</span>
+                <span className="min-w-0 flex-1 truncate text-left text-sm font-medium">{label}</span>
               </>
             )}
-            <ChevronsUpDown className="size-4 shrink-0 opacity-60" />
+            <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-60" />
           </Button>
         </PopoverTrigger>
 

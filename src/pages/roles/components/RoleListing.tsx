@@ -10,11 +10,12 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
 ]
 
-export function RoleListing() {
+export function RoleListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={roleColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}

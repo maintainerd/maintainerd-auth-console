@@ -12,26 +12,27 @@ interface PrivateLayoutProps {
 
 // Access gating (auth, registration completeness, tenant isolation) is handled
 // centrally by AppBootstrap → RouteGuard; this layout only renders the chrome.
+//
+// Coolify-style chrome: a full-height left sidebar owns the brand + tenant
+// switcher (see AppSidebar). The top bar is a slim header inside the content
+// area holding only the user menu + sidebar collapse toggle.
 export function PrivateLayout({ fullWidth = false }: PrivateLayoutProps) {
   return (
     <ConsoleBrandingProvider>
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Wider sidebar (default is 16rem) to suit the larger menu text/icons */}
       <SidebarProvider style={{ "--sidebar-width": "17rem" } as CSSProperties}>
-        <TopNav />
-        <div className="flex flex-1 pt-14">
-          <AppSidebar variant="sidebar" className="top-14" />
-          <SidebarInset className="bg-slate-50 min-w-0">
-            <main className={cn(
+        <AppSidebar variant="sidebar" />
+        <SidebarInset className="bg-white min-w-0">
+          <TopNav />
+          <main
+            className={cn(
               "flex-1 px-4 py-6 sm:px-6 sm:py-8",
-              !fullWidth && "max-w-6xl mx-auto"
-            )}>
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </div>
+              !fullWidth && "w-full max-w-6xl mx-auto",
+            )}
+          >
+            <Outlet />
+          </main>
+        </SidebarInset>
       </SidebarProvider>
-    </div>
     </ConsoleBrandingProvider>
   )
 }
