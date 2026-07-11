@@ -201,7 +201,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
@@ -315,7 +315,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
           </Card>
 
           {/* Configuration */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -364,7 +364,7 @@ export default function RegistrationFlowAddOrUpdateForm() {
           </Card>
 
           {/* Roles */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Roles</CardTitle>
               <p className="text-sm text-muted-foreground">

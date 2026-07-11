@@ -102,7 +102,7 @@ export default function EmailTemplateForm() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Template" title="Edit Email Template" description="Update the email template details and content." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -128,7 +128,7 @@ export default function EmailTemplateForm() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Template Information</CardTitle>
             </CardHeader>
@@ -172,7 +172,7 @@ export default function EmailTemplateForm() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Email Content</CardTitle>
             </CardHeader>
@@ -202,7 +202,7 @@ export default function EmailTemplateForm() {
           </Card>
 
           {templateData?.parametersDoc && (
-            <Card className="shadow-xs">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">Template Parameters</CardTitle>
                 <p className="text-sm text-muted-foreground">

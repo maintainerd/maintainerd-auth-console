@@ -20,7 +20,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           tenant switcher directly beneath it. */}
       <SidebarHeader className="gap-4 bg-white px-3 pt-6 pb-2">
         <div className="flex items-center gap-2.5 px-2">
-          <MaintainedAuthIcon width={36} height={36} className="shrink-0" />
+          <MaintainedAuthIcon width={30} height={30} className="shrink-0" />
           <span className="text-lg font-semibold tracking-tight text-slate-900 group-data-[collapsible=icon]:hidden">
             Maintainerd-Auth
           </span>

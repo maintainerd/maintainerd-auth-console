@@ -63,7 +63,7 @@ export default function PasskeySetupPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted"><Key className="size-5 text-muted-foreground" /></div>
@@ -86,7 +86,7 @@ export default function PasskeySetupPage() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Your passkeys</CardTitle>
           <CardDescription>{keys.length > 0 ? `${keys.length} registered passkey${keys.length !== 1 ? "s" : ""}.` : "You haven't registered any passkeys yet."}</CardDescription>

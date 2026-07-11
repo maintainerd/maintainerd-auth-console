@@ -65,7 +65,7 @@ export function MFAIndex() {
   if (isLoading) return <MFAIndexSkeleton />
   if (isError)
     return (
-      <Card className="shadow-xs">
+      <Card>
         <CardContent className="py-12 text-center text-sm text-destructive">
           Failed to load MFA settings. {error instanceof Error ? error.message : ""}
         </CardContent>
@@ -85,7 +85,7 @@ export function MFAIndex() {
   return (
     <div className="space-y-6">
       {/* ── Security status ─────────────────────────────────────── */}
-      <Card className="shadow-xs">
+      <Card>
         <CardContent className="flex items-center gap-4">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted">
             {protected_ ? <ShieldCheck className="size-6 text-emerald-600" /> : <ShieldAlert className="size-6 text-amber-600" />}
@@ -106,7 +106,7 @@ export function MFAIndex() {
       {/* ── Authentication methods ──────────────────────────────── */}
       <div>
         <h2 className="text-sm font-medium text-muted-foreground px-1 mb-2">Authentication methods</h2>
-        <Card className="shadow-xs py-0 overflow-hidden">
+        <Card className="py-0 overflow-hidden">
           <CardContent className="p-0">
             <MethodRow
               icon={Smartphone}
@@ -148,7 +148,7 @@ export function MFAIndex() {
       {totpOn && (
         <div>
           <h2 className="text-sm font-medium text-muted-foreground px-1 mb-2">Recovery</h2>
-          <Card className="shadow-xs py-0 overflow-hidden">
+          <Card className="py-0 overflow-hidden">
             <CardContent className="p-0">
               <MethodRow
                 icon={KeyRound}
@@ -192,7 +192,7 @@ function ResetAllMFA() {
   return (
     <div>
       <h2 className="text-sm font-medium text-muted-foreground px-1 mb-2">Reset</h2>
-      <Card className="shadow-xs border-destructive/30">
+      <Card className="border-destructive/30">
         <CardContent className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium">Reset all methods</p>
@@ -262,7 +262,7 @@ function MFAIndexSkeleton() {
       <Skeleton className="h-20 w-full rounded-xl" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-40" />
-        <Card className="shadow-xs py-0 overflow-hidden">
+        <Card className="py-0 overflow-hidden">
           <CardContent className="p-0">
             {[0, 1, 2].map((i) => (
               <div key={i} className="flex items-center gap-4 px-4 py-4">

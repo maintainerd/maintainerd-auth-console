@@ -60,7 +60,7 @@ export default function SMSDeliveryPage() {
         />
 
         {isLoading && (
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-48" />
               <div className="grid gap-4 md:grid-cols-3">
@@ -73,7 +73,7 @@ export default function SMSDeliveryPage() {
         )}
 
         {!isLoading && notConfigured && (
-          <Card className="shadow-xs">
+          <Card>
             <CardContent>
               <EmptyState
                 icon={MessageSquare}

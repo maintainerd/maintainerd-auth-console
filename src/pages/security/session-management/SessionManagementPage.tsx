@@ -87,7 +87,7 @@ export default function SessionManagementPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Sessions" title="Configure Sessions" description="Set token lifetimes, timeouts, and cookie settings." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -113,7 +113,7 @@ export default function SessionManagementPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Token Lifetimes</CardTitle>
               <p className="text-sm text-muted-foreground">Set how long access and refresh tokens remain valid.</p>
@@ -126,7 +126,7 @@ export default function SessionManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Timeouts & Concurrency</CardTitle>
               <p className="text-sm text-muted-foreground">Idle and absolute session limits. Set concurrency to 0 for unlimited.</p>
@@ -140,7 +140,7 @@ export default function SessionManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Refresh Rotation</CardTitle>
               <p className="text-sm text-muted-foreground">Single-use refresh tokens with reuse detection and family revocation.</p>
@@ -153,7 +153,7 @@ export default function SessionManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Cookie Settings</CardTitle>
               <p className="text-sm text-muted-foreground">Security flags applied to authentication cookies.</p>

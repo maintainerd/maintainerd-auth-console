@@ -143,7 +143,7 @@ export default function SMSConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to SMS Delivery" title="Configure SMS Delivery" description="Connect an SMS provider to send platform text messages." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -163,7 +163,7 @@ export default function SMSConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to SMS Delivery" title="Configure SMS Delivery" description="Connect an SMS provider to send platform text messages." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load SMS configuration. {(error as Error)?.message || ""}
             </CardContent>
@@ -184,7 +184,7 @@ export default function SMSConfigPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Provider & Credentials</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -237,7 +237,7 @@ export default function SMSConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Sender & Options</CardTitle>
               <p className="text-sm text-muted-foreground">

@@ -83,7 +83,7 @@ export default function RegistrationConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Registration" title="Configure Registration" description="Set registration and verification policies." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -109,7 +109,7 @@ export default function RegistrationConfigPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Registration Settings</CardTitle>
               <p className="text-sm text-muted-foreground">Control how users can register.</p>
@@ -125,7 +125,7 @@ export default function RegistrationConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Domain Rules</CardTitle>
               <p className="text-sm text-muted-foreground">Restrict registration to specific email domains. One domain per line. Supports wildcard patterns like *.example.com.</p>
@@ -138,7 +138,7 @@ export default function RegistrationConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Verification</CardTitle>
               <p className="text-sm text-muted-foreground">Configure email and phone verification requirements.</p>

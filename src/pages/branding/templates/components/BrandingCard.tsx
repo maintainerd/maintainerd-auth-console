@@ -35,7 +35,7 @@ export function BrandingCard({ branding }: { branding: Branding }) {
           open()
         }
       }}
-      className="cursor-pointer gap-0 overflow-hidden py-0 shadow-xs transition-colors hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {/* Palette preview band */}
       <div className="flex h-20 w-full border-b" aria-hidden>

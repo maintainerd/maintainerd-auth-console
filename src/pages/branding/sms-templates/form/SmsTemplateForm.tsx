@@ -94,7 +94,7 @@ export default function SmsTemplateForm() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader><CardTitle>Template Information</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <FormInputField label="Name" placeholder="e.g., otp_verification" description="Template identifier — cannot be changed." disabled error={errors.name?.message} required {...register("name")} />
@@ -105,7 +105,7 @@ export default function SmsTemplateForm() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader><CardTitle>Message Content</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <FormTextareaField label="Message" placeholder="Enter your SMS message here..." description="The SMS body text sent to recipients." rows={6} disabled={isBusy} error={errors.message?.message} required {...register("message")} />
@@ -113,7 +113,7 @@ export default function SmsTemplateForm() {
           </Card>
 
           {templateData?.parametersDoc && (
-            <Card className="shadow-xs">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">Template Parameters</CardTitle>
                 <p className="text-sm text-muted-foreground">

@@ -79,7 +79,7 @@ export default function LockoutConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Account Lockout" title="Configure Account Lockout" description="Set lockout policies and behavior." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -99,7 +99,7 @@ export default function LockoutConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Account Lockout" title="Configure Account Lockout" description="Set lockout policies and behavior." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load lockout configuration.
             </CardContent>
@@ -120,7 +120,7 @@ export default function LockoutConfigPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Lockout Policy</CardTitle>
               <p className="text-sm text-muted-foreground">Set thresholds and duration for account lockouts.</p>
@@ -143,7 +143,7 @@ export default function LockoutConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Progressive Lockout</CardTitle>
               <p className="text-sm text-muted-foreground">Escalate lockout duration on repeated lockouts.</p>
@@ -156,7 +156,7 @@ export default function LockoutConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Behavior</CardTitle>
               <p className="text-sm text-muted-foreground">Additional lockout behavior settings.</p>

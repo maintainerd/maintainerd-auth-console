@@ -70,7 +70,7 @@ function ThemeTab({ branding }: { branding: Branding }) {
   const fontFamily = tokens["font.family"]
 
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardHeader>
         <CardTitle className="text-base">Theme tokens</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -121,7 +121,7 @@ function DetailsTab({ branding }: { branding: Branding }) {
   ]
 
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardHeader>
         <CardTitle className="text-base">Brand assets &amp; links</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -167,7 +167,7 @@ function ClientsTab({ brandingId }: { brandingId: string }) {
   )
 
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardHeader>
         <CardTitle className="text-base">Clients using this branding</CardTitle>
         <p className="text-sm text-muted-foreground">

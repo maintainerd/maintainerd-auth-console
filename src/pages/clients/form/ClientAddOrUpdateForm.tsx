@@ -522,7 +522,7 @@ export default function ClientAddOrUpdateForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
@@ -604,7 +604,7 @@ export default function ClientAddOrUpdateForm() {
           </Card>
 
           {/* OAuth Flow Configuration */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>OAuth Flow Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -722,7 +722,7 @@ export default function ClientAddOrUpdateForm() {
           </Card>
 
           {/* Token Configuration */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Token Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -784,7 +784,7 @@ export default function ClientAddOrUpdateForm() {
           </Card>
 
           {/* Step-up & Session Security */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Step-up &amp; Session Security</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -841,7 +841,7 @@ export default function ClientAddOrUpdateForm() {
 
           {/* Application URIs — only the lists relevant to this client type */}
           {showUriCard && (
-            <Card className="shadow-xs">
+            <Card>
               <CardHeader>
                 <CardTitle>Application URIs</CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -906,7 +906,7 @@ export default function ClientAddOrUpdateForm() {
 
           {/* Cross Origin Authentication */}
           {capability.showCors && (
-            <Card className="shadow-xs">
+            <Card>
               <CardHeader>
                 <CardTitle>Cross Origin Authentication</CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -939,7 +939,7 @@ export default function ClientAddOrUpdateForm() {
           )}
 
           {/* Metadata */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Metadata</CardTitle>
               <p className="text-sm text-muted-foreground">

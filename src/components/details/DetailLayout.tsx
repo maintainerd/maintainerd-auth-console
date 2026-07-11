@@ -63,7 +63,7 @@ export function DetailLayout({
 function DetailSkeleton() {
   return (
     <>
-      <Card className="shadow-xs">
+      <Card>
         <CardContent className="space-y-5">
           <div className="flex items-center gap-4">
             <Skeleton className="size-14 rounded-xl" />
@@ -99,7 +99,7 @@ function DetailError({
   onBack: () => void
 }) {
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <AlertCircle className="size-6" />

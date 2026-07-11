@@ -36,7 +36,7 @@ export function DetailHeaderCard({
   attributes,
 }: DetailHeaderCardProps) {
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardContent>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 items-center gap-4">

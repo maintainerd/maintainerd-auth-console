@@ -92,7 +92,7 @@ export default function EventRoutesPage() {
             {isLoadingTypes && (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="shadow-xs">
+                  <Card key={i}>
                     <CardContent className="space-y-3">
                       <Skeleton className="h-4 w-32" />
                       <Skeleton className="h-3 w-full max-w-md" />

@@ -23,19 +23,18 @@ export const userColumns: ColumnDef<User>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => {
       const user = row.original
-      const name = user.fullname?.trim()
+      // `fullname` is derived server-side from the user's default profile
+      // (display name → first + last); fall back to the username when no profile
+      // name is set so the column is never blank — matching the detail header.
+      const name = user.fullname?.trim() || user.username
       return (
         <div className="flex items-center gap-3 px-3 py-1">
           <Avatar className="size-9">
             <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
-              {initials(name || user.username)}
+              {initials(name)}
             </AvatarFallback>
           </Avatar>
-          {name ? (
-            <span className="font-medium">{name}</span>
-          ) : (
-            <span className="text-muted-foreground">—</span>
-          )}
+          <span className="font-medium">{name}</span>
         </div>
       )
     },

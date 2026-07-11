@@ -12,7 +12,7 @@ interface InformationCardProps {
 
 export function InformationCard({ title, description, icon: Icon, action, children }: InformationCardProps) {
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">

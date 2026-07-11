@@ -253,7 +253,7 @@ export default function IdentityProviderAddOrUpdateForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Basic Information</CardTitle>
             </CardHeader>
@@ -370,7 +370,7 @@ export default function IdentityProviderAddOrUpdateForm() {
           </Card>
 
           {connectionSchema && (
-            <Card className="shadow-xs">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">Connection</CardTitle>
                 <p className="text-sm text-muted-foreground">{connectionSchema.summary}</p>

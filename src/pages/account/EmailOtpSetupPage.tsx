@@ -59,7 +59,7 @@ export default function EmailOtpSetupPage() {
 
   if (enabled) {
     return (
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-emerald-600">
@@ -95,7 +95,7 @@ export default function EmailOtpSetupPage() {
   return (
     <div className="space-y-6">
       {step === "idle" && (
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -125,7 +125,7 @@ export default function EmailOtpSetupPage() {
       )}
 
       {step === "verify" && (
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base">Enter verification code</CardTitle>
             <CardDescription>Enter the 6-digit code sent to {email}.</CardDescription>

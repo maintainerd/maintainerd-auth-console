@@ -258,7 +258,7 @@ export default function WorkloadIdentityPage() {
         {items.length > 0 && (
           <div className="space-y-3">
             {items.map((item) => (
-              <Card key={item.workload_identity_federation_uuid} className="shadow-xs">
+              <Card key={item.workload_identity_federation_uuid}>
                 <CardContent className="flex items-start justify-between gap-3 p-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">

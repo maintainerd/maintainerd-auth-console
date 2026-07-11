@@ -45,7 +45,7 @@ export function ProviderConfigSection({ provider, controller, disabled }: Provid
   return (
     <>
       {/* Provider-specific configuration */}
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">{providerLabel} Configuration</CardTitle>
           {schema?.summary && (
@@ -144,7 +144,7 @@ export function ProviderConfigSection({ provider, controller, disabled }: Provid
       </Card>
 
       {/* Free-form additional configuration */}
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Additional Configuration</CardTitle>
           <p className="text-sm text-muted-foreground">

@@ -160,7 +160,7 @@ export default function TOTPSetupPage() {
   if (enabled) {
     return (
       <div className="space-y-6">
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-emerald-600">
@@ -180,7 +180,7 @@ export default function TOTPSetupPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -216,7 +216,7 @@ export default function TOTPSetupPage() {
   return (
     <div className="space-y-6">
       {step === "idle" && (
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted"><Smartphone className="size-5 text-muted-foreground" /></div>
@@ -241,7 +241,7 @@ export default function TOTPSetupPage() {
       )}
 
       {step === "scan" && (
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base">Scan the QR code</CardTitle>
             <CardDescription>Open your authenticator app and scan this code, or enter the key manually.</CardDescription>
@@ -261,7 +261,7 @@ export default function TOTPSetupPage() {
       )}
 
       {step === "verify" && (
-        <Card className="shadow-xs">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base">Enter verification code</CardTitle>
             <CardDescription>Enter the 6-digit code from your authenticator app.</CardDescription>

@@ -108,7 +108,7 @@ export default function PasswordPoliciesFormPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Password Policy" title="Configure Password Policy" description="Set password requirements for your tenant." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -128,7 +128,7 @@ export default function PasswordPoliciesFormPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Password Policy" title="Configure Password Policy" description="Set password requirements for your tenant." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load password policy.
             </CardContent>
@@ -149,7 +149,7 @@ export default function PasswordPoliciesFormPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Complexity Requirements</CardTitle>
               <p className="text-sm text-muted-foreground">Set the minimum character types each password must contain.</p>
@@ -188,7 +188,7 @@ export default function PasswordPoliciesFormPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Breach & History</CardTitle>
               <p className="text-sm text-muted-foreground">Block commonly used passwords, check breach databases, and enforce password history.</p>
@@ -225,7 +225,7 @@ export default function PasswordPoliciesFormPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Expiry & Hashing</CardTitle>
               <p className="text-sm text-muted-foreground">Configure password expiration, temporary password validity, and hashing algorithm.</p>

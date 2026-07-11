@@ -56,7 +56,7 @@ export default function BrandingTemplatesPage() {
         {isLoading && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden py-0 shadow-xs">
+              <Card key={i} className="overflow-hidden py-0">
                 <Skeleton className="h-20 w-full rounded-none" />
                 <CardContent className="space-y-2 p-4">
                   <Skeleton className="h-4 w-32" />

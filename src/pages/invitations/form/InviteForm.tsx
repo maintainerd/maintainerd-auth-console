@@ -102,7 +102,7 @@ export default function InviteForm() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Invitation</CardTitle>
               <p className="text-sm text-muted-foreground">Who to invite and how they onboard.</p>

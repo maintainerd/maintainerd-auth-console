@@ -92,7 +92,7 @@ function MfaStatusBanner({ onSetup }: { onSetup: () => void }) {
 
   if (active > 0) {
     return (
-      <Card className="border-emerald-500/30 bg-emerald-500/[0.04] py-0 shadow-xs">
+      <Card className="border-emerald-500/30 bg-emerald-500/[0.04] py-0">
         <CardContent className="flex items-center gap-3 p-3.5">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
             <ShieldCheck className="size-4" />
@@ -109,7 +109,7 @@ function MfaStatusBanner({ onSetup }: { onSetup: () => void }) {
   }
 
   return (
-    <Card className="border-amber-500/40 bg-amber-500/[0.04] shadow-xs">
+    <Card className="border-amber-500/40 bg-amber-500/[0.04]">
       <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
@@ -164,9 +164,9 @@ const DashboardPage = () => {
           <Card
             key={stat.label}
             className={cn(
-              "py-0 shadow-xs transition-shadow hover:shadow-sm",
+              "py-0",
               stat.hero &&
-                "border-transparent bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/20",
+                "border-transparent bg-gradient-to-br from-blue-500 to-indigo-600 text-white",
             )}
           >
             <CardContent className="flex items-center justify-between p-5">
@@ -194,7 +194,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Quick Actions */}
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Settings className="h-4 w-4" />
@@ -220,7 +220,7 @@ const DashboardPage = () => {
       </Card>
 
       {/* Integration Guide */}
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <BookOpen className="h-4 w-4" />
@@ -262,7 +262,7 @@ const DashboardPage = () => {
       </Card>
 
       {/* Security */}
-      <Card className="shadow-xs">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Shield className="h-4 w-4" />

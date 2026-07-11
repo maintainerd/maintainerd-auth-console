@@ -81,7 +81,7 @@ export default function ThreatDetectionPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Threat Protection" title="Configure Threat Protection" description="Set threat detection and risk policies." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -107,7 +107,7 @@ export default function ThreatDetectionPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Detection Engines</CardTitle>
               <p className="text-sm text-muted-foreground">Threat detection subsystems that run on every login.</p>
@@ -122,7 +122,7 @@ export default function ThreatDetectionPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Risk-Based Controls</CardTitle>
               <p className="text-sm text-muted-foreground">Step-up and blocking based on a cumulative risk score (0-100).</p>
@@ -139,7 +139,7 @@ export default function ThreatDetectionPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Network & IP</CardTitle>
               <p className="text-sm text-muted-foreground">IP reputation checks, Tor blocking, and per-IP velocity limits.</p>

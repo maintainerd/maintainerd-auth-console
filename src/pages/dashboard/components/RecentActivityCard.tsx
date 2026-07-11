@@ -60,7 +60,7 @@ export function RecentActivityCard({ onViewAll }: { onViewAll: () => void }) {
   })
 
   return (
-    <Card className="shadow-xs">
+    <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2 text-base">

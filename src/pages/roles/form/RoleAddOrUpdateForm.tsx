@@ -96,7 +96,7 @@ export default function RoleAddOrUpdateForm() {
             title="Edit Role"
             description="Update role settings and configuration"
           />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -123,7 +123,7 @@ export default function RoleAddOrUpdateForm() {
             title="Edit Role"
             description="Update role settings and configuration"
           />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <AlertCircle className="size-6" />
@@ -163,7 +163,7 @@ export default function RoleAddOrUpdateForm() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={roleId || "create"}>
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Basic Information</CardTitle>
               <p className="text-sm text-muted-foreground">

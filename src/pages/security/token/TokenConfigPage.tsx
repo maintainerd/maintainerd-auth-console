@@ -91,7 +91,7 @@ export default function TokenConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Tokens" title="Configure Tokens" description="Set JWT signing, PKCE, and token claims." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -111,7 +111,7 @@ export default function TokenConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Tokens" title="Configure Tokens" description="Set JWT signing, PKCE, and token claims." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load token configuration.
             </CardContent>
@@ -132,7 +132,7 @@ export default function TokenConfigPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">JWT Settings</CardTitle>
               <p className="text-sm text-muted-foreground">Signing algorithm, clock skew tolerance, and PKCE enforcement.</p>
@@ -146,7 +146,7 @@ export default function TokenConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">ID Token Claims</CardTitle>
               <p className="text-sm text-muted-foreground">Extra claims injected into the ID token.</p>
@@ -169,7 +169,7 @@ export default function TokenConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Access Token Claims</CardTitle>
               <p className="text-sm text-muted-foreground">Extra claims injected into the access token.</p>

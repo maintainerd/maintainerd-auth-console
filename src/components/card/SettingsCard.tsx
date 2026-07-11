@@ -4,7 +4,6 @@
  */
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
 
@@ -26,7 +25,7 @@ export function SettingsCard({
   contentClassName
 }: SettingsCardProps) {
   return (
-    <Card className={cn("shadow-xs", className)}>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {Icon && <Icon className="h-5 w-5" />}

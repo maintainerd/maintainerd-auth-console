@@ -57,7 +57,7 @@ export default function MfaViewPage() {
         />
 
         {isLoading && (
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-48" />
               <div className="grid gap-4 md:grid-cols-3">
@@ -70,7 +70,7 @@ export default function MfaViewPage() {
         )}
 
         {isError && !isLoading && (
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load MFA configuration.
             </CardContent>
@@ -78,7 +78,7 @@ export default function MfaViewPage() {
         )}
 
         {!isLoading && data && (
-          <Card className="shadow-xs">
+          <Card>
             <CardContent>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">

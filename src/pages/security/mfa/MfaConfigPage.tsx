@@ -144,7 +144,7 @@ export default function MfaConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Multi-Factor Auth" title="Configure MFA" description="Set MFA enforcement, methods, and policies." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -164,7 +164,7 @@ export default function MfaConfigPage() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader backUrl={backTo} backLabel="Back to Multi-Factor Auth" title="Configure MFA" description="Set MFA enforcement, methods, and policies." />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="py-12 text-center text-sm text-destructive">
               Failed to load MFA configuration.
             </CardContent>
@@ -185,7 +185,7 @@ export default function MfaConfigPage() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Enforcement & Methods</CardTitle>
               <p className="text-sm text-muted-foreground">Set the global MFA requirement level and which factors users may enroll.</p>
@@ -239,7 +239,7 @@ export default function MfaConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">TOTP Parameters</CardTitle>
               <p className="text-sm text-muted-foreground">Time-based One-Time Password configuration.</p>
@@ -279,7 +279,7 @@ export default function MfaConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Trust, Recovery & Options</CardTitle>
               <p className="text-sm text-muted-foreground">Trusted device windows, enrollment grace periods, backup codes, and behavior controls.</p>

@@ -168,7 +168,7 @@ export default function BrandingForm() {
             title="Edit Branding Template"
             description="Update the branding theme and its values"
           />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <Skeleton className="h-5 w-40" />
               <div className="grid gap-4 md:grid-cols-2">
@@ -195,7 +195,7 @@ export default function BrandingForm() {
             title="Edit Branding Template"
             description="Update the branding theme and its values"
           />
-          <Card className="shadow-xs">
+          <Card>
             <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <AlertCircle className="size-6" />
@@ -235,7 +235,7 @@ export default function BrandingForm() {
         />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={brandingId || "create"}>
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Basic Information</CardTitle>
               <p className="text-sm text-muted-foreground">The template name and company.</p>
@@ -278,7 +278,7 @@ export default function BrandingForm() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Brand assets &amp; links</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -372,7 +372,7 @@ export default function BrandingForm() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Theme tokens</CardTitle>
               <p className="text-sm text-muted-foreground">

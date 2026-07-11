@@ -174,7 +174,7 @@ export default function WebhookAddOrUpdateForm() {
             description="This is the only time the signing secret will be shown."
           />
 
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <KeyRound className="size-4" />
@@ -237,7 +237,7 @@ export default function WebhookAddOrUpdateForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Endpoint */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Endpoint</CardTitle>
             </CardHeader>
@@ -280,7 +280,7 @@ export default function WebhookAddOrUpdateForm() {
           </Card>
 
           {/* Delivery settings */}
-          <Card className="shadow-xs">
+          <Card>
             <CardHeader>
               <CardTitle>Delivery settings</CardTitle>
               <p className="text-sm text-muted-foreground">

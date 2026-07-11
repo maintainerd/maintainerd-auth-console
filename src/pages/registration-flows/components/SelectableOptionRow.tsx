@@ -50,7 +50,7 @@ export function SelectableOptionRow({
       <span
         aria-hidden
         className={cn(
-          "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
+          "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[3px] border transition-colors",
           selected ? "border-primary bg-primary text-primary-foreground" : "border-input",
         )}
       >
