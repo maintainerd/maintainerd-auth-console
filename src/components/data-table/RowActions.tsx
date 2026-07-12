@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { LucideIcon } from "lucide-react"
-import { MoreHorizontal, MoreVertical } from "lucide-react"
+import { MoreHorizontal, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -74,9 +74,9 @@ export function RowActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {variant === "header" ? (
-            <Button variant="outline" size="sm" className="h-9 w-9 p-0">
-              <span className="sr-only">Open actions</span>
-              <MoreVertical className="size-4" />
+            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+              Actions
+              <ChevronDown className="size-4 opacity-70" />
             </Button>
           ) : (
             <Button variant="ghost" className="h-8 w-8 p-0">
