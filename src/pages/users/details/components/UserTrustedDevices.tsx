@@ -1,97 +1,123 @@
-import { useState } from "react"
+import { useMemo } from "react"
+import { MonitorSmartphone, Globe, Calendar, Clock, ShieldCheck, Trash2 } from "lucide-react"
 import { format } from "date-fns"
-import { Smartphone, Calendar, Trash2 } from "lucide-react"
 import { InformationCard } from "@/components/card"
-import { Button } from "@/components/ui/button"
 import { EmptyState, ListSkeleton } from "@/components/details"
-import { ConfirmationDialog } from "@/components/dialog"
+import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUserTrustedDevices, useRevokeUserDevice } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
+import { formatUserAgent } from "@/lib/userAgent"
+import type { TrustedDevice } from "@/services/api/users/types"
 
 interface UserTrustedDevicesProps {
   userId: string
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "—"
+  try {
+    return format(new Date(value), "PPp")
+  } catch (e) {
+    console.warn("Invalid device date:", value, e)
+    return "—"
+  }
+}
+
 export function UserTrustedDevices({ userId }: UserTrustedDevicesProps) {
   const { data, isLoading, isError } = useUserTrustedDevices(userId)
-  const devices = data ?? []
+  const devices = useMemo(() => data ?? [], [data])
   const { showSuccess, showError } = useToast()
   const revokeMutation = useRevokeUserDevice()
-  const [revokeTarget, setRevokeTarget] = useState<string | null>(null)
 
-  const handleRevoke = async () => {
-    if (!revokeTarget) return
+  const revokeDevice = async (device: TrustedDevice) => {
     try {
-      await revokeMutation.mutateAsync({ userId, deviceId: revokeTarget })
+      await revokeMutation.mutateAsync({ userId, deviceId: device.uuid })
       showSuccess("Device revoked")
     } catch (e) {
       showError(e)
-    } finally {
-      setRevokeTarget(null)
     }
   }
+
+  const deviceActions = (device: TrustedDevice): RowActionItem[] => [
+    {
+      key: "revoke",
+      label: "Revoke device",
+      icon: Trash2,
+      destructive: true,
+      onSelect: () => revokeDevice(device),
+      confirm: {
+        title: "Revoke trusted device",
+        description:
+          "The user will need to re-verify this device (e.g. via MFA) the next time they sign in from it. Continue?",
+        confirmText: "Revoke",
+      },
+    },
+  ]
 
   return (
     <InformationCard
       title="Trusted Devices"
-      description="Devices this user has marked as trusted. Revoking one forces re-verification (e.g. MFA) on the next sign-in from it."
-      icon={Smartphone}
+      description="Devices this user has marked as trusted so they can skip MFA. Revoking one forces re-verification on the next sign-in from it."
+      icon={MonitorSmartphone}
     >
-      {isLoading && <ListSkeleton />}
+      <div className="space-y-4">
+        {isLoading && <ListSkeleton />}
 
-      {isError && (
-        <p className="py-4 text-center text-sm text-destructive">Failed to load devices</p>
-      )}
+        {isError && <p className="py-8 text-center text-sm text-destructive">Failed to load devices</p>}
 
-      {!isLoading && !isError && devices.length === 0 && (
-        <EmptyState
-          icon={Smartphone}
-          title="No trusted devices"
-          description="This user has not trusted any devices."
-        />
-      )}
+        {data && data.length === 0 && (
+          <EmptyState
+            icon={MonitorSmartphone}
+            title="No trusted devices"
+            description="This user has not trusted any devices."
+          />
+        )}
 
-      {devices.map((device) => (
-        <div
-          key={device.uuid}
-          className="flex items-start justify-between rounded-lg border p-3"
-        >
-          <div className="space-y-1">
-            <p className="font-mono text-xs text-muted-foreground">
-              {device.uuid.slice(0, 8)}...
-            </p>
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Calendar className="size-3" />
-                Added {format(new Date(device.created_at), "PP")}
-              </span>
-              {device.trusted_until && (
-                <span>Trusted until {format(new Date(device.trusted_until), "PP")}</span>
-              )}
-            </div>
+        {devices.length > 0 && (
+          <div className="space-y-3">
+            {devices.map((device) => (
+              <div
+                key={device.uuid}
+                className="flex items-start justify-between gap-3 rounded-lg border p-4"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <MonitorSmartphone className="size-4" />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <p className="break-words text-sm font-medium" title={device.user_agent || undefined}>
+                      {device.device_name || formatUserAgent(device.user_agent)}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      {device.ip_address && (
+                        <span className="inline-flex items-center gap-1 font-mono">
+                          <Globe className="size-3" />
+                          {device.ip_address}
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="size-3" />
+                        Last seen {formatDate(device.last_seen_at)}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="size-3" />
+                        Trusted {formatDate(device.created_at)}
+                      </span>
+                      {device.trusted_until && (
+                        <span className="inline-flex items-center gap-1">
+                          <ShieldCheck className="size-3" />
+                          Expires {formatDate(device.trusted_until)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <RowActions items={deviceActions(device)} />
+              </div>
+            ))}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 gap-2 text-destructive hover:text-destructive"
-            onClick={() => setRevokeTarget(device.uuid)}
-          >
-            <Trash2 className="size-4" />
-            Revoke
-          </Button>
-        </div>
-      ))}
-
-      <ConfirmationDialog
-        open={revokeTarget !== null}
-        onOpenChange={(open) => { if (!open) setRevokeTarget(null) }}
-        onConfirm={handleRevoke}
-        title="Revoke trusted device?"
-        description="The user will need to re-verify this device (e.g. via MFA) the next time they sign in from it."
-        confirmText="Revoke device"
-        variant="destructive"
-        isLoading={revokeMutation.isPending}
-      />
+        )}
+      </div>
     </InformationCard>
   )
 }

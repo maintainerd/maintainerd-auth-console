@@ -377,6 +377,11 @@ export interface UserConsentsResponse {
 
 export interface TrustedDevice {
   uuid: string
+  device_fingerprint?: string
+  device_name?: string
+  ip_address?: string
+  user_agent?: string
+  last_seen_at?: string | null
   trusted_until: string | null
   created_at: string
 }
