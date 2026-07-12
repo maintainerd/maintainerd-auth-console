@@ -25,6 +25,8 @@ export function RoleListing({ tableInCard }: { tableInCard?: boolean } = {}) {
       onRowClick={(role) => navigate(`/roles/${role.role_id}`)}
       onCreate={() => navigate(`/roles/create`)}
       createLabel="New Role"
+      emptyTitle="No roles yet"
+      emptyDescription="Add your first role to define permission groups and control what users can access."
     />
   )
 }

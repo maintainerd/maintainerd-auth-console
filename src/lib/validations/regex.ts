@@ -1,5 +1,11 @@
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
+export const SLUG_REGEX = /^[a-z0-9:-]+$/
+
+export function sanitizeSlug(raw: string): string {
+  return raw.replace(/[^a-z0-9:-]/g, '').toLowerCase()
+}
+
 export const PHONE_REGEX = /^\+?[1-9][\d\s\-().]{6,20}$/
 
 export const PASSWORD_SPECIAL_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/

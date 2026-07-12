@@ -121,6 +121,7 @@ export function RowActions({
             title={activeConfirm.confirm.title}
             description={activeConfirm.confirm.description}
             confirmText={activeConfirm.confirm.confirmText}
+            variant={activeConfirm.destructive ? "destructive" : "default"}
             isLoading={isSubmitting}
           />
         ))}

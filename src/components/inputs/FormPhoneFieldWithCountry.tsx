@@ -162,7 +162,7 @@ export const FormPhoneFieldWithCountry = forwardRef<HTMLDivElement, FormPhoneFie
                 <ChevronsUpDown className="size-3 opacity-50 shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0 w-[280px]" align="start">
+            <PopoverContent className="p-0 w-[200px]" align="start">
               <Command>
                 <CommandInput placeholder="Search countries..." />
                 <CommandList>

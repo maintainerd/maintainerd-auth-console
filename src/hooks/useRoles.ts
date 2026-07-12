@@ -53,6 +53,7 @@ export function useRoles(params?: RoleQueryParams, options?: { enabled?: boolean
   return useQuery({
     queryKey: roleKeys.list(params),
     queryFn: () => fetchRoles(params),
+    placeholderData: keepPreviousData,
     enabled: options?.enabled,
   })
 }

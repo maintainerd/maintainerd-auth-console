@@ -207,9 +207,9 @@ export function useAssignUserRoles() {
     mutationFn: ({ userId, data }: { userId: string; data: { role_ids: string[] } }) =>
       assignUserRoles(userId, data),
     onSuccess: (_, variables) => {
-      // Invalidate user roles and user detail
       queryClient.invalidateQueries({ queryKey: userKeys.roles(variables.userId) })
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
     },
   })
 }
@@ -224,9 +224,9 @@ export function useRemoveUserRole() {
     mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) =>
       removeUserRole(userId, roleId),
     onSuccess: (_, variables) => {
-      // Invalidate user roles and user detail
       queryClient.invalidateQueries({ queryKey: userKeys.roles(variables.userId) })
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.userId) })
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
     },
   })
 }

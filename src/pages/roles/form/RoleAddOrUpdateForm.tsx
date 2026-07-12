@@ -9,15 +9,17 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
-  FormInputField,
   FormTextareaField,
   FormSelectField,
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { FormSlugField } from "@/components/inputs"
 import { roleSchema, type RoleFormData } from "@/lib/validations"
 import { useRole, useCreateRole, useUpdateRole } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
+import { ConfirmationDialog } from "@/components/dialog"
 
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
@@ -28,18 +30,15 @@ export default function RoleAddOrUpdateForm() {
   const { roleId } = useParams<{ roleId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
 
   const isEditing = Boolean(roleId)
   const isCreating = !isEditing
 
-  // Honour where the user came from so the back button and post-submit
-  // navigation return there. Falls back to the listing.
   const navState = location.state as { from?: string; backLabel?: string } | null
   const backTo = navState?.from ?? `/roles`
   const backLabel = navState?.backLabel ?? (backTo === `/roles` ? "Back to Roles" : "Back")
 
-  // Fetch existing role if editing
   const { data: roleData, isLoading: isFetchingRole } = useRole(roleId || "")
   const createRoleMutation = useCreateRole()
   const updateRoleMutation = useUpdateRole()
@@ -49,12 +48,13 @@ export default function RoleAddOrUpdateForm() {
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<RoleFormData>({
     resolver: yupResolver(roleSchema),
     defaultValues: { name: "", description: "", status: "active" },
-    mode: "onSubmit",
-    reValidateMode: "onSubmit",
+    mode: "onTouched",
+    reValidateMode: "onChange",
   })
 
   useEffect(() => {
@@ -65,6 +65,8 @@ export default function RoleAddOrUpdateForm() {
 
   const isLoading = createRoleMutation.isPending || updateRoleMutation.isPending || isSubmitting
   const existingRole = roleData
+
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
 
   const onSubmit = async (data: RoleFormData) => {
     try {
@@ -78,6 +80,24 @@ export default function RoleAddOrUpdateForm() {
       }
       navigate(backTo)
     } catch (error) {
+      const parsed = parseError(error)
+      const known = ["name", "description", "status"] as const
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          if ((known as readonly string[]).includes(field)) {
+            setError(field as (typeof known)[number], { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        const field = known.find((f) => lower.includes(f))
+        if (field) {
+          setError(field, { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
@@ -85,7 +105,6 @@ export default function RoleAddOrUpdateForm() {
   const pageTitle = isCreating ? "Create Role" : `Edit ${existingRole?.name || "Role"}`
   const submitButtonText = isCreating ? "Create Role" : "Update Role"
 
-  // Loading state while fetching the role to edit
   if (isEditing && isFetchingRole) {
     return (
       <DetailsContainer>
@@ -112,7 +131,6 @@ export default function RoleAddOrUpdateForm() {
     )
   }
 
-  // Not-found state
   if (isEditing && !isFetchingRole && !roleData) {
     return (
       <DetailsContainer>
@@ -134,7 +152,7 @@ export default function RoleAddOrUpdateForm() {
                   The role you're looking for doesn't exist or may have been removed.
                 </p>
               </div>
-              <Button variant="outline" onClick={() => navigate(backTo)}>
+              <Button variant="outline" onClick={() => guard(() => navigate(backTo))}>
                 <ArrowLeft className="mr-2 size-4" />
                 {backLabel}
               </Button>
@@ -151,6 +169,7 @@ export default function RoleAddOrUpdateForm() {
         <FormPageHeader
           backUrl={backTo}
           backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
           title={pageTitle}
           description={
             isCreating
@@ -172,10 +191,10 @@ export default function RoleAddOrUpdateForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <FormInputField
+                <FormSlugField
                   label="Name"
                   placeholder="e.g., admin, developer, viewer"
-                  description="Unique identifier for the role (lowercase, numbers, hyphens, and underscores only)"
+                  description="Unique identifier for the role (lowercase, numbers, hyphens, and colons only)"
                   disabled={isLoading || existingRole?.is_system}
                   error={errors.name?.message}
                   required
@@ -202,11 +221,10 @@ export default function RoleAddOrUpdateForm() {
 
               <FormTextareaField
                 label="Description"
-                placeholder="Provide a detailed description of the role and its purpose"
+                placeholder="Describe the role's purpose and permissions"
                 rows={4}
                 disabled={isLoading}
                 error={errors.description?.message}
-                required
                 {...register("description")}
               />
             </CardContent>
@@ -216,7 +234,7 @@ export default function RoleAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(backTo)}
+              onClick={() => guard(() => navigate(backTo))}
               disabled={isLoading}
             >
               Cancel
@@ -228,6 +246,17 @@ export default function RoleAddOrUpdateForm() {
             />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )
