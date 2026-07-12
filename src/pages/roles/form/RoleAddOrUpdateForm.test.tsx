@@ -32,7 +32,14 @@ vi.mock("@/hooks/useRoles", () => ({
 }))
 
 vi.mock("@/hooks/useToast", () => ({
-  useToast: () => ({ showSuccess: showSuccessMock, showError: showErrorMock }),
+  useToast: () => ({
+    showSuccess: showSuccessMock,
+    showError: showErrorMock,
+    // The form's catch block calls parseError(error) before showError.
+    parseError: (error: unknown) => ({
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  }),
 }))
 
 const u = () => userEvent.setup({ pointerEventsCheck: 0 })
@@ -98,10 +105,11 @@ describe("RoleAddOrUpdateForm", () => {
   it("shows validation errors for blank required fields", async () => {
     renderWithProviders(<RoleAddOrUpdateForm />)
     await u().click(screen.getByRole("button", { name: /create role/i }))
+    // Name is required; description is optional (matches the backend validation).
     await waitFor(() => {
       expect(screen.getByText(/name is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/description is required/i)).toBeInTheDocument()
     })
+    expect(screen.queryByText(/description is required/i)).not.toBeInTheDocument()
   })
 
   it("renders loading skeleton when editing", () => {

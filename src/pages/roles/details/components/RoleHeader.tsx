@@ -1,19 +1,20 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Shield, CalendarDays } from "lucide-react"
+import { Edit, Trash2, MoreVertical, Shield, CalendarDays, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
-import { useDeleteRole } from "@/hooks/useRoles"
+import { useDeleteRole, useUpdateRoleStatus } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
-import { format } from "date-fns"
-import type { Role } from "@/services/api/roles/types"
+import { safeFormat } from "@/lib/formatDate"
+import type { Role, RoleStatus } from "@/services/api/roles/types"
 
 interface RoleHeaderProps {
   role: Role
@@ -24,7 +25,9 @@ export function RoleHeader({ role, roleId }: RoleHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteRoleMutation = useDeleteRole()
+  const updateStatusMutation = useUpdateRoleStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<{ status: RoleStatus; title: string; description: string } | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -35,6 +38,26 @@ export function RoleHeader({ role, roleId }: RoleHeaderProps) {
       showError(error)
     }
   }
+
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    try {
+      await updateStatusMutation.mutateAsync({ roleId, data: { status: statusAction.status } })
+      showSuccess(`Role status updated to ${statusAction.status}`)
+    } catch (error) {
+      showError(error)
+    } finally {
+      setStatusAction(null)
+    }
+  }
+
+  // Availability mirrors the backend rules: system roles can't change status or
+  // be deleted; the default (registration) role can't be deactivated or deleted.
+  const isActive = role.status === "active"
+  const canActivate = !role.is_system && !isActive
+  const canDeactivate = !role.is_system && isActive && !role.is_default
+  const canDelete = !role.is_system && !role.is_default
+  const hasMenu = canActivate || canDeactivate || canDelete
 
   const attributes: DetailAttribute[] = [
     {
@@ -48,12 +71,12 @@ export function RoleHeader({ role, roleId }: RoleHeaderProps) {
     {
       icon: CalendarDays,
       label: "Created",
-      value: format(new Date(role.created_at), "PP"),
+      value: safeFormat(role.created_at, "PP"),
     },
     {
       icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(role.updated_at), "PP"),
+      value: safeFormat(role.updated_at, "PP"),
     },
   ]
 
@@ -84,7 +107,7 @@ export function RoleHeader({ role, roleId }: RoleHeaderProps) {
               <Edit className="size-4" />
               Edit
             </Button>
-            {!role.is_system && (
+            {hasMenu && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 w-9 p-0">
@@ -93,18 +116,63 @@ export function RoleHeader({ role, roleId }: RoleHeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 size-4" />
-                    Delete Role
-                  </DropdownMenuItem>
+                  {canActivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "active",
+                          title: "Activate Role",
+                          description: "Are you sure you want to activate this role? It can be assigned to users again.",
+                        })
+                      }
+                    >
+                      <Play className="mr-2 size-4" />
+                      Activate Role
+                    </DropdownMenuItem>
+                  )}
+                  {canDeactivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "inactive",
+                          title: "Deactivate Role",
+                          description: "Are you sure you want to deactivate this role? It can no longer be assigned to users.",
+                        })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Pause className="mr-2 size-4" />
+                      Deactivate Role
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        Delete Role
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
           </>
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        variant={statusAction?.status === "inactive" ? "destructive" : "default"}
+        confirmText={statusAction?.status === "active" ? "Activate" : "Deactivate"}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Key, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { InformationCard } from "@/components/card"
 import { SystemBadge } from "@/components/badges"
 import { EmptyState, ListSkeleton } from "@/components/details"
@@ -109,7 +109,7 @@ export function RolePermissionsTab({ roleId }: RolePermissionsTabProps) {
                           {permission.api && (
                             <span>API: {permission.api.display_name}</span>
                           )}
-                          <span>Created {format(new Date(permission.created_at), "MMM dd, yyyy")}</span>
+                          <span>Created {safeFormat(permission.created_at, "MMM dd, yyyy")}</span>
                         </div>
                       </div>
                     </div>

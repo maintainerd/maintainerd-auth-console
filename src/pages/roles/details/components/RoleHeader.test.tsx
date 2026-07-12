@@ -22,6 +22,7 @@ vi.mock("react-router-dom", async (importOriginal: () => Promise<typeof import("
 
 vi.mock("@/hooks/useRoles", () => ({
   useDeleteRole: () => ({ mutateAsync: deleteMutateAsync, isPending: false }),
+  useUpdateRoleStatus: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 
 vi.mock("@/hooks/useToast", () => ({

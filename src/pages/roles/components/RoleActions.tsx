@@ -24,7 +24,12 @@ export function RoleActions({ role }: RoleActionsProps) {
     }
   }
 
+  // Availability mirrors the backend rules: system roles can't change status or
+  // be deleted; the default (registration) role can't be deactivated or deleted.
   const isActive = role.status === "active"
+  const canActivate = !role.is_system && !isActive
+  const canDeactivate = !role.is_system && isActive && !role.is_default
+  const canDelete = !role.is_system && !role.is_default
 
   const items: RowActionItem[] = [
     {
@@ -39,21 +44,8 @@ export function RoleActions({ role }: RoleActionsProps) {
       icon: Edit,
       onSelect: () => navigate(`/roles/${role.role_id}/edit`),
     },
-    ...(isActive
+    ...(canActivate
       ? [
-          {
-            key: "deactivate",
-            label: "Deactivate Role",
-            icon: Pause,
-            onSelect: () => changeStatus("inactive"),
-            confirm: {
-              title: "Deactivate Role",
-              description: "Are you sure you want to deactivate this role?",
-              confirmText: "Deactivate",
-            },
-          } satisfies RowActionItem,
-        ]
-      : [
           {
             key: "activate",
             label: "Activate Role",
@@ -65,8 +57,25 @@ export function RoleActions({ role }: RoleActionsProps) {
               confirmText: "Activate",
             },
           } satisfies RowActionItem,
-        ]),
-    ...(!role.is_system
+        ]
+      : []),
+    ...(canDeactivate
+      ? [
+          {
+            key: "deactivate",
+            label: "Deactivate Role",
+            icon: Pause,
+            destructive: true,
+            onSelect: () => changeStatus("inactive"),
+            confirm: {
+              title: "Deactivate Role",
+              description: "Are you sure you want to deactivate this role? It can no longer be assigned to users.",
+              confirmText: "Deactivate",
+            },
+          } satisfies RowActionItem,
+        ]
+      : []),
+    ...(canDelete
       ? [
           {
             key: "delete",
