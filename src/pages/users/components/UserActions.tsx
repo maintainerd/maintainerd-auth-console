@@ -100,11 +100,14 @@ export function UserActions({ user }: UserActionsProps) {
         key: `status-${action.status}`,
         label: action.label,
         icon: action.icon,
+        // Suspend/Deactivate lock the user out → destructive (red). Activate is
+        // restorative → default.
+        destructive: action.status !== "active",
         onSelect: () => changeStatus(action.status),
         confirm: {
           title: action.title,
           description: action.description,
-          confirmText: "Confirm",
+          confirmText: action.label,
         },
       }),
     ),

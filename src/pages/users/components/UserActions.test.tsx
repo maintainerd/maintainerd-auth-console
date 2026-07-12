@@ -100,7 +100,7 @@ describe("UserActions", () => {
       await u.click(await screen.findByText(label))
 
       const dialog = await screen.findByRole("dialog")
-      await u.click(within(dialog).getByRole("button", { name: "Confirm" }))
+      await u.click(within(dialog).getByRole("button", { name: label }))
 
       await waitFor(() =>
         expect(updateStatusMutateAsync).toHaveBeenCalledWith({
@@ -121,7 +121,7 @@ describe("UserActions", () => {
     await u.click(await screen.findByText("Activate User"))
 
     const dialog = await screen.findByRole("dialog")
-    await u.click(within(dialog).getByRole("button", { name: "Confirm" }))
+    await u.click(within(dialog).getByRole("button", { name: "Activate User" }))
 
     await waitFor(() => expect(showErrorMock).toHaveBeenCalledWith(err))
     expect(showSuccessMock).not.toHaveBeenCalled()
