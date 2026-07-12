@@ -33,7 +33,7 @@ import type {
   UserSession,
   UserMFAResponse,
   UserConsentsResponse,
-  TrustedDevicesResponse,
+  TrustedDevice,
 } from './types'
 
 const userApi = createResourceApi<User, CreateUserRequest, UpdateUserRequest, UserListResponse>(
@@ -179,9 +179,10 @@ export const fetchUserConsents = (userId: string): Promise<UserConsentsResponse>
     unwrap(r, 'fetch user consents'),
   )
 
-export const fetchUserTrustedDevices = (userId: string): Promise<TrustedDevicesResponse> =>
-  get<ApiResponse<TrustedDevicesResponse>>(`${base}/${userId}/devices`).then((r) =>
-    unwrap(r, 'fetch user devices'),
+// The API returns a bare array of devices (same shape as identity's /me/devices).
+export const fetchUserTrustedDevices = (userId: string): Promise<TrustedDevice[]> =>
+  get<ApiResponse<TrustedDevice[]>>(`${base}/${userId}/devices`).then((r) =>
+    unwrap(r, 'fetch user devices') ?? [],
   )
 
 export const createErasureRequest = (userId: string): Promise<void> =>

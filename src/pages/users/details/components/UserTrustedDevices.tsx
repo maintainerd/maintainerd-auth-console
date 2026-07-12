@@ -14,7 +14,7 @@ interface UserTrustedDevicesProps {
 
 export function UserTrustedDevices({ userId }: UserTrustedDevicesProps) {
   const { data, isLoading, isError } = useUserTrustedDevices(userId)
-  const devices = data?.rows ?? []
+  const devices = data ?? []
   const { showSuccess, showError } = useToast()
   const revokeMutation = useRevokeUserDevice()
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null)
