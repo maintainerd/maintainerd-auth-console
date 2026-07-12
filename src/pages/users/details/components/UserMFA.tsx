@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   ShieldCheck,
   Key,
@@ -12,10 +11,8 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import type { LucideIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
 import { ListSkeleton, StatusBadge } from "@/components/details"
-import { ConfirmationDialog } from "@/components/dialog"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUserMFA, useResetUserMfa, useResetUserMfaMethod } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
@@ -76,7 +73,6 @@ export function UserMFA({ userId }: UserMFAProps) {
   const { showSuccess, showError } = useToast()
   const resetMfaMutation = useResetUserMfa()
   const resetMethodMutation = useResetUserMfaMethod()
-  const [showResetDialog, setShowResetDialog] = useState(false)
 
   const handleReset = async () => {
     try {
@@ -84,10 +80,24 @@ export function UserMFA({ userId }: UserMFAProps) {
       showSuccess("MFA reset successfully")
     } catch (error) {
       showError(error)
-    } finally {
-      setShowResetDialog(false)
     }
   }
+
+  const resetAllActions: RowActionItem[] = [
+    {
+      key: "reset-mfa",
+      label: "Reset MFA",
+      icon: ShieldOff,
+      destructive: true,
+      onSelect: handleReset,
+      confirm: {
+        title: "Reset MFA",
+        description:
+          "This removes all multi-factor authentication methods for this user. They will be prompted to set up MFA again on their next sign-in.",
+        confirmText: "Reset MFA",
+      },
+    },
+  ]
 
   // Per-method reset (e.g. wipe a lost phone's TOTP while leaving a passkey).
   // RowActions handles the confirmation step before this runs.
@@ -124,14 +134,7 @@ export function UserMFA({ userId }: UserMFAProps) {
       title="Multi-Factor Authentication"
       description="Authentication methods protecting this user's account. Reset to clear every method at once."
       icon={ShieldCheck}
-      action={
-        hasAnyMfa ? (
-          <Button variant="outline" size="sm" onClick={() => setShowResetDialog(true)}>
-            <ShieldOff className="size-4 mr-2" />
-            Reset MFA
-          </Button>
-        ) : undefined
-      }
+      action={hasAnyMfa ? <RowActions items={resetAllActions} /> : undefined}
     >
       {isLoading && <ListSkeleton />}
 
@@ -236,16 +239,6 @@ export function UserMFA({ userId }: UserMFAProps) {
         </div>
       )}
 
-      <ConfirmationDialog
-        open={showResetDialog}
-        onOpenChange={setShowResetDialog}
-        onConfirm={handleReset}
-        title="Reset MFA"
-        description="This removes all multi-factor authentication methods for this user. They will be prompted to set up MFA again on their next sign-in."
-        confirmText="Reset MFA"
-        variant="destructive"
-        isLoading={resetMfaMutation.isPending}
-      />
     </InformationCard>
   )
 }

@@ -2,8 +2,6 @@ import { useState, useMemo } from "react"
 import { Monitor, Globe, Calendar, Clock, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
-import { Button } from "@/components/ui/button"
-import { ConfirmationDialog } from "@/components/dialog"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
 import { useUserSessions, useRevokeUserSession, useRevokeAllUserSessions } from "@/hooks/useUsers"
@@ -31,7 +29,6 @@ export function UserSessions({ userId }: UserSessionsProps) {
   const { showSuccess, showError } = useToast()
   const revokeMutation = useRevokeUserSession()
   const revokeAllMutation = useRevokeAllUserSessions()
-  const [revokeAllOpen, setRevokeAllOpen] = useState(false)
 
   const sessions = useMemo(() => data ?? [], [data])
 
@@ -41,10 +38,24 @@ export function UserSessions({ userId }: UserSessionsProps) {
       showSuccess("All sessions revoked")
     } catch (error) {
       showError(error)
-    } finally {
-      setRevokeAllOpen(false)
     }
   }
+
+  const revokeAllActions: RowActionItem[] = [
+    {
+      key: "revoke-all",
+      label: "Revoke all sessions",
+      icon: Trash2,
+      destructive: true,
+      onSelect: handleRevokeAll,
+      confirm: {
+        title: "Revoke all sessions?",
+        description:
+          "This signs the user out of every device immediately. They will need to sign in again.",
+        confirmText: "Revoke all",
+      },
+    },
+  ]
 
   const paginatedSessions = useMemo(() => {
     const start = pagination.pageIndex * pagination.pageSize
@@ -86,32 +97,9 @@ export function UserSessions({ userId }: UserSessionsProps) {
       title="Sessions"
       description="Active sign-in sessions for this user. Revoke any to sign them out of that device."
       icon={Monitor}
-      action={
-        sessions.length > 0 ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 text-destructive hover:text-destructive"
-            onClick={() => setRevokeAllOpen(true)}
-          >
-            <Trash2 className="size-4" />
-            Revoke all
-          </Button>
-        ) : undefined
-      }
+      action={sessions.length > 0 ? <RowActions items={revokeAllActions} /> : undefined}
     >
       <div className="space-y-4">
-        <ConfirmationDialog
-          open={revokeAllOpen}
-          onOpenChange={setRevokeAllOpen}
-          onConfirm={handleRevokeAll}
-          title="Revoke all sessions?"
-          description="This signs the user out of every device immediately. They will need to sign in again."
-          confirmText="Revoke all"
-          variant="destructive"
-          isLoading={revokeAllMutation.isPending}
-        />
-
         {isLoading && <ListSkeleton />}
 
         {isError && <p className="py-8 text-center text-sm text-destructive">Failed to load sessions</p>}
