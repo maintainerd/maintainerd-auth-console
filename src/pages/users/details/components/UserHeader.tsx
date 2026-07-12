@@ -309,6 +309,10 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
         }}
         title={statusAction?.title ?? ""}
         description={statusAction?.description ?? ""}
+        // Suspend/Deactivate are disruptive (immediate logout, blocks sign-in) →
+        // red confirm. Activate is restorative → normal confirm.
+        variant={statusAction && statusAction.status !== "active" ? "destructive" : "default"}
+        confirmText={statusAction?.status === "active" ? "Activate" : statusAction?.status === "suspended" ? "Suspend" : "Deactivate"}
         isLoading={updateStatusMutation.isPending}
       />
 
