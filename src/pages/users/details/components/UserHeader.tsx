@@ -312,7 +312,7 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
         isLoading={updateStatusMutation.isPending}
       />
 
-      <ConfirmationDialog
+      <DeleteConfirmationDialog
         open={showErasureDialog}
         onOpenChange={setShowErasureDialog}
         onConfirm={() =>
@@ -322,9 +322,10 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
           ).then(() => setShowErasureDialog(false))
         }
         title="Erase User Data"
-        description="This schedules anonymization of all personal data for this user in 30 days. The account cannot be restored after erasure begins."
-        confirmText="Schedule Erasure"
-        isLoading={erasureRequestMutation.isPending}
+        description="This schedules irreversible anonymization of all personal data for this user in 30 days. The account cannot be restored once erasure begins."
+        itemName={user.fullname || user.username}
+        confirmLabel="Schedule Erasure"
+        isDeleting={erasureRequestMutation.isPending}
       />
 
     </>
