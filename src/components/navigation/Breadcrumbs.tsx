@@ -1,11 +1,12 @@
 import { useMemo } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight } from "lucide-react"
+import type { ComponentType } from "react"
 import { data } from "@/components/sidebar/constants"
 import type { NavSection } from "@/components/sidebar/NavMain"
 
 type Crumb = { label: string; href?: string }
-type Trail = { crumbs: Crumb[]; icon?: LucideIcon }
+type Trail = { crumbs: Crumb[]; icon?: ComponentType<{ className?: string; active?: boolean }> }
 
 const norm = (route: string) => (route.startsWith("/") ? route : `/${route}`)
 

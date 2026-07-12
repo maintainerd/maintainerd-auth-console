@@ -154,6 +154,12 @@ export const revokeUserSession = (userId: string, sessionId: string): Promise<vo
     assertSuccess(r, 'revoke session'),
   )
 
+// Admin: revoke ALL of a user's active sessions (force global sign-out).
+export const revokeAllUserSessions = (userId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/sessions`).then((r) =>
+    assertSuccess(r, 'revoke all sessions'),
+  )
+
 // MFA: the user's MFA configuration (TOTP, WebAuthn keys, backup codes).
 export const fetchUserMFA = (userId: string): Promise<UserMFAResponse> =>
   get<ApiResponse<UserMFAResponse>>(`${base}/${userId}/mfa`).then((r) => unwrap(r, 'fetch user MFA'))
@@ -181,4 +187,22 @@ export const fetchUserTrustedDevices = (userId: string): Promise<TrustedDevicesR
 export const createErasureRequest = (userId: string): Promise<void> =>
   post<ApiResponse<void>>(`${base}/${userId}/erasure-requests`).then((r) =>
     assertSuccess(r, 'create erasure request'),
+  )
+
+// Admin: revoke a user's trusted device.
+export const revokeUserDevice = (userId: string, deviceId: string): Promise<void> =>
+  deleteRequest<ApiResponse<void>>(`${base}/${userId}/devices/${deviceId}`).then((r) =>
+    assertSuccess(r, 'revoke device'),
+  )
+
+// Admin: withdraw a user's consent (GDPR right to withdraw — logged, not erased).
+export const withdrawUserConsent = (userId: string, consentType: string): Promise<void> =>
+  post<ApiResponse<void>>(`${base}/${userId}/consents/withdraw`, { consent_type: consentType }).then((r) =>
+    assertSuccess(r, 'withdraw consent'),
+  )
+
+// Admin: clear a user's failed-login lockout.
+export const unlockUser = (userId: string): Promise<void> =>
+  post<ApiResponse<void>>(`${base}/${userId}/unlock`).then((r) =>
+    assertSuccess(r, 'unlock account'),
   )

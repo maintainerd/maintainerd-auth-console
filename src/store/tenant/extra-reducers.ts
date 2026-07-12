@@ -79,11 +79,6 @@ export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantState
     })
     .addCase(bootstrapTenantAsync.fulfilled, (state, action) => {
       const data = action.payload
-      // Normalize the bootstrap tenant into the shared TenantEntity shape so
-      // every existing consumer keeps working: map `tenant_uuid` → `tenant_id`
-      // and fold the sibling `branding` into the tenant. Fields the public
-      // surface omits (is_default, timestamps, password/registration config) are
-      // not needed for console rendering.
       const t = data.tenant
       const normalized: TenantEntity = {
         tenant_id: t.tenant_uuid,
@@ -96,6 +91,8 @@ export const tenantExtraReducers = (builder: ActionReducerMapBuilder<TenantState
         created_at: '',
         updated_at: '',
         branding: data.branding,
+        password_config: data.password_config,
+        registration_config: data.registration_config,
       }
       state.isLoading = false
       state.currentTenant = normalized

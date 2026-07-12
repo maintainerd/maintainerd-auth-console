@@ -14,7 +14,10 @@ interface FormPageHeaderProps {
   // Navigation
   backUrl: string
   backLabel?: string
-  
+  // Optional override for the back action (e.g. an unsaved-changes guard).
+  // When provided it replaces the default navigate(backUrl).
+  onBack?: () => void
+
   // Header content
   title: string
   description: string
@@ -35,6 +38,7 @@ interface FormPageHeaderProps {
 export function FormPageHeader({
   backUrl,
   backLabel = "Back",
+  onBack,
   title,
   description,
   showSystemBadge = false,
@@ -53,7 +57,7 @@ export function FormPageHeader({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(backUrl)}
+          onClick={onBack ?? (() => navigate(backUrl))}
           className="-ml-2 w-fit gap-2 text-muted-foreground"
         >
           <ArrowLeft className="size-4" />

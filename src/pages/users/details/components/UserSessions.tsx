@@ -2,9 +2,11 @@ import { useState, useMemo } from "react"
 import { Monitor, Globe, Calendar, Clock, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
+import { Button } from "@/components/ui/button"
+import { ConfirmationDialog } from "@/components/dialog"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem } from "@/components/data-table"
-import { useUserSessions, useRevokeUserSession } from "@/hooks/useUsers"
+import { useUserSessions, useRevokeUserSession, useRevokeAllUserSessions } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserSession } from "@/services/api/users/types"
 import { type PaginationState } from "@tanstack/react-table"
@@ -28,8 +30,21 @@ export function UserSessions({ userId }: UserSessionsProps) {
   const { data, isLoading, isError } = useUserSessions(userId)
   const { showSuccess, showError } = useToast()
   const revokeMutation = useRevokeUserSession()
+  const revokeAllMutation = useRevokeAllUserSessions()
+  const [revokeAllOpen, setRevokeAllOpen] = useState(false)
 
   const sessions = useMemo(() => data ?? [], [data])
+
+  const handleRevokeAll = async () => {
+    try {
+      await revokeAllMutation.mutateAsync(userId)
+      showSuccess("All sessions revoked")
+    } catch (error) {
+      showError(error)
+    } finally {
+      setRevokeAllOpen(false)
+    }
+  }
 
   const paginatedSessions = useMemo(() => {
     const start = pagination.pageIndex * pagination.pageSize
@@ -73,6 +88,31 @@ export function UserSessions({ userId }: UserSessionsProps) {
       icon={Monitor}
     >
       <div className="space-y-4">
+        {sessions.length > 0 && (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-destructive hover:text-destructive"
+              onClick={() => setRevokeAllOpen(true)}
+            >
+              <Trash2 className="size-4" />
+              Revoke all sessions
+            </Button>
+          </div>
+        )}
+
+        <ConfirmationDialog
+          open={revokeAllOpen}
+          onOpenChange={setRevokeAllOpen}
+          onConfirm={handleRevokeAll}
+          title="Revoke all sessions?"
+          description="This signs the user out of every device immediately. They will need to sign in again."
+          confirmText="Revoke all"
+          variant="destructive"
+          isLoading={revokeAllMutation.isPending}
+        />
+
         {isLoading && <ListSkeleton />}
 
         {isError && <p className="py-8 text-center text-sm text-destructive">Failed to load sessions</p>}

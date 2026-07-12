@@ -1,5 +1,5 @@
-import { type LucideIcon, ChevronRight } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { ChevronRight } from "lucide-react"
+import { type ComponentType, useEffect, useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 
 import {
@@ -22,7 +22,7 @@ export type NavSubItem = {
 export type NavItem = {
   title: string
   route: string
-  icon?: LucideIcon
+  icon?: ComponentType<{ className?: string; active?: boolean }>
   items?: NavSubItem[]
 }
 
@@ -104,9 +104,9 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                       <SidebarMenuButton
                         onClick={() => toggleItem(item.title)}
                         tooltip={item.title}
-                        className={`h-8 px-2 text-sm [&>svg]:size-4 ${isParentActive(item) ? "font-medium text-blue-700 hover:text-blue-700" : ""}`}
+                        className={`h-8 px-2 text-sm [&>svg]:size-[18px] hover:bg-slate-100 ${isParentActive(item) ? "font-medium text-slate-900 hover:bg-slate-100 hover:text-slate-900" : ""}`}
                       >
-                        {item.icon && <item.icon />}
+                        {item.icon && <item.icon active={isParentActive(item)} />}
                         <span>{item.title}</span>
                         <ChevronRight
                           className={`ml-auto h-4 w-4 text-muted-foreground transition-transform ${
@@ -121,7 +121,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive(subItem.route)}
-                                className={`h-8 px-2 text-sm ${isActive(subItem.route) ? "bg-blue-100 text-blue-700 font-medium hover:bg-blue-100 hover:text-blue-700 data-[active=true]:bg-blue-100" : ""}`}
+                                className={`h-8 px-2 text-sm hover:bg-slate-100 hover:text-slate-900 ${isActive(subItem.route) ? "bg-slate-200 font-medium text-slate-900 hover:bg-slate-200 hover:text-slate-900 data-[active=true]:bg-slate-200" : ""}`}
                               >
                                 <Link to={buildRoute(subItem.route)}>
                                   <span>{subItem.title}</span>
@@ -136,10 +136,10 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
-                      className={`h-8 px-2 text-sm [&>svg]:size-4 ${isActive(item.route) ? "bg-blue-100 font-medium text-blue-700 hover:bg-blue-100 hover:text-blue-700" : ""}`}
+                      className={`h-8 px-2 text-sm [&>svg]:size-[18px] hover:bg-slate-100 ${isActive(item.route) ? "bg-slate-200 font-medium text-slate-900 hover:bg-slate-200 hover:text-slate-900" : ""}`}
                     >
                       <Link to={buildRoute(item.route)}>
-                        {item.icon && <item.icon />}
+                        {item.icon && <item.icon active={isActive(item.route)} />}
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

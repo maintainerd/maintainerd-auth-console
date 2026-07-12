@@ -120,6 +120,12 @@
 }
 
 @layer base {
+  /* Global scale: Tailwind sizes text and spacing in rem, so raising the root
+     font size scales the whole app up proportionally. 16px is the browser
+     default; bump this single value to scale everything (e.g. 16.5 / 17 / 18). */
+  html {
+    font-size: 17px;
+  }
   * {
     @apply border-border outline-ring/50;
   }

@@ -64,6 +64,7 @@ export {
 // User schemas
 export {
   userSchema,
+  buildUserSchema,
 } from './userSchema'
 
 // User Profile schemas

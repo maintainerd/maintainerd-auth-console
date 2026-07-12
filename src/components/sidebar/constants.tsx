@@ -11,7 +11,17 @@ import {
 	TrendingUp,
 	Mail,
 	Building2,
+	type LucideIcon,
 } from "lucide-react"
+import type { ComponentType } from "react"
+
+// Sidenav icons: lucide, wrapped so the active item renders a bolder stroke and
+// inactive items a thinner one (mirroring the active/inactive weight used for the
+// nav text). Icons inherit the nav item's text color.
+const li =
+	(IconCmp: LucideIcon): ComponentType<{ className?: string; active?: boolean }> =>
+	({ className, active }) =>
+		<IconCmp className={className} strokeWidth={active ? 2.25 : 1.5} />
 
 export const data = {
   user: {
@@ -26,7 +36,7 @@ export const data = {
         {
           title: "Dashboard",
           route: "/dashboard",
-          icon: LayoutDashboard,
+          icon: li(LayoutDashboard),
         },
       ],
     },
@@ -36,7 +46,7 @@ export const data = {
         {
           title: "User Management",
           route: "/user-management",
-          icon: Users,
+          icon: li(Users),
           items: [
             { title: "Users", route: "/users" },
             { title: "Roles", route: "/roles" },
@@ -46,7 +56,7 @@ export const data = {
         {
           title: "Authentication",
           route: "/authentication",
-          icon: KeyRound,
+          icon: li(KeyRound),
           items: [
             { title: "Identity Providers", route: "/providers/identity" },
             { title: "Registration", route: "/registration-flows" },
@@ -60,7 +70,7 @@ export const data = {
         {
           title: "Applications",
           route: "/applications",
-          icon: Layers,
+          icon: li(Layers),
           items: [
             { title: "Clients", route: "/clients" },
             { title: "Workload Identity", route: "/workload-identity" },
@@ -69,7 +79,7 @@ export const data = {
         {
           title: "APIs & Resources",
           route: "/apis-resources",
-          icon: Server,
+          icon: li(Server),
           items: [
             { title: "Services", route: "/services" },
             { title: "APIs", route: "/apis" },
@@ -84,7 +94,7 @@ export const data = {
         {
           title: "Security",
           route: "/security",
-          icon: Shield,
+          icon: li(Shield),
           items: [
             { title: "Password Policy", route: "/security/password" },
             { title: "Multi-Factor Auth", route: "/security/mfa" },
@@ -104,7 +114,7 @@ export const data = {
         {
           title: "Branding",
           route: "/branding",
-          icon: Palette,
+          icon: li(Palette),
           items: [
             { title: "Themes", route: "/branding/templates" },
             { title: "Email Templates", route: "/branding/email-templates" },
@@ -114,7 +124,7 @@ export const data = {
         {
           title: "Messaging",
           route: "/messaging",
-          icon: Mail,
+          icon: li(Mail),
           items: [
             { title: "Email Delivery", route: "/messaging/email" },
             { title: "SMS Delivery", route: "/messaging/sms" },
@@ -128,7 +138,7 @@ export const data = {
         {
           title: "Events & Webhooks",
           route: "/events",
-          icon: Webhook,
+          icon: li(Webhook),
           items: [
             { title: "Webhooks", route: "/webhooks" },
             { title: "Event Routes", route: "/events/routes" },
@@ -138,7 +148,7 @@ export const data = {
         {
           title: "Monitoring",
           route: "/monitoring",
-          icon: TrendingUp,
+          icon: li(TrendingUp),
           items: [
             { title: "Sign-in Logs", route: "/logs" },
             { title: "Audit Log", route: "/audit-log" },
@@ -152,12 +162,12 @@ export const data = {
         {
           title: "Tenants",
           route: "/tenants",
-          icon: Building2,
+          icon: li(Building2),
         },
         {
           title: "Settings",
           route: "/settings",
-          icon: Settings,
+          icon: li(Settings),
         },
       ],
     },

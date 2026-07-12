@@ -1,8 +1,12 @@
+import { useState } from "react"
 import { format } from "date-fns"
-import { Smartphone, Calendar } from "lucide-react"
+import { Smartphone, Calendar, Trash2 } from "lucide-react"
 import { InformationCard } from "@/components/card"
+import { Button } from "@/components/ui/button"
 import { EmptyState, ListSkeleton } from "@/components/details"
-import { useUserTrustedDevices } from "@/hooks/useUsers"
+import { ConfirmationDialog } from "@/components/dialog"
+import { useUserTrustedDevices, useRevokeUserDevice } from "@/hooks/useUsers"
+import { useToast } from "@/hooks/useToast"
 
 interface UserTrustedDevicesProps {
   userId: string
@@ -11,11 +15,26 @@ interface UserTrustedDevicesProps {
 export function UserTrustedDevices({ userId }: UserTrustedDevicesProps) {
   const { data, isLoading, isError } = useUserTrustedDevices(userId)
   const devices = data?.rows ?? []
+  const { showSuccess, showError } = useToast()
+  const revokeMutation = useRevokeUserDevice()
+  const [revokeTarget, setRevokeTarget] = useState<string | null>(null)
+
+  const handleRevoke = async () => {
+    if (!revokeTarget) return
+    try {
+      await revokeMutation.mutateAsync({ userId, deviceId: revokeTarget })
+      showSuccess("Device revoked")
+    } catch (e) {
+      showError(e)
+    } finally {
+      setRevokeTarget(null)
+    }
+  }
 
   return (
     <InformationCard
       title="Trusted Devices"
-      description="Devices this user has marked as trusted. Read-only — revoke support coming soon."
+      description="Devices this user has marked as trusted. Revoking one forces re-verification (e.g. MFA) on the next sign-in from it."
       icon={Smartphone}
     >
       {isLoading && <ListSkeleton />}
@@ -51,8 +70,28 @@ export function UserTrustedDevices({ userId }: UserTrustedDevicesProps) {
               )}
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0 gap-2 text-destructive hover:text-destructive"
+            onClick={() => setRevokeTarget(device.uuid)}
+          >
+            <Trash2 className="size-4" />
+            Revoke
+          </Button>
         </div>
       ))}
+
+      <ConfirmationDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRevokeTarget(null) }}
+        onConfirm={handleRevoke}
+        title="Revoke trusted device?"
+        description="The user will need to re-verify this device (e.g. via MFA) the next time they sign in from it."
+        confirmText="Revoke device"
+        variant="destructive"
+        isLoading={revokeMutation.isPending}
+      />
     </InformationCard>
   )
 }

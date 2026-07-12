@@ -16,6 +16,7 @@ import { useState } from "react"
   Ban,
   KeyRound,
   Eraser,
+  LockOpen,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
@@ -38,6 +39,7 @@ import {
   useUpdateUserStatus,
   useForcePasswordChange,
   useCreateErasureRequest,
+  useUnlockUser,
 } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { User, UserStatus } from "@/services/api/users/types"
@@ -87,12 +89,14 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
   const updateStatusMutation = useUpdateUserStatus()
   const forcePasswordChangeMutation = useForcePasswordChange()
   const erasureRequestMutation = useCreateErasureRequest()
+  const unlockMutation = useUnlockUser()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
   const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
   const [showForcePasswordDialog, setShowForcePasswordDialog] = useState(false)
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false)
   const [showErasureDialog, setShowErasureDialog] = useState(false)
   const [statusAction, setStatusAction] = useState<{ status: UserStatus; title: string; description: string } | null>(null)
 
@@ -242,6 +246,10 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
                   <KeyRound className="mr-2 size-4" />
                   Force Password Change
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowUnlockDialog(true)}>
+                  <LockOpen className="mr-2 size-4" />
+                  Unlock Account
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setShowErasureDialog(true)}
                   className="text-destructive focus:text-destructive"
@@ -320,6 +328,16 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
         description="This forces the user to change their password on their next login. Continue?"
         confirmText="Force Change"
         isLoading={forcePasswordChangeMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        open={showUnlockDialog}
+        onOpenChange={setShowUnlockDialog}
+        onConfirm={() => runAction(() => unlockMutation.mutateAsync(userId), "Account unlocked")}
+        title="Unlock Account"
+        description="This clears the user's failed-login lockout so they can sign in again immediately. Continue?"
+        confirmText="Unlock"
+        isLoading={unlockMutation.isPending}
       />
 
       <ConfirmationDialog

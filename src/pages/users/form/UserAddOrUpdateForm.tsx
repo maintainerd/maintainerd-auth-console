@@ -1,26 +1,33 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { ArrowLeft, Plus, X, AlertCircle } from "lucide-react"
+import { ArrowLeft, Plus, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
   FormInputField,
-  FormPasswordField,
   FormSelectField,
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
-import { userSchema } from "@/lib/validations"
+import {
+  FormEmailField,
+  FormPhoneFieldWithCountry,
+  FormPasswordFieldWithPolicy,
+  MetadataFieldEditor,
+} from "@/components/inputs"
+import { buildUserSchema } from "@/lib/validations"
 import { useUser, useCreateUser, useUpdateUser } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import { useMetadataFields } from "@/hooks/useMetadataFields"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
+import { ConfirmationDialog } from "@/components/dialog"
+import { useAppSelector } from "@/store/hooks"
 import type { UserStatus } from "@/services/api/users/types"
 
 // Status options for the select field
@@ -35,7 +42,7 @@ export default function UserAddOrUpdateForm() {
   const { userId } = useParams<{ userId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
 
   const isEditing = Boolean(userId)
   const isCreating = !isEditing
@@ -54,6 +61,11 @@ export default function UserAddOrUpdateForm() {
   // Fetch existing user if editing
   const { data: userData, isLoading: isFetchingUser } = useUser(userId || '')
   const createUserMutation = useCreateUser()
+
+  // Read tenant password config from Redux (populated by AppBootstrap after bootstrap)
+  const passwordConfig = useAppSelector(
+    (state) => state.tenant.currentTenant?.password_config
+  )
   const updateUserMutation = useUpdateUser()
 
   // Honour where the user came from (e.g. the details page) so the back button,
@@ -62,15 +74,19 @@ export default function UserAddOrUpdateForm() {
   const backTo = navState?.from ?? `/users`
   const backLabel = navState?.backLabel ?? (backTo === `/users` ? "Back to Users" : "Back")
 
+  // Build schema dynamically from tenant password config
+  const schema = useMemo(() => buildUserSchema(passwordConfig), [passwordConfig])
+
   // React Hook Form setup
   const {
     register,
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting }
+    setError,
+    formState: { errors, isSubmitting, isDirty }
   } = useForm({
-    resolver: yupResolver(userSchema),
+    resolver: yupResolver(schema),
     context: { isCreating },
     defaultValues: {
       username: "",
@@ -79,8 +95,8 @@ export default function UserAddOrUpdateForm() {
       password: undefined,
       status: "active" as const,
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   // Load existing user data if editing
@@ -99,7 +115,10 @@ export default function UserAddOrUpdateForm() {
 
   const isLoading = createUserMutation.isPending || updateUserMutation.isPending || isSubmitting
 
-  const onSubmit = async (data: yup.InferType<typeof userSchema>) => {
+  // Warn before discarding unsaved edits (browser close/refresh + guarded exits).
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
+
+  const onSubmit = async (data: yup.InferType<typeof schema>) => {
     if (metadataError) {
       showError(metadataError)
       return
@@ -134,6 +153,28 @@ export default function UserAddOrUpdateForm() {
 
       navigate(backTo)
     } catch (error) {
+      // Route backend errors onto the offending field where we can: structured
+      // field errors first, otherwise keyword-match the message (duplicate
+      // username/email, or a password-policy rejection the client can't pre-check
+      // — strength/common/HIBP). Anything unmapped still shows via the toast.
+      const parsed = parseError(error)
+      const known = ["username", "email", "phone", "password", "status"] as const
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          if ((known as readonly string[]).includes(field)) {
+            setError(field as (typeof known)[number], { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        const field = known.find((f) => lower.includes(f) && (f !== "password" || isCreating))
+        if (field) {
+          setError(field, { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
@@ -206,6 +247,7 @@ export default function UserAddOrUpdateForm() {
         <FormPageHeader
           backUrl={backTo}
           backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
           title={pageTitle}
           description={
             isCreating
@@ -237,10 +279,8 @@ export default function UserAddOrUpdateForm() {
                 />
 
                 {/* Email */}
-                <FormInputField
+                <FormEmailField
                   label="Email"
-                  type="email"
-                  placeholder="e.g., john.doe@example.com"
                   description="User's email address"
                   disabled={isLoading}
                   error={errors.email?.message}
@@ -249,14 +289,20 @@ export default function UserAddOrUpdateForm() {
                 />
 
                 {/* Phone */}
-                <FormInputField
-                  label="Phone"
-                  type="tel"
-                  placeholder="e.g., +1 555 123 4567"
-                  description="Optional — 10 to 20 characters"
-                  disabled={isLoading}
-                  error={errors.phone?.message}
-                  {...register("phone")}
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <FormPhoneFieldWithCountry
+                      label="Phone"
+                      description="Optional — select country code and enter local number"
+                      disabled={isLoading}
+                      error={errors.phone?.message}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  )}
                 />
 
                 {/* Status */}
@@ -283,13 +329,13 @@ export default function UserAddOrUpdateForm() {
 
               {/* Password (only for create) */}
               {isCreating && (
-                <FormPasswordField
+                <FormPasswordFieldWithPolicy
                   label="Password"
                   placeholder="Enter a strong password"
-                  description="At least 8 characters with uppercase, lowercase, number, and special character"
                   disabled={isLoading}
                   error={errors.password?.message}
                   required
+                  passwordConfig={passwordConfig}
                   {...register("password")}
                 />
               )}
@@ -319,59 +365,15 @@ export default function UserAddOrUpdateForm() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {metadataError && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {metadataError}
-                </div>
-              )}
-
-              {customFields.length === 0 ? (
-                <div className="rounded-lg border border-dashed py-10 text-center">
-                  <p className="text-sm text-muted-foreground">No custom metadata yet.</p>
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={addCustomField}
-                    disabled={isLoading}
-                    className="h-auto p-0 text-sm"
-                  >
-                    Add your first field
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {customFields.map((field) => (
-                    <div key={field.id} className="flex items-center gap-2">
-                      <Input
-                        aria-label="Metadata key"
-                        placeholder="Key (e.g., department)"
-                        value={field.key}
-                        onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
-                        disabled={isLoading}
-                      />
-                      <Input
-                        aria-label="Metadata value"
-                        placeholder="Value (e.g., Engineering)"
-                        value={field.value}
-                        onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
-                        disabled={isLoading}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCustomField(field.id)}
-                        disabled={isLoading}
-                        className="size-9 shrink-0 p-0 text-muted-foreground"
-                      >
-                        <span className="sr-only">Remove field</span>
-                        <X className="size-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <CardContent>
+              <MetadataFieldEditor
+                fields={customFields}
+                error={metadataError}
+                disabled={isLoading}
+                onAdd={addCustomField}
+                onUpdate={updateCustomField}
+                onRemove={removeCustomField}
+              />
             </CardContent>
           </Card>
 
@@ -380,7 +382,7 @@ export default function UserAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(backTo)}
+              onClick={() => guard(() => navigate(backTo))}
               disabled={isLoading}
             >
               Cancel
@@ -388,6 +390,17 @@ export default function UserAddOrUpdateForm() {
             <FormSubmitButton isSubmitting={isLoading} submitText={submitButtonText} />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

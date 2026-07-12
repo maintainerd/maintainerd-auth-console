@@ -36,6 +36,10 @@ import {
   fetchUserConsents,
   fetchUserTrustedDevices,
   createErasureRequest,
+  revokeAllUserSessions,
+  revokeUserDevice,
+  withdrawUserConsent,
+  unlockUser,
 } from '@/services/api/users'
 import type {
   UserQueryParams,
@@ -482,5 +486,59 @@ export function useUserTrustedDevices(userId: string) {
 export function useCreateErasureRequest() {
   return useMutation({
     mutationFn: (userId: string) => createErasureRequest(userId),
+  })
+}
+
+/**
+ * Hook to revoke ALL of a user's sessions (admin — force global sign-out)
+ */
+export function useRevokeAllUserSessions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => revokeAllUserSessions(userId),
+    onSuccess: (_data, userId) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.sessions(userId) })
+    },
+  })
+}
+
+/**
+ * Hook to revoke a user's trusted device (admin)
+ */
+export function useRevokeUserDevice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, deviceId }: { userId: string; deviceId: string }) =>
+      revokeUserDevice(userId, deviceId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...userKeys.all, 'devices', variables.userId] })
+    },
+  })
+}
+
+/**
+ * Hook to withdraw a user's consent (admin — GDPR right to withdraw)
+ */
+export function useWithdrawUserConsent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, consentType }: { userId: string; consentType: string }) =>
+      withdrawUserConsent(userId, consentType),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...userKeys.all, 'consents', variables.userId] })
+    },
+  })
+}
+
+/**
+ * Hook to unlock a user's failed-login lockout (admin remediation)
+ */
+export function useUnlockUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => unlockUser(userId),
+    onSuccess: (_data, userId) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
+    },
   })
 }
