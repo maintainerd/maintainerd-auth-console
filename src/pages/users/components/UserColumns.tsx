@@ -6,15 +6,15 @@ import { DataTableColumnHeader } from "@/components/data-table"
 import { StatusBadge } from "@/components/details/StatusBadge"
 import type { User } from "@/services/api/users/types"
 
-// First letters of the name (max two) for the avatar fallback.
-const initials = (name: string) =>
-  name
-    .trim()
-    .split(/\s+/)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "?"
+// Two-letter avatar fallback: initials of the first two whitespace-separated
+// parts, or the first two characters of a single token (e.g. "jdoe" → "JD").
+const initials = (value: string) => {
+  const v = value.trim()
+  if (!v) return "?"
+  const parts = v.split(/\s+/)
+  const letters = parts.length > 1 ? parts.slice(0, 2).map((p) => p[0]).join("") : v.slice(0, 2)
+  return letters.toUpperCase() || "?"
+}
 
 export const userColumns: ColumnDef<User>[] = [
   {
