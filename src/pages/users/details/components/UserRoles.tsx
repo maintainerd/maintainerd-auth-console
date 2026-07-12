@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Shield, Calendar, Plus, Trash2, Eye } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
@@ -71,10 +72,6 @@ export function UserRoles({ userId }: UserRolesProps) {
     },
   ]
 
-  const assignActions: RowActionItem[] = [
-    { key: "assign", label: "Assign Role", icon: Plus, onSelect: () => setAssignDialogOpen(true) },
-  ]
-
   // Get existing role IDs for the assign dialog
   const existingRoleIds = data?.rows.map(role => role.role_id) || []
 
@@ -84,7 +81,12 @@ export function UserRoles({ userId }: UserRolesProps) {
         title="User Roles"
         description="Roles and permissions assigned to this user"
         icon={Shield}
-        action={<RowActions items={assignActions} variant="header" />}
+        action={
+          <Button size="sm" className="gap-2" onClick={() => setAssignDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Assign Role
+          </Button>
+        }
       >
       <div className="space-y-4">
         {isLoading && <ListSkeleton />}

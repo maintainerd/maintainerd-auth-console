@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { User, Calendar, Mail, Globe, Clock, Languages, Check, Plus, type LucideIcon } from "lucide-react"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
-import { DataTablePagination, RowActions, usePaginationTable, type RowActionItem } from "@/components/data-table"
+import { DataTablePagination, usePaginationTable } from "@/components/data-table"
 import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { useUserProfiles, useDeleteUserProfile, useSetUserProfileAsDefault } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
@@ -94,10 +95,6 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     pageCount: data?.total_pages ?? 0,
   })
 
-  const createActions: RowActionItem[] = [
-    { key: "create", label: "Create Profile", icon: Plus, onSelect: handleCreateProfile },
-  ]
-
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM dd, yyyy')
@@ -121,7 +118,12 @@ export function UserProfiles({ userId }: UserProfilesProps) {
         title="User Profiles"
         description="User profile information including personal details and preferences"
         icon={User}
-        action={<RowActions items={createActions} variant="header" />}
+        action={
+          <Button onClick={handleCreateProfile} size="sm" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create Profile
+          </Button>
+        }
       >
       <div className="space-y-4">
         {isLoading && <ListSkeleton />}
