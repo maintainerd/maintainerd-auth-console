@@ -23,15 +23,11 @@ export const userColumns: ColumnDef<User>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
     cell: ({ row }) => {
       const user = row.original
-      // Avatar initials come from the display name (server-derived from the
-      // user's default profile) when available, else the username — so the
-      // avatar stays meaningful even though only the username is shown.
-      const name = user.fullname?.trim() || user.username
       return (
         <div className="flex items-center gap-3 px-3 py-1">
           <Avatar className="size-9">
             <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
-              {initials(name)}
+              {initials(user.username)}
             </AvatarFallback>
           </Avatar>
           <span className="font-medium">{user.username}</span>
