@@ -32,7 +32,7 @@ import type {
   UserActivityResponse,
   UserSession,
   UserMFAResponse,
-  UserConsentsResponse,
+  UserConsent,
   TrustedDevice,
 } from './types'
 
@@ -174,9 +174,10 @@ export const unlinkUserIdentity = (userId: string, identityId: string): Promise<
     assertSuccess(r, 'unlink identity'),
   )
 
-export const fetchUserConsents = (userId: string): Promise<UserConsentsResponse> =>
-  get<ApiResponse<UserConsentsResponse>>(`${base}/${userId}/consents`).then((r) =>
-    unwrap(r, 'fetch user consents'),
+// The API returns a bare array of all consents for the user (not paginated).
+export const fetchUserConsents = (userId: string): Promise<UserConsent[]> =>
+  get<ApiResponse<UserConsent[]>>(`${base}/${userId}/consents`).then((r) =>
+    unwrap(r, 'fetch user consents') ?? [],
   )
 
 // The API returns a bare array of devices (same shape as identity's /me/devices).

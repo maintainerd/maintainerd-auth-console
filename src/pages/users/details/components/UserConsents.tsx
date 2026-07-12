@@ -31,7 +31,7 @@ function formatDate(value?: string | null) {
 
 export function UserConsents({ userId }: UserConsentsProps) {
   const { data, isLoading, isError } = useUserConsents(userId)
-  const consents = (data?.rows ?? []) as ConsentRow[]
+  const consents = (data ?? []) as ConsentRow[]
   const { showSuccess, showError } = useToast()
   const withdrawMutation = useWithdrawUserConsent()
 

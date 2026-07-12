@@ -453,7 +453,8 @@ export function useUnlinkUserIdentity() {
       unlinkUserIdentity(userId, identityId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.userId) })
-      queryClient.invalidateQueries({ queryKey: userKeys.identitiesList(variables.userId) })
+      // Prefix key (no params) so it partial-matches the active paginated query.
+      queryClient.invalidateQueries({ queryKey: userKeys.identities(variables.userId) })
     },
   })
 }

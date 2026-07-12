@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Shield, Calendar, Plus, Trash2, Eye } from "lucide-react"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton, StatusBadge } from "@/components/details"
 import { DataTablePagination, RowActions, usePaginationTable, type RowActionItem } from "@/components/data-table"
@@ -148,7 +148,7 @@ export function UserRoles({ userId }: UserRolesProps) {
                     <p className="text-sm text-muted-foreground">{role.description}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      Added {format(new Date(role.created_at), "PPP")}
+                      Added {safeFormat(role.created_at, "PPP")}
                     </div>
                   </div>
                 </div>

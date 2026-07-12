@@ -213,7 +213,9 @@ export function UserMFA({ userId }: UserMFAProps) {
                     <div className="min-w-0 space-y-1">
                       <p className="break-words text-sm font-medium">{key.name}</p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        {key.transport && <span className="capitalize">{key.transport}</span>}
+                        {key.transport && key.transport.length > 0 && (
+                          <span className="capitalize">{key.transport.join(", ")}</span>
+                        )}
                         <span className="inline-flex items-center gap-1">
                           <Clock className="size-3" />
                           Last used {formatDate(key.last_used_at)}

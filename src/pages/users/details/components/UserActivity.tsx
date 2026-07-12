@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Activity, Calendar, Globe } from "lucide-react"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { Badge } from "@/components/ui/badge"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
@@ -98,7 +98,7 @@ export function UserActivity({ userId }: UserActivityProps) {
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="size-3" />
-                        {format(new Date(event.created_at), "PPp")}
+                        {safeFormat(event.created_at, "PPp")}
                       </span>
                       {event.ip_address && (
                         <span className="inline-flex items-center gap-1 font-mono">

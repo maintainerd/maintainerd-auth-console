@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Key, Calendar, Globe, Unlink } from "lucide-react"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, RowActions, usePaginationTable, type RowActionItem } from "@/components/data-table"
@@ -150,7 +150,7 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
                         {/* Footer */}
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Calendar className="size-3" />
-                          Connected {format(new Date(identity.created_at), "PPP")}
+                          Connected {safeFormat(identity.created_at, "PPP")}
                         </div>
                       </div>
                     </div>
