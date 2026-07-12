@@ -28,6 +28,8 @@ Maintainerd Auth Console is the management dashboard for [`maintainerd-auth`](ht
 
 It targets the **internal management API** (`maintainerd-auth` port `:8080`) and is the equivalent of the Auth0 / Okta / Keycloak admin console for the Maintainerd ecosystem.
 
+<img width="1916" height="1013" alt="image" src="https://github.com/user-attachments/assets/2eeff397-9321-4733-b62d-79aee517c162" />
+
 It can be used in three ways:
 
 | Mode | Description |
