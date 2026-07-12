@@ -97,7 +97,7 @@ export function UserSessions({ userId }: UserSessionsProps) {
       title="Sessions"
       description="Active sign-in sessions for this user. Revoke any to sign them out of that device."
       icon={Monitor}
-      action={sessions.length > 0 ? <RowActions items={revokeAllActions} /> : undefined}
+      action={sessions.length > 0 ? <RowActions items={revokeAllActions} variant="header" /> : undefined}
     >
       <div className="space-y-4">
         {isLoading && <ListSkeleton />}

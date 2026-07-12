@@ -121,7 +121,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
         title="User Profiles"
         description="User profile information including personal details and preferences"
         icon={User}
-        action={<RowActions items={createActions} />}
+        action={<RowActions items={createActions} variant="header" />}
       >
       <div className="space-y-4">
         {isLoading && <ListSkeleton />}

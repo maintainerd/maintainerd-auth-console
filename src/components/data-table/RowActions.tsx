@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { LucideIcon } from "lucide-react"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -39,7 +39,18 @@ export interface RowActionItem {
  * item list, with the confirm/delete dialog flow handled here — so each listing
  * only declares its actions instead of re-implementing the menu + dialogs.
  */
-export function RowActions({ items }: { items: RowActionItem[] }) {
+export function RowActions({
+  items,
+  variant = "row",
+}: {
+  items: RowActionItem[]
+  /**
+   * "row" (default) — the compact ghost `⋯` used inside table rows.
+   * "header" — matches the main detail-card action button (outline, `⋮`), for
+   * use in an InformationCard's `action` slot.
+   */
+  variant?: "row" | "header"
+}) {
   const [activeConfirm, setActiveConfirm] = useState<RowActionItem | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -62,10 +73,17 @@ export function RowActions({ items }: { items: RowActionItem[] }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          {variant === "header" ? (
+            <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+              <span className="sr-only">Open actions</span>
+              <MoreVertical className="size-4" />
+            </Button>
+          ) : (
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {items.map((item) => (

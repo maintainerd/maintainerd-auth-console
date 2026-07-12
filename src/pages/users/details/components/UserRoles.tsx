@@ -84,7 +84,7 @@ export function UserRoles({ userId }: UserRolesProps) {
         title="User Roles"
         description="Roles and permissions assigned to this user"
         icon={Shield}
-        action={<RowActions items={assignActions} />}
+        action={<RowActions items={assignActions} variant="header" />}
       >
       <div className="space-y-4">
         {isLoading && <ListSkeleton />}

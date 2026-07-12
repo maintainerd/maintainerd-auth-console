@@ -134,7 +134,7 @@ export function UserMFA({ userId }: UserMFAProps) {
       title="Multi-Factor Authentication"
       description="Authentication methods protecting this user's account. Reset to clear every method at once."
       icon={ShieldCheck}
-      action={hasAnyMfa ? <RowActions items={resetAllActions} /> : undefined}
+      action={hasAnyMfa ? <RowActions items={resetAllActions} variant="header" /> : undefined}
     >
       {isLoading && <ListSkeleton />}
 
