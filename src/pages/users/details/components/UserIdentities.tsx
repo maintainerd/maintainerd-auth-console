@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Key, Calendar, Globe, Unlink } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
-import { DataTablePagination, usePaginationTable } from "@/components/data-table"
+import { DataTablePagination, RowActions, usePaginationTable, type RowActionItem } from "@/components/data-table"
 import { useUserIdentities, useUnlinkUserIdentity } from "@/hooks/useUsers"
 import { useToast } from "@/hooks/useToast"
 import type { UserIdentity } from "@/services/api/users/types"
@@ -46,10 +45,32 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
     pageCount: data?.total_pages ?? 0,
   })
 
+  // Never strand a user: only offer unlink when they have more than one identity.
+  const canUnlink = (data?.total ?? 0) > 1
+
+  const identityActions = (identity: UserIdentity): RowActionItem[] =>
+    canUnlink
+      ? [
+          {
+            key: "unlink",
+            label: "Unlink identity",
+            icon: Unlink,
+            destructive: true,
+            onSelect: () => handleUnlink(identity.user_identity_id),
+            confirm: {
+              title: "Unlink identity",
+              description:
+                "This removes this authentication method from the user. They will no longer be able to sign in with it. Continue?",
+              confirmText: "Unlink",
+            },
+          },
+        ]
+      : []
+
   return (
     <InformationCard
       title="User Identities"
-      description="How this user can authenticate — provider, subject, and the client each identity is linked to. Read-only."
+      description="How this user can authenticate — provider, subject, and the client each identity is linked to."
       icon={Key}
     >
       <div className="space-y-4">
@@ -69,80 +90,75 @@ export function UserIdentities({ userId }: UserIdentitiesProps) {
 
         {data && data.rows.length > 0 && (
           <div className="space-y-3">
-            {data.rows.map((identity: UserIdentity) => (
-              <div key={identity.user_identity_id} className="rounded-lg border p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <Key className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-3">
-                    {/* Provider + subject */}
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-0.5">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Provider
-                        </p>
-                        <p className="text-sm font-medium capitalize">{identity.provider}</p>
+            {data.rows.map((identity: UserIdentity) => {
+              const actions = identityActions(identity)
+              return (
+                <div key={identity.user_identity_id} className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <Key className="size-4" />
                       </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Subject
-                        </p>
-                        <p className="break-all font-mono text-sm">{identity.sub}</p>
-                      </div>
-                    </div>
+                      <div className="min-w-0 flex-1 space-y-3">
+                        {/* Provider + subject */}
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Provider
+                            </p>
+                            <p className="text-sm font-medium capitalize">{identity.provider}</p>
+                          </div>
+                          <div className="min-w-0 space-y-0.5">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Subject
+                            </p>
+                            <p className="break-all font-mono text-sm">{identity.sub}</p>
+                          </div>
+                        </div>
 
-                    {/* Linked client */}
-                    {identity.client && (
-                      <div className="space-y-2 rounded-md border bg-muted/30 p-3">
-                        <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          <Globe className="size-3.5" />
-                          Linked client
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-medium">{identity.client.display_name}</span>
-                          <Badge variant="secondary" className="font-normal capitalize">
-                            {identity.client.client_type}
-                          </Badge>
-                          {identity.client.is_default && (
-                            <Badge variant="outline" className="font-normal">
-                              Default
-                            </Badge>
-                          )}
-                          {identity.client.is_system && (
-                            <Badge variant="outline" className="font-normal">
-                              System
-                            </Badge>
-                          )}
-                        </div>
-                        {identity.client.domain && (
-                          <p className="break-all font-mono text-xs text-muted-foreground">
-                            {identity.client.domain}
-                          </p>
+                        {/* Linked client */}
+                        {identity.client && (
+                          <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+                            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              <Globe className="size-3.5" />
+                              Linked client
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-medium">{identity.client.display_name}</span>
+                              <Badge variant="secondary" className="font-normal capitalize">
+                                {identity.client.client_type}
+                              </Badge>
+                              {identity.client.is_default && (
+                                <Badge variant="outline" className="font-normal">
+                                  Default
+                                </Badge>
+                              )}
+                              {identity.client.is_system && (
+                                <Badge variant="outline" className="font-normal">
+                                  System
+                                </Badge>
+                              )}
+                            </div>
+                            {identity.client.domain && (
+                              <p className="break-all font-mono text-xs text-muted-foreground">
+                                {identity.client.domain}
+                              </p>
+                            )}
+                          </div>
                         )}
-                      </div>
-                    )}
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        Connected {format(new Date(identity.created_at), "PPP")}
+                        {/* Footer */}
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="size-3" />
+                          Connected {format(new Date(identity.created_at), "PPP")}
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        disabled={unlinkMutation.isPending}
-                        onClick={() => handleUnlink(identity.user_identity_id)}
-                      >
-                        <Unlink className="size-3 mr-1" /> Unlink
-                      </Button>
                     </div>
+                    {actions.length > 0 && <RowActions items={actions} />}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 

@@ -86,22 +86,21 @@ export function UserSessions({ userId }: UserSessionsProps) {
       title="Sessions"
       description="Active sign-in sessions for this user. Revoke any to sign them out of that device."
       icon={Monitor}
+      action={
+        sessions.length > 0 ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-destructive hover:text-destructive"
+            onClick={() => setRevokeAllOpen(true)}
+          >
+            <Trash2 className="size-4" />
+            Revoke all
+          </Button>
+        ) : undefined
+      }
     >
       <div className="space-y-4">
-        {sessions.length > 0 && (
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 text-destructive hover:text-destructive"
-              onClick={() => setRevokeAllOpen(true)}
-            >
-              <Trash2 className="size-4" />
-              Revoke all sessions
-            </Button>
-          </div>
-        )}
-
         <ConfirmationDialog
           open={revokeAllOpen}
           onOpenChange={setRevokeAllOpen}

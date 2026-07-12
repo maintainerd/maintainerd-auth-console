@@ -379,6 +379,7 @@ export interface TrustedDevice {
   uuid: string
   device_fingerprint?: string
   device_name?: string
+  location?: string
   ip_address?: string
   user_agent?: string
   last_seen_at?: string | null
