@@ -5,7 +5,6 @@ import { useState } from "react"
   MoreVertical,
   CheckCircle2,
   Phone,
-  UserCheck,
   Mail,
   Building2,
   CalendarDays,
@@ -34,7 +33,6 @@ import {
   useDeleteUser,
   useVerifyUserEmail,
   useVerifyUserPhone,
-  useCompleteUserAccount,
   useResetUserMfa,
   useUpdateUserStatus,
   useForcePasswordChange,
@@ -64,27 +62,12 @@ function VerifiedMark({ verified }: { verified: boolean }) {
   )
 }
 
-/** Profile / account completion shown as a subtle check or dash. */
-function CompletionMark({ label, complete }: { label: string; complete: boolean }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-sm">
-      {complete ? (
-        <CheckCircle2 className="size-3.5 text-emerald-600" />
-      ) : (
-        <Minus className="size-3.5 text-muted-foreground" />
-      )}
-      <span className={complete ? "text-foreground" : "text-muted-foreground"}>{label}</span>
-    </span>
-  )
-}
-
 export function UserHeader({ user, userId }: UserHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteUserMutation = useDeleteUser()
   const verifyEmailMutation = useVerifyUserEmail()
   const verifyPhoneMutation = useVerifyUserPhone()
-  const completeAccountMutation = useCompleteUserAccount()
   const resetMfaMutation = useResetUserMfa()
   const updateStatusMutation = useUpdateUserStatus()
   const forcePasswordChangeMutation = useForcePasswordChange()
@@ -93,7 +76,6 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const [showVerifyPhoneDialog, setShowVerifyPhoneDialog] = useState(false)
-  const [showCompleteAccountDialog, setShowCompleteAccountDialog] = useState(false)
   const [showResetMfaDialog, setShowResetMfaDialog] = useState(false)
   const [showForcePasswordDialog, setShowForcePasswordDialog] = useState(false)
   const [showUnlockDialog, setShowUnlockDialog] = useState(false)
@@ -142,16 +124,6 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
         </div>
       ) : (
         <span className="text-muted-foreground">—</span>
-      ),
-    },
-    {
-      icon: UserCheck,
-      label: "Account",
-      value: (
-        <div className="flex flex-col gap-1">
-          <CompletionMark label="Profile" complete={user.is_profile_completed} />
-          <CompletionMark label="Account" complete={user.is_account_completed} />
-        </div>
       ),
     },
     ...(user.tenant
@@ -234,10 +206,6 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
                   <Phone className="mr-2 size-4" />
                   Mark Phone as Verified
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowCompleteAccountDialog(true)}>
-                  <UserCheck className="mr-2 size-4" />
-                  Mark Account as Completed
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowResetMfaDialog(true)}>
                   <ShieldOff className="mr-2 size-4" />
                   Reset MFA
@@ -297,17 +265,6 @@ export function UserHeader({ user, userId }: UserHeaderProps) {
         title="Verify Phone"
         description="Are you sure you want to mark this user's phone as verified?"
         isLoading={verifyPhoneMutation.isPending}
-      />
-
-      <ConfirmationDialog
-        open={showCompleteAccountDialog}
-        onOpenChange={setShowCompleteAccountDialog}
-        onConfirm={() =>
-          runAction(() => completeAccountMutation.mutateAsync(userId), "Account completed successfully")
-        }
-        title="Complete Account"
-        description="Are you sure you want to mark this user's account as completed?"
-        isLoading={completeAccountMutation.isPending}
       />
 
       <ConfirmationDialog

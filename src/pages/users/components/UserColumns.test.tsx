@@ -82,8 +82,11 @@ describe("userColumns", () => {
 
     expect(screen.getByText("active_user")).toBeInTheDocument()
     expect(screen.getByText("inactive_user")).toBeInTheDocument()
-    expect(screen.getByText("no_name_user")).toBeInTheDocument()
-    expect(screen.getAllByText("—").length).toBe(2)
+    // With no full name, the Name column falls back to the username, so
+    // "no_name_user" renders in both the Name and Username cells.
+    expect(screen.getAllByText("no_name_user").length).toBeGreaterThanOrEqual(2)
+    // The blank-name/blank-username user falls back to the username and shows the
+    // "?" avatar fallback (the Name column no longer renders an em-dash placeholder).
     expect(screen.getByText("?")).toBeInTheDocument()
 
     expect(screen.getAllByRole("button", { name: /open menu/i }).length).toBe(data.length)

@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { MonitorSmartphone, Globe, MapPin, Calendar, Clock, ShieldCheck, Trash2 } from "lucide-react"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { RowActions, type RowActionItem } from "@/components/data-table"
@@ -14,13 +14,7 @@ interface UserTrustedDevicesProps {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return "—"
-  try {
-    return format(new Date(value), "PPp")
-  } catch (e) {
-    console.warn("Invalid device date:", value, e)
-    return "—"
-  }
+  return safeFormat(value, "PPp")
 }
 
 export function UserTrustedDevices({ userId }: UserTrustedDevicesProps) {

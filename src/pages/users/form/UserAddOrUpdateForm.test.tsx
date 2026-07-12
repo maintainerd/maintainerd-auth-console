@@ -1,9 +1,62 @@
+import type { ReactElement } from "react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { renderWithProviders } from "@/test/utils"
+import { Provider } from "react-redux"
+import { configureStore } from "@reduxjs/toolkit"
+import { renderWithProviders as baseRender } from "@/test/utils"
+import { authReducer } from "@/store/auth/reducers"
+import { tenantReducer } from "@/store/tenant/reducers"
 import UserAddOrUpdateForm from "./UserAddOrUpdateForm"
 import { useParams, useLocation } from "react-router-dom"
+
+// The form reads the tenant password policy from the Redux store, so it must
+// render inside a <Provider>. A fresh store per render (with a minimal tenant
+// password_config) keeps the tenant slice populated and avoids cross-test leak.
+function makeStore() {
+  return configureStore({
+    reducer: { auth: authReducer, tenant: tenantReducer },
+    preloadedState: {
+      tenant: {
+        currentTenant: {
+          tenant_id: "t1",
+          name: "acme",
+          display_name: "Acme",
+          description: "",
+          status: "active" as const,
+          is_default: false,
+          is_system: false,
+          created_at: "2024-01-01T00:00:00Z",
+          updated_at: "2024-01-01T00:00:00Z",
+          password_config: {
+            min_length: 8,
+            max_length: 128,
+            require_uppercase: true,
+            require_lowercase: true,
+            require_number: true,
+            require_symbol: true,
+            min_strength_score: 0,
+            reject_common_passwords: false,
+            check_hibp: false,
+          },
+        },
+        surface: null,
+        identityUrl: null,
+        consoleUrl: null,
+        consoleClient: null,
+        isLoading: false,
+        error: null,
+      },
+    },
+  })
+}
+
+function renderWithProviders(
+  ui: ReactElement,
+  options?: Parameters<typeof baseRender>[1],
+) {
+  return baseRender(<Provider store={makeStore()}>{ui}</Provider>, options)
+}
 
 const {
   useUserMock,
@@ -38,7 +91,15 @@ vi.mock("@/hooks/useUsers", () => ({
 }))
 
 vi.mock("@/hooks/useToast", () => ({
-  useToast: () => ({ showSuccess: showSuccessMock, showError: showErrorMock }),
+  useToast: () => ({
+    showSuccess: showSuccessMock,
+    showError: showErrorMock,
+    // The form's catch block calls parseError(error) before showError, so the
+    // mock must provide it. Return the real ParsedError shape ({ message, ... }).
+    parseError: (error: unknown) => ({
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  }),
 }))
 
 const u = () => userEvent.setup({ pointerEventsCheck: 0 })
@@ -102,7 +163,8 @@ describe("UserAddOrUpdateForm", () => {
         expect.objectContaining({
           username: "newuser",
           email: "new@test.com",
-          phone: "5551234567",
+          // The country-code phone field emits the dial code + formatted local number.
+          phone: "+1 (555) 123-4567",
           password: "P@ssword1",
         }),
       ),
@@ -156,14 +218,16 @@ describe("UserAddOrUpdateForm", () => {
   it("pre-fills the form with existing user data and hides the password field", async () => {
     setEditMode()
     useUserMock.mockReturnValue({
-      data: makeUser({ phone: "555" }),
+      data: makeUser({ phone: "+1 5551234567" }),
       isLoading: false,
     })
     renderWithProviders(<UserAddOrUpdateForm />)
     await waitFor(() => {
       expect(screen.getByDisplayValue("jdoe")).toBeInTheDocument()
       expect(screen.getByDisplayValue("jdoe@test.com")).toBeInTheDocument()
-      expect(screen.getByDisplayValue("555")).toBeInTheDocument()
+      // The country-code phone field parses the stored value and shows the
+      // formatted local number in the input.
+      expect(screen.getByDisplayValue("(555) 123-4567")).toBeInTheDocument()
     })
     expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument()
   })
@@ -209,7 +273,7 @@ describe("UserAddOrUpdateForm", () => {
     await u().click(screen.getByRole("button", { name: /create user/i }))
 
     await waitFor(() => {
-      expect(screen.getByText("Phone must be at least 10 characters")).toBeInTheDocument()
+      expect(screen.getByText("Invalid phone number format")).toBeInTheDocument()
       expect(screen.getByText("Password must be at least 8 characters")).toBeInTheDocument()
     })
     expect(createMutateAsync).not.toHaveBeenCalled()
@@ -246,7 +310,7 @@ describe("UserAddOrUpdateForm", () => {
     await u().type(keys[0], "dup")
     await u().type(keys[1], "dup")
     await waitFor(() => {
-      expect(screen.getByText(/Duplicate metadata keys: dup/i)).toBeInTheDocument()
+      expect(screen.getByText(/Duplicate keys: dup/i)).toBeInTheDocument()
     })
     await u().type(screen.getByLabelText(/username/i), "newuser")
     await u().type(screen.getByLabelText(/email/i), "new@test.com")

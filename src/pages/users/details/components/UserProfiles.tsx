@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { User, Calendar, Mail, Globe, Clock, Languages, Check, Plus, type LucideIcon } from "lucide-react"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { DataTablePagination, usePaginationTable } from "@/components/data-table"
@@ -95,14 +95,7 @@ export function UserProfiles({ userId }: UserProfilesProps) {
     pageCount: data?.total_pages ?? 0,
   })
 
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM dd, yyyy')
-    } catch (e) {
-      console.warn("Invalid profile date:", dateString, e)
-      return 'Invalid date'
-    }
-  }
+  const formatDate = (dateString: string) => safeFormat(dateString, 'MMM dd, yyyy')
 
   // Name fields are optional on the backend, so compose without interpolating
   // "undefined". Prefer the display name; fall back to the composed legal name.

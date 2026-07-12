@@ -66,10 +66,10 @@ describe("UserMFA", () => {
     expect(screen.getByText("5 unused recovery codes remaining")).toBeInTheDocument()
   })
 
-  it("shows the Reset MFA button when any method is enabled", () => {
+  it("shows the Reset MFA action when any method is enabled", () => {
     setData({ data: { is_totp_enabled: true, is_webauthn_enabled: false, is_sms_enabled: false, backup_codes_count: 0 } })
     renderWithProviders(<UserMFA userId="u1" />)
-    expect(screen.getByText("Reset MFA")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /actions/i })).toBeInTheDocument()
   })
 
   it("resets MFA with confirmation", async () => {
@@ -77,7 +77,8 @@ describe("UserMFA", () => {
     setData({ data: { is_totp_enabled: true, is_webauthn_enabled: false, is_sms_enabled: false, backup_codes_count: 0 } })
     resetMfaMutateAsync.mockResolvedValueOnce(undefined)
     renderWithProviders(<UserMFA userId="u1" />)
-    await u.click(screen.getByText("Reset MFA"))
+    await u.click(screen.getByRole("button", { name: /actions/i }))
+    await u.click(await screen.findByText("Reset MFA"))
     await u.click(screen.getByRole("button", { name: "Reset MFA" }))
     await waitFor(() => expect(resetMfaMutateAsync).toHaveBeenCalledWith("u1"))
     expect(showSuccessMock).toHaveBeenCalledWith("MFA reset successfully")
@@ -102,7 +103,8 @@ describe("UserMFA", () => {
     setData({ data: { is_totp_enabled: true, is_webauthn_enabled: false, is_sms_enabled: false, backup_codes_count: 0 } })
     resetMfaMutateAsync.mockRejectedValueOnce(err)
     renderWithProviders(<UserMFA userId="u1" />)
-    await u.click(screen.getByText("Reset MFA"))
+    await u.click(screen.getByRole("button", { name: /actions/i }))
+    await u.click(await screen.findByText("Reset MFA"))
     await u.click(screen.getByRole("button", { name: "Reset MFA" }))
     await waitFor(() => expect(showErrorMock).toHaveBeenCalledWith(err))
   })
@@ -111,7 +113,7 @@ describe("UserMFA", () => {
     setData({
       data: {
         is_totp_enabled: false, is_webauthn_enabled: true, is_sms_enabled: false, backup_codes_count: 3,
-        webauthn_keys: [{ credential_uuid: "c1", name: "iPhone Touch ID", transport: "internal", last_used_at: "2024-06-01T00:00:00Z", created_at: "2024-01-01T00:00:00Z" }],
+        webauthn_keys: [{ credential_uuid: "c1", name: "iPhone Touch ID", transport: ["internal"], last_used_at: "2024-06-01T00:00:00Z", created_at: "2024-01-01T00:00:00Z" }],
       },
     })
     renderWithProviders(<UserMFA userId="u1" />)

@@ -63,7 +63,7 @@ export function AssignUserRolesDialog({
   }
 
   const handleSelectAll = () => {
-    /* v8 ignore next */ const availableRoles = (rolesData?.rows ?? []).filter(
+    const availableRoles = (rolesData?.rows ?? []).filter(
       role => !existingRoleIds.includes(role.role_id)
     )
     const availableRoleIds = availableRoles.map(r => r.role_id)

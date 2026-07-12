@@ -94,6 +94,8 @@ export function DataTable<TData>({
                   "relative block p-4 pr-14 md:static md:table-row md:p-0 md:pr-0",
                   onRowClick && "cursor-pointer",
                 )}
+                role={onRowClick ? "button" : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
                 onClick={
                   onRowClick
                     ? (event) => {
@@ -105,6 +107,19 @@ export function DataTable<TData>({
                         // Ignore in-row interactive controls (e.g. the menu trigger).
                         if (target.closest("button, a, input, label")) return
                         onRowClick(row.original)
+                      }
+                    : undefined
+                }
+                onKeyDown={
+                  onRowClick
+                    ? (event) => {
+                        // Only the row itself activates via keyboard; inner controls
+                        // (menu trigger, etc.) handle their own keys.
+                        if (event.target !== event.currentTarget) return
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault()
+                          onRowClick(row.original)
+                        }
                       }
                     : undefined
                 }

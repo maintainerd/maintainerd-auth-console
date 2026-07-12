@@ -15,6 +15,7 @@ const { useUserSessionsMock, revokeMutateAsync, showSuccessMock, showErrorMock }
 vi.mock("@/hooks/useUsers", () => ({
   useUserSessions: () => useUserSessionsMock(),
   useRevokeUserSession: () => ({ mutateAsync: revokeMutateAsync, isPending: false }),
+  useRevokeAllUserSessions: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 
 vi.mock("@/hooks/useToast", () => ({

@@ -113,9 +113,6 @@ export const verifyUserEmail = (userId: string): Promise<User> =>
 export const verifyUserPhone = (userId: string): Promise<User> =>
   patch<ApiResponse<User>>(`${base}/${userId}/verify-phone`).then((r) => unwrap(r, 'verify phone'))
 
-export const completeUserAccount = (userId: string): Promise<User> =>
-  patch<ApiResponse<User>>(`${base}/${userId}/complete-account`).then((r) => unwrap(r, 'complete account'))
-
 // Admin action: reset a user's MFA enrollment (POST /mfa/admin/users/{uuid}/reset).
 // Requires the "user:mfa:reset" permission + step-up; clears every factor at once.
 export const resetUserMfa = (userId: string): Promise<void> =>

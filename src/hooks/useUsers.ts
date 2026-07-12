@@ -22,7 +22,6 @@ import {
   removeUserRole,
   verifyUserEmail,
   verifyUserPhone,
-  completeUserAccount,
   resetUserMfa,
   resetUserMfaMethod,
   type UserMfaMethod,
@@ -328,21 +327,6 @@ export function useVerifyUserPhone() {
   })
 }
 
-/**
- * Hook to complete user account
- */
-export function useCompleteUserAccount() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (userId: string) => completeUserAccount(userId),
-    onSuccess: (_, userId) => {
-      // Invalidate the specific user to refetch
-      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
-    },
-  })
-}
 
 /**
  * Hook to reset a user's MFA enrollment (admin action) — clears every factor.

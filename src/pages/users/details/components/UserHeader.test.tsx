@@ -10,7 +10,6 @@ const {
   deleteMutateAsync,
   verifyEmailMutateAsync,
   verifyPhoneMutateAsync,
-  completeAccountMutateAsync,
   resetMfaMutateAsync,
   updateStatusMutateAsync,
   showSuccessMock,
@@ -20,7 +19,6 @@ const {
   deleteMutateAsync: vi.fn(),
   verifyEmailMutateAsync: vi.fn(),
   verifyPhoneMutateAsync: vi.fn(),
-  completeAccountMutateAsync: vi.fn(),
   resetMfaMutateAsync: vi.fn(),
   updateStatusMutateAsync: vi.fn(),
   showSuccessMock: vi.fn(),
@@ -37,10 +35,11 @@ vi.mock("@/hooks/useUsers", () => {
     useDeleteUser: () => ({ mutateAsync: deleteMutateAsync, isPending: false }),
     useVerifyUserEmail: () => ({ mutateAsync: verifyEmailMutateAsync, isPending: false }),
     useVerifyUserPhone: () => ({ mutateAsync: verifyPhoneMutateAsync, isPending: false }),
-    useCompleteUserAccount: () => ({ mutateAsync: completeAccountMutateAsync, isPending: false }),
     useResetUserMfa: () => ({ mutateAsync: resetMfaMutateAsync, isPending: false }),
     useUpdateUserStatus: () => ({ mutateAsync: updateStatusMutateAsync, isPending: false }),
     useForcePasswordChange: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false }),
+    useCreateErasureRequest: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false }),
+    useUnlockUser: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false }),
   }
 })
 
@@ -93,7 +92,7 @@ describe("UserHeader", () => {
       is_phone_verified: true,
       tenant: {
         tenant_id: "t1",
-        name: "Acme",
+        name: "acme",
         display_name: "Acme Inc",
         description: "",
         status: "active",
@@ -106,7 +105,7 @@ describe("UserHeader", () => {
     })
     expect(screen.getByText("jdoe@example.com")).toBeInTheDocument()
     expect(screen.getByText("12345")).toBeInTheDocument()
-    expect(screen.getByText("Acme")).toBeInTheDocument()
+    expect(screen.getByText("Acme Inc")).toBeInTheDocument()
     expect(screen.getByText("acme")).toBeInTheDocument()
     // Two "Verified" marks (email + phone) since both are verified.
     expect(screen.getAllByText("Verified").length).toBe(2)
@@ -152,11 +151,6 @@ describe("UserHeader", () => {
       menu: "Mark Phone as Verified",
       mutate: () => verifyPhoneMutateAsync,
       success: "Phone verified successfully",
-    },
-    {
-      menu: "Mark Account as Completed",
-      mutate: () => completeAccountMutateAsync,
-      success: "Account completed successfully",
     },
     {
       menu: "Reset MFA",

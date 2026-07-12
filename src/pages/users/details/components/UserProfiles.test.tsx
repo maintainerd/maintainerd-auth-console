@@ -241,14 +241,14 @@ describe("UserProfiles", () => {
     expect(screen.getByText("UP")).toBeInTheDocument()
   })
 
-  it("uses 'Invalid date' when a date cannot be parsed", () => {
+  it("renders an em dash when a date cannot be parsed", () => {
     useUserProfilesMock.mockReturnValue({
       data: response([makeProfile({ created_at: "nope", updated_at: "nope" })]),
       isLoading: false,
       isError: false,
     })
     renderWithProviders(<UserProfiles userId="u1" />)
-    expect(screen.getAllByText(/Invalid date/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/—/).length).toBeGreaterThan(0)
   })
 
   it("opens the create form via the Create Profile button", async () => {

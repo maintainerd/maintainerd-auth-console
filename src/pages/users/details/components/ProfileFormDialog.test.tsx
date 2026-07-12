@@ -36,7 +36,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     language: "en",
     profile_url: "https://example.com/a.png",
     is_default: false,
-    metadata: { employee_id: "E1" },
+    metadata: { "employee-id": "E1" },
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
     ...overrides,
@@ -104,7 +104,7 @@ describe("ProfileFormDialog", () => {
     expect(screen.getByDisplayValue("M")).toBeInTheDocument()
     expect(screen.getByDisplayValue("https://example.com/a.png")).toBeInTheDocument()
     // Existing metadata loads into custom fields.
-    expect(screen.getByDisplayValue("employee_id")).toBeInTheDocument()
+    expect(screen.getByDisplayValue("employee-id")).toBeInTheDocument()
     expect(screen.getByDisplayValue("E1")).toBeInTheDocument()
   })
 
@@ -223,7 +223,7 @@ describe("ProfileFormDialog", () => {
     await u.type(keys[0], "dup")
     await u.type(keys[1], "dup")
 
-    expect(await screen.findByText(/Duplicate metadata keys: dup/)).toBeInTheDocument()
+    expect(await screen.findByText(/Duplicate keys: dup/)).toBeInTheDocument()
     // The submit button is disabled while there's a metadata error.
     expect(screen.getByRole("button", { name: "Create Profile" })).toBeDisabled()
     expect(createMutateAsync).not.toHaveBeenCalled()
@@ -239,13 +239,13 @@ describe("ProfileFormDialog", () => {
     const keys = screen.getAllByLabelText("Metadata key")
     await u.type(keys[0], "dup")
     await u.type(keys[1], "dup")
-    expect(await screen.findByText(/Duplicate metadata keys: dup/)).toBeInTheDocument()
+    expect(await screen.findByText(/Duplicate keys: dup/)).toBeInTheDocument()
 
     // The submit button is disabled, but submitting the form directly still runs
     // the handler, which must bail out via the metadata-error guard.
     fireEvent.submit(document.querySelector("form")!)
     await waitFor(() =>
-      expect(showErrorMock).toHaveBeenCalledWith("Duplicate metadata keys: dup"),
+      expect(showErrorMock).toHaveBeenCalledWith("Duplicate keys: dup"),
     )
     expect(createMutateAsync).not.toHaveBeenCalled()
   })
