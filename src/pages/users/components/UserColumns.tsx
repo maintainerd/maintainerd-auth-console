@@ -18,14 +18,14 @@ const initials = (name: string) =>
 
 export const userColumns: ColumnDef<User>[] = [
   {
-    id: "Name",
-    accessorKey: "fullname",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    id: "Username",
+    accessorKey: "username",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
     cell: ({ row }) => {
       const user = row.original
-      // `fullname` is derived server-side from the user's default profile
-      // (display name → first + last); fall back to the username when no profile
-      // name is set so the column is never blank — matching the detail header.
+      // Avatar initials come from the display name (server-derived from the
+      // user's default profile) when available, else the username — so the
+      // avatar stays meaningful even though only the username is shown.
       const name = user.fullname?.trim() || user.username
       return (
         <div className="flex items-center gap-3 px-3 py-1">
@@ -34,18 +34,10 @@ export const userColumns: ColumnDef<User>[] = [
               {initials(name)}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium">{name}</span>
+          <span className="font-medium">{user.username}</span>
         </div>
       )
     },
-  },
-  {
-    id: "Username",
-    accessorKey: "username",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Username" />,
-    cell: ({ row }) => (
-      <div className="px-3 py-1 text-muted-foreground">{row.original.username}</div>
-    ),
   },
   {
     id: "Status",

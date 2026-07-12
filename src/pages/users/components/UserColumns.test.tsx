@@ -71,7 +71,6 @@ describe("userColumns", () => {
 
     renderWithProviders(<Harness data={data} />)
 
-    expect(screen.getByRole("button", { name: "Name" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Username" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Status" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Created" })).toBeInTheDocument()
@@ -82,11 +81,9 @@ describe("userColumns", () => {
 
     expect(screen.getByText("active_user")).toBeInTheDocument()
     expect(screen.getByText("inactive_user")).toBeInTheDocument()
-    // With no full name, the Name column falls back to the username, so
-    // "no_name_user" renders in both the Name and Username cells.
-    expect(screen.getAllByText("no_name_user").length).toBeGreaterThanOrEqual(2)
-    // The blank-name/blank-username user falls back to the username and shows the
-    // "?" avatar fallback (the Name column no longer renders an em-dash placeholder).
+    // The username shows once in its column (the avatar shows its initials).
+    expect(screen.getByText("no_name_user")).toBeInTheDocument()
+    // The blank-name/blank-username user still shows the "?" avatar fallback.
     expect(screen.getByText("?")).toBeInTheDocument()
 
     expect(screen.getAllByRole("button", { name: /open menu/i }).length).toBe(data.length)
