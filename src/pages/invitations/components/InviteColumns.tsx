@@ -1,19 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Mail } from "lucide-react"
-import { formatDistanceToNow, format } from "date-fns"
+import { formatDistanceToNow } from "date-fns"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { StatusBadge } from "@/components/details/StatusBadge"
+import { safeFormat } from "@/lib/formatDate"
 import type { Invite } from "@/services/api/invites/types"
 import { InviteActions } from "./InviteActions"
-
-function formatDate(value?: string | null) {
-  if (!value) return null
-  try {
-    return format(new Date(value), "PP")
-  } catch {
-    return null
-  }
-}
 
 export const inviteColumns: ColumnDef<Invite>[] = [
   {
@@ -56,14 +48,11 @@ export const inviteColumns: ColumnDef<Invite>[] = [
     id: "Expires",
     accessorKey: "expires_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Expires" />,
-    cell: ({ row }) => {
-      const expires = formatDate(row.original.expires_at)
-      return (
-        <div className="px-3 py-1">
-          <span className="text-sm">{expires ?? "—"}</span>
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <span className="text-sm">{safeFormat(row.original.expires_at, "PP") || "—"}</span>
+      </div>
+    ),
   },
   {
     id: "Invited",

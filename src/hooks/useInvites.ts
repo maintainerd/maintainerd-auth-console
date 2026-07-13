@@ -3,27 +3,30 @@
  */
 
 import { useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { fetchInvites, sendInvite, resendInvite, revokeInvite, fetchInviteById } from '@/services/api/invites'
 import type { Invite, SendInviteRequest } from '@/services/api/invites/types'
 import type { ServerListResult } from '@/components/data-table'
 
 export const inviteKeys = {
   all: ['invites'] as const,
-  list: () => [...inviteKeys.all, 'list'] as const,
+  lists: () => [...inviteKeys.all, 'list'] as const,
+  details: () => [...inviteKeys.all, 'detail'] as const,
+  detail: (id: string) => [...inviteKeys.details(), id] as const,
 }
 
 export function useInvites() {
   return useQuery({
-    queryKey: inviteKeys.list(),
+    queryKey: inviteKeys.lists(),
     queryFn: fetchInvites,
+    placeholderData: keepPreviousData,
   })
 }
 
 // Single invitation fetched from the dedicated GET-by-id endpoint.
 export function useInvite(inviteId: string | undefined) {
   return useQuery({
-    queryKey: [...inviteKeys.all, inviteId],
+    queryKey: inviteKeys.detail(inviteId ?? ''),
     queryFn: () => fetchInviteById(inviteId!),
     enabled: !!inviteId,
   })
@@ -90,7 +93,7 @@ export function useSendInvite() {
   return useMutation({
     mutationFn: (data: SendInviteRequest) => sendInvite(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inviteKeys.list() })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.lists() })
     },
   })
 }
@@ -99,8 +102,9 @@ export function useResendInvite() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (inviteId: string) => resendInvite(inviteId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inviteKeys.list() })
+    onSuccess: (_data, inviteId) => {
+      queryClient.invalidateQueries({ queryKey: inviteKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.detail(inviteId) })
     },
   })
 }
@@ -109,8 +113,9 @@ export function useRevokeInvite() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (inviteId: string) => revokeInvite(inviteId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inviteKeys.list() })
+    onSuccess: (_data, inviteId) => {
+      queryClient.invalidateQueries({ queryKey: inviteKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.detail(inviteId) })
     },
   })
 }

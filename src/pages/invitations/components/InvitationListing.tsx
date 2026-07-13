@@ -25,6 +25,8 @@ export function InvitationListing({ tableInCard }: { tableInCard?: boolean } = {
       onRowClick={(invite) => navigate(`/invites/${invite.invite_id}`)}
       onCreate={() => navigate(`/invites/create`)}
       createLabel="Invite User"
+      emptyTitle="No invitations yet"
+      emptyDescription="Invite users to register by sending a signed email link with their onboarding flow."
     />
   )
 }

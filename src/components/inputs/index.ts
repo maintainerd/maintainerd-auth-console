@@ -1,5 +1,7 @@
 export { FormEmailField } from "./FormEmailField"
 export type { FormEmailFieldProps } from "./FormEmailField"
+export { FormUrlField } from "./FormUrlField"
+export type { FormUrlFieldProps } from "./FormUrlField"
 export { FormSlugField } from "./FormSlugField"
 export type { FormSlugFieldProps } from "./FormSlugField"
 export { FormPhoneField } from "./FormPhoneField"

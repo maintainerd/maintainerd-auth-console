@@ -6,22 +6,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ConfirmationDialog } from "@/components/dialog"
 import { DetailLayout, DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { useInvite, useResendInvite, useRevokeInvite } from "@/hooks/useInvites"
 import { useToast } from "@/hooks/useToast"
-import { format } from "date-fns"
-
-function formatDate(value?: string | null) {
-  if (!value) return "—"
-  try {
-    return format(new Date(value), "PP")
-  } catch {
-    return "—"
-  }
-}
+import { safeFormat } from "@/lib/formatDate"
 
 export default function InviteDetailsPage() {
   const { inviteId } = useParams<{ inviteId: string }>()
@@ -59,9 +51,9 @@ export default function InviteDetailsPage() {
           label: "Registration flow",
           value: invite.registration_flow_name ?? (invite.registration_flow_id ? "—" : "Default registration"),
         },
-        { icon: CalendarDays, label: "Invited", value: formatDate(invite.created_at) },
-        { icon: CalendarClock, label: "Expires", value: formatDate(invite.expires_at) },
-        { icon: CheckCircle2, label: "Accepted", value: formatDate(invite.used_at) },
+        { icon: CalendarDays, label: "Invited", value: safeFormat(invite.created_at, "PP") || "—" },
+        { icon: CalendarClock, label: "Expires", value: safeFormat(invite.expires_at, "PP") || "—" },
+        { icon: CheckCircle2, label: "Accepted", value: safeFormat(invite.used_at, "PP") || "—" },
       ]
     : []
 
@@ -111,6 +103,7 @@ export default function InviteDetailsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => setShowRevoke(true)}
                         className="text-destructive focus:text-destructive"
@@ -132,6 +125,7 @@ export default function InviteDetailsPage() {
             title="Revoke Invitation"
             description={`Revoke the invitation to ${invite.invited_email}? Their sign-up link will stop working.`}
             confirmText="Revoke"
+            variant="destructive"
             isLoading={revokeMutation.isPending}
           />
         </>
