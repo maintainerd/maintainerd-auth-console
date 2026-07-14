@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { getProviderConnectionSchema, PROVIDER_LABELS } from "@/components/provider-config"
 import type { IdentityProviderDetail } from "@/services/api/identity-providers/types"
 
-interface IdentityProviderInformationTabProps {
+interface IdentityProviderConnectionTabProps {
   provider: IdentityProviderDetail
 }
 
@@ -35,7 +35,7 @@ function connectionValue(provider: IdentityProviderDetail, key: string): unknown
  * top-level provider connection fields. Client secrets are intentionally absent
  * because the backend stores them write-only.
  */
-export function IdentityProviderConnectionTab({ provider }: IdentityProviderInformationTabProps) {
+export function IdentityProviderConnectionTab({ provider }: IdentityProviderConnectionTabProps) {
   const connectionSchema = getProviderConnectionSchema(provider.provider)
   const providerLabel = PROVIDER_LABELS[provider.provider] ?? provider.provider
 

@@ -4,8 +4,10 @@
  * Declarative, per-provider field maps. Shared connection fields live as
  * top-level identity provider columns on the backend (`issuer`,
  * `provider_client_id`, `provider_client_secret`, `allow_jit_provisioning`, and `email_domains`). The schemas
- * below only describe provider-specific config JSON keys such as scopes,
- * endpoint overrides, directory IDs, and social-provider options.
+ * below only describe provider-specific config JSON keys the backend actually
+ * reads: OAuth scopes and OAuth2 endpoints (optional overrides for OIDC
+ * providers with discovery; required for OAuth2-only providers without it).
+ * The backend rejects unknown config keys, so no other keys are collected.
  *
  * Note: this is distinct from the Clients resource, which models the apps that
  * authenticate *against* Maintainerd and whose credentials Maintainerd issues.
@@ -13,10 +15,10 @@
 
 import type { ProviderOption } from "@/services/api/identity-providers/types"
 
-export type ProviderFieldType = "text" | "password" | "url" | "list" | "switch"
+export type ProviderFieldType = "text" | "password" | "url" | "list" | "switch" | "scopes" | "textarea"
 
 /** Backend `provider_type` discriminator. */
-export type ProviderKind = "system" | "social" | "enterprise"
+export type ProviderKind = "system" | "social" | "enterprise" | "saml"
 export type ProviderConnectionFieldKey =
   | "issuer"
   | "provider_client_id"
@@ -32,6 +34,10 @@ export interface ProviderConfigField {
   required?: boolean
   placeholder?: string
   description?: string
+  /** Seed value used on create (never overrides an existing/edited value). */
+  default?: string
+  /** For `scopes` fields: selectable suggestions shown in the picker. */
+  suggestions?: string[]
 }
 
 export interface ProviderConfigGroup {
@@ -78,12 +84,13 @@ export const PROVIDER_LABELS: Record<string, string> = {
   github: "GitHub",
   gitlab: "GitLab",
   facebook: "Facebook",
-  apple: "Apple",
   linkedin: "LinkedIn",
   twitter: "X (Twitter)",
 }
 
-/** Display order for the provider dropdown — identity providers first, then social. */
+/**
+ * Display order for the provider dropdown — identity providers first, then social.
+ */
 export const PROVIDER_ORDER: ProviderOption[] = [
   "maintainerd",
   "saml",
@@ -94,12 +101,71 @@ export const PROVIDER_ORDER: ProviderOption[] = [
   "github",
   "gitlab",
   "facebook",
-  "apple",
   "linkedin",
   "twitter",
 ]
 
+/**
+ * Providers that have no OIDC discovery document, so the broker needs explicit
+ * OAuth2 endpoints. Mirrors the backend's OAUTH2_ONLY provider class. For these
+ * providers the config-level authorization/token/userinfo endpoints are REQUIRED
+ * and the top-level issuer connection field is NOT required.
+ */
+const OAUTH2_ONLY_PROVIDERS: ReadonlySet<ProviderOption> = new Set([
+  "github",
+  "facebook",
+  "twitter",
+])
+
+/** True when a provider is OAuth2-only (no OIDC issuer/discovery). */
+export function isOAuth2OnlyProvider(provider: string): boolean {
+  return OAUTH2_ONLY_PROVIDERS.has(provider as ProviderOption)
+}
+
+/**
+ * Per-provider official host allow-list — kept in lock-step with the backend's
+ * providerAllowedHosts (internal/idp/validation_provider.go). For fixed-domain
+ * providers the ISSUER (OIDC) or the ENDPOINTS (OAuth2-only) must live on these
+ * hosts, so a known provider can't be pointed at an attacker-controlled host.
+ * Providers deliberately ABSENT are host-unrestricted because they use custom /
+ * self-managed / arbitrary domains (auth0, gitlab, external maintainerd, saml).
+ * Cognito uses a regex because its issuer host is regional.
+ */
+const PROVIDER_ALLOWED_HOSTS: Partial<Record<ProviderOption, string[]>> = {
+  google: ["accounts.google.com"],
+  linkedin: ["www.linkedin.com"],
+  microsoft: ["login.microsoftonline.com", "login.microsoftonline.us", "login.partner.microsoftonline.cn"],
+  github: ["github.com", "api.github.com"],
+  facebook: ["facebook.com", "www.facebook.com", "graph.facebook.com"],
+  twitter: ["x.com", "twitter.com", "api.x.com", "api.twitter.com"],
+}
+
+const COGNITO_ISSUER_HOST_REGEX = /^(issuer-)?cognito-idp\.[a-z0-9-]+\.amazonaws\.com(\.cn)?$/
+
+/**
+ * True when `url`'s host is permitted for `provider`. Exact host match (never
+ * suffix-contains, which is bypassable by evilgithub.com / github.com.evil.com).
+ * Providers with no allow-list are unrestricted. An empty or unparseable value
+ * returns true — presence and https/format are enforced separately, so this only
+ * adds the host constraint. Mirrors the backend requireAllowedHost.
+ */
+export function isAllowedProviderHost(provider: string, url: string | null | undefined): boolean {
+  const v = (url ?? "").trim()
+  if (v === "") return true
+  let host: string
+  try {
+    host = new URL(v).hostname.toLowerCase()
+  } catch {
+    return true
+  }
+  if (provider === "cognito") return COGNITO_ISSUER_HOST_REGEX.test(host)
+  const allowed = PROVIDER_ALLOWED_HOSTS[provider as ProviderOption]
+  if (!allowed) return true
+  return allowed.includes(host)
+}
+
 const DEFAULT_ISSUERS: Partial<Record<ProviderOption, string>> = {
+  maintainerd: "https://auth.example-org.com",
   cognito: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_aB12cD34",
   auth0: "https://your-tenant.us.auth0.com/",
   microsoft: "https://login.microsoftonline.com/common/v2.0",
@@ -107,27 +173,27 @@ const DEFAULT_ISSUERS: Partial<Record<ProviderOption, string>> = {
   github: "https://github.com",
   gitlab: "https://gitlab.com",
   facebook: "https://www.facebook.com",
-  apple: "https://appleid.apple.com",
   linkedin: "https://www.linkedin.com",
-  twitter: "https://twitter.com",
+  twitter: "https://x.com",
 }
 
 const CLIENT_ID_LABELS: Partial<Record<ProviderOption, string>> = {
   cognito: "App Client ID",
   auth0: "Application Client ID",
-  apple: "Services ID",
 }
 
 const CLIENT_SECRET_LABELS: Partial<Record<ProviderOption, string>> = {
   cognito: "App Client Secret",
-  apple: "Client Secret JWT",
 }
 
 /** Provider-specific labels for the backend-owned connection columns. */
 export function getProviderConnectionSchema(provider: string): ProviderConnectionSchema | undefined {
   const option = provider as ProviderOption
   const schema = getProviderConfigSchema(option)
-  if (!schema || schema.kind === "system") return undefined
+  // System (built-in) and SAML providers have no upstream OIDC connection: SAML
+  // uses its own config fields (sso_url / entity_id / certificate) instead of an
+  // issuer + client id/secret, so it must not render the OIDC connection card.
+  if (!schema || schema.kind === "system" || schema.kind === "saml") return undefined
 
   return {
     summary:
@@ -137,7 +203,10 @@ export function getProviderConnectionSchema(provider: string): ProviderConnectio
         key: "issuer",
         label: option === "cognito" ? "User Pool Issuer URL" : "Issuer URL",
         type: "url",
-        required: true,
+        // OIDC providers discover metadata from the issuer, so it is required.
+        // OAuth2-only providers (github/facebook/twitter) have no issuer — the
+        // broker uses the explicit config endpoints instead — so it is optional.
+        required: !isOAuth2OnlyProvider(option),
         placeholder: DEFAULT_ISSUERS[option] ?? "https://provider.example.com",
         description:
           "Issuer or authority URL used by the broker to discover metadata and validate tokens.",
@@ -189,165 +258,133 @@ export function getPromotedProviderFieldKeys(): string[] {
   ]
 }
 
+// Scopes an OIDC provider commonly supports, offered as picker suggestions in
+// addition to whatever the provider's default set is.
+const COMMON_OIDC_SCOPES = ["openid", "profile", "email", "offline_access", "address", "phone", "groups"]
+
+function parseScopeString(value: string): string[] {
+  return value.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)
+}
+
 function scopesGroup(defaultScopes = "openid, profile, email"): ProviderConfigGroup {
+  const base = parseScopeString(defaultScopes)
+  // Suggest the provider's own defaults first, then the common OIDC scopes when
+  // this is an OIDC provider (its default set includes `openid`).
+  const isOidc = base.includes("openid")
+  const suggestions = Array.from(new Set([...base, ...(isOidc ? COMMON_OIDC_SCOPES : [])]))
   return {
     title: "OAuth",
-    description: "Optional scopes requested during sign-in.",
+    description: "Scopes requested during sign-in.",
     fields: [
       {
         key: "scopes",
         label: "Scopes",
-        type: "list",
+        type: "scopes",
+        // Pre-filled on create so operators don't have to guess; editable, and
+        // never overrides an existing provider's saved scopes on edit.
+        default: defaultScopes,
+        suggestions,
         placeholder: defaultScopes,
-        description: "Comma-separated scopes requested during sign-in.",
+        description: "Comma-separated scopes requested during sign-in. Use Browse to pick common scopes.",
       },
     ],
   }
 }
 
-function endpointOverridesGroup(): ProviderConfigGroup {
+interface EndpointDefaults {
+  authorization_endpoint: string
+  token_endpoint: string
+  userinfo_endpoint: string
+}
+
+/**
+ * REQUIRED OAuth2 endpoints for OAuth2-only providers (github/facebook/twitter)
+ * which publish no discovery document. Pre-filled with each provider's known
+ * endpoints (like scopes) so operators rarely need to change them.
+ */
+function requiredEndpointsGroup(defaults: EndpointDefaults): ProviderConfigGroup {
   return {
-    title: "Endpoint Overrides",
-    description: "Optional overrides for providers that do not fully match discovery metadata.",
+    title: "Endpoints",
+    description:
+      "OAuth2 endpoints used by the broker. Required because this provider has no OIDC discovery document.",
     fields: [
       {
         key: "authorization_endpoint",
         label: "Authorization Endpoint",
         type: "url",
-        placeholder: "https://provider.example.com/oauth2/authorize",
+        required: true,
+        default: defaults.authorization_endpoint,
+        placeholder: defaults.authorization_endpoint,
       },
       {
         key: "token_endpoint",
         label: "Token Endpoint",
         type: "url",
-        placeholder: "https://provider.example.com/oauth2/token",
+        required: true,
+        default: defaults.token_endpoint,
+        placeholder: defaults.token_endpoint,
       },
       {
         key: "userinfo_endpoint",
         label: "UserInfo Endpoint",
         type: "url",
-        placeholder: "https://provider.example.com/oauth2/userinfo",
-      },
-      {
-        key: "jwks_uri",
-        label: "JWKS URI",
-        type: "url",
-        placeholder: "https://provider.example.com/.well-known/jwks.json",
+        required: true,
+        default: defaults.userinfo_endpoint,
+        placeholder: defaults.userinfo_endpoint,
       },
     ],
   }
 }
 
+/**
+ * OIDC providers: scopes only. Endpoints come from OIDC discovery — the backend
+ * REJECTS endpoint overrides for OIDC providers (they'd let the runtime be
+ * pointed at an attacker host), so we must not collect them here.
+ */
 function commonExternalGroups(defaultScopes?: string): ProviderConfigGroup[] {
-  return [scopesGroup(defaultScopes), endpointOverridesGroup()]
+  return [scopesGroup(defaultScopes)]
+}
+
+/** OAuth2-only providers: scopes + REQUIRED, pre-filled OAuth2 endpoints. */
+function oauth2OnlyGroups(defaultScopes: string, endpoints: EndpointDefaults): ProviderConfigGroup[] {
+  return [scopesGroup(defaultScopes), requiredEndpointsGroup(endpoints)]
 }
 
 export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchema> = {
   maintainerd: {
-    kind: "system",
+    // A user-created Maintainerd provider federates to ANOTHER organization's
+    // self-hosted Maintainerd instance over standard OIDC (enterprise). The
+    // built-in local provider that ships with this system is a separate,
+    // undeletable system record and is shown read-only — it needs no config.
+    kind: "enterprise",
     summary:
-      "Built-in authentication managed by Maintainerd. User accounts, passwords, and sessions are handled natively — no external connection details are required.",
-    groups: [],
+      "Federate to another organization's self-hosted Maintainerd instance over OpenID Connect. Provide that instance's issuer URL and an OAuth client registered there. (The built-in Maintainerd provider is managed separately and needs no configuration.)",
+    groups: commonExternalGroups("openid, profile, email"),
   },
 
   cognito: {
     kind: "enterprise",
-    summary: "Connect an Amazon Cognito User Pool. Maintainerd needs the pool's regional identifiers and OAuth credentials to validate tokens and broker sign-in.",
+    summary: "Connect an Amazon Cognito User Pool over OpenID Connect. Provide the pool's issuer URL and OAuth credentials; the broker discovers the rest from its metadata.",
     docsLabel: "AWS Cognito user pool guide",
     docsUrl:
       "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html",
-    groups: [
-      ...commonExternalGroups(),
-      {
-        title: "User Pool",
-        description: "Identifiers for the Cognito User Pool that issues tokens.",
-        fields: [
-          {
-            key: "region",
-            label: "AWS Region",
-            type: "text",
-            required: true,
-            placeholder: "us-east-1",
-            description: "Region where the user pool is hosted.",
-          },
-          {
-            key: "user_pool_id",
-            label: "User Pool ID",
-            type: "text",
-            required: true,
-            placeholder: "us-east-1_aB12cD34",
-            description: "The Cognito User Pool identifier.",
-          },
-          {
-            key: "domain",
-            label: "Hosted UI Domain",
-            type: "url",
-            placeholder: "https://your-app.auth.us-east-1.amazoncognito.com",
-            description: "Cognito hosted UI / OAuth domain. Optional if you don't use the hosted UI.",
-          },
-        ],
-      },
-    ],
+    groups: commonExternalGroups(),
   },
 
   auth0: {
     kind: "enterprise",
-    summary: "Connect an Auth0 tenant. Provide the tenant connection details and application credentials.",
+    summary: "Connect an Auth0 tenant over OpenID Connect. Provide the tenant issuer URL and application credentials.",
     docsLabel: "Auth0 application setup",
     docsUrl: "https://auth0.com/docs/get-started/applications",
-    groups: [
-      ...commonExternalGroups(),
-      {
-        title: "Tenant",
-        fields: [
-          {
-            key: "domain",
-            label: "Domain",
-            type: "text",
-            required: true,
-            placeholder: "your-tenant.us.auth0.com",
-            description: "Your Auth0 tenant domain, without the https:// prefix.",
-          },
-          {
-            key: "audience",
-            label: "API Audience",
-            type: "url",
-            placeholder: "https://api.example.com",
-            description: "Identifier of the API this provider issues access tokens for. Optional.",
-          },
-          {
-            key: "connection",
-            label: "Connection",
-            type: "text",
-            placeholder: "Username-Password-Authentication",
-            description: "Restrict logins to a specific Auth0 connection. Optional.",
-          },
-        ],
-      },
-    ],
+    groups: commonExternalGroups(),
   },
 
   microsoft: {
     kind: "enterprise",
-    summary: "Sign in with Microsoft Entra ID (Azure AD). Provide the directory and application credentials.",
+    summary: "Sign in with Microsoft Entra ID (Azure AD) over OpenID Connect. Provide the tenant issuer URL and application credentials.",
     docsLabel: "Microsoft Entra ID platform",
     docsUrl: "https://learn.microsoft.com/en-us/entra/identity-platform/",
-    groups: [
-      ...commonExternalGroups(),
-      {
-        title: "Directory",
-        fields: [
-          {
-            key: "tenant",
-            label: "Tenant",
-            type: "text",
-            required: true,
-            placeholder: "common",
-            description: "Entra tenant ID, or one of: common, organizations, consumers.",
-          },
-        ],
-      },
-    ],
+    groups: commonExternalGroups(),
   },
 
   google: {
@@ -355,118 +392,40 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
     summary: "Sign in with Google. Maintainerd uses Google's published OIDC metadata with your OAuth credentials.",
     docsLabel: "Google OAuth 2.0",
     docsUrl: "https://developers.google.com/identity/protocols/oauth2",
-    groups: [
-      ...commonExternalGroups(),
-      {
-        title: "Options",
-        fields: [
-          {
-            key: "hosted_domain",
-            label: "Hosted Domain (hd)",
-            type: "text",
-            placeholder: "example.com",
-            description: "Restrict sign-in to a Google Workspace domain. Optional.",
-          },
-        ],
-      },
-    ],
+    groups: commonExternalGroups(),
   },
 
   github: {
     kind: "social",
-    summary: "Sign in with GitHub using your OAuth App credentials.",
+    summary: "Sign in with GitHub using your OAuth App credentials. GitHub has no OIDC discovery, so the OAuth2 endpoints below are required (pre-filled with github.com defaults).",
     docsLabel: "GitHub OAuth Apps",
     docsUrl:
       "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
-    groups: [
-      ...commonExternalGroups("read:user, user:email"),
-      {
-        title: "Options",
-        fields: [
-          {
-            key: "enterprise_base_url",
-            label: "Enterprise Base URL",
-            type: "url",
-            placeholder: "https://github.your-company.com",
-            description: "Only for GitHub Enterprise Server. Leave blank for github.com.",
-          },
-        ],
-      },
-    ],
+    groups: oauth2OnlyGroups("read:user, user:email", {
+      authorization_endpoint: "https://github.com/login/oauth/authorize",
+      token_endpoint: "https://github.com/login/oauth/access_token",
+      userinfo_endpoint: "https://api.github.com/user",
+    }),
   },
 
   gitlab: {
     kind: "social",
-    summary: "Sign in with GitLab using your OAuth application credentials.",
+    summary: "Sign in with GitLab using your OAuth application credentials over OpenID Connect.",
     docsLabel: "GitLab OAuth provider",
     docsUrl: "https://docs.gitlab.com/ee/integration/oauth_provider.html",
-    groups: [
-      ...commonExternalGroups("openid, profile, email"),
-      {
-        title: "Options",
-        fields: [
-          {
-            key: "base_url",
-            label: "Base URL",
-            type: "url",
-            placeholder: "https://gitlab.example.com",
-            description: "Base URL for self-managed GitLab. Leave blank for gitlab.com.",
-          },
-        ],
-      },
-    ],
+    groups: commonExternalGroups("openid, profile, email"),
   },
 
   facebook: {
     kind: "social",
-    summary: "Sign in with Facebook Login using your app credentials.",
+    summary: "Sign in with Facebook Login using your app credentials. Facebook has no OIDC discovery, so the OAuth2 endpoints below are required (pre-filled with Graph API defaults).",
     docsLabel: "Facebook Login setup",
     docsUrl: "https://developers.facebook.com/docs/facebook-login/",
-    groups: [
-      ...commonExternalGroups("public_profile, email"),
-      {
-        title: "Options",
-        fields: [
-          {
-            key: "api_version",
-            label: "Graph API Version",
-            type: "text",
-            placeholder: "v19.0",
-            description: "Graph API version used for token and profile calls. Optional.",
-          },
-        ],
-      },
-    ],
-  },
-
-  apple: {
-    kind: "social",
-    summary: "Sign in with Apple. Provide your Services ID as the client ID and the generated client secret (signed with your private key).",
-    docsLabel: "Sign in with Apple",
-    docsUrl: "https://developer.apple.com/sign-in-with-apple/",
-    groups: [
-      ...commonExternalGroups("name, email"),
-      {
-        title: "Developer",
-        fields: [
-          {
-            key: "team_id",
-            label: "Team ID",
-            type: "text",
-            required: true,
-            placeholder: "ABCDE12345",
-            description: "Your Apple Developer Team ID.",
-          },
-          {
-            key: "key_id",
-            label: "Key ID",
-            type: "text",
-            placeholder: "XYZ1234567",
-            description: "Identifier of the private key used to sign the client secret. Optional.",
-          },
-        ],
-      },
-    ],
+    groups: oauth2OnlyGroups("public_profile, email", {
+      authorization_endpoint: "https://www.facebook.com/v25.0/dialog/oauth",
+      token_endpoint: "https://graph.facebook.com/v25.0/oauth/access_token",
+      userinfo_endpoint: "https://graph.facebook.com/v25.0/me?fields=id,name,email",
+    }),
   },
 
   linkedin: {
@@ -480,28 +439,18 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
 
   twitter: {
     kind: "social",
-    summary: "Sign in with X (Twitter) using your OAuth 2.0 application credentials.",
+    summary: "Sign in with X (Twitter) using your OAuth 2.0 application credentials. X has no OIDC discovery, so the OAuth2 endpoints below are required (pre-filled with X API defaults).",
     docsLabel: "X OAuth 2.0",
     docsUrl: "https://developer.twitter.com/en/docs/authentication/oauth-2-0",
-    groups: [
-      ...commonExternalGroups("tweet.read, users.read, offline.access"),
-      {
-        title: "Options",
-        fields: [
-          {
-            key: "api_version",
-            label: "API Version",
-            type: "text",
-            placeholder: "2",
-            description: "X API version. Optional.",
-          },
-        ],
-      },
-    ],
+    groups: oauth2OnlyGroups("tweet.read, users.read, offline.access", {
+      authorization_endpoint: "https://x.com/i/oauth2/authorize",
+      token_endpoint: "https://api.x.com/2/oauth2/token",
+      userinfo_endpoint: "https://api.x.com/2/users/me",
+    }),
   },
 
   saml: {
-    kind: "enterprise",
+    kind: "saml",
     summary: "Connect a SAML 2.0 identity provider. Maintainerd acts as the service provider and validates assertions signed by your enterprise IdP.",
     groups: [
       {
@@ -520,16 +469,17 @@ export const PROVIDER_CONFIG_SCHEMAS: Record<ProviderOption, ProviderConfigSchem
             key: "entity_id",
             label: "IdP Entity ID",
             type: "text",
+            required: true,
             placeholder: "https://idp.example.com/saml2/metadata",
             description: "Unique identifier for the identity provider (from its metadata).",
           },
           {
             key: "certificate",
             label: "X.509 Certificate",
-            type: "text",
+            type: "textarea",
             required: true,
             placeholder: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
-            description: "Public certificate used to verify SAML assertion signatures.",
+            description: "Public certificate (PEM) used to verify SAML assertion signatures.",
           },
         ],
       },

@@ -26,9 +26,6 @@ const MaintainedAuthIcon = ({
 				<clipPath id="right-half">
 					<rect x="12" y="0" width="12" height="24" />
 				</clipPath>
-				<filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
-					<feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="rgba(0,0,0,0.3)" />
-				</filter>
 				<path id="shieldPath"
 					d="M12 2.5
 						L4 5.5
@@ -39,13 +36,11 @@ const MaintainedAuthIcon = ({
 						L12 2.5Z" />
 			</defs>
 			<rect width="100%" height="100%" fill="transparent" />
-			<g filter="url(#dropShadow)">
-				<g clipPath="url(#left-half)">
-					<use href="#shieldPath" fill="#1E40AF" />
-				</g>
-				<g clipPath="url(#right-half)">
-					<use href="#shieldPath" fill="#2563EB" />
-				</g>
+			<g clipPath="url(#left-half)">
+				<use href="#shieldPath" fill="#1E40AF" />
+			</g>
+			<g clipPath="url(#right-half)">
+				<use href="#shieldPath" fill="#2563EB" />
 			</g>
 		</svg>
 

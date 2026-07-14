@@ -9,14 +9,15 @@ const SEARCH_FIELDS = ["search"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
   { key: "provider_type", label: "Type", options: ["system", "enterprise", "social"] },
-  { key: "provider", label: "Provider", options: ["maintainerd", "cognito", "auth0", "google", "facebook", "github", "gitlab", "microsoft", "apple", "linkedin", "twitter"] },
+  { key: "provider", label: "Provider", options: ["maintainerd", "saml", "cognito", "auth0", "google", "facebook", "github", "gitlab", "microsoft", "linkedin", "twitter"] },
 ]
 
-export function IdentityProviderListing() {
+export function IdentityProviderListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={identityProviderColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}

@@ -32,7 +32,7 @@ const getProviderBadge = (provider: ProviderOption, isSystem: boolean) => {
 
 export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
   {
-    id: "display_name",
+    id: "Identity Provider",
     accessorKey: "display_name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Identity Provider" />,
     cell: ({ row }) => {
@@ -52,7 +52,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "provider",
+    id: "Provider",
     accessorKey: "provider",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Provider" />,
     cell: ({ row }) => {
@@ -64,7 +64,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
@@ -76,24 +76,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
     },
   },
   {
-    id: "token_federation",
-    accessorKey: "allow_token_federation",
-    header: "Federation",
-    cell: ({ row }) => {
-      if (row.original.allow_token_federation) {
-        return (
-          <div className="px-3 py-1">
-            <Badge variant="outline" className="text-xs border-blue-200 bg-blue-50 text-blue-700">
-              Token Federation
-            </Badge>
-          </div>
-        )
-      }
-      return null
-    },
-  },
-  {
-    id: "created_at",
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -119,5 +102,7 @@ export const identityProviderColumns: ColumnDef<IdentityProvider>[] = [
         </div>
       )
     },
+    enableSorting: false,
+    enableHiding: false,
   },
 ]

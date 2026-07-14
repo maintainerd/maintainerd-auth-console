@@ -26,7 +26,6 @@ export type ProviderOption =
   | 'github'
   | 'gitlab'
   | 'microsoft'
-  | 'apple'
   | 'linkedin'
   | 'twitter'
   | 'saml'
@@ -68,7 +67,6 @@ export type Tenant = {
   tenant_id: string
   name: string
   description: string
-  identifier: string
   status: 'active' | 'inactive' | 'suspended'
   is_public: boolean
   is_default: boolean

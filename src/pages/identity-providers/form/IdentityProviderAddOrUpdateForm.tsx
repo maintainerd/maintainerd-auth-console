@@ -3,8 +3,11 @@ import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useMutation } from "@tanstack/react-query"
+import { ArrowLeft, AlertCircle, CheckCircle2, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -16,6 +19,10 @@ import {
   FormTextareaField,
   type SelectOption
 } from "@/components/form"
+import { FormSlugField, FormUrlField } from "@/components/inputs"
+import { sanitizeName } from "@/lib/validations/regex"
+import { ConfirmationDialog } from "@/components/dialog"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
 import {
   ProviderConfigSection,
   useProviderConfig,
@@ -37,9 +44,14 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
+// Tokenizer for list fields submitted to the backend (email domains, allowed
+// audiences). Splits on whitespace, comma, or newline — kept identical to the
+// yup emailDomains tokenizer and useProviderConfig's parseList so a value that
+// validates is split into exactly the same tokens on submit (space-separated
+// domains no longer collapse into one invalid token the backend rejects).
 function parseList(value: string | null | undefined): string[] {
   return (value ?? "")
-    .split(/[\n,]/)
+    .split(/[\s,\n]+/)
     .map((item) => item.trim())
     .filter(Boolean)
 }
@@ -52,7 +64,7 @@ export default function IdentityProviderAddOrUpdateForm() {
   const { providerId } = useParams<{ providerId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
 
   const isEditing = Boolean(providerId)
@@ -84,7 +96,7 @@ export default function IdentityProviderAddOrUpdateForm() {
     watch,
     getValues,
     setError,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<IdentityProviderFormData>({
     resolver: yupResolver(identityProviderSchema) as Resolver<IdentityProviderFormData>,
     defaultValues: {
@@ -101,8 +113,8 @@ export default function IdentityProviderAddOrUpdateForm() {
       allowedAudiences: "",
       emailDomains: "",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    mode: 'onTouched',
+    reValidateMode: 'onChange'
   })
 
   // Dynamic, provider-aware configuration. Re-renders its fields whenever the
@@ -110,8 +122,17 @@ export default function IdentityProviderAddOrUpdateForm() {
   // merged into a single `config` JSON on save.
   const selectedProvider = watch("provider")
   const selectedStatus = watch("status")
+  const allowTokenFederation = watch("allowTokenFederation")
   const connectionSchema = getProviderConnectionSchema(selectedProvider)
   const providerConfig = useProviderConfig(selectedProvider)
+
+  // The built-in provider is the seeded, undeletable system record (is_system).
+  // It authenticates locally and has no external OIDC connection/config, so its
+  // (read-only) edit view hides the connection + config cards. Every other
+  // maintainerd provider is a regular external federation to a different
+  // organization's Maintainerd instance and shows the full OIDC connection UI.
+  const isBuiltInSystem = providerData?.is_system === true
+  const showConnection = Boolean(connectionSchema) && !isBuiltInSystem
 
   // Load existing provider data if editing
   useEffect(() => {
@@ -137,13 +158,16 @@ export default function IdentityProviderAddOrUpdateForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, providerData, reset])
 
+  // Warn before discarding unsaved edits (browser close/refresh + guarded exits).
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
+
   const onSubmit = async (formData: IdentityProviderFormData) => {
     if (!currentTenant) {
       showError("Tenant information not available")
       return
     }
 
-    const activeExternalProvider = Boolean(connectionSchema && formData.status === "active")
+    const activeExternalProvider = Boolean(showConnection && formData.status === "active")
     if (activeExternalProvider && !isEditing && !(formData.clientSecret ?? "").trim()) {
       setError("clientSecret", {
         type: "manual",
@@ -153,27 +177,32 @@ export default function IdentityProviderAddOrUpdateForm() {
       return
     }
 
-    if (!providerConfig.validate()) {
+    // Thread the selected status through so config presence ("required") checks
+    // only fire for an active provider — matching the backend, which requires
+    // config fields only when status === "active". Format checks always run.
+    if (!isBuiltInSystem && !providerConfig.validate(selectedStatus)) {
       showError("Please complete the required provider configuration fields.")
       return
     }
 
     try {
-      const config = providerConfig.buildConfig()
-      const providerType = getProviderKind(formData.provider)
+      // The built-in system record keeps its system type; every other provider
+      // derives its type from the selected provider (maintainerd → enterprise).
+      const config = isBuiltInSystem ? {} : providerConfig.buildConfig()
+      const providerType = isBuiltInSystem ? "system" : getProviderKind(formData.provider)
       const clientSecret = (formData.clientSecret ?? "").trim()
       const payload = {
         name: formData.name,
         display_name: formData.displayName,
         provider: formData.provider as ProviderOption,
         provider_type: providerType,
-        issuer: connectionSchema ? (formData.issuer ?? "").trim() || null : null,
-        provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
-        allow_jit_provisioning: connectionSchema ? Boolean(formData.allowJITProvisioning) : false,
+        issuer: showConnection ? (formData.issuer ?? "").trim() || null : null,
+        provider_client_id: showConnection ? (formData.clientId ?? "").trim() || null : null,
+        allow_jit_provisioning: showConnection ? Boolean(formData.allowJITProvisioning) : false,
         allow_registration: Boolean(formData.allowRegistration),
         allow_token_federation: Boolean(formData.allowTokenFederation),
         allowed_audiences: parseList(formData.allowedAudiences),
-        email_domains: connectionSchema ? parseList(formData.emailDomains) : [],
+        email_domains: showConnection ? parseList(formData.emailDomains) : [],
         config,
         status: formData.status as IdentityProviderStatus,
         ...(clientSecret ? { provider_client_secret: clientSecret } : {}),
@@ -193,7 +222,43 @@ export default function IdentityProviderAddOrUpdateForm() {
       // Navigate back to wherever we came from
       navigate(backTo)
     } catch (error) {
-      showError(error, "Failed to save identity provider")
+      // Route backend errors onto the offending field where we can: structured
+      // field errors first, otherwise keyword-match the message. Anything
+      // unmapped still shows via the toast. The backend keys field errors by its
+      // snake_case JSON tag, so translate those to the form's RHF field names.
+      const parsed = parseError(error)
+      const BACKEND_FIELD_MAP: Record<string, keyof IdentityProviderFormData> = {
+        name: "name",
+        display_name: "displayName",
+        provider: "provider",
+        provider_type: "provider",
+        status: "status",
+        issuer: "issuer",
+        provider_client_id: "clientId",
+        provider_client_secret: "clientSecret",
+        allowed_audiences: "allowedAudiences",
+        email_domains: "emailDomains",
+      }
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          const rhfField = BACKEND_FIELD_MAP[field]
+          if (rhfField) {
+            setError(rhfField, { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        const match = Object.entries(BACKEND_FIELD_MAP).find(
+          ([backendField, rhfField]) => lower.includes(backendField) || lower.includes(rhfField.toLowerCase())
+        )
+        if (match) {
+          setError(match[1], { type: "server", message: parsed.message })
+        }
+      }
+      showError(error)
     }
   }
 
@@ -203,15 +268,15 @@ export default function IdentityProviderAddOrUpdateForm() {
   const handleTestConnection = async () => {
     setTestResult(null)
     const formData = getValues()
-    const config = providerConfig.buildConfig()
-    const providerType = getProviderKind(formData.provider)
+    const config = isBuiltInSystem ? {} : providerConfig.buildConfig()
+    const providerType = isBuiltInSystem ? "system" : getProviderKind(formData.provider)
     const clientSecret = (formData.clientSecret ?? "").trim()
     const payload: Record<string, unknown> = {
       name: formData.name || "",
       provider: formData.provider,
       provider_type: providerType,
-      issuer: connectionSchema ? (formData.issuer ?? "").trim() || null : null,
-      provider_client_id: connectionSchema ? (formData.clientId ?? "").trim() || null : null,
+      issuer: showConnection ? (formData.issuer ?? "").trim() || null : null,
+      provider_client_id: showConnection ? (formData.clientId ?? "").trim() || null : null,
       ...(clientSecret ? { provider_client_secret: clientSecret } : {}),
       config,
       allowed_audiences: parseList(formData.allowedAudiences),
@@ -219,17 +284,61 @@ export default function IdentityProviderAddOrUpdateForm() {
     testConnectionMutation.mutate(payload)
   }
 
-  // Loading state
+  // Loading state while fetching the provider to edit
   if (isEditing && isFetchingProvider) {
     return (
       <DetailsContainer>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">Loading...</h2>
-            <p className="text-muted-foreground mt-2">
-              Fetching identity provider details
-            </p>
-          </div>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Identity Provider"
+            description="Update the identity provider configuration and settings."
+          />
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
+  }
+
+  // Not-found state
+  if (isEditing && !isFetchingProvider && !providerData) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Identity Provider"
+            description="Update the identity provider configuration and settings."
+          />
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Identity provider not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The identity provider you're looking for doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => guard(() => navigate(backTo))}>
+                <ArrowLeft className="mr-2 size-4" />
+                {backLabel}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </DetailsContainer>
     )
@@ -248,20 +357,28 @@ export default function IdentityProviderAddOrUpdateForm() {
           }
           backUrl={backTo}
           backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
+          showSystemBadge={isBuiltInSystem}
+          showWarning={isBuiltInSystem}
+          warningMessage="This is the built-in system provider. It authenticates locally and cannot be edited."
         />
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={providerId || "create"}>
           {/* Basic Information */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                The provider name, type, status, and registration policies.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormInputField
+              <FormSlugField
                 label="Name"
                 placeholder="e.g., corporate-auth0, aws-cognito"
                 description="Lowercase letters, numbers, and hyphens only"
+                sanitize={sanitizeName}
                 disabled={fieldsDisabled}
                 error={errors.name?.message}
                 required
@@ -349,27 +466,29 @@ export default function IdentityProviderAddOrUpdateForm() {
                 )}
               />
 
-              <Controller
-                name="allowedAudiences"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <FormTextareaField
-                    id="allowed-audiences"
-                    label="Allowed audiences"
-                    description='External app client IDs that may present tokens from this issuer. One per line.'
-                    placeholder="my-external-app&#10;another-app"
-                    error={fieldState.error?.message}
-                    disabled={fieldsDisabled}
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
+              {allowTokenFederation && (
+                <Controller
+                  name="allowedAudiences"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <FormTextareaField
+                      id="allowed-audiences"
+                      label="Allowed audiences"
+                      description='External app client IDs that may present tokens from this issuer. One per line.'
+                      placeholder="my-external-app&#10;another-app"
+                      error={fieldState.error?.message}
+                      disabled={fieldsDisabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              )}
             </CardContent>
           </Card>
 
-          {connectionSchema && (
+          {showConnection && connectionSchema && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Connection</CardTitle>
@@ -433,11 +552,26 @@ export default function IdentityProviderAddOrUpdateForm() {
                       )
                     }
 
+                    if (field.type === "url") {
+                      return (
+                        <FormUrlField
+                          key={field.key}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          description={field.description}
+                          disabled={fieldsDisabled}
+                          error={field.key === "issuer" ? errors.issuer?.message : errors.clientId?.message}
+                          required={field.required && selectedStatus === "active"}
+                          {...register(field.key === "issuer" ? "issuer" : "clientId")}
+                        />
+                      )
+                    }
+
                     return (
                       <FormInputField
                         key={field.key}
                         label={field.label}
-                        type={field.type === "url" ? "url" : "text"}
+                        type="text"
                         placeholder={field.placeholder}
                         description={field.description}
                         disabled={fieldsDisabled}
@@ -452,12 +586,15 @@ export default function IdentityProviderAddOrUpdateForm() {
             </Card>
           )}
 
-          {/* Provider-aware configuration */}
-          <ProviderConfigSection
-            provider={selectedProvider}
-            controller={providerConfig}
-            disabled={fieldsDisabled}
-          />
+          {/* Provider-aware configuration (external providers only; the built-in
+              system provider authenticates locally and has no config). */}
+          {!isBuiltInSystem && (
+            <ProviderConfigSection
+              provider={selectedProvider}
+              controller={providerConfig}
+              disabled={fieldsDisabled}
+            />
+          )}
 
           {/* Actions */}
           <div className="flex items-center justify-between gap-3">
@@ -465,7 +602,7 @@ export default function IdentityProviderAddOrUpdateForm() {
               type="button"
               variant="secondary"
               onClick={handleTestConnection}
-              disabled={isLoading || testConnectionMutation.isPending}
+              disabled={isLoading || testConnectionMutation.isPending || !showConnection}
             >
               {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
             </Button>
@@ -473,7 +610,7 @@ export default function IdentityProviderAddOrUpdateForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(backTo)}
+                onClick={() => guard(() => navigate(backTo))}
                 disabled={isLoading}
               >
                 Cancel
@@ -487,19 +624,44 @@ export default function IdentityProviderAddOrUpdateForm() {
             </div>
           </div>
           {testResult && (
-            <div className={`rounded p-3 mt-2 text-sm ${testResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
-              <p className="font-medium mb-1">{testResult.success ? "Connection test passed" : "Connection test failed"}</p>
-              {testResult.message && <p className="text-muted-foreground mb-2">{testResult.message}</p>}
-              {testResult.checks?.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className={c.passed ? "text-green-600" : "text-red-600"}>{c.passed ? "✓" : "✗"}</span>
-                  <span>{c.label}</span>
-                  {c.message && <span className="text-muted-foreground">— {c.message}</span>}
-                </div>
-              ))}
-            </div>
+            <Alert variant={testResult.success ? "default" : "destructive"}>
+              {testResult.success ? <CheckCircle2 /> : <XCircle />}
+              <AlertTitle>
+                {testResult.success ? "Connection test passed" : "Connection test failed"}
+              </AlertTitle>
+              <AlertDescription>
+                {testResult.message && <p>{testResult.message}</p>}
+                {testResult.checks && testResult.checks.length > 0 && (
+                  <ul className="space-y-1">
+                    {testResult.checks.map((c, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        {c.passed ? (
+                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                        ) : (
+                          <XCircle className="size-4 shrink-0 text-destructive" aria-hidden="true" />
+                        )}
+                        <span className="sr-only">{c.passed ? "Passed:" : "Failed:"}</span>
+                        <span>{c.label}</span>
+                        {c.message && <span className="text-muted-foreground">— {c.message}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </AlertDescription>
+            </Alert>
           )}
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

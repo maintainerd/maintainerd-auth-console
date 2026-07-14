@@ -13,6 +13,7 @@ export {
   getProviderConfigSchema,
   getProviderFieldKeys,
   getProviderKind,
+  isOAuth2OnlyProvider,
   type ProviderConnectionField,
   type ProviderConnectionFieldKey,
   type ProviderConnectionSchema,
@@ -22,7 +23,7 @@ export {
   type ProviderFieldType,
   type ProviderKind,
 } from "./providerConfigSchemas"
-export { useProviderConfig, type ProviderConfigController, type CustomConfigField } from "./useProviderConfig"
+export { useProviderConfig, type ProviderConfigController } from "./useProviderConfig"
 export { ProviderConfigSection, type ProviderConfigSectionProps } from "./ProviderConfigSection"
 export { ProviderLogo, type ProviderLogoProps } from "./ProviderLogo"
 export { getProviderBrand, type ProviderBrand } from "./providerBrand"

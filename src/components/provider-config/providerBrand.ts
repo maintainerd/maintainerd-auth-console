@@ -2,13 +2,12 @@
  * Provider brand marks — maps each provider to a brand glyph + colour.
  *
  * Uses the brand icons shipped with @tabler/icons-react (already a project
- * dependency) so no extra icon library is needed. Monochrome brands (GitHub,
- * Apple, X) use `text-foreground` so they stay legible in light and dark themes.
+ * dependency) so no extra icon library is needed. Monochrome brands (GitHub, X)
+ * use `text-foreground` so they stay legible in light and dark themes.
  * Internal/unmapped providers fall back to a neutral shield.
  */
 
 import {
-  IconBrandApple,
   IconBrandAuth0,
   IconBrandAws,
   IconBrandAzure,
@@ -38,7 +37,6 @@ const PROVIDER_BRAND: Record<string, ProviderBrand> = {
   github: { Icon: IconBrandGithub, color: "text-foreground" },
   gitlab: { Icon: IconBrandGitlab, color: "text-[#FC6D26]" },
   facebook: { Icon: IconBrandFacebook, color: "text-[#1877F2]" },
-  apple: { Icon: IconBrandApple, color: "text-foreground" },
   linkedin: { Icon: IconBrandLinkedin, color: "text-[#0A66C2]" },
   twitter: { Icon: IconBrandX, color: "text-foreground" },
 }

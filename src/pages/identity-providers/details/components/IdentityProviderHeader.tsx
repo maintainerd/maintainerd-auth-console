@@ -1,21 +1,23 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, KeyRound, Building2, CalendarDays, Globe2 } from "lucide-react"
+import { Edit, Trash2, MoreVertical, KeyRound, Building2, CalendarDays, Globe2, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
-import { useDeleteIdentityProvider } from "@/hooks/useIdentityProviders"
+import { ProviderLogo } from "@/components/provider-config"
+import { useDeleteIdentityProvider, useUpdateIdentityProviderStatus } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
 import { format } from "date-fns"
 import { getProviderDisplayName } from "../utils"
-import type { IdentityProviderDetail } from "@/services/api/identity-providers/types"
+import type { IdentityProviderDetail, IdentityProviderStatus } from "@/services/api/identity-providers/types"
 
 interface IdentityProviderHeaderProps {
   provider: IdentityProviderDetail
@@ -26,7 +28,9 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteProviderMutation = useDeleteIdentityProvider()
+  const updateStatusMutation = useUpdateIdentityProviderStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<{ status: IdentityProviderStatus; title: string; description: string } | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -38,8 +42,29 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
     }
   }
 
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    try {
+      await updateStatusMutation.mutateAsync({ identityProviderId: providerId, data: { status: statusAction.status } })
+      showSuccess(`Identity provider status updated to ${statusAction.status}`)
+    } catch (error) {
+      showError(error)
+    } finally {
+      setStatusAction(null)
+    }
+  }
+
+  // Availability mirrors the backend rules and the listing (IdentityProviderActions):
+  // system providers can't change status or be deleted; the default provider also
+  // can't be deactivated or deleted.
+  const isActive = provider.status === "active"
+  const canActivate = !provider.is_system && !isActive
+  const canDeactivate = !provider.is_system && isActive && !provider.is_default
+  const canDelete = !provider.is_system && !provider.is_default
+  const hasMenu = canActivate || canDeactivate || canDelete
+
+  const providerLabel = getProviderDisplayName(provider.provider, provider.is_system)
   const tenantName = provider.tenant?.name
-  const tenantIdentifier = provider.tenant?.identifier
 
   const attributes: DetailAttribute[] = [
     {
@@ -55,7 +80,7 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
     {
       icon: Building2,
       label: "Provider Type",
-      value: getProviderDisplayName(provider.provider, provider.is_system),
+      value: providerLabel,
     },
     {
       icon: Globe2,
@@ -70,12 +95,7 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
       icon: Building2,
       label: "Tenant",
       value: tenantName ? (
-        <div className="flex flex-col gap-0.5">
-          <span className="font-medium">{tenantName}</span>
-          {tenantIdentifier && (
-            <span className="font-mono text-xs text-muted-foreground">{tenantIdentifier}</span>
-          )}
-        </div>
+        <span className="font-medium">{tenantName}</span>
       ) : (
         <span className="text-muted-foreground">—</span>
       ),
@@ -95,11 +115,7 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
   return (
     <>
       <DetailHeaderCard
-        leading={
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-            <KeyRound className="size-6" />
-          </div>
-        }
+        leading={<ProviderLogo provider={provider.provider} className="size-14" iconClassName="size-6" />}
         title={provider.display_name}
         badge={
           <div className="flex items-center gap-2">
@@ -107,9 +123,7 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
             <SystemBadge isSystem={provider.is_system} />
           </div>
         }
-        subtitle={
-          <span className="font-mono text-xs text-muted-foreground">{provider.identifier}</span>
-        }
+        subtitle={<span className="text-sm font-medium text-muted-foreground">{providerLabel}</span>}
         attributes={attributes}
         actions={
           <>
@@ -126,7 +140,7 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
               <Edit className="size-4" />
               Edit
             </Button>
-            {!provider.is_system && (
+            {hasMenu && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 w-9 p-0">
@@ -135,18 +149,63 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 size-4" />
-                    Delete Provider
-                  </DropdownMenuItem>
+                  {canActivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "active",
+                          title: "Activate Identity Provider",
+                          description: "Are you sure you want to activate this identity provider? Users will be able to authenticate through it.",
+                        })
+                      }
+                    >
+                      <Play className="mr-2 size-4" />
+                      Activate Provider
+                    </DropdownMenuItem>
+                  )}
+                  {canDeactivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "inactive",
+                          title: "Deactivate Identity Provider",
+                          description: "Are you sure you want to deactivate this identity provider? Users will not be able to authenticate through it.",
+                        })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Pause className="mr-2 size-4" />
+                      Deactivate Provider
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        Delete Provider
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
           </>
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        variant={statusAction?.status === "inactive" ? "destructive" : "default"}
+        confirmText={statusAction?.status === "active" ? "Activate" : "Deactivate"}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

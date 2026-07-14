@@ -121,7 +121,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive(subItem.route)}
-                                className={`h-8 px-2 text-sm hover:bg-slate-100 hover:text-slate-900 ${isActive(subItem.route) ? "bg-slate-200 font-medium text-slate-900 hover:bg-slate-200 hover:text-slate-900 data-[active=true]:bg-slate-200" : ""}`}
+                                className={`h-8 px-2 text-sm hover:bg-slate-100 hover:text-slate-900 ${isActive(subItem.route) ? "bg-[#edf2f6] font-medium text-slate-900 hover:bg-[#edf2f6] hover:text-slate-900 data-[active=true]:bg-[#edf2f6]" : ""}`}
                               >
                                 <Link to={buildRoute(subItem.route)}>
                                   <span>{subItem.title}</span>
@@ -136,7 +136,7 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
-                      className={`h-8 px-2 text-sm [&>svg]:size-[18px] hover:bg-slate-100 ${isActive(item.route) ? "bg-slate-200 font-medium text-slate-900 hover:bg-slate-200 hover:text-slate-900" : ""}`}
+                      className={`h-8 px-2 text-sm [&>svg]:size-[18px] hover:bg-slate-100 ${isActive(item.route) ? "bg-[#edf2f6] font-medium text-slate-900 hover:bg-[#edf2f6] hover:text-slate-900" : ""}`}
                     >
                       <Link to={buildRoute(item.route)}>
                         {item.icon && <item.icon active={isActive(item.route)} />}

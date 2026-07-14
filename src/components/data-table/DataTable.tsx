@@ -44,7 +44,7 @@ export function DataTable<TData>({
           the normal table layout returns at md+. The header carries a single 1px
           bottom rule, slightly darker (slate-300) than the row separators so it
           still reads as the header divider without being heavy. */}
-      <TableHeader className="hidden md:table-header-group [&_tr]:border-b [&_tr]:bg-[#f6f6f7] [&_tr]:hover:bg-[#f6f6f7]">
+      <TableHeader className="hidden md:table-header-group [&_tr]:border-b [&_tr]:bg-slate-50 [&_tr]:hover:bg-slate-50">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {

@@ -27,7 +27,12 @@ export function IdentityProviderActions({ provider }: IdentityProviderActionsPro
     }
   }
 
+  // Availability mirrors backend rules: system identity providers can't change
+  // status or be deleted; the default provider also can't be deactivated/deleted.
   const isActive = provider.status === "active"
+  const canActivate = !provider.is_system && !isActive
+  const canDeactivate = !provider.is_system && isActive && !provider.is_default
+  const canDelete = !provider.is_system && !provider.is_default
 
   const items: RowActionItem[] = [
     {
@@ -42,21 +47,8 @@ export function IdentityProviderActions({ provider }: IdentityProviderActionsPro
       icon: Edit,
       onSelect: () => navigate(`/providers/identity/${provider.identity_provider_id}/edit`),
     },
-    ...(isActive
+    ...(canActivate
       ? [
-          {
-            key: "deactivate",
-            label: "Deactivate Provider",
-            icon: Pause,
-            onSelect: () => changeStatus("inactive"),
-            confirm: {
-              title: "Deactivate Identity Provider",
-              description: "Are you sure you want to deactivate this identity provider? Users will not be able to authenticate through it.",
-              confirmText: "Deactivate",
-            },
-          } satisfies RowActionItem,
-        ]
-      : [
           {
             key: "activate",
             label: "Activate Provider",
@@ -68,8 +60,25 @@ export function IdentityProviderActions({ provider }: IdentityProviderActionsPro
               confirmText: "Activate",
             },
           } satisfies RowActionItem,
-        ]),
-    ...(!provider.is_system
+        ]
+      : []),
+    ...(canDeactivate
+      ? [
+          {
+            key: "deactivate",
+            label: "Deactivate Provider",
+            icon: Pause,
+            destructive: true,
+            onSelect: () => changeStatus("inactive"),
+            confirm: {
+              title: "Deactivate Identity Provider",
+              description: "Are you sure you want to deactivate this identity provider? Users will not be able to authenticate through it.",
+              confirmText: "Deactivate",
+            },
+          } satisfies RowActionItem,
+        ]
+      : []),
+    ...(canDelete
       ? [
           {
             key: "delete",
