@@ -29,6 +29,7 @@ function mapFlow(raw: RawFlow): RegistrationFlow {
     client_id: raw.client_id as string,
     verification_required: Boolean(raw.verification_required),
     required_fields: (raw.required_fields ?? []) as string[],
+    is_system: Boolean(raw.is_system),
     created_at: raw.created_at as string,
     updated_at: raw.updated_at as string,
   }

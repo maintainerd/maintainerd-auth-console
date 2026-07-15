@@ -111,9 +111,19 @@ export async function updateIdentityProviderStatus(identityProviderId: string, d
   throw new Error(response.message || 'Failed to update identity provider status')
 }
 
+// Mirrors the backend TestConnectionResultDTO / TestCheckDTO
+// (internal/idp/types.go): each check carries { step, ok, error?, url? }.
+// `message` is only used for a client-side network/error fallback.
+export interface TestConnectionCheck {
+  step: string
+  ok: boolean
+  error?: string
+  url?: string
+}
+
 export interface TestConnectionResult {
   success: boolean
-  checks?: { label: string; passed: boolean; message?: string }[]
+  checks?: TestConnectionCheck[]
   message?: string
 }
 

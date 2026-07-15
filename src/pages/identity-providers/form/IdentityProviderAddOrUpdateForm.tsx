@@ -29,6 +29,7 @@ import {
   PROVIDER_SELECT_OPTIONS,
   getProviderConnectionSchema,
   getProviderKind,
+  isOAuth2OnlyProvider,
 } from "@/components/provider-config"
 import { identityProviderSchema, type IdentityProviderFormData } from "@/lib/validations"
 import { useAppSelector } from "@/store/hooks"
@@ -133,6 +134,10 @@ export default function IdentityProviderAddOrUpdateForm() {
   // organization's Maintainerd instance and shows the full OIDC connection UI.
   const isBuiltInSystem = providerData?.is_system === true
   const showConnection = Boolean(connectionSchema) && !isBuiltInSystem
+  // Test Connection probes OIDC discovery (/.well-known/openid-configuration) +
+  // JWKS, so it's only meaningful for OIDC providers. OAuth2-only providers
+  // (github/facebook/x) publish no discovery document, so the probe can't apply.
+  const canTestConnection = showConnection && !isOAuth2OnlyProvider(selectedProvider)
 
   // Load existing provider data if editing
   useEffect(() => {
@@ -268,18 +273,15 @@ export default function IdentityProviderAddOrUpdateForm() {
   const handleTestConnection = async () => {
     setTestResult(null)
     const formData = getValues()
-    const config = isBuiltInSystem ? {} : providerConfig.buildConfig()
-    const providerType = isBuiltInSystem ? "system" : getProviderKind(formData.provider)
     const clientSecret = (formData.clientSecret ?? "").trim()
+    // Field names must match the backend TestConnectionRequestDTO
+    // (provider / discovery_url / client_id / client_secret). The probe derives
+    // the discovery document from discovery_url (= the OIDC issuer).
     const payload: Record<string, unknown> = {
-      name: formData.name || "",
       provider: formData.provider,
-      provider_type: providerType,
-      issuer: showConnection ? (formData.issuer ?? "").trim() || null : null,
-      provider_client_id: showConnection ? (formData.clientId ?? "").trim() || null : null,
-      ...(clientSecret ? { provider_client_secret: clientSecret } : {}),
-      config,
-      allowed_audiences: parseList(formData.allowedAudiences),
+      discovery_url: (formData.issuer ?? "").trim(),
+      client_id: (formData.clientId ?? "").trim(),
+      ...(clientSecret ? { client_secret: clientSecret } : {}),
     }
     testConnectionMutation.mutate(payload)
   }
@@ -598,14 +600,20 @@ export default function IdentityProviderAddOrUpdateForm() {
 
           {/* Actions */}
           <div className="flex items-center justify-between gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleTestConnection}
-              disabled={isLoading || testConnectionMutation.isPending || !showConnection}
-            >
-              {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
-            </Button>
+            {canTestConnection ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleTestConnection}
+                disabled={isLoading || testConnectionMutation.isPending}
+              >
+                {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
+              </Button>
+            ) : (
+              // Keeps the action bar's justify-between layout when there is no
+              // discovery-based connection to test (OAuth2-only / SAML / built-in).
+              <span />
+            )}
             <div className="flex items-center gap-3">
               <Button
                 type="button"
@@ -634,15 +642,15 @@ export default function IdentityProviderAddOrUpdateForm() {
                 {testResult.checks && testResult.checks.length > 0 && (
                   <ul className="space-y-1">
                     {testResult.checks.map((c, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        {c.passed ? (
-                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                      <li key={i} className="flex items-start gap-2">
+                        {c.ok ? (
+                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                         ) : (
-                          <XCircle className="size-4 shrink-0 text-destructive" aria-hidden="true" />
+                          <XCircle className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
                         )}
-                        <span className="sr-only">{c.passed ? "Passed:" : "Failed:"}</span>
-                        <span>{c.label}</span>
-                        {c.message && <span className="text-muted-foreground">— {c.message}</span>}
+                        <span className="sr-only">{c.ok ? "Passed:" : "Failed:"}</span>
+                        <span>{c.step}</span>
+                        {c.error && <span className="text-muted-foreground">— {c.error}</span>}
                       </li>
                     ))}
                   </ul>

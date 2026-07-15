@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Power, PowerOff, Fingerprint, Box, CalendarDays } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { Edit, Trash2, MoreVertical, Workflow, Fingerprint, Box, CalendarDays, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,12 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
+import { SystemBadge } from "@/components/badges"
 import { useDeleteRegistrationFlow, useUpdateRegistrationFlowStatus } from "@/hooks/useRegistrationFlows"
 import { useToast } from "@/hooks/useToast"
-import { format } from "date-fns"
-import type { RegistrationFlow } from "@/services/api/registration-flows/types"
+import { safeFormat } from "@/lib/formatDate"
+import type { RegistrationFlow, RegistrationFlowStatus } from "@/services/api/registration-flows/types"
 
 interface RegistrationFlowHeaderProps {
   registrationFlow: RegistrationFlow
@@ -27,8 +28,7 @@ export function RegistrationFlowHeader({ registrationFlow, registrationFlowId }:
   const deleteMutation = useDeleteRegistrationFlow()
   const updateStatusMutation = useUpdateRegistrationFlowStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-  const isActive = registrationFlow.status === "active"
+  const [statusAction, setStatusAction] = useState<{ status: RegistrationFlowStatus; title: string; description: string } | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -40,15 +40,24 @@ export function RegistrationFlowHeader({ registrationFlow, registrationFlowId }:
     }
   }
 
-  const handleToggleStatus = async () => {
-    const newStatus = isActive ? "inactive" : "active"
+  const handleStatusChange = async () => {
+    if (!statusAction) return
     try {
-      await updateStatusMutation.mutateAsync({ registrationFlowId, data: { status: newStatus } })
-      showSuccess(`Registration flow ${newStatus === "active" ? "activated" : "deactivated"} successfully`)
+      await updateStatusMutation.mutateAsync({ registrationFlowId, data: { status: statusAction.status } })
+      showSuccess(`Registration flow ${statusAction.status === "active" ? "activated" : "deactivated"} successfully`)
     } catch (error) {
       showError(error)
+    } finally {
+      setStatusAction(null)
     }
   }
+
+  // Availability mirrors the backend rules: system flows can't change status or be deleted.
+  const isActive = registrationFlow.status === "active"
+  const canActivate = !registrationFlow.is_system && !isActive
+  const canDeactivate = !registrationFlow.is_system && isActive
+  const canDelete = !registrationFlow.is_system
+  const hasMenu = canActivate || canDeactivate || canDelete
 
   const attributes: DetailAttribute[] = [
     {
@@ -60,23 +69,30 @@ export function RegistrationFlowHeader({ registrationFlow, registrationFlowId }:
       icon: Box,
       label: "Client",
       value: registrationFlow.client_id ? (
-        <Link
-          to={`/clients/${registrationFlow.client_id}`}
-          className="text-primary hover:underline"
-        >
-          {registrationFlow.client_id}
-        </Link>
-      ) : "—",
+        <span className="font-mono text-xs">{registrationFlow.client_id}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
     },
-    { icon: CalendarDays, label: "Created", value: format(new Date(registrationFlow.created_at), "PP") },
-    { icon: CalendarDays, label: "Last updated", value: format(new Date(registrationFlow.updated_at), "PP") },
+    { icon: CalendarDays, label: "Created", value: safeFormat(registrationFlow.created_at, "PP") },
+    { icon: CalendarDays, label: "Last updated", value: safeFormat(registrationFlow.updated_at, "PP") },
   ]
 
   return (
     <>
       <DetailHeaderCard
+        leading={
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Workflow className="size-6" />
+          </div>
+        }
         title={registrationFlow.name}
-        badge={<StatusBadge status={registrationFlow.status} />}
+        badge={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={registrationFlow.status} />
+            <SystemBadge isSystem={registrationFlow.is_system} />
+          </div>
+        }
         subtitle={registrationFlow.description}
         attributes={attributes}
         actions={
@@ -87,49 +103,79 @@ export function RegistrationFlowHeader({ registrationFlow, registrationFlowId }:
               className="h-9 gap-2"
               onClick={() =>
                 navigate(`/registration-flows/${registrationFlowId}/edit`, {
-                  state: {
-                    from: `/registration-flows/${registrationFlowId}`,
-                    backLabel: "Back to Registration Flow Details",
-                  },
+                  state: { from: `/registration-flows/${registrationFlowId}`, backLabel: "Back to Registration Flow Details" },
                 })
               }
             >
               <Edit className="size-4" />
               Edit
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
-                  <span className="sr-only">Open actions</span>
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleToggleStatus}>
-                  {isActive ? (
+            {hasMenu && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    <span className="sr-only">Open actions</span>
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canActivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "active",
+                          title: "Activate Registration Flow",
+                          description: "Are you sure you want to activate this registration flow?",
+                        })
+                      }
+                    >
+                      <Play className="mr-2 size-4" />
+                      Activate Registration Flow
+                    </DropdownMenuItem>
+                  )}
+                  {canDeactivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "inactive",
+                          title: "Deactivate Registration Flow",
+                          description: "Are you sure you want to deactivate this registration flow?",
+                        })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Pause className="mr-2 size-4" />
+                      Deactivate Registration Flow
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
                     <>
-                      <PowerOff className="mr-2 size-4" />
-                      Deactivate
-                    </>
-                  ) : (
-                    <>
-                      <Power className="mr-2 size-4" />
-                      Activate
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        Delete Registration Flow
+                      </DropdownMenuItem>
                     </>
                   )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 size-4" />
-                  Delete Registration Flow
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </>
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        variant={statusAction?.status === "inactive" ? "destructive" : "default"}
+        confirmText={statusAction?.status === "active" ? "Activate" : "Deactivate"}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

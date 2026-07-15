@@ -64,7 +64,6 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
   const hasMenu = canActivate || canDeactivate || canDelete
 
   const providerLabel = getProviderDisplayName(provider.provider, provider.is_system)
-  const tenantName = provider.tenant?.name
 
   const attributes: DetailAttribute[] = [
     {
@@ -89,15 +88,6 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
         <span className="break-all font-mono text-xs">{provider.issuer}</span>
       ) : (
         <span className="text-muted-foreground">Built-in</span>
-      ),
-    },
-    {
-      icon: Building2,
-      label: "Tenant",
-      value: tenantName ? (
-        <span className="font-medium">{tenantName}</span>
-      ) : (
-        <span className="text-muted-foreground">—</span>
       ),
     },
     {

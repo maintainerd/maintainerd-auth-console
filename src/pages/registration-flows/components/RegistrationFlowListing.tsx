@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import type { SortingState } from "@tanstack/react-table"
 import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { registrationFlowColumns } from "./RegistrationFlowColumns"
@@ -10,20 +10,20 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
 ]
 
-export function RegistrationFlowListing() {
+export function RegistrationFlowListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
-  const location = useLocation()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={registrationFlowColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}
       searchPlaceholder="Search registration flows by name..."
       useData={useRegistrationFlows}
       filterGroups={FILTER_GROUPS}
-      onRowClick={(flow) => navigate(`/registration-flows/${flow.registration_flow_id}`, { state: { from: location.pathname, backLabel: "Back to Registration" } })}
-      onCreate={() => navigate(`/registration-flows/create`, { state: { from: location.pathname, backLabel: "Back to Registration" } })}
+      onRowClick={(flow) => navigate(`/registration-flows/${flow.registration_flow_id}`)}
+      onCreate={() => navigate(`/registration-flows/create`)}
       createLabel="New Registration Flow"
       emptyTitle="No registration flows yet"
       emptyDescription="Create your first registration flow to define how users authenticate and onboard into your applications."

@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useForm, Controller, type Resolver } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
+import { ArrowLeft, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -11,13 +13,13 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
-  FormInputField,
-  FormSwitchField,
   FormTextareaField,
   FormSelectField,
+  FormSwitchField,
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { FormSlugField } from "@/components/inputs"
 import { registrationFlowSchema, type RegistrationFlowFormData } from "@/lib/validations"
 import {
   useRegistrationFlow,
@@ -28,9 +30,10 @@ import {
 import { useClients, useClient } from "@/hooks/useClients"
 import { useRoles } from "@/hooks/useRoles"
 import { useToast } from "@/hooks/useToast"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
+import { ConfirmationDialog } from "@/components/dialog"
 import { SelectableOptionRow } from "../components/SelectableOptionRow"
 
-// Backend only accepts active/inactive (DB CHECK enforces it) — no "draft".
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
@@ -45,26 +48,22 @@ const REGISTRATION_FIELDS = [
 export default function RegistrationFlowAddOrUpdateForm() {
   const { registrationFlowId } = useParams<{ registrationFlowId?: string }>()
   const navigate = useNavigate()
-  const { showSuccess, showError } = useToast()
+  const location = useLocation()
+  const { showSuccess, showError, parseError } = useToast()
 
   const isEditing = Boolean(registrationFlowId)
+  const isCreating = !isEditing
 
-  const location = useLocation()
-  const navState = (location.state || {}) as {
-    from?: string
-    backLabel?: string
-  }
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const listingUrl = `/registration-flows`
 
-  // Fetch existing registration flow if editing
-  const { isLoading: isFetchingRegistrationFlow } = useRegistrationFlow(registrationFlowId || '')
+  const { data: registrationFlow, isLoading: isFetchingRegistrationFlow } = useRegistrationFlow(registrationFlowId || "")
   const createRegistrationFlowMutation = useCreateRegistrationFlow()
   const updateRegistrationFlowMutation = useUpdateRegistrationFlow()
 
-  // Client search state
   const [clientSearchValue, setClientSearchValue] = useState("")
   const [clientSearchOpen, setClientSearchOpen] = useState(false)
 
-  // Fetch clients with search
   const { data: clientsData } = useClients({
     name: clientSearchValue || undefined,
     limit: 10,
@@ -73,11 +72,8 @@ export default function RegistrationFlowAddOrUpdateForm() {
     sort_order: 'asc',
   })
 
-  // Auto approved state
   const [verificationRequired, setVerificationRequired] = useState<boolean>(false)
   const [requiredFields, setRequiredFields] = useState<string[]>([])
-
-  // Roles to auto-assign + callback URIs to attach (sent with create/update).
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([])
 
   const { data: rolesData, isLoading: isLoadingRoles } = useRoles({
@@ -88,43 +84,67 @@ export default function RegistrationFlowAddOrUpdateForm() {
   })
   const roleOptions = rolesData?.rows ?? []
 
-  // React Hook Form setup
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting }
+    watch,
+    reset,
+    setError,
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<RegistrationFlowFormData>({
-    resolver: yupResolver(registrationFlowSchema) as Resolver<RegistrationFlowFormData>,
+    resolver: yupResolver(registrationFlowSchema),
     defaultValues: {
       name: "",
       description: "",
       status: "active",
       clientId: "",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    mode: "onTouched",
+    reValidateMode: "onChange",
   })
 
-  // Fetch selected client when editing (to display the name)
-  const selectedClientId = control._formValues.clientId
-  const { data: selectedClientData } = useClient(selectedClientId || '')
+  const selectedClientId = watch("clientId")
+  const { data: selectedClientData } = useClient(selectedClientId || "")
 
-  // Existing roles when editing (to diff on save).
   const { data: existingRolesData } = useRegistrationFlowRoles(registrationFlowId || "", { limit: 100 })
 
-  // Initialize the selections from the existing data exactly once.
   const rolesInitialized = useRef(false)
+
+  useEffect(() => {
+    if (isEditing && registrationFlow) {
+      reset({
+        name: registrationFlow.name,
+        description: registrationFlow.description,
+        identifier: registrationFlow.identifier,
+        status: registrationFlow.status,
+        clientId: registrationFlow.client_id,
+      })
+    }
+  }, [isEditing, registrationFlow, reset])
 
   useEffect(() => {
     if (isEditing && existingRolesData && !rolesInitialized.current) {
       rolesInitialized.current = true
       setSelectedRoleIds(existingRolesData.rows.map((r) => r.role_id))
+      setVerificationRequired(registrationFlow?.verification_required ?? false)
     }
-  }, [isEditing, existingRolesData])
+  }, [isEditing, existingRolesData, registrationFlow?.verification_required])
 
   const toggleRole = (id: string) =>
     setSelectedRoleIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+
+  const isLoading =
+    isFetchingRegistrationFlow ||
+    createRegistrationFlowMutation.isPending ||
+    updateRegistrationFlowMutation.isPending ||
+    isSubmitting
+
+  const existingFlow = registrationFlow
+  const pageTitle = isCreating ? "Create Registration Flow" : `Edit ${existingFlow?.name || "Registration Flow"}`
+  const submitButtonText = isCreating ? "Create Registration Flow" : "Update Registration Flow"
+
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
 
   const onSubmit = async (data: RegistrationFlowFormData) => {
     try {
@@ -151,72 +171,147 @@ export default function RegistrationFlowAddOrUpdateForm() {
       showSuccess(isEditing ? "Registration flow updated successfully" : "Registration flow created successfully")
       navigate(`/registration-flows/${flowId}`)
     } catch (error) {
+      const parsed = parseError(error)
+      const known = ["name", "identifier", "description", "status", "clientId", "client_id"] as const
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          if ((known as readonly string[]).includes(field)) {
+            setError(field as (typeof known)[number], { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        const field = known.find((f) => lower.includes(f))
+        if (field) {
+          setError(field, { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
 
-  const handleCancel = () => {
-    if (isEditing && registrationFlowId) {
-      navigate(`/registration-flows/${registrationFlowId}`)
-    } else {
-      navigate(navState.from ?? `/registration-flows`)
-    }
-  }
-
-  const isLoading = isFetchingRegistrationFlow || createRegistrationFlowMutation.isPending || updateRegistrationFlowMutation.isPending
-
-  // Get selected client display name
   const selectedClient = clientsData?.rows?.find(
-    client => client.client_id === control._formValues.clientId
+    client => client.client_id === selectedClientId
   ) || selectedClientData
 
-  // Show loading state while fetching
   if (isEditing && isFetchingRegistrationFlow) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-          <p className="text-muted-foreground mt-2">
-            Fetching registration flow details
-          </p>
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={`/registration-flows/${registrationFlowId}`}
+            backLabel="Back to Registration"
+            title="Edit Registration Flow"
+            description="Update registration flow configuration and settings"
+          />
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </DetailsContainer>
+    )
+  }
+
+  if (isEditing && !isFetchingRegistrationFlow && !registrationFlow) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={`/registration-flows/${registrationFlowId}`}
+            backLabel="Back to Registration"
+            title="Edit Registration Flow"
+            description="Update registration flow configuration and settings"
+          />
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Registration flow not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The registration flow you're looking for doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => guard(() => navigate(`/registration-flows`))}>
+                <ArrowLeft className="mr-2 size-4" />
+                Back to Registration
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
     )
   }
 
   return (
     <DetailsContainer>
       <div className="flex flex-col gap-6">
-        {/* Header */}
         <FormPageHeader
-          backUrl={isEditing ? `/registration-flows/${registrationFlowId}` : navState.from ?? `/registration-flows`}
-          backLabel={isEditing ? "Back to Registration" : navState.backLabel ?? "Back to Registration"}
-          title={isEditing ? "Edit Registration Flow" : "Create New Registration Flow"}
-          description={isEditing
-            ? "Update registration flow configuration and settings"
-            : "Configure a new registration flow for user registration"
+          backUrl={listingUrl}
+          backLabel="Back to Registration"
+          onBack={() => guard(() => navigate(listingUrl))}
+          title={pageTitle}
+          description={
+            isCreating
+              ? "Configure a new registration flow for user registration"
+              : "Update registration flow configuration and settings"
           }
+          showSystemBadge={existingFlow?.is_system}
+          showWarning={existingFlow?.is_system}
+          warningMessage="This is a system registration flow. Some settings may be restricted to prevent system instability."
         />
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={registrationFlowId || "create"}>
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                The name, identifier, description, status, and associated client.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormInputField
-                label="Name"
-                placeholder="e.g., seller-signup"
-                description="A descriptive name for this registration flow"
-                disabled={isLoading}
-                error={errors.name?.message}
-                required
-                {...register("name")}
-              />
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormSlugField
+                  label="Name"
+                  placeholder="e.g., seller-signup"
+                  description="A descriptive name for this registration flow"
+                  disabled={isLoading || existingFlow?.is_system}
+                  error={errors.name?.message}
+                  required
+                  {...register("name")}
+                />
 
-              <FormInputField
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <FormSelectField
+                      label="Status"
+                      placeholder="Select status"
+                      options={STATUS_OPTIONS}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                      error={errors.status?.message}
+                      required
+                    />
+                  )}
+                />
+              </div>
+
+              <FormSlugField
                 label="Identifier"
                 placeholder="e.g., seller-flow (optional)"
                 description="A stable, unique identifier for this flow. Auto-generated if left empty. Once set, it cannot be changed."
@@ -236,24 +331,6 @@ export default function RegistrationFlowAddOrUpdateForm() {
               />
 
               <div className="grid gap-4 md:grid-cols-2">
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <FormSelectField
-                      label="Status"
-                      placeholder="Select status"
-                      options={STATUS_OPTIONS}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isLoading}
-                      error={errors.status?.message}
-                      required
-                    />
-                  )}
-                />
-
-                {/* Client Selection */}
                 <div className="space-y-2">
                   <Label>
                     Client <span className="text-destructive">*</span>
@@ -314,10 +391,9 @@ export default function RegistrationFlowAddOrUpdateForm() {
             </CardContent>
           </Card>
 
-          {/* Configuration */}
           <Card>
             <CardHeader>
-              <CardTitle>Configuration</CardTitle>
+              <CardTitle className="text-base">Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Configure registration flow behavior and settings
               </p>
@@ -363,10 +439,9 @@ export default function RegistrationFlowAddOrUpdateForm() {
             </CardContent>
           </Card>
 
-          {/* Roles */}
           <Card>
             <CardHeader>
-              <CardTitle>Roles</CardTitle>
+              <CardTitle className="text-base">Roles</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Optional — roles automatically assigned to users who complete this registration flow.
               </p>
@@ -398,23 +473,34 @@ export default function RegistrationFlowAddOrUpdateForm() {
             </CardContent>
           </Card>
 
-          {/* Form Actions */}
           <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={handleCancel}
+              onClick={() => guard(() => navigate(listingUrl))}
               disabled={isLoading}
             >
               Cancel
             </Button>
             <FormSubmitButton
-              isSubmitting={isSubmitting || isLoading}
+              isSubmitting={isLoading}
               submittingText="Saving..."
-              submitText={isEditing ? "Update Registration Flow" : "Create Registration Flow"}
+              submitText={submitButtonText}
+              disabled={existingFlow?.is_system && isEditing}
             />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

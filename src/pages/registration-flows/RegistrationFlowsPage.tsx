@@ -1,14 +1,14 @@
 import { RegistrationFlowListing } from "./components/RegistrationFlowListing"
-import { PageContainer, PageHeader } from "@/components/layout"
+import { PageHeader } from "@/components/layout"
 
 export default function RegistrationFlowsPage() {
   return (
-    <PageContainer>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <PageHeader
         title="Registration"
         description="Define how users authenticate and onboard into your applications, with automatic role assignment per flow."
       />
-      <RegistrationFlowListing />
-    </PageContainer>
+      <RegistrationFlowListing tableInCard />
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Settings, Shield } from "lucide-react"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailTabs } from "@/components/details/DetailTabs"
@@ -16,8 +16,6 @@ const TABS = [
 export default function RegistrationFlowDetailsPage() {
   const { registrationFlowId } = useParams<{ registrationFlowId: string }>()
   const navigate = useNavigate()
-  const location = useLocation()
-  const navState = (location.state || {}) as { from?: string; backLabel?: string }
   const [searchParams, setSearchParams] = useSearchParams()
 
   const activeTab = searchParams.get("tab") || "config"
@@ -27,36 +25,32 @@ export default function RegistrationFlowDetailsPage() {
 
   return (
     <DetailLayout
-      backLabel={navState.backLabel ?? "Back to Registration"}
-      onBack={() => navigate(navState.from ?? `/registration-flows`)}
+      backLabel="Back to Registration"
+      onBack={() => navigate(`/registration-flows`)}
       isLoading={isLoading}
       isError={isError || !registrationFlow}
       notFoundTitle="Registration flow not found"
       notFoundDescription="The registration flow you're looking for doesn't exist or may have been removed."
     >
-      {registrationFlow && (
-        <>
-          <RegistrationFlowHeader registrationFlow={registrationFlow} registrationFlowId={registrationFlowId!} />
+      <RegistrationFlowHeader registrationFlow={registrationFlow!} registrationFlowId={registrationFlowId!} />
 
-          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList>
-              {TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="gap-2">
-                  <Icon className="size-4" />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {TABS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-            <TabsContent value="config">
-              <RegistrationFlowConfig registrationFlowId={registrationFlowId!} />
-            </TabsContent>
-            <TabsContent value="roles">
-              <RegistrationFlowRoles registrationFlowId={registrationFlowId!} />
-            </TabsContent>
-          </DetailTabs>
-        </>
-      )}
+        <TabsContent value="config">
+          <RegistrationFlowConfig registrationFlowId={registrationFlowId!} />
+        </TabsContent>
+        <TabsContent value="roles">
+          <RegistrationFlowRoles registrationFlowId={registrationFlowId!} />
+        </TabsContent>
+      </DetailTabs>
     </DetailLayout>
   )
 }

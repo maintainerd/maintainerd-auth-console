@@ -4,13 +4,14 @@ import { formatDistanceToNow } from "date-fns"
 import type { RegistrationFlow } from "@/services/api/registration-flows/types"
 import { RegistrationFlowActions } from "./RegistrationFlowActions"
 import { DataTableColumnHeader } from "@/components/data-table"
+import { SystemBadge } from "@/components/badges"
 import { StatusBadge } from "@/components/details/StatusBadge"
 
 export const registrationFlowColumns: ColumnDef<RegistrationFlow>[] = [
   {
-    id: "Name",
+    id: "Registration Flow",
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Registration Flow" />,
     cell: ({ row }) => {
       const flow = row.original
       return (
@@ -18,10 +19,9 @@ export const registrationFlowColumns: ColumnDef<RegistrationFlow>[] = [
           <div className="flex items-center gap-2">
             <Workflow className="size-4 text-muted-foreground shrink-0" />
             <span className="font-medium">{flow.name}</span>
+            <SystemBadge isSystem={flow.is_system} />
           </div>
-          {flow.description && (
-            <span className="text-sm text-muted-foreground truncate">{flow.description}</span>
-          )}
+          <span className="text-sm text-muted-foreground truncate">{flow.description}</span>
         </div>
       )
     },

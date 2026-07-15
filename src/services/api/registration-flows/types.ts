@@ -25,6 +25,7 @@ export interface RegistrationFlow {
   client_id: string
   verification_required: boolean
   required_fields?: string[]
+  is_system: boolean
   created_at: string
   updated_at: string
 }

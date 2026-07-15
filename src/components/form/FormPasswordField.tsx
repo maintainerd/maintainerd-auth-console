@@ -36,6 +36,13 @@ export const FormPasswordField = forwardRef<HTMLInputElement, FormPasswordFieldP
       className,
       showToggle = true,
       id,
+      // Default to "new-password" so browsers (Chrome/Firefox) do NOT autofill
+      // these fields with a saved login the way they do for a normal password
+      // input. Every password field in this admin console is a secret-entry
+      // field (client secrets, SMTP/SMS credentials, a user's new password) —
+      // never a login — so unsolicited autofill is always unwanted. A caller can
+      // still override (e.g. autoComplete="current-password" for a real login).
+      autoComplete = "new-password",
       ...props
     },
     ref
@@ -60,6 +67,7 @@ export const FormPasswordField = forwardRef<HTMLInputElement, FormPasswordFieldP
             id={fieldId}
             ref={ref}
             type={showPassword ? "text" : "password"}
+            autoComplete={autoComplete}
             className={cn(
               error && "border-red-500 focus-visible:ring-red-500",
               showToggle && "pr-10",
