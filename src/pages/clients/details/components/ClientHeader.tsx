@@ -1,22 +1,23 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Palette, ShieldCheck, Trash2 } from "lucide-react"
-import { format } from "date-fns"
+import { AppWindow, CalendarDays, Edit, Globe, KeyRound, MoreVertical, Palette, ShieldCheck, Trash2, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useDeleteClient } from "@/hooks/useClients"
-import { useBrandings } from "@/hooks/useBranding"
-import { useToast } from "@/hooks/useToast"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
-import type { ClientResponse } from "@/services/api/clients/types"
+import { useDeleteClient, useUpdateClientStatus } from "@/hooks/useClients"
+import { useBrandings } from "@/hooks/useBranding"
+import { useToast } from "@/hooks/useToast"
+import { safeFormat } from "@/lib/formatDate"
+import type { ClientResponse, ClientStatus } from "@/services/api/clients/types"
 
 interface ClientHeaderProps {
   client: ClientResponse
@@ -34,8 +35,10 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteClientMutation = useDeleteClient()
+  const updateStatusMutation = useUpdateClientStatus()
   const { data: brandings } = useBrandings()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<{ status: ClientStatus; title: string; description: string } | null>(null)
 
   const branding = client.branding_id
     ? brandings?.find((b) => b.branding_id === client.branding_id)
@@ -45,12 +48,31 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
     try {
       await deleteClientMutation.mutateAsync(clientId)
       showSuccess("Client deleted successfully")
-      // Navigate back to clients list
       navigate(`/clients`)
     } catch (error) {
       showError(error)
     }
   }
+
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    try {
+      await updateStatusMutation.mutateAsync({ clientId, data: { status: statusAction.status } })
+      showSuccess(`Client status updated to ${statusAction.status}`)
+    } catch (error) {
+      showError(error)
+    } finally {
+      setStatusAction(null)
+    }
+  }
+
+  // Availability mirrors the backend rules: system clients can't change status or
+  // be deleted; the default client also can't be deactivated or deleted.
+  const isActive = client.status === "active"
+  const canActivate = !client.is_system && !isActive
+  const canDeactivate = !client.is_system && isActive && !client.is_default
+  const canDelete = !client.is_system && !client.is_default
+  const hasMenu = canActivate || canDeactivate || canDelete
 
   const attributes: DetailAttribute[] = [
     {
@@ -73,11 +95,6 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
       ),
     },
     {
-      icon: CalendarDays,
-      label: "Created",
-      value: format(new Date(client.created_at), "PP"),
-    },
-    {
       icon: Palette,
       label: "Branding",
       value: branding?.name ?? (client.branding_id ? "—" : "Tenant's active branding"),
@@ -89,8 +106,13 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
     },
     {
       icon: CalendarDays,
+      label: "Created",
+      value: safeFormat(client.created_at, "PP"),
+    },
+    {
+      icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(client.updated_at), "PP"),
+      value: safeFormat(client.updated_at, "PP"),
     },
   ]
 
@@ -131,7 +153,7 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
               <Edit className="size-4" />
               Edit
             </Button>
-            {!client.is_system && (
+            {hasMenu && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 w-9 p-0">
@@ -140,18 +162,63 @@ export function ClientHeader({ client, clientId }: ClientHeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 size-4" />
-                    Delete Client
-                  </DropdownMenuItem>
+                  {canActivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "active",
+                          title: "Activate Client",
+                          description: "Are you sure you want to activate this client? Users will be able to authenticate using this client.",
+                        })
+                      }
+                    >
+                      <Play className="mr-2 size-4" />
+                      Activate Client
+                    </DropdownMenuItem>
+                  )}
+                  {canDeactivate && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusAction({
+                          status: "inactive",
+                          title: "Deactivate Client",
+                          description: "Are you sure you want to deactivate this client? Users will not be able to authenticate using this client.",
+                        })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Pause className="mr-2 size-4" />
+                      Deactivate Client
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        Delete Client
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
           </>
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        variant={statusAction?.status === "inactive" ? "destructive" : "default"}
+        confirmText={statusAction?.status === "active" ? "Activate" : "Deactivate"}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

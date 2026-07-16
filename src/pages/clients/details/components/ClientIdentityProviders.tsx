@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { Building2, Eye, Link2, Unlink, Settings, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -160,7 +160,7 @@ export function ClientIdentityProviders({ client }: ClientIdentityProvidersProps
                   </div>
                   <div>
                     <span className="font-medium">Connected</span>
-                    <p>{format(new Date(connection.created_at), "PPpp")}</p>
+                    <p>{safeFormat(connection.created_at, "PPpp")}</p>
                   </div>
                 </div>
 

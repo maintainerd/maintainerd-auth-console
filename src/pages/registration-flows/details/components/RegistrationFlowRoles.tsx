@@ -1,6 +1,8 @@
 import { useState } from "react"
-import { Shield, Plus, Trash2 } from "lucide-react"
-import { format } from "date-fns"
+import { useNavigate } from "react-router-dom"
+import { Badge } from "@/components/ui/badge"
+import { Shield, Plus, Trash2, Eye, Calendar } from "lucide-react"
+import { safeFormat } from "@/lib/formatDate"
 import { Button } from "@/components/ui/button"
 import { InformationCard } from "@/components/card"
 import { SystemBadge } from "@/components/badges"
@@ -16,6 +18,7 @@ interface RegistrationFlowRolesProps {
 }
 
 export function RegistrationFlowRoles({ registrationFlowId }: RegistrationFlowRolesProps) {
+  const navigate = useNavigate()
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -79,10 +82,17 @@ export function RegistrationFlowRoles({ registrationFlowId }: RegistrationFlowRo
               {data.rows.map((role) => {
                 const actions: RowActionItem[] = [
                   {
+                    key: "view",
+                    label: "View Details",
+                    icon: Eye,
+                    onSelect: () => navigate(`/roles/${role.role_id}`),
+                  },
+                  {
                     key: "remove",
                     label: "Remove Role",
                     icon: Trash2,
                     destructive: true,
+                    separatorBefore: true,
                     onSelect: () => removeRole(role.role_id),
                     confirm: {
                       title: "Remove Role",
@@ -95,23 +105,41 @@ export function RegistrationFlowRoles({ registrationFlowId }: RegistrationFlowRo
                 return (
                   <div
                     key={role.role_id}
-                    className="flex items-start justify-between gap-3 rounded-lg border p-4"
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (!e.currentTarget.contains(target) || target.closest("button, a")) return
+                      navigate(`/roles/${role.role_id}`)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.target !== e.currentTarget) return
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        navigate(`/roles/${role.role_id}`)
+                      }
+                    }}
+                    className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50"
                   >
-                    <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex items-start gap-3">
                       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <Shield className="size-4" />
                       </div>
-                      <div className="min-w-0 space-y-1">
+                      <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium">{role.name}</span>
-                          <SystemBadge isSystem={role.is_system} />
+                          <p className="text-sm font-medium">{role.name}</p>
                           {role.status && <StatusBadge status={role.status} />}
+                          {role.is_system && (
+                            <Badge variant="secondary" className="text-xs">System</Badge>
+                          )}
+                          {role.is_default && (
+                            <Badge variant="outline" className="text-xs">Default</Badge>
+                          )}
                         </div>
-                        {role.description && (
-                          <p className="text-sm text-muted-foreground">{role.description}</p>
-                        )}
-                        <div className="text-xs text-muted-foreground">
-                          Added {format(new Date(role.created_at), "MMM dd, yyyy")}
+                        <p className="text-sm text-muted-foreground">{role.description}</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          Added {safeFormat(role.created_at, "PPP")}
                         </div>
                       </div>
                     </div>

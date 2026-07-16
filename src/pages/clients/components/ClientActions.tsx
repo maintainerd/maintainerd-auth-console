@@ -27,7 +27,12 @@ export function ClientActions({ client }: ClientActionsProps) {
     }
   }
 
+  // Availability mirrors the backend rules: system clients can't change status or
+  // be deleted; the default client also can't be deactivated or deleted.
   const isActive = client.status === "active"
+  const canActivate = !client.is_system && !isActive
+  const canDeactivate = !client.is_system && isActive && !client.is_default
+  const canDelete = !client.is_system && !client.is_default
 
   const items: RowActionItem[] = [
     {
@@ -42,21 +47,8 @@ export function ClientActions({ client }: ClientActionsProps) {
       icon: Edit,
       onSelect: () => navigate(`/clients/${client.client_id}/edit`),
     },
-    ...(isActive
+    ...(canActivate
       ? [
-          {
-            key: "deactivate",
-            label: "Deactivate Client",
-            icon: Pause,
-            onSelect: () => changeStatus("inactive"),
-            confirm: {
-              title: "Deactivate Client",
-              description: "Are you sure you want to deactivate this client? Users will not be able to authenticate using this client.",
-              confirmText: "Deactivate",
-            },
-          } satisfies RowActionItem,
-        ]
-      : [
           {
             key: "activate",
             label: "Activate Client",
@@ -68,8 +60,25 @@ export function ClientActions({ client }: ClientActionsProps) {
               confirmText: "Activate",
             },
           } satisfies RowActionItem,
-        ]),
-    ...(!client.is_system
+        ]
+      : []),
+    ...(canDeactivate
+      ? [
+          {
+            key: "deactivate",
+            label: "Deactivate Client",
+            icon: Pause,
+            destructive: true,
+            onSelect: () => changeStatus("inactive"),
+            confirm: {
+              title: "Deactivate Client",
+              description: "Are you sure you want to deactivate this client? Users will not be able to authenticate using this client.",
+              confirmText: "Deactivate",
+            },
+          } satisfies RowActionItem,
+        ]
+      : []),
+    ...(canDelete
       ? [
           {
             key: "delete",

@@ -51,7 +51,7 @@ const getTypeBadge = (type: ClientType) => {
 
 export const clientColumns: ColumnDef<Client>[] = [
   {
-    id: "display_name",
+    id: "Client",
     accessorKey: "display_name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Client" />,
     cell: ({ row }) => {
@@ -74,7 +74,7 @@ export const clientColumns: ColumnDef<Client>[] = [
     },
   },
   {
-    id: "client_type",
+    id: "Type",
     accessorKey: "client_type",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
     cell: ({ row }) => {
@@ -86,7 +86,7 @@ export const clientColumns: ColumnDef<Client>[] = [
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
@@ -98,7 +98,7 @@ export const clientColumns: ColumnDef<Client>[] = [
     },
   },
   {
-    id: "created_at",
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -117,6 +117,7 @@ export const clientColumns: ColumnDef<Client>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => {
       const client = row.original

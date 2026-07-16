@@ -46,54 +46,50 @@ export default function ClientDetailsPage() {
       notFoundTitle="Client not found"
       notFoundDescription="The client you're looking for doesn't exist or may have been removed."
     >
-      {clientData && (
-        <>
-          <ClientHeader client={clientData} clientId={clientId!} />
+      <ClientHeader client={clientData!} clientId={clientId!} />
 
-          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1 md:w-fit">
-              {TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="h-8 flex-none gap-2 px-3">
-                  <Icon className="size-4" />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {TABS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-            <TabsContent value="overview">
-              <ClientInformation client={clientData} />
-            </TabsContent>
+        <TabsContent value="overview">
+          <ClientInformation client={clientData!} />
+        </TabsContent>
 
-            <TabsContent value="identity-providers">
-              <ClientIdentityProviders client={clientData} />
-            </TabsContent>
+        <TabsContent value="identity-providers">
+          <ClientIdentityProviders client={clientData!} />
+        </TabsContent>
 
-            <TabsContent value="credentials">
-              <ClientCredentials client={clientData} />
-            </TabsContent>
+        <TabsContent value="credentials">
+          <ClientCredentials client={clientData!} />
+        </TabsContent>
 
-            <TabsContent value="config">
-              <ClientConfig clientId={clientId!} />
-            </TabsContent>
+        <TabsContent value="config">
+          <ClientConfig clientId={clientId!} />
+        </TabsContent>
 
-            <TabsContent value="uris">
-              <ClientUris client={clientData} />
-            </TabsContent>
+        <TabsContent value="uris">
+          <ClientUris client={clientData!} />
+        </TabsContent>
 
-            <TabsContent value="apis">
-              <ClientApis clientId={clientId!} />
-            </TabsContent>
+        <TabsContent value="apis">
+          <ClientApis clientId={clientId!} />
+        </TabsContent>
 
-            <TabsContent value="roles">
-              <ClientRoles clientId={clientId!} />
-            </TabsContent>
+        <TabsContent value="roles">
+          <ClientRoles clientId={clientId!} />
+        </TabsContent>
 
-            <TabsContent value="metadata">
-              <ClientMetadata clientId={clientId!} />
-            </TabsContent>
-          </DetailTabs>
-        </>
-      )}
+        <TabsContent value="metadata">
+          <ClientMetadata clientId={clientId!} />
+        </TabsContent>
+      </DetailTabs>
     </DetailLayout>
   )
 }

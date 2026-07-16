@@ -1,14 +1,14 @@
 import { ClientListing } from "./components/ClientListing"
-import { PageContainer, PageHeader } from "@/components/layout"
+import { PageHeader } from "@/components/layout"
 
 export default function ClientsPage() {
   return (
-    <PageContainer>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <PageHeader
         title="Clients"
         description="Manage OAuth clients and applications that integrate with your authentication system. Configure client types, provider connections, permissions, and security settings for web apps, mobile apps, and machine-to-machine services."
       />
-      <ClientListing />
-    </PageContainer>
+      <ClientListing tableInCard />
+    </div>
   )
 }

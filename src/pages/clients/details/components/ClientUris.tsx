@@ -1,4 +1,4 @@
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { Link2 } from "lucide-react"
 import { InformationCard } from "@/components/card"
 import { EmptyState } from "@/components/details"
@@ -79,11 +79,11 @@ export function ClientUris({ client }: ClientUrisProps) {
                       </div>
                       <div>
                         <span className="font-medium">Created</span>
-                        <p>{format(new Date(uri.created_at), "PPpp")}</p>
+                        <p>{safeFormat(uri.created_at, "PPpp")}</p>
                       </div>
                       <div>
                         <span className="font-medium">Last Updated</span>
-                        <p>{format(new Date(uri.updated_at), "PPpp")}</p>
+                        <p>{safeFormat(uri.updated_at, "PPpp")}</p>
                       </div>
                     </div>
                   </div>

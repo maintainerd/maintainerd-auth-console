@@ -3,6 +3,7 @@ import { Copy, KeyRound, RotateCcw, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InformationCard } from "@/components/card"
+import { safeFormat } from "@/lib/formatDate"
 import { ConfirmationDialog } from "@/components/dialog"
 import { useToast } from "@/hooks/useToast"
 import { useRotateClientSecret } from "@/hooks/useClients"
@@ -103,7 +104,7 @@ export function ClientCredentials({ client }: ClientCredentialsProps) {
                 <div>
                   <p className="text-sm font-semibold">New Client Secret</p>
                   {previousSecretExpiresAt && (
-                    <p className="text-xs">Previous secret expires {new Date(previousSecretExpiresAt).toLocaleString()}.</p>
+                    <p className="text-xs">Previous secret expires {safeFormat(previousSecretExpiresAt, "PPpp")}.</p>
                   )}
                 </div>
                 <Button variant="outline" size="sm" className="h-8 gap-2 bg-background" onClick={() => copy(rotatedSecret, "Client secret")}>

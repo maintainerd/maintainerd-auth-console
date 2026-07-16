@@ -15,7 +15,7 @@ import { SystemBadge } from "@/components/badges"
 import { ProviderLogo } from "@/components/provider-config"
 import { useDeleteIdentityProvider, useUpdateIdentityProviderStatus } from "@/hooks/useIdentityProviders"
 import { useToast } from "@/hooks/useToast"
-import { format } from "date-fns"
+import { safeFormat } from "@/lib/formatDate"
 import { getProviderDisplayName } from "../utils"
 import type { IdentityProviderDetail, IdentityProviderStatus } from "@/services/api/identity-providers/types"
 
@@ -93,12 +93,12 @@ export function IdentityProviderHeader({ provider, providerId }: IdentityProvide
     {
       icon: CalendarDays,
       label: "Created",
-      value: format(new Date(provider.created_at), "PP"),
+      value: safeFormat(provider.created_at, "PP"),
     },
     {
       icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(provider.updated_at), "PP"),
+      value: safeFormat(provider.updated_at, "PP"),
     },
   ]
 

@@ -46,37 +46,33 @@ export default function IdentityProviderDetailsPage() {
       notFoundTitle="Identity Provider not found"
       notFoundDescription="The identity provider you're looking for doesn't exist or may have been removed."
     >
-      {provider && (
-        <>
-          <IdentityProviderHeader provider={provider} providerId={providerId!} />
+      <IdentityProviderHeader provider={provider!} providerId={providerId!} />
 
-          <DetailTabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList>
-              {TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="gap-2">
-                  <Icon className="size-4" />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+      <DetailTabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {TABS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-            <TabsContent value="connection">
-              <IdentityProviderConnectionTab provider={provider} />
-            </TabsContent>
+        <TabsContent value="connection">
+          <IdentityProviderConnectionTab provider={provider!} />
+        </TabsContent>
 
-            <TabsContent value="configuration">
-              <IdentityProviderConfigurationTab provider={provider} />
-            </TabsContent>
+        <TabsContent value="configuration">
+          <IdentityProviderConfigurationTab provider={provider!} />
+        </TabsContent>
 
-            <TabsContent value="connected-clients">
-              <IdentityProviderClients
-                providerId={providerId!}
-                providerName={provider.display_name}
-              />
-            </TabsContent>
-          </DetailTabs>
-        </>
-      )}
+        <TabsContent value="connected-clients">
+          <IdentityProviderClients
+            providerId={providerId!}
+            providerName={provider!.display_name}
+          />
+        </TabsContent>
+      </DetailTabs>
     </DetailLayout>
   )
 }

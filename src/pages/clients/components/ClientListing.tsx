@@ -4,7 +4,7 @@ import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { clientColumns } from "./ClientColumns"
 import { useClientsList } from "@/hooks/useClients"
 
-const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const DEFAULT_SORT: SortingState = [{ id: "Created", desc: true }]
 const SEARCH_FIELDS = ["name", "display_name"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
@@ -12,11 +12,12 @@ const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "is_system", label: "Type", options: ["system", "regular"] },
 ]
 
-export function ClientListing() {
+export function ClientListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={clientColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}
