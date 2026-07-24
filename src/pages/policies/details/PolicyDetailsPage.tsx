@@ -13,6 +13,10 @@ const TABS = [
   { value: "history", label: "History", icon: History },
 ] as const
 
+type PolicyDetailsTab = typeof TABS[number]["value"]
+
+const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
+
 export default function PolicyDetailsPage() {
   const { policyId } = useParams<{ policyId: string }>()
   const navigate = useNavigate()
@@ -23,7 +27,10 @@ export default function PolicyDetailsPage() {
   const backTo = navState?.from ?? `/policies`
   const backLabel = navState?.backLabel ?? (backTo === `/policies` ? "Back to Policies" : "Back")
 
-  const activeTab = searchParams.get("tab") || "statements"
+  const requestedTab = searchParams.get("tab")
+  const activeTab: PolicyDetailsTab = TAB_VALUES.has(requestedTab || "")
+    ? requestedTab as PolicyDetailsTab
+    : "statements"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
 
   const { data: policy, isLoading, isError } = usePolicy(policyId || "")

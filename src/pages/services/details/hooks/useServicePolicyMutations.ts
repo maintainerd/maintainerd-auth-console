@@ -4,35 +4,30 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { assignPolicyToService, removePolicyFromService } from '@/services'
-import { toast } from 'react-toastify'
+import { policyKeys } from '@/hooks/usePolicies'
+import { serviceKeys } from '@/hooks/useServices'
 
+// Success/error feedback lives with the calling component (useToast), matching
+// the shared mutation-hook convention: hooks only mutate and invalidate.
 export function useServicePolicyMutations(serviceId: string) {
   const queryClient = useQueryClient()
 
+  const invalidate = () => {
+    // The assigned-policies tab lists policies filtered by service_id.
+    queryClient.invalidateQueries({ queryKey: policyKeys.all })
+    // Service detail + listing carry the policy_count.
+    queryClient.invalidateQueries({ queryKey: serviceKeys.detail(serviceId) })
+    queryClient.invalidateQueries({ queryKey: serviceKeys.lists() })
+  }
+
   const assignPolicy = useMutation({
     mutationFn: (policyId: string) => assignPolicyToService(serviceId, policyId),
-    onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: ['policies'] })
-      queryClient.invalidateQueries({ queryKey: ['service', serviceId] })
-      toast.success('Policy assigned successfully')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to assign policy')
-    },
+    onSuccess: invalidate,
   })
 
   const removePolicy = useMutation({
     mutationFn: (policyId: string) => removePolicyFromService(serviceId, policyId),
-    onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: ['policies'] })
-      queryClient.invalidateQueries({ queryKey: ['service', serviceId] })
-      toast.success('Policy removed successfully')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to remove policy')
-    },
+    onSuccess: invalidate,
   })
 
   return {
@@ -40,4 +35,3 @@ export function useServicePolicyMutations(serviceId: string) {
     removePolicy,
   }
 }
-

@@ -22,14 +22,14 @@ const STATUS_ACTIONS: Record<ApiStatus, StatusAction> = {
     status: "active",
     label: "Activate API",
     title: "Activate API",
-    description: "Are you sure you want to activate this API?",
+    description: "Are you sure you want to activate this API? Its permissions will be available for use.",
     icon: Play,
   },
   inactive: {
     status: "inactive",
     label: "Deactivate API",
     title: "Deactivate API",
-    description: "Are you sure you want to deactivate this API?",
+    description: "Are you sure you want to deactivate this API? Its permissions will no longer be available.",
     icon: XCircle,
   },
 }
@@ -52,39 +52,44 @@ export function ApiActions({ api }: ApiActionsProps) {
     }
   }
 
-  const statusActions = Object.values(STATUS_ACTIONS)
-    .filter((action) => action.status !== api.status)
-    .map((action) => ({
-      key: `status-${action.status}`,
-      label: action.label,
-      icon: action.icon,
-      onSelect: () => changeStatus(action.status),
-      confirm: {
-        title: action.title,
-        description: action.description,
-        confirmText: action.status === "active" ? "Activate" : "Confirm",
-      },
-    }) satisfies RowActionItem)
+  // Availability mirrors the backend rules: system APIs cannot be edited,
+  // change status, or be deleted.
+  const statusActions = api.is_system
+    ? []
+    : Object.values(STATUS_ACTIONS)
+        .filter((action) => action.status !== api.status)
+        .map((action) => ({
+          key: `status-${action.status}`,
+          label: action.label,
+          icon: action.icon,
+          // Deactivate takes the API out of use → destructive (red confirm).
+          // Activate is restorative → default.
+          destructive: action.status !== "active",
+          onSelect: () => changeStatus(action.status),
+          confirm: {
+            title: action.title,
+            description: action.description,
+            confirmText: action.label,
+          },
+        }) satisfies RowActionItem)
 
   const items: RowActionItem[] = [
     {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () =>
-        navigate(`/apis/${api.api_id}`, {
-          state: { from: `/apis`, backLabel: "Back to APIs" },
-        }),
+      onSelect: () => navigate(`/apis/${api.api_id}`),
     },
-    {
-      key: "edit",
-      label: "Edit API",
-      icon: Edit,
-      onSelect: () =>
-        navigate(`/apis/${api.api_id}/edit`, {
-          state: { from: `/apis`, backLabel: "Back to APIs" },
-        }),
-    },
+    ...(!api.is_system
+      ? [
+          {
+            key: "edit",
+            label: "Edit API",
+            icon: Edit,
+            onSelect: () => navigate(`/apis/${api.api_id}/edit`),
+          } satisfies RowActionItem,
+        ]
+      : []),
     ...statusActions,
     ...(!api.is_system
       ? [

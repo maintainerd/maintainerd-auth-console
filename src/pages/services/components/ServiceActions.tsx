@@ -66,29 +66,33 @@ export function ServiceActions({ service }: ServiceActionsProps) {
     }
   }
 
-  const statusActions = Object.values(STATUS_ACTIONS)
-    .filter((action) => action.status !== service.status)
-    .map((action) => ({
-      key: `status-${action.status}`,
-      label: action.label,
-      icon: action.icon,
-      onSelect: () => changeStatus(action.status),
-      confirm: {
-        title: action.title,
-        description: action.description,
-        confirmText: action.status === "active" ? "Activate" : "Confirm",
-      },
-    }) satisfies RowActionItem)
+  // Availability mirrors the backend rules: system services cannot be edited,
+  // change status, or be deleted.
+  const statusActions = service.is_system
+    ? []
+    : Object.values(STATUS_ACTIONS)
+        .filter((action) => action.status !== service.status)
+        .map((action) => ({
+          key: `status-${action.status}`,
+          label: action.label,
+          icon: action.icon,
+          // Everything except Activate takes the service (partly) out of use →
+          // destructive (red confirm). Activate is restorative → default.
+          destructive: action.status !== "active",
+          onSelect: () => changeStatus(action.status),
+          confirm: {
+            title: action.title,
+            description: action.description,
+            confirmText: action.label,
+          },
+        }) satisfies RowActionItem)
 
   const items: RowActionItem[] = [
     {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () =>
-        navigate(`/services/${service.service_id}`, {
-          state: { from: `/services`, backLabel: "Back to Services" },
-        }),
+      onSelect: () => navigate(`/services/${service.service_id}`),
     },
     ...(!service.is_system
       ? [
@@ -96,10 +100,7 @@ export function ServiceActions({ service }: ServiceActionsProps) {
             key: "edit",
             label: "Edit Service",
             icon: Edit,
-            onSelect: () =>
-              navigate(`/services/${service.service_id}/edit`, {
-                state: { from: `/services`, backLabel: "Back to Services" },
-              }),
+            onSelect: () => navigate(`/services/${service.service_id}/edit`),
           } satisfies RowActionItem,
         ]
       : []),

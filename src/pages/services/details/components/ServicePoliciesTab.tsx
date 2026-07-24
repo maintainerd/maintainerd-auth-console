@@ -9,6 +9,7 @@ import { DataTablePagination, usePaginationTable, RowActions, type RowActionItem
 import { PolicyAssignDialog } from "./PolicyAssignDialog"
 import { useServicePolicies } from "../hooks/useServicePolicies"
 import { useServicePolicyMutations } from "../hooks/useServicePolicyMutations"
+import { useToast } from "@/hooks/useToast"
 import { type PaginationState } from "@tanstack/react-table"
 import type { Policy } from "@/services/api/policies/types"
 
@@ -38,7 +39,17 @@ export function ServicePoliciesTab({ serviceId }: ServicePoliciesTabProps) {
     pageCount: data?.total_pages ?? 0,
   })
 
-  const { removePolicy } = useServicePolicyMutations(serviceId)
+  const { removePolicy: removePolicyMutation } = useServicePolicyMutations(serviceId)
+  const { showSuccess, showError } = useToast()
+
+  const removePolicy = async (policy: Policy) => {
+    try {
+      await removePolicyMutation.mutateAsync(policy.policy_id)
+      showSuccess(`Policy "${policy.name}" removed successfully`)
+    } catch (error) {
+      showError(error)
+    }
+  }
 
   const navState = { from: `/services/${serviceId}`, backLabel: "Back to Service Details" }
   const existingPolicyIds = data?.rows.map((p) => p.policy_id) ?? []
@@ -60,7 +71,7 @@ export function ServicePoliciesTab({ serviceId }: ServicePoliciesTabProps) {
         icon: Trash2,
         destructive: true,
         separatorBefore: true,
-        onSelect: () => removePolicy.mutateAsync(policy.policy_id),
+        onSelect: () => removePolicy(policy),
         confirm: {
           title: "Remove Policy from Service",
           description: "This removes the policy from this service. The policy itself will not be deleted.",

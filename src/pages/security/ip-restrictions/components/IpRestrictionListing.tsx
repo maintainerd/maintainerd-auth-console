@@ -11,14 +11,15 @@ import {
 import { useToast } from "@/hooks/useToast"
 import type { IpRestrictionRule } from "@/services/api/ip-restriction-rules/types"
 
-const DEFAULT_SORT: SortingState = [{ id: "createdAt", desc: true }]
+// Backend field name; the camelCase API key is not in the sort allow-list.
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
 const SEARCH_FIELDS = ["ip_address", "description"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "type", label: "Type", options: ["allow", "deny"] },
   { key: "status", label: "Status", options: ["active", "inactive"] },
 ]
 
-export function IpRestrictionListing() {
+export function IpRestrictionListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const { showSuccess, showError } = useToast()
   const createMutation = useCreateIpRestrictionRule()
   const updateMutation = useUpdateIpRestrictionRule()
@@ -79,6 +80,7 @@ export function IpRestrictionListing() {
   return (
     <>
       <ResourceListing
+        tableInCard={tableInCard}
         columns={columns}
         defaultSort={DEFAULT_SORT}
         searchFields={SEARCH_FIELDS}

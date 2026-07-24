@@ -29,7 +29,7 @@ export default function BrandingDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Themes"
-      onBack={() => navigate(`/branding/templates`)}
+      onBack={() => navigate(`/branding?tab=themes`)}
       isLoading={isLoading}
       isError={isError || !branding}
       notFoundTitle="Branding not found"

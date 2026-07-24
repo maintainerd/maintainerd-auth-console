@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { Eye, Edit, Play, Pause } from "lucide-react"
 import { RowActions, type RowActionItem } from "@/components/data-table"
 import { useUpdateSmsTemplateStatus } from "@/hooks/useSmsTemplates"
+import { useToast } from "@/hooks/useToast"
 import type { SmsTemplate } from "@/services/api/sms-templates/types"
 
 interface SmsTemplateActionsProps {
@@ -10,7 +11,22 @@ interface SmsTemplateActionsProps {
 
 export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
   const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
   const updateStatusMutation = useUpdateSmsTemplateStatus()
+
+  const changeStatus = async (status: "active" | "inactive") => {
+    try {
+      await updateStatusMutation.mutateAsync({
+        id: template.smsTemplateId,
+        data: { status },
+      })
+      showSuccess(
+        `SMS template ${status === "active" ? "activated" : "deactivated"} successfully`,
+      )
+    } catch (error) {
+      showError(error)
+    }
+  }
 
   const isActive = template.status === "active"
 
@@ -31,17 +47,30 @@ export function SmsTemplateActions({ template }: SmsTemplateActionsProps) {
       ? [
           {
             key: "deactivate",
-            label: "Deactivate",
+            label: "Deactivate Template",
             icon: Pause,
-            onSelect: () => updateStatusMutation.mutate({ id: template.smsTemplateId, data: { status: "inactive" } }),
+            destructive: true,
+            onSelect: () => changeStatus("inactive"),
+            confirm: {
+              title: "Deactivate SMS Template",
+              description:
+                "Are you sure you want to deactivate this SMS template? It will no longer be used for SMS delivery.",
+              confirmText: "Deactivate Template",
+            },
           } satisfies RowActionItem,
         ]
       : [
           {
             key: "activate",
-            label: "Activate",
+            label: "Activate Template",
             icon: Play,
-            onSelect: () => updateStatusMutation.mutate({ id: template.smsTemplateId, data: { status: "active" } }),
+            onSelect: () => changeStatus("active"),
+            confirm: {
+              title: "Activate SMS Template",
+              description:
+                "Are you sure you want to activate this SMS template? It will be used for SMS delivery.",
+              confirmText: "Activate Template",
+            },
           } satisfies RowActionItem,
         ]),
   ]

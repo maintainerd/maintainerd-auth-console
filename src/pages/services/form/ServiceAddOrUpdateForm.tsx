@@ -15,9 +15,13 @@ import {
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { FormSlugField } from "@/components/inputs"
+import { ConfirmationDialog } from "@/components/dialog"
 import { serviceSchema, type ServiceFormData } from "@/lib/validations"
+import { sanitizeName } from "@/lib/validations/regex"
 import { useService, useCreateService, useUpdateService } from "@/hooks/useServices"
 import { useToast } from "@/hooks/useToast"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
 
 // Status options for the select field
 const STATUS_OPTIONS: SelectOption[] = [
@@ -27,11 +31,21 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
+// Backend snake_case field keys → form field names, for routing structured
+// server validation errors onto the offending inputs.
+const BACKEND_FIELD_MAP: Record<string, keyof ServiceFormData> = {
+  name: "name",
+  display_name: "displayName",
+  description: "description",
+  version: "version",
+  status: "status",
+}
+
 export default function ServiceAddOrUpdateForm() {
   const { serviceId } = useParams<{ serviceId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
 
   const isEditing = Boolean(serviceId)
   const isCreating = !isEditing
@@ -53,7 +67,8 @@ export default function ServiceAddOrUpdateForm() {
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting }
+    setError,
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<ServiceFormData>({
     resolver: yupResolver(serviceSchema),
     defaultValues: {
@@ -63,8 +78,8 @@ export default function ServiceAddOrUpdateForm() {
       version: "v0.1.0",
       status: "active",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   // Load existing service data if editing
@@ -82,6 +97,9 @@ export default function ServiceAddOrUpdateForm() {
 
   const isLoading = createServiceMutation.isPending || updateServiceMutation.isPending || isSubmitting
   const existingService = serviceData
+
+  // Warn before discarding unsaved edits (browser close/refresh + guarded exits).
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
 
   const onSubmit = async (data: ServiceFormData) => {
     try {
@@ -106,6 +124,36 @@ export default function ServiceAddOrUpdateForm() {
 
       navigate(backTo)
     } catch (error) {
+      // Route backend errors onto the offending field where we can: structured
+      // field errors first, otherwise keyword-match the message. Anything
+      // unmapped still shows via the toast.
+      const parsed = parseError(error)
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          const formField = BACKEND_FIELD_MAP[field]
+          if (formField) {
+            setError(formField, { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        // Most specific first, so "display name" doesn't land on "name".
+        const keywordOrder: Array<[string, keyof ServiceFormData]> = [
+          ["display name", "displayName"],
+          ["display_name", "displayName"],
+          ["description", "description"],
+          ["version", "version"],
+          ["status", "status"],
+          ["name", "name"],
+        ]
+        const hit = keywordOrder.find(([keyword]) => lower.includes(keyword))
+        if (hit) {
+          setError(hit[1], { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
@@ -162,7 +210,7 @@ export default function ServiceAddOrUpdateForm() {
                   The service you're looking for doesn't exist or may have been removed.
                 </p>
               </div>
-              <Button variant="outline" onClick={() => navigate(backTo)}>
+              <Button variant="outline" onClick={() => guard(() => navigate(backTo))}>
                 <ArrowLeft className="mr-2 size-4" />
                 {backLabel}
               </Button>
@@ -179,6 +227,7 @@ export default function ServiceAddOrUpdateForm() {
         <FormPageHeader
           backUrl={backTo}
           backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
           title={pageTitle}
           description={
             isCreating
@@ -200,10 +249,11 @@ export default function ServiceAddOrUpdateForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <FormInputField
+                <FormSlugField
                   label="Service Name"
                   placeholder="e.g., core, auth, payment"
                   description="Used for communications and events (lowercase, numbers, hyphens only)"
+                  sanitize={sanitizeName}
                   disabled={existingService?.is_system || isLoading}
                   error={errors.name?.message}
                   required
@@ -266,7 +316,7 @@ export default function ServiceAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(backTo)}
+              onClick={() => guard(() => navigate(backTo))}
               disabled={isLoading}
             >
               Cancel
@@ -278,6 +328,17 @@ export default function ServiceAddOrUpdateForm() {
             />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

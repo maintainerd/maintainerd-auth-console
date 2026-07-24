@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Server, Key } from "lucide-react"
+import { Server } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ApiActions } from "./ApiActions"
 import { DataTableColumnHeader } from "@/components/data-table"
@@ -9,13 +9,13 @@ import type { Api } from "@/services/api/api/types"
 
 export const apiColumns: ColumnDef<Api>[] = [
   {
-    id: "display_name",
+    id: "API",
     accessorKey: "display_name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="API" />,
     cell: ({ row }) => {
       const api = row.original
       return (
-        <div className="flex max-w-sm items-center gap-3 px-3 py-1">
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <Server className="size-5" />
           </div>
@@ -24,29 +24,28 @@ export const apiColumns: ColumnDef<Api>[] = [
               <span className="truncate font-medium">{api.display_name}</span>
               <SystemBadge isSystem={api.is_system} />
             </div>
-            <span className="truncate text-sm text-muted-foreground">{api.description}</span>
-            <span className="truncate font-mono text-xs text-muted-foreground">{api.name}</span>
+            <span className="truncate text-sm text-muted-foreground">{api.name}</span>
           </div>
         </div>
       )
     },
   },
   {
-    id: "service",
+    id: "Service",
     accessorKey: "service",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Service" />,
     cell: ({ row }) => {
       const api = row.original
       return (
         <div className="flex items-center gap-2 px-3 py-1">
-          <Key className="size-4 text-muted-foreground" />
+          <Server className="size-4 text-muted-foreground" />
           <span className="font-medium">{api.service.display_name}</span>
         </div>
       )
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
@@ -56,7 +55,7 @@ export const apiColumns: ColumnDef<Api>[] = [
     ),
   },
   {
-    id: "created_at",
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -75,6 +74,7 @@ export const apiColumns: ColumnDef<Api>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
       <div className="px-3 py-1">

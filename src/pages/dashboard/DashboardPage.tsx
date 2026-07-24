@@ -31,7 +31,7 @@ const fmt = (n: number) => n.toLocaleString()
 
 const QUICK_ACTIONS = [
   { icon: Users, title: "Manage Users", desc: "Add users and assign roles", to: "/users" },
-  { icon: Shield, title: "Security Settings", desc: "Configure security policies", to: "/security/password" },
+  { icon: Shield, title: "Security Settings", desc: "Configure security policies", to: "/security" },
   { icon: Server, title: "Manage Services", desc: "Register application services", to: "/services" },
   { icon: KeyRound, title: "Identity Providers", desc: "Connect external providers", to: "/providers/identity" },
 ]
@@ -39,11 +39,11 @@ const QUICK_ACTIONS = [
 // Security areas that exist in the backend (/security-settings/*, /ip-restriction-rules)
 // AND have a built console page.
 const SECURITY_LINKS = [
-  { title: "Multi-Factor Auth", desc: "Require a second authentication factor", icon: ShieldCheck, to: "/security/mfa" },
-  { title: "Password Policy", desc: "Set password strength requirements", icon: Lock, to: "/security/password" },
-  { title: "Sessions", desc: "Session lifetime and concurrency limits", icon: Clock, to: "/security/session" },
-  { title: "Threat Protection", desc: "Detect and block suspicious activity", icon: ShieldAlert, to: "/security/threat" },
-  { title: "IP Restrictions", desc: "Allow or block access by IP range", icon: Globe, to: "/security/ip-restrictions" },
+  { title: "Multi-Factor Auth", desc: "Require a second authentication factor", icon: ShieldCheck, to: "/security?tab=mfa" },
+  { title: "Password Policy", desc: "Set password strength requirements", icon: Lock, to: "/security?tab=password" },
+  { title: "Sessions", desc: "Session lifetime and concurrency limits", icon: Clock, to: "/security?tab=sessions" },
+  { title: "Threat Protection", desc: "Detect and block suspicious activity", icon: ShieldAlert, to: "/security?tab=threat" },
+  { title: "IP Restrictions", desc: "Allow or block access by IP range", icon: Globe, to: "/security?tab=ip-restrictions" },
 ]
 
 // Shared icon-tile + chevron row used by both Quick Actions and Security, so the
@@ -288,7 +288,7 @@ const DashboardPage = () => {
       </Card>
 
       {/* Recent activity — latest tenant auth-events; supporting context, kept below the setup actions */}
-      <RecentActivityCard onViewAll={() => to("/logs")} />
+      <RecentActivityCard onViewAll={() => to("/monitoring?tab=logs")} />
       </div>
     </DetailsContainer>
   )

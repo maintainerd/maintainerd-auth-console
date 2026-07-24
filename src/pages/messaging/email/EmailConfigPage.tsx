@@ -65,7 +65,7 @@ export default function EmailConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const queryClient = useQueryClient()
-  const backTo = `/messaging/email`
+  const backTo = `/messaging?tab=email`
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["email-config"],

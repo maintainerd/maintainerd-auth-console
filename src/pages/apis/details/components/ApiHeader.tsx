@@ -1,31 +1,68 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Server, CalendarDays, KeyRound } from "lucide-react"
-import { format } from "date-fns"
+import {
+  CalendarDays,
+  Edit,
+  KeyRound,
+  MoreVertical,
+  Play,
+  Server,
+  Trash2,
+  XCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
-import { useDeleteApi } from "@/hooks/useApis"
+import { useDeleteApi, useUpdateApiStatus } from "@/hooks/useApis"
 import { useToast } from "@/hooks/useToast"
-import type { Api } from "@/services/api/api/types"
+import { safeFormat } from "@/lib/formatDate"
+import type { Api, ApiStatus } from "@/services/api/api/types"
 
 interface ApiHeaderProps {
   api: Api
   apiId: string
 }
 
+interface StatusAction {
+  status: ApiStatus
+  label: string
+  title: string
+  description: string
+  icon: typeof Play
+}
+
+const STATUS_ACTIONS: Record<ApiStatus, StatusAction> = {
+  active: {
+    status: "active",
+    label: "Activate API",
+    title: "Activate API",
+    description: "Are you sure you want to activate this API? Its permissions will be available for use.",
+    icon: Play,
+  },
+  inactive: {
+    status: "inactive",
+    label: "Deactivate API",
+    title: "Deactivate API",
+    description: "Are you sure you want to deactivate this API? Its permissions will no longer be available.",
+    icon: XCircle,
+  },
+}
+
 export function ApiHeader({ api, apiId }: ApiHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteApiMutation = useDeleteApi()
+  const updateStatusMutation = useUpdateApiStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<StatusAction | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -36,6 +73,24 @@ export function ApiHeader({ api, apiId }: ApiHeaderProps) {
       showError(error)
     }
   }
+
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    try {
+      await updateStatusMutation.mutateAsync({ apiId, data: { status: statusAction.status } })
+      showSuccess(`API status updated to ${statusAction.status}`)
+    } catch (error) {
+      showError(error)
+    } finally {
+      setStatusAction(null)
+    }
+  }
+
+  // Availability mirrors the backend rules: system APIs cannot be edited,
+  // change status, or be deleted.
+  const statusActions = api.is_system
+    ? []
+    : Object.values(STATUS_ACTIONS).filter((action) => action.status !== api.status)
 
   const attributes: DetailAttribute[] = [
     {
@@ -56,12 +111,12 @@ export function ApiHeader({ api, apiId }: ApiHeaderProps) {
     {
       icon: CalendarDays,
       label: "Created",
-      value: format(new Date(api.created_at), "PP"),
+      value: safeFormat(api.created_at, "PP"),
     },
     {
       icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(api.updated_at), "PP"),
+      value: safeFormat(api.updated_at, "PP"),
     },
     {
       icon: Server,
@@ -88,21 +143,21 @@ export function ApiHeader({ api, apiId }: ApiHeaderProps) {
         subtitle={api.description}
         attributes={attributes}
         actions={
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-2"
-              onClick={() =>
-                navigate(`/apis/${apiId}/edit`, {
-                  state: { from: `/apis/${apiId}`, backLabel: "Back to API Details" },
-                })
-              }
-            >
-              <Edit className="size-4" />
-              Edit
-            </Button>
-            {!api.is_system && (
+          !api.is_system && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-2"
+                onClick={() =>
+                  navigate(`/apis/${apiId}/edit`, {
+                    state: { from: `/apis/${apiId}`, backLabel: "Back to API Details" },
+                  })
+                }
+              >
+                <Edit className="size-4" />
+                Edit
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 w-9 p-0">
@@ -111,6 +166,21 @@ export function ApiHeader({ api, apiId }: ApiHeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {statusActions.map((action) => (
+                    <DropdownMenuItem
+                      key={action.status}
+                      onClick={() => setStatusAction(action)}
+                      className={
+                        action.status !== "active"
+                          ? "text-destructive focus:text-destructive"
+                          : undefined
+                      }
+                    >
+                      <action.icon className="mr-2 size-4" />
+                      {action.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
                     className="text-destructive focus:text-destructive"
@@ -120,9 +190,22 @@ export function ApiHeader({ api, apiId }: ApiHeaderProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-          </>
+            </>
+          )
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        // Deactivate takes the API out of use → red confirm. Activate is
+        // restorative → normal confirm.
+        variant={statusAction && statusAction.status !== "active" ? "destructive" : "default"}
+        confirmText={statusAction?.label}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

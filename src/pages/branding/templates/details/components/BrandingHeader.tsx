@@ -36,13 +36,14 @@ export function BrandingHeader({ branding, brandingId }: BrandingHeaderProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showActivateDialog, setShowActivateDialog] = useState(false)
 
-  const base = `/branding/templates`
+  const listUrl = `/branding?tab=themes`
+  const detailBase = `/branding/templates`
 
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(brandingId)
       showSuccess("Branding deleted successfully")
-      navigate(base)
+      navigate(listUrl)
     } catch (error) {
       showError(error)
     }
@@ -96,8 +97,8 @@ export function BrandingHeader({ branding, brandingId }: BrandingHeaderProps) {
               size="sm"
               className="h-9 gap-2"
               onClick={() =>
-                navigate(`${base}/${brandingId}/edit`, {
-                  state: { from: `${base}/${brandingId}`, backLabel: "Back to Branding Details" },
+                navigate(`${detailBase}/${brandingId}/edit`, {
+                  state: { from: `${detailBase}/${brandingId}`, backLabel: "Back to Branding Details" },
                 })
               }
             >

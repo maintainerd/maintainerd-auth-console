@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm, Controller, type Resolver } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { Plus, X } from "lucide-react"
+import { ArrowLeft, Plus, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DetailsContainer } from "@/components/container"
 import { FormPageHeader } from "@/components/header"
 import {
@@ -17,6 +17,8 @@ import {
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { FormUrlField, MetadataFieldEditor } from "@/components/inputs"
+import { ConfirmationDialog } from "@/components/dialog"
 import { clientSchema, type ClientFormData } from "@/lib/validations"
 import { useAppSelector } from "@/store/hooks"
 import {
@@ -29,6 +31,8 @@ import {
 } from "@/hooks/useClients"
 import { useToast } from "@/hooks/useToast"
 import { useBrandings } from "@/hooks/useBranding"
+import { useMetadataFields } from "@/hooks/useMetadataFields"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
 import type {
   CreateClientRequest,
   UpdateClientRequest,
@@ -66,19 +70,39 @@ const REQUIRED_ACR_OPTIONS: SelectOption[] = [
   { value: "2", label: "Require step-up — MFA (ACR 2)" },
 ]
 
+// Client metadata allows provider-style snake_case keys, must not shadow the
+// standard config controls, and follows the shared metadata-editor rules.
+const METADATA_OPTIONS = {
+  reservedKeys: COMMON_CLIENT_CONFIG_KEYS,
+  reservedKeysMessage: "Move standard client configuration to its own controls",
+  allowUnderscore: true,
+  maxKeyLength: 50,
+} as const
+
+// Backend snake_case field keys → form field names, for routing structured
+// server validation errors onto the offending inputs.
+const BACKEND_FIELD_MAP: Record<string, keyof ClientFormData> = {
+  name: "name",
+  display_name: "displayName",
+  client_type: "clientType",
+  domain: "domain",
+  status: "status",
+}
+
 export default function ClientAddOrUpdateForm() {
   const { clientId } = useParams<{ clientId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
   const currentTenant = useAppSelector((state) => state.tenant.currentTenant)
 
-  const navState = (location.state || {}) as {
-    from?: string
-    backLabel?: string
-  }
-
   const isEditing = Boolean(clientId)
+
+  // Honour where the user came from (e.g. the details page) so the back button,
+  // Cancel, and post-submit navigation return there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/clients`
+  const backLabel = navState?.backLabel ?? (backTo === `/clients` ? "Back to Clients" : "Back")
 
   // Fetch existing client if editing
   const { data: clientData, isLoading: isFetchingClient } = useClient(clientId || '')
@@ -131,26 +155,24 @@ export default function ClientAddOrUpdateForm() {
   const [sessionIdleTimeout, setSessionIdleTimeout] = useState<string>("")
   const [sessionAbsoluteTimeout, setSessionAbsoluteTimeout] = useState<string>("")
 
-  // Custom config fields state
-  const [customFields, setCustomFields] = useState<Array<{ key: string; value: string; id: string }>>([])
-  const [configError, setConfigError] = useState<string>("")
+  // Most of this form lives outside React Hook Form (OAuth toggles, URI lists,
+  // metadata, …), so RHF's isDirty alone under-reports unsaved changes. Every
+  // user-facing handler below marks local dirtiness; hydration effects use the
+  // raw setters so loading a client never counts as an edit.
+  const [isLocalDirty, setIsLocalDirty] = useState(false)
+  const markDirty = () => setIsLocalDirty(true)
 
-  // Check for duplicate keys whenever custom fields change
-  useEffect(() => {
-    const keys = customFields.map(field => field.key.trim()).filter(key => key !== '')
-    const duplicateKeys = keys.filter((key, index) => keys.indexOf(key) !== index)
-    const reservedKeys = keys.filter(key => COMMON_CLIENT_CONFIG_KEYS.has(key))
-
-    if (reservedKeys.length > 0) {
-      const uniqueReserved = [...new Set(reservedKeys)]
-      setConfigError(`Move standard client configuration to its own controls: ${uniqueReserved.join(', ')}`)
-    } else if (duplicateKeys.length > 0) {
-      const uniqueDuplicates = [...new Set(duplicateKeys)]
-      setConfigError(`Duplicate metadata keys: ${uniqueDuplicates.join(', ')}`)
-    } else {
-      setConfigError("")
-    }
-  }, [customFields])
+  // Custom metadata via shared hook (client rules: snake_case keys allowed,
+  // standard config keys reserved).
+  const {
+    customFields,
+    metadataError,
+    addCustomField,
+    removeCustomField,
+    updateCustomField,
+    buildPayload,
+    resetFields,
+  } = useMetadataFields(METADATA_OPTIONS)
 
   // React Hook Form setup
   const {
@@ -159,7 +181,8 @@ export default function ClientAddOrUpdateForm() {
     control,
     reset,
     watch,
-    formState: { errors, isSubmitting }
+    setError,
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<ClientFormData>({
     resolver: yupResolver(clientSchema) as Resolver<ClientFormData>,
     defaultValues: {
@@ -169,8 +192,8 @@ export default function ClientAddOrUpdateForm() {
       domain: "",
       status: "active",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   // The selected client type drives which OAuth flows, credential model, and
@@ -284,35 +307,16 @@ export default function ClientAddOrUpdateForm() {
         config.session_absolute_timeout != null ? String(parseNumberConfigValue(config.session_absolute_timeout, 0) || "") : ""
       )
 
-      const metadataEntries = Object.entries(getClientMetadata(config)).map(([key, value], index) => ({
-        id: `custom-${Date.now()}-${index}`,
-        key,
-        value: typeof value === "object" && value !== null ? JSON.stringify(value) : String(value)
-      }))
-      setCustomFields(metadataEntries)
+      resetFields(getClientMetadata(config))
     }
-  }, [isEditing, clientConfigData])
-
-  // Custom config field management functions
-  const addCustomField = () => {
-    setCustomFields([...customFields, { id: Date.now().toString(), key: "", value: "" }])
-  }
-
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter(field => field.id !== id))
-  }
-
-  const updateCustomField = (id: string, key: string, value: string) => {
-    setCustomFields(customFields.map(field =>
-      field.id === id ? { ...field, key, value } : field
-    ))
-  }
+  }, [isEditing, clientConfigData, resetFields])
 
   const toggleConfigValue = (
     value: string,
     selectedValues: string[],
     setSelectedValues: (values: string[]) => void
   ) => {
+    markDirty()
     if (selectedValues.includes(value)) {
       setSelectedValues(selectedValues.filter((item) => item !== value))
       return
@@ -325,10 +329,18 @@ export default function ClientAddOrUpdateForm() {
     items: UriEntry[],
     setItems: (items: UriEntry[]) => void
   ) => ({
-    onAdd: () => setItems([...items, { uri: "" }]),
-    onRemove: (index: number) => setItems(items.filter((_, i) => i !== index)),
-    onChange: (index: number, value: string) =>
-      setItems(items.map((item, i) => (i === index ? { ...item, uri: value } : item))),
+    onAdd: () => {
+      markDirty()
+      setItems([...items, { uri: "" }])
+    },
+    onRemove: (index: number) => {
+      markDirty()
+      setItems(items.filter((_, i) => i !== index))
+    },
+    onChange: (index: number, value: string) => {
+      markDirty()
+      setItems(items.map((item, i) => (i === index ? { ...item, uri: value } : item)))
+    },
   })
 
   const redirectUriHandlers = makeUriListHandlers(redirectUris, setRedirectUris)
@@ -336,14 +348,19 @@ export default function ClientAddOrUpdateForm() {
   const allowedLogoutHandlers = makeUriListHandlers(allowedLogoutUrls, setAllowedLogoutUrls)
   const corsOriginHandlers = makeUriListHandlers(corsAllowedOrigins, setCorsAllowedOrigins)
 
+  const isLoading = createClientMutation.isPending || updateClientMutation.isPending || isSubmitting
+
+  // Warn before discarding unsaved edits (browser close/refresh + guarded exits).
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty || isLocalDirty)
+
   const onSubmit = async (formData: ClientFormData) => {
     if (!currentTenant) {
       showError("Tenant information not available")
       return
     }
 
-    if (configError) {
-      showError(configError)
+    if (metadataError) {
+      showError(metadataError)
       return
     }
 
@@ -409,15 +426,8 @@ export default function ClientAddOrUpdateForm() {
         config.session_absolute_timeout = absoluteTimeout
       }
 
-      const customConfig: Record<string, string> = {}
-      customFields.forEach(field => {
-        const key = field.key.trim()
-        if (key && !COMMON_CLIENT_CONFIG_KEYS.has(key)) {
-          customConfig[key] = field.value
-        }
-      })
-
-      if (Object.keys(customConfig).length > 0) {
+      const customConfig = buildPayload()
+      if (customConfig) {
         config.custom = customConfig
       }
 
@@ -490,48 +500,139 @@ export default function ClientAddOrUpdateForm() {
       }
 
       showSuccess(isEditing ? "Client updated successfully" : "Client created successfully")
-      navigate(isEditing ? `/clients/${clientId}` : navState.from ?? `/clients`)
+      navigate(backTo)
     } catch (error: unknown) {
+      // Route backend errors onto the offending field where we can: structured
+      // field errors first, otherwise keyword-match the message. Anything
+      // unmapped still shows via the toast.
+      const parsed = parseError(error)
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          const formField = BACKEND_FIELD_MAP[field]
+          if (formField) {
+            setError(formField, { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        // Most specific first, so "display name" doesn't land on "name".
+        const keywordOrder: Array<[string, keyof ClientFormData]> = [
+          ["display name", "displayName"],
+          ["display_name", "displayName"],
+          ["client type", "clientType"],
+          ["client_type", "clientType"],
+          ["domain", "domain"],
+          ["status", "status"],
+          ["name", "name"],
+        ]
+        const hit = keywordOrder.find(([keyword]) => lower.includes(keyword))
+        if (hit) {
+          setError(hit[1], { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
 
-  const handleCancel = () => {
-    if (isEditing && clientId) {
-      navigate(`/clients/${clientId}`)
-    } else {
-      navigate(navState.from ?? `/clients`)
-    }
+  const pageTitle = isEditing ? `Edit ${clientData?.display_name || clientData?.name}` : "Create Client"
+  const pageDescription = isEditing
+    ? "Update client configuration and settings"
+    : "Configure a new OAuth client for your application"
+
+  const showUriCard = hasApplicationUris(capability)
+  const isSystemClient = Boolean(clientData?.is_system)
+
+  // Loading state while fetching the client to edit
+  if (isEditing && isFetchingClient) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Client"
+            description={pageDescription}
+          />
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
   }
 
-  const isLoading = isFetchingClient || createClientMutation.isPending || updateClientMutation.isPending
-  const showUriCard = hasApplicationUris(capability)
+  // Not-found state
+  if (isEditing && !isFetchingClient && !clientData) {
+    return (
+      <DetailsContainer>
+        <div className="flex flex-col gap-6">
+          <FormPageHeader
+            backUrl={backTo}
+            backLabel={backLabel}
+            title="Edit Client"
+            description={pageDescription}
+          />
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <AlertCircle className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Client not found</h2>
+                <p className="text-sm text-muted-foreground">
+                  The client you're trying to edit doesn't exist or may have been removed.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => guard(() => navigate(backTo))}>
+                <ArrowLeft className="mr-2 size-4" />
+                {backLabel}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DetailsContainer>
+    )
+  }
 
   return (
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={isEditing ? `/clients/${clientId}` : navState.from ?? `/clients`}
-          backLabel={isEditing ? "Back to Clients" : navState.backLabel ?? "Back to Clients"}
-          title={isEditing ? "Edit Client" : "Create New Client"}
-          description={isEditing
-            ? "Update client configuration and settings"
-            : "Configure a new OAuth client for your application"
-          }
+          backUrl={backTo}
+          backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
+          title={pageTitle}
+          description={pageDescription}
+          showSystemBadge={isSystemClient}
+          showWarning={isSystemClient}
+          warningMessage="This is a system client. Some settings may be restricted and cannot be modified."
         />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" key={clientId || 'create'}>
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Name, application type, domain, and status for this client.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormInputField
                 label="Name"
                 placeholder="e.g., medlexer-public"
                 description="Lowercase letters, numbers, and hyphens only"
-                disabled={clientData?.is_system || isLoading}
+                disabled={isSystemClient || isLoading}
                 error={errors.name?.message}
                 required
                 {...register("name")}
@@ -541,7 +642,7 @@ export default function ClientAddOrUpdateForm() {
                 label="Display Name"
                 placeholder="e.g., Medlexer Public"
                 description="This will be the display name shown to users"
-                disabled={clientData?.is_system || isLoading}
+                disabled={isSystemClient || isLoading}
                 error={errors.displayName?.message}
                 required
                 {...register("displayName")}
@@ -559,7 +660,7 @@ export default function ClientAddOrUpdateForm() {
                       options={CLIENT_TYPE_OPTIONS}
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={clientData?.is_system || isLoading}
+                      disabled={isSystemClient || isLoading}
                       error={errors.clientType?.message}
                       description="Determines the OAuth flow, credentials, and URIs below"
                       required
@@ -606,7 +707,7 @@ export default function ClientAddOrUpdateForm() {
           {/* OAuth Flow Configuration */}
           <Card>
             <CardHeader>
-              <CardTitle>OAuth Flow Configuration</CardTitle>
+              <CardTitle className="text-base">OAuth Flow Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Configure the standard OAuth and OIDC behavior for this client.
               </p>
@@ -627,7 +728,7 @@ export default function ClientAddOrUpdateForm() {
                       label={option.label}
                       checked={grantTypes.includes(option.value)}
                       onCheckedChange={() => toggleConfigValue(option.value, grantTypes, setGrantTypes)}
-                      disabled={clientData?.is_system || isLoading}
+                      disabled={isSystemClient || isLoading}
                     />
                   ))}
                 </div>
@@ -647,7 +748,7 @@ export default function ClientAddOrUpdateForm() {
                       label="Code"
                       checked={responseTypes.includes("code")}
                       onCheckedChange={() => toggleConfigValue("code", responseTypes, setResponseTypes)}
-                      disabled={clientData?.is_system || isLoading}
+                      disabled={isSystemClient || isLoading}
                     />
                   </div>
                 </div>
@@ -658,8 +759,8 @@ export default function ClientAddOrUpdateForm() {
                 placeholder="Select auth method"
                 options={capability.authMethodOptions}
                 value={tokenEndpointAuthMethod}
-                onValueChange={setTokenEndpointAuthMethod}
-                disabled={clientData?.is_system || isLoading || capability.isPublic}
+                onValueChange={(value) => { markDirty(); setTokenEndpointAuthMethod(value) }}
+                disabled={isSystemClient || isLoading || capability.isPublic}
                 description={capability.isPublic
                   ? "Public clients do not authenticate with a secret at the token endpoint"
                   : "How this client authenticates when calling the token endpoint"}
@@ -670,8 +771,8 @@ export default function ClientAddOrUpdateForm() {
                 label="Allowed Scopes"
                 placeholder="openid, profile, email"
                 value={allowedScopes}
-                onChange={(event) => setAllowedScopes(event.target.value)}
-                disabled={clientData?.is_system || isLoading}
+                onChange={(event) => { markDirty(); setAllowedScopes(event.target.value) }}
+                disabled={isSystemClient || isLoading}
                 description="Comma-separated scopes this client can request"
               />
 
@@ -681,8 +782,8 @@ export default function ClientAddOrUpdateForm() {
                   label="Require Consent"
                   description="Require user consent before issuing tokens for this client"
                   checked={requireConsent}
-                  onCheckedChange={setRequireConsent}
-                  disabled={clientData?.is_system || isLoading}
+                  onCheckedChange={(checked) => { markDirty(); setRequireConsent(checked) }}
+                  disabled={isSystemClient || isLoading}
                 />
 
                 <FormSelectField
@@ -690,7 +791,7 @@ export default function ClientAddOrUpdateForm() {
                   placeholder="Select branding"
                   options={brandingOptions}
                   value={brandingId}
-                  onValueChange={setBrandingId}
+                  onValueChange={(value) => { markDirty(); setBrandingId(value) }}
                   disabled={isLoading}
                   description="Optional — the branding applied to this client's login and registration pages. Defaults to the tenant's active branding."
                 />
@@ -700,7 +801,7 @@ export default function ClientAddOrUpdateForm() {
                   label="Allow registration"
                   description="Allow self-service registration for this client. Does not affect login for existing users or invite acceptance."
                   checked={allowRegistration}
-                  onCheckedChange={setAllowRegistration}
+                  onCheckedChange={(checked) => { markDirty(); setAllowRegistration(checked) }}
                   disabled={isLoading}
                   containerClassName="rounded-md border p-4"
                 />
@@ -713,8 +814,8 @@ export default function ClientAddOrUpdateForm() {
                       ? "Required for this client type and cannot be disabled"
                       : "Require proof key verification for authorization code flows"}
                     checked={pkceForced ? true : pkceRequired}
-                    onCheckedChange={setPkceRequired}
-                    disabled={pkceForced || clientData?.is_system || isLoading}
+                    onCheckedChange={(checked) => { markDirty(); setPkceRequired(checked) }}
+                    disabled={pkceForced || isSystemClient || isLoading}
                   />
                 )}
               </div>
@@ -724,43 +825,33 @@ export default function ClientAddOrUpdateForm() {
           {/* Token Configuration */}
           <Card>
             <CardHeader>
-              <CardTitle>Token Configuration</CardTitle>
+              <CardTitle className="text-base">Token Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Configure token lifetimes and security settings
+                Configure token lifetimes and security settings.
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="accessTokenLifetime">Access Token Lifetime (seconds)</Label>
-                  <Input
-                    id="accessTokenLifetime"
-                    type="number"
-                    value={accessTokenLifetime}
-                    onChange={(e) => setAccessTokenLifetime(parseInt(e.target.value) || 3600)}
-                    min="300"
-                    max="86400"
-                    disabled={isLoading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Current: {accessTokenLifetime / 3600} hours (300-86400 seconds)
-                  </p>
-                </div>
+                <FormInputField
+                  label="Access Token Lifetime (seconds)"
+                  type="number"
+                  min={300}
+                  max={86400}
+                  value={accessTokenLifetime}
+                  onChange={(e) => { markDirty(); setAccessTokenLifetime(parseInt(e.target.value) || 3600) }}
+                  disabled={isLoading}
+                  description={`Current: ${accessTokenLifetime / 3600} hours (300-86400 seconds)`}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="refreshTokenLifetime">Refresh Token Lifetime (seconds)</Label>
-                  <Input
-                    id="refreshTokenLifetime"
-                    type="number"
-                    value={refreshTokenLifetime}
-                    onChange={(e) => setRefreshTokenLifetime(parseInt(e.target.value) || 604800)}
-                    min="3600"
-                    disabled={isLoading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Current: {refreshTokenLifetime / 86400} days
-                  </p>
-                </div>
+                <FormInputField
+                  label="Refresh Token Lifetime (seconds)"
+                  type="number"
+                  min={3600}
+                  value={refreshTokenLifetime}
+                  onChange={(e) => { markDirty(); setRefreshTokenLifetime(parseInt(e.target.value) || 604800) }}
+                  disabled={isLoading}
+                  description={`Current: ${refreshTokenLifetime / 86400} days`}
+                />
               </div>
 
               <FormSwitchField
@@ -768,7 +859,7 @@ export default function ClientAddOrUpdateForm() {
                 label="Refresh Token Rotation"
                 description="Issue a new refresh token with each access token refresh"
                 checked={refreshTokenRotation}
-                onCheckedChange={setRefreshTokenRotation}
+                onCheckedChange={(checked) => { markDirty(); setRefreshTokenRotation(checked) }}
                 disabled={isLoading}
               />
 
@@ -777,7 +868,7 @@ export default function ClientAddOrUpdateForm() {
                 label="Multi-Resource Refresh Token (MRRT)"
                 description="Allow one refresh token to receive access tokens for multiple APIs"
                 checked={multiResourceRefreshToken}
-                onCheckedChange={setMultiResourceRefreshToken}
+                onCheckedChange={(checked) => { markDirty(); setMultiResourceRefreshToken(checked) }}
                 disabled={isLoading}
               />
             </CardContent>
@@ -786,7 +877,7 @@ export default function ClientAddOrUpdateForm() {
           {/* Step-up & Session Security */}
           <Card>
             <CardHeader>
-              <CardTitle>Step-up &amp; Session Security</CardTitle>
+              <CardTitle className="text-base">Step-up &amp; Session Security</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Per-client overrides for authentication assurance and session lifetimes.
                 Leave blank to inherit the tenant security policy.
@@ -798,43 +889,33 @@ export default function ClientAddOrUpdateForm() {
                 placeholder="Inherit tenant default"
                 options={REQUIRED_ACR_OPTIONS}
                 value={requiredAcr}
-                onValueChange={setRequiredAcr}
-                disabled={clientData?.is_system || isLoading}
+                onValueChange={(value) => { markDirty(); setRequiredAcr(value) }}
+                disabled={isSystemClient || isLoading}
                 description="Minimum assurance required to access this client. Step-up forces MFA at sign-in even when the tenant default does not."
               />
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="sessionIdleTimeout">Session Idle Timeout (seconds)</Label>
-                  <Input
-                    id="sessionIdleTimeout"
-                    type="number"
-                    min="1"
-                    value={sessionIdleTimeout}
-                    onChange={(e) => setSessionIdleTimeout(e.target.value)}
-                    placeholder="Inherit tenant default"
-                    disabled={clientData?.is_system || isLoading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Sliding window of inactivity before the session expires.
-                  </p>
-                </div>
+                <FormInputField
+                  label="Session Idle Timeout (seconds)"
+                  type="number"
+                  min={1}
+                  value={sessionIdleTimeout}
+                  onChange={(e) => { markDirty(); setSessionIdleTimeout(e.target.value) }}
+                  placeholder="Inherit tenant default"
+                  disabled={isSystemClient || isLoading}
+                  description="Sliding window of inactivity before the session expires."
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="sessionAbsoluteTimeout">Session Absolute Timeout (seconds)</Label>
-                  <Input
-                    id="sessionAbsoluteTimeout"
-                    type="number"
-                    min="1"
-                    value={sessionAbsoluteTimeout}
-                    onChange={(e) => setSessionAbsoluteTimeout(e.target.value)}
-                    placeholder="Inherit tenant default"
-                    disabled={clientData?.is_system || isLoading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Hard cap on total session lifetime regardless of activity.
-                  </p>
-                </div>
+                <FormInputField
+                  label="Session Absolute Timeout (seconds)"
+                  type="number"
+                  min={1}
+                  value={sessionAbsoluteTimeout}
+                  onChange={(e) => { markDirty(); setSessionAbsoluteTimeout(e.target.value) }}
+                  placeholder="Inherit tenant default"
+                  disabled={isSystemClient || isLoading}
+                  description="Hard cap on total session lifetime regardless of activity."
+                />
               </div>
             </CardContent>
           </Card>
@@ -843,26 +924,21 @@ export default function ClientAddOrUpdateForm() {
           {showUriCard && (
             <Card>
               <CardHeader>
-                <CardTitle>Application URIs</CardTitle>
+                <CardTitle className="text-base">Application URIs</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Configure application URLs and endpoints
+                  Configure application URLs and endpoints.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 {capability.showLoginUri && (
-                  <div className="space-y-2">
-                    <Label htmlFor="loginUri">Login URI</Label>
-                    <Input
-                      id="loginUri"
-                      value={loginUri.uri}
-                      onChange={(e) => setLoginUri({ ...loginUri, uri: e.target.value })}
-                      placeholder="https://your-app.com/login"
-                      disabled={isLoading}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      The URL where users will be directed to log in
-                    </p>
-                  </div>
+                  <FormUrlField
+                    label="Login URI"
+                    placeholder="https://your-app.com/login"
+                    description="The URL where users will be directed to log in"
+                    value={loginUri.uri}
+                    onChange={(e) => { markDirty(); setLoginUri({ ...loginUri, uri: e.target.value }) }}
+                    disabled={isLoading}
+                  />
                 )}
 
                 {capability.showRedirectUris && (
@@ -908,9 +984,9 @@ export default function ClientAddOrUpdateForm() {
           {capability.showCors && (
             <Card>
               <CardHeader>
-                <CardTitle>Cross Origin Authentication</CardTitle>
+                <CardTitle className="text-base">Cross Origin Authentication</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Configure CORS settings for cross-origin authentication
+                  Configure CORS settings for cross-origin authentication.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -919,7 +995,7 @@ export default function ClientAddOrUpdateForm() {
                   label="Enable Cross-Origin Authentication"
                   description="Allow browser-based authentication calls from configured origins"
                   checked={corsEnabled}
-                  onCheckedChange={setCorsEnabled}
+                  onCheckedChange={(checked) => { markDirty(); setCorsEnabled(checked) }}
                   disabled={isLoading}
                 />
 
@@ -941,60 +1017,35 @@ export default function ClientAddOrUpdateForm() {
           {/* Metadata */}
           <Card>
             <CardHeader>
-              <CardTitle>Metadata</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Add non-common provider or application fields that should be available to integrations.
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base">Metadata</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1.5">
+                    Add non-common provider or application fields that should be available to integrations.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { markDirty(); addCustomField() }}
+                  disabled={isSystemClient || isLoading}
+                  className="h-9 shrink-0 gap-2"
+                >
+                  <Plus className="size-4" />
+                  Add Field
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {configError && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {configError}
-                </div>
-              )}
-
-              {customFields.length > 0 && (
-                <div className="space-y-3">
-                  {customFields.map((field) => (
-                    <div key={field.id} className="flex gap-3 items-start">
-                      <div className="flex-1 grid gap-3 md:grid-cols-2">
-                        <Input
-                          value={field.key}
-                          onChange={(e) => updateCustomField(field.id, e.target.value, field.value)}
-                          placeholder="Field name (e.g., cognito_region)"
-                          disabled={clientData?.is_system || isLoading}
-                        />
-                        <Input
-                          value={field.value}
-                          onChange={(e) => updateCustomField(field.id, field.key, e.target.value)}
-                          placeholder="Field value"
-                          disabled={clientData?.is_system || isLoading}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCustomField(field.id)}
-                        disabled={clientData?.is_system || isLoading}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addCustomField}
-                disabled={clientData?.is_system || isLoading}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Metadata Field
-              </Button>
+            <CardContent>
+              <MetadataFieldEditor
+                fields={customFields}
+                error={metadataError}
+                disabled={isSystemClient || isLoading}
+                onAdd={() => { markDirty(); addCustomField() }}
+                onUpdate={(id, key, value) => { markDirty(); updateCustomField(id, key, value) }}
+                onRemove={(id) => { markDirty(); removeCustomField(id) }}
+              />
             </CardContent>
           </Card>
 
@@ -1003,19 +1054,30 @@ export default function ClientAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={handleCancel}
+              onClick={() => guard(() => navigate(backTo))}
               disabled={isLoading}
             >
               Cancel
             </Button>
             <FormSubmitButton
-              isSubmitting={isSubmitting || isLoading}
-              disabled={clientData?.is_system}
+              isSubmitting={isLoading}
+              disabled={isSystemClient}
               submittingText="Saving..."
               submitText={isEditing ? "Update Client" : "Create Client"}
             />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

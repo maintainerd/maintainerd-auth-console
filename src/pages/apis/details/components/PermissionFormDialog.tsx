@@ -1,16 +1,18 @@
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
 import { Key } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FormInputField, FormTextareaField, FormSelectField, FormSubmitButton, type SelectOption } from "@/components/form"
+import { Button } from "@/components/ui/button"
+import { FormInputField, FormTextareaField, FormSelectField, type SelectOption } from "@/components/form"
+import { permissionSchema, type PermissionFormData } from "@/lib/validations"
 import { useCreatePermission, useUpdatePermission } from "@/hooks/usePermissions"
 import { useToast } from "@/hooks/useToast"
 import type { PermissionEntity } from "@/services/api/permissions/types"
@@ -22,24 +24,6 @@ interface PermissionFormDialogProps {
   permission?: PermissionEntity
   onSuccess?: () => void
 }
-
-interface PermissionFormData {
-  name: string
-  description: string
-  status: "active" | "inactive"
-}
-
-const permissionSchema = yup.object({
-  name: yup
-    .string()
-    .required("Permission name is required")
-    .matches(
-      /^[a-z0-9-]+:[a-z0-9-]+$/,
-      "Permission name must follow format: resource:action (e.g., users:read, posts:write)"
-    ),
-  description: yup.string().required("Description is required"),
-  status: yup.string().oneOf(["active", "inactive"]).required("Status is required"),
-})
 
 const statusOptions: SelectOption[] = [
   { value: "active", label: "Active" },
@@ -61,6 +45,7 @@ export function PermissionFormDialog({
   const {
     register,
     handleSubmit,
+    control,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<PermissionFormData>({
@@ -70,6 +55,8 @@ export function PermissionFormDialog({
       description: "",
       status: "active",
     },
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   // Load existing permission data if editing
@@ -155,22 +142,33 @@ export function PermissionFormDialog({
             {...register("description")}
           />
 
-          <FormSelectField
-            label="Status"
-            options={statusOptions}
-            disabled={isLoading}
-            error={errors.status?.message}
-            required
-            {...register("status")}
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <FormSelectField
+                label="Status"
+                placeholder="Select status"
+                options={statusOptions}
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isLoading}
+                error={errors.status?.message}
+                required
+              />
+            )}
           />
 
-          <FormSubmitButton
-            isSubmitting={isLoading}
-            submitText={isEditing ? "Update Permission" : "Create Permission"}
-          />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : isEditing ? "Update Permission" : "Create Permission"}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
-

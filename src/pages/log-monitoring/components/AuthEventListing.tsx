@@ -9,7 +9,7 @@ import { authEventColumns } from "./AuthEventColumns"
 import { useAuthEventsList } from "@/hooks/useAuthEvents"
 import { API_ENDPOINTS } from "@/services/api/config"
 
-const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
 const SEARCH_FIELDS = ["event_type", "ip_address"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "category", label: "Category", options: ["AUTHN", "AUTHZ", "SESSION", "USER", "SYSTEM"] },
@@ -25,7 +25,7 @@ function buildExportUrl(format: "csv" | "json", searchParams: URLSearchParams): 
   return `${API_ENDPOINTS.AUTH_EVENTS}/export?${params.toString()}`
 }
 
-export function AuthEventListing() {
+export function AuthEventListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -35,8 +35,18 @@ export function AuthEventListing() {
   }, [searchParams])
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-end">
+    <ResourceListing
+      tableInCard={tableInCard}
+      columns={authEventColumns}
+      defaultSort={DEFAULT_SORT}
+      searchFields={SEARCH_FIELDS}
+      searchPlaceholder="Search events by type or IP..."
+      useData={useAuthEventsList}
+      filterGroups={FILTER_GROUPS}
+      emptyTitle="No auth events yet"
+      emptyDescription="Authentication and authorization events will appear here as users interact with the system."
+      onRowClick={(event) => navigate(`/logs/${event.auth_event_id}`)}
+      extraActions={
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -48,18 +58,7 @@ export function AuthEventListing() {
             <DropdownMenuItem onClick={() => handleExport("json")}>JSON</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-      <ResourceListing
-        columns={authEventColumns}
-        defaultSort={DEFAULT_SORT}
-        searchFields={SEARCH_FIELDS}
-        searchPlaceholder="Search events by type or IP..."
-        useData={useAuthEventsList}
-        filterGroups={FILTER_GROUPS}
-        emptyTitle="No auth events yet"
-        emptyDescription="Authentication and authorization events will appear here as users interact with the system."
-        onRowClick={(event) => navigate(`/logs/${event.auth_event_id}`)}
-      />
-    </div>
+      }
+    />
   )
 }

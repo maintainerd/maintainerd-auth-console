@@ -35,6 +35,7 @@ export default function WebhookAddOrUpdateForm() {
   const { showSuccess, showError } = useToast()
 
   const isEditing = Boolean(webhookId)
+  const webhooksListUrl = `/events?tab=webhooks`
 
   const { data: webhookData, isLoading: isFetchingWebhook } = useWebhook(webhookId || "")
   const createWebhookMutation = useCreateWebhook()
@@ -132,7 +133,7 @@ export default function WebhookAddOrUpdateForm() {
     if (isEditing && webhookId) {
       navigate(`/webhooks/${webhookId}`)
     } else {
-      navigate(`/webhooks`)
+      navigate(webhooksListUrl)
     }
   }
 
@@ -168,7 +169,7 @@ export default function WebhookAddOrUpdateForm() {
       <DetailsContainer>
         <div className="flex flex-col gap-6">
           <FormPageHeader
-            backUrl={`/webhooks`}
+            backUrl={webhooksListUrl}
             backLabel="Back to Webhooks"
             title="Save your signing secret"
             description="This is the only time the signing secret will be shown."
@@ -207,7 +208,7 @@ export default function WebhookAddOrUpdateForm() {
                     navigate(
                       savedWebhookId
                         ? `/webhooks/${savedWebhookId}`
-                        : `/webhooks`,
+                        : webhooksListUrl,
                     )
                   }
                 >
@@ -225,7 +226,7 @@ export default function WebhookAddOrUpdateForm() {
     <DetailsContainer>
       <div className="flex flex-col gap-6">
         <FormPageHeader
-          backUrl={isEditing ? `/webhooks/${webhookId}` : `/webhooks`}
+          backUrl={isEditing ? `/webhooks/${webhookId}` : webhooksListUrl}
           backLabel="Back to Webhooks"
           title={isEditing ? "Edit Webhook" : "Create New Webhook"}
           description={

@@ -4,17 +4,18 @@ import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { webhookColumns } from "./WebhookColumns"
 import { useWebhooksList } from "@/hooks/useWebhooks"
 
-const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
 const SEARCH_FIELDS = ["url"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive", "quarantined"] },
 ]
 
-export function WebhookListing() {
+export function WebhookListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={webhookColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}

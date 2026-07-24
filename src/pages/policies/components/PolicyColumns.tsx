@@ -1,78 +1,60 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown } from "lucide-react"
+import { FileText } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { PolicyActions } from "./PolicyActions"
+import { DataTableColumnHeader } from "@/components/data-table"
 import { SystemBadge, StatusBadge } from "@/components/badges"
 import type { Policy } from "@/services/api/policies/types"
 
 export const policyColumns: ColumnDef<Policy>[] = [
   {
+    id: "Policy",
     accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Policy
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Policy" />,
     cell: ({ row }) => {
       const policy = row.original
       return (
-        <div className="flex flex-col gap-1 px-3 py-1 max-w-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{policy.name}</span>
-            <SystemBadge isSystem={policy.is_system} />
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <FileText className="size-5" />
           </div>
-          <span className="truncate text-sm text-muted-foreground">
-            {policy.description || "No description"}
-          </span>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Version: <span className="font-mono">{policy.version}</span></span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate font-medium">{policy.name}</span>
+              <SystemBadge isSystem={policy.is_system} />
+            </div>
+            <span className="truncate text-sm text-muted-foreground">
+              {policy.description || "No description"}
+            </span>
           </div>
         </div>
       )
     },
   },
   {
+    id: "Status",
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const policy = row.original
-      return (
-        <div className="px-3 py-1">
-          <StatusBadge status={policy.status} />
-        </div>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <StatusBadge status={row.original.status} />
+      </div>
+    ),
   },
   {
+    id: "Version",
+    accessorKey: "version",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Version" />,
+    cell: ({ row }) => (
+      <div className="px-3 py-1">
+        <span className="font-mono text-sm">{row.original.version}</span>
+      </div>
+    ),
+  },
+  {
+    id: "Created",
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const policy = row.original
       return (
@@ -89,6 +71,7 @@ export const policyColumns: ColumnDef<Policy>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => {
       const policy = row.original

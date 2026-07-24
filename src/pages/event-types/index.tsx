@@ -25,7 +25,7 @@ function groupByCategory(types: EventType[]): [string, EventType[]][] {
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
 }
 
-export default function EventTypesPage() {
+export default function EventTypesPage({ standalone = true }: { standalone?: boolean }) {
   const { data, isLoading, isError } = useEventTypes()
   const { data: tenantConfigs } = useTenantEventTypes()
   const setTenantEventType = useSetTenantEventType()
@@ -65,6 +65,104 @@ export default function EventTypesPage() {
     return groupByCategory(filtered)
   }, [data, search])
 
+  const content = (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-2 rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+        <Info className="mt-0.5 size-4 shrink-0" />
+        <span>
+          This is a tenant-wide master switch. Disabling an event stops it at the source — it
+          won't reach any webhook or the message broker, regardless of individual subscriptions.
+          Events are enabled by default.
+        </span>
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search event types by key, category, or description..."
+          className="pl-9"
+        />
+      </div>
+
+      {isLoading && (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-full max-w-md" />
+                <Skeleton className="h-3 w-full max-w-sm" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {isError && (
+        <p className="py-8 text-center text-sm text-destructive">Failed to load event types</p>
+      )}
+
+      {data && groups.length === 0 && (
+        <EmptyState
+          icon={Radio}
+          title={search ? "No matching event types" : "No event types"}
+          description={
+            search
+              ? "No event types match your search. Try a different key or category."
+              : "No event types are available for this tenant."
+          }
+        />
+      )}
+
+      {groups.length > 0 && (
+        <div className="space-y-4">
+          {groups.map(([category, types]) => (
+            <InformationCard
+              key={category}
+              title={category}
+              description={`${types.length} event type${types.length === 1 ? "" : "s"}`}
+            >
+              <div className="divide-y divide-border/60">
+                {types.map((t) => {
+                  const enabled = isEnabled(t.uuid)
+                  return (
+                    <div
+                      key={t.uuid}
+                      className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                    >
+                      <div className={cn("min-w-0 space-y-1", !enabled && "opacity-50")}>
+                        <div className="flex items-center gap-2">
+                          <code className="rounded bg-muted px-2 py-0.5 font-mono text-sm font-medium">
+                            {t.key}
+                          </code>
+                          {t.version > 1 && (
+                            <span className="text-xs text-muted-foreground">v{t.version}</span>
+                          )}
+                        </div>
+                        {t.description && (
+                          <p className="text-sm text-muted-foreground">{t.description}</p>
+                        )}
+                      </div>
+                      <Switch
+                        checked={enabled}
+                        onCheckedChange={(checked) => handleToggle(t, checked)}
+                        aria-label={`${enabled ? "Disable" : "Enable"} ${t.key}`}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </InformationCard>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  if (!standalone) return content
+
   return (
     <DetailsContainer>
       <PageContainer>
@@ -72,98 +170,7 @@ export default function EventTypesPage() {
           title="Event Types"
           description="The catalog of events the system can emit. Toggle an event off to stop it from being delivered to any webhook or message broker for this tenant."
         />
-
-        <div className="flex items-start gap-2 rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0" />
-          <span>
-            This is a tenant-wide master switch. Disabling an event stops it at the source — it
-            won't reach any webhook or the message broker, regardless of individual subscriptions.
-            Events are enabled by default.
-          </span>
-        </div>
-
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search event types by key, category, or description..."
-            className="pl-9"
-          />
-        </div>
-
-        {isLoading && (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="space-y-3">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-full max-w-md" />
-                  <Skeleton className="h-3 w-full max-w-sm" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {isError && (
-          <p className="py-8 text-center text-sm text-destructive">Failed to load event types</p>
-        )}
-
-        {data && groups.length === 0 && (
-          <EmptyState
-            icon={Radio}
-            title={search ? "No matching event types" : "No event types"}
-            description={
-              search
-                ? "No event types match your search. Try a different key or category."
-                : "No event types are available for this tenant."
-            }
-          />
-        )}
-
-        {groups.length > 0 && (
-          <div className="space-y-4">
-            {groups.map(([category, types]) => (
-              <InformationCard
-                key={category}
-                title={category}
-                description={`${types.length} event type${types.length === 1 ? "" : "s"}`}
-              >
-                <div className="divide-y divide-border/60">
-                  {types.map((t) => {
-                    const enabled = isEnabled(t.uuid)
-                    return (
-                      <div
-                        key={t.uuid}
-                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className={cn("min-w-0 space-y-1", !enabled && "opacity-50")}>
-                          <div className="flex items-center gap-2">
-                            <code className="rounded bg-muted px-2 py-0.5 font-mono text-sm font-medium">
-                              {t.key}
-                            </code>
-                            {t.version > 1 && (
-                              <span className="text-xs text-muted-foreground">v{t.version}</span>
-                            )}
-                          </div>
-                          {t.description && (
-                            <p className="text-sm text-muted-foreground">{t.description}</p>
-                          )}
-                        </div>
-                        <Switch
-                          checked={enabled}
-                          onCheckedChange={(checked) => handleToggle(t, checked)}
-                          aria-label={`${enabled ? "Disable" : "Enable"} ${t.key}`}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              </InformationCard>
-            ))}
-          </div>
-        )}
+        {content}
       </PageContainer>
     </DetailsContainer>
   )

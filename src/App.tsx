@@ -44,53 +44,41 @@ const IdentityProviderAddOrUpdateForm = lazy(() => import('./pages/identity-prov
 const ClientsPage = lazy(() => import('./pages/clients'))
 const ClientDetailsPage = lazy(() => import('./pages/clients/details'))
 const ClientAddOrUpdateForm = lazy(() => import('./pages/clients/form'))
-const WebhooksPage = lazy(() => import('./pages/webhooks'))
+const EventsAndWebhooksPage = lazy(() => import('./pages/events/EventsAndWebhooksPage'))
 const WebhookDetailsPage = lazy(() => import('./pages/webhooks/details'))
 const WebhookAddOrUpdateForm = lazy(() => import('./pages/webhooks/form'))
-const EventTypesPage = lazy(() => import('./pages/event-types'))
-const EventRoutesPage = lazy(() => import('./pages/event-routes').then(m => ({ default: m.EventRoutesPage })))
 const WorkloadIdentityPage = lazy(() => import('./pages/workload-identity'))
-const AuditLogPage = lazy(() => import('./pages/audit-log'))
 const PoliciesPage = lazy(() => import('./pages/policies'))
 const PolicyDetailsPage = lazy(() => import('./pages/policies/details'))
 const PolicyAddOrUpdateForm = lazy(() => import('./pages/policies/form'))
 const MfaConfigPage = lazy(() => import('./pages/security/mfa/MfaConfigPage'))
-const MfaViewPage = lazy(() => import('./pages/security/mfa/MfaViewPage'))
-const PasswordPoliciesPage = lazy(() => import('./pages/security/password-policies'))
 const PasswordPoliciesFormPage = lazy(() => import('./pages/security/password-policies').then(m => ({ default: m.PasswordPoliciesFormPage })))
-const SessionManagementPage = lazy(() => import('./pages/security/session-management'))
 const SessionManagementFormPage = lazy(() => import('./pages/security/session-management').then(m => ({ default: m.SessionManagementFormPage })))
-const TokenViewPage = lazy(() => import('./pages/security/token/TokenViewPage'))
 const TokenConfigPage = lazy(() => import('./pages/security/token/TokenConfigPage'))
-const LockoutViewPage = lazy(() => import('./pages/security/lockout/LockoutViewPage'))
 const LockoutConfigPage = lazy(() => import('./pages/security/lockout/LockoutConfigPage'))
-const RegistrationViewPage = lazy(() => import('./pages/security/registration/RegistrationViewPage'))
 const RegistrationConfigPage = lazy(() => import('./pages/security/registration/RegistrationConfigPage'))
-const ThreatDetectionPage = lazy(() => import('./pages/security/threat-detection'))
 const ThreatDetectionFormPage = lazy(() => import('./pages/security/threat-detection').then(m => ({ default: m.ThreatDetectionFormPage })))
-const IpRestrictionsPage = lazy(() => import('./pages/security/ip-restrictions'))
 const TenantSettingsPage = lazy(() => import('./pages/tenant-settings/TenantSettingsPage').then(m => ({ default: m.TenantSettingsPage })))
+const SecurityPage = lazy(() => import('./pages/security/SecurityPage'))
 const TenantsPage = lazy(() => import('./pages/tenants'))
 const TenantDetailsPage = lazy(() => import('./pages/tenants/details'))
 const TenantAddOrUpdateForm = lazy(() => import('./pages/tenants/form'))
 const RegistrationFlowsPage = lazy(() => import('./pages/registration-flows'))
 const RegistrationFlowDetailsPage = lazy(() => import('./pages/registration-flows/details'))
 const RegistrationFlowAddOrUpdateForm = lazy(() => import('./pages/registration-flows/form'))
-const LogMonitoringPage = lazy(() => import('./pages/log-monitoring'))
+const MonitoringPage = lazy(() => import('./pages/monitoring/MonitoringPage'))
+const AuditLogDetailsPage = lazy(() => import('./pages/audit-log/details/AuditLogDetailsPage'))
 const AuthEventDetailsPage = lazy(() => import('./pages/log-monitoring/details/AuthEventDetailsPage'))
-const BrandingTemplatesPage = lazy(() => import('./pages/branding/templates'))
 const BrandingDetailsPage = lazy(() => import('./pages/branding/templates/details/BrandingDetailsPage'))
 const BrandingForm = lazy(() => import('./pages/branding/templates/form/BrandingForm'))
-const EmailTemplatesPage = lazy(() => import('./pages/branding/email-templates'))
+const BrandingPage = lazy(() => import('./pages/branding/BrandingPage'))
 const EmailTemplateDetailsPage = lazy(() => import('./pages/branding/email-templates/details'))
 const EmailTemplateForm = lazy(() => import('./pages/branding/email-templates/form'))
-const SmsTemplatesPage = lazy(() => import('./pages/branding/sms-templates'))
 const SmsTemplateDetailsPage = lazy(() => import('./pages/branding/sms-templates/details'))
 const SmsTemplateForm = lazy(() => import('./pages/branding/sms-templates/form'))
-const EmailDeliveryPage = lazy(() => import('./pages/messaging/email/EmailDeliveryPage'))
 const EmailConfigPage = lazy(() => import('./pages/messaging/email/EmailConfigPage'))
-const SMSDeliveryPage = lazy(() => import('./pages/messaging/sms/SMSDeliveryPage'))
 const SMSConfigPage = lazy(() => import('./pages/messaging/sms/SMSConfigPage'))
+const MessagingPage = lazy(() => import('./pages/messaging/MessagingPage'))
 const MFAPage = lazy(() => import('./pages/account/MFAPage'))
 const MFAIndex = lazy(() => import('./pages/account/MFAPage').then(m => ({ default: m.MFAIndex })))
 const TOTPSetupPage = lazy(() => import('./pages/account/TOTPSetupPage'))
@@ -120,24 +108,17 @@ function App() {
         <Route path="/setup/tenant" element={<SetupTenantPage />} />
         <Route path="/setup/admin" element={<SetupAdminPage />} />
         <Route element={<PrivateLayout fullWidth />}>
-          <Route path="logs" element={<LogMonitoringPage />} />
+          <Route path="monitoring" element={<MonitoringPage />} />
           <Route path="logs/:eventId" element={<AuthEventDetailsPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="security/mfa" element={<MfaViewPage />} />
+          <Route path="security" element={<SecurityPage />} />
           <Route path="security/mfa/configure" element={<MfaConfigPage />} />
-          <Route path="security/password" element={<PasswordPoliciesPage />} />
           <Route path="security/password/configure" element={<PasswordPoliciesFormPage />} />
-          <Route path="security/session" element={<SessionManagementPage />} />
           <Route path="security/session/configure" element={<SessionManagementFormPage />} />
-          <Route path="security/token" element={<TokenViewPage />} />
           <Route path="security/token/configure" element={<TokenConfigPage />} />
-          <Route path="security/lockout" element={<LockoutViewPage />} />
           <Route path="security/lockout/configure" element={<LockoutConfigPage />} />
-          <Route path="security/registration" element={<RegistrationViewPage />} />
           <Route path="security/registration/configure" element={<RegistrationConfigPage />} />
-          <Route path="security/threat" element={<ThreatDetectionPage />} />
           <Route path="security/threat/configure" element={<ThreatDetectionFormPage />} />
-          <Route path="security/ip-restrictions" element={<IpRestrictionsPage />} />
           <Route path="settings" element={<TenantSettingsPage />} />
           <Route path="tenants" element={<TenantsPage />} />
           <Route path="tenants/create" element={<TenantAddOrUpdateForm />} />
@@ -172,14 +153,12 @@ function App() {
           <Route path="clients/create" element={<ClientAddOrUpdateForm />} />
           <Route path="clients/:clientId" element={<ClientDetailsPage />} />
           <Route path="clients/:clientId/edit" element={<ClientAddOrUpdateForm />} />
-          <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="webhooks/create" element={<WebhookAddOrUpdateForm />} />
           <Route path="webhooks/:webhookId" element={<WebhookDetailsPage />} />
           <Route path="webhooks/:webhookId/edit" element={<WebhookAddOrUpdateForm />} />
-          <Route path="events/types" element={<EventTypesPage />} />
-          <Route path="events/routes" element={<EventRoutesPage />} />
+          <Route path="events" element={<EventsAndWebhooksPage />} />
+          <Route path="audit-log/:uuid" element={<AuditLogDetailsPage />} />
           <Route path="workload-identity" element={<WorkloadIdentityPage />} />
-          <Route path="audit-log" element={<AuditLogPage />} />
           <Route path="policies" element={<PoliciesPage />} />
           <Route path="policies/create" element={<PolicyAddOrUpdateForm />} />
           <Route path="policies/:policyId" element={<PolicyDetailsPage />} />
@@ -188,19 +167,16 @@ function App() {
           <Route path="registration-flows/create" element={<RegistrationFlowAddOrUpdateForm />} />
           <Route path="registration-flows/:registrationFlowId" element={<RegistrationFlowDetailsPage />} />
           <Route path="registration-flows/:registrationFlowId/edit" element={<RegistrationFlowAddOrUpdateForm />} />
-          <Route path="branding/templates" element={<BrandingTemplatesPage />} />
+          <Route path="branding" element={<BrandingPage />} />
           <Route path="branding/templates/create" element={<BrandingForm />} />
           <Route path="branding/templates/:brandingId" element={<BrandingDetailsPage />} />
           <Route path="branding/templates/:brandingId/edit" element={<BrandingForm />} />
-          <Route path="branding/email-templates" element={<EmailTemplatesPage />} />
           <Route path="branding/email-templates/:templateId" element={<EmailTemplateDetailsPage />} />
           <Route path="branding/email-templates/:templateId/edit" element={<EmailTemplateForm />} />
-          <Route path="branding/sms-templates" element={<SmsTemplatesPage />} />
           <Route path="branding/sms-templates/:templateId" element={<SmsTemplateDetailsPage />} />
           <Route path="branding/sms-templates/:templateId/edit" element={<SmsTemplateForm />} />
-          <Route path="messaging/email" element={<EmailDeliveryPage />} />
+          <Route path="messaging" element={<MessagingPage />} />
           <Route path="messaging/email/configure" element={<EmailConfigPage />} />
-          <Route path="messaging/sms" element={<SMSDeliveryPage />} />
           <Route path="messaging/sms/configure" element={<SMSConfigPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           <Route path="account/settings" element={<SettingsPage />} />

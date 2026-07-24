@@ -15,7 +15,7 @@ import { registrationConfigSchema, type RegistrationConfigFormData } from '@/lib
 export default function RegistrationConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/registration`
+  const backTo = `/security?tab=registration`
 
   const { data: savedConfig, isLoading } = useRegistrationConfig()
   const updateMutation = useUpdateRegistrationConfig()

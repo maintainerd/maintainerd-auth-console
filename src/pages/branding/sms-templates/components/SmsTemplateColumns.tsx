@@ -8,13 +8,13 @@ import type { SmsTemplate } from "@/services/api/sms-templates/types"
 
 export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
   {
-    id: "name",
+    id: "Name",
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => {
       const template = row.original
       return (
-        <div className="flex items-center gap-3 px-3 py-1 max-w-md">
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <MessageSquare className="size-5" />
           </div>
@@ -29,7 +29,7 @@ export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
@@ -39,7 +39,7 @@ export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
     ),
   },
   {
-    id: "created_at",
+    id: "Created",
     accessorKey: "createdAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -58,6 +58,7 @@ export const smsTemplateColumns: ColumnDef<SmsTemplate>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
       <div className="px-3 py-1">

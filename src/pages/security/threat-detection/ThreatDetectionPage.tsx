@@ -15,7 +15,7 @@ import { threatDetectionSettingsSchema, type ThreatDetectionSettingsFormData } f
 export default function ThreatDetectionPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/threat`
+  const backTo = `/security?tab=threat`
 
   const { data: savedSettings, isLoading } = useThreatDetectionSettings()
   const updateMutation = useUpdateThreatDetectionSettings()

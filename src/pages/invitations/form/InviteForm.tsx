@@ -130,7 +130,7 @@ export default function InviteForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(`/messaging/email`)}
+                onClick={() => navigate(`/messaging?tab=email`)}
               >
                 Configure email delivery
               </Button>

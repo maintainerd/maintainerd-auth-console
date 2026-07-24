@@ -19,7 +19,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   log: "Log (testing)",
 }
 
-export default function SMSDeliveryPage() {
+export default function SMSDeliveryPage({ standalone = true }: { standalone?: boolean }) {
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
@@ -51,6 +51,78 @@ export default function SMSDeliveryPage() {
       ]
     : []
 
+  const content = (
+    <>
+      {isLoading && (
+        <Card>
+          <CardContent className="space-y-4 pt-6">
+            <Skeleton className="h-5 w-48" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && notConfigured && (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={MessageSquare}
+              title="SMS delivery is not configured"
+              description="Connect an SMS provider so the platform can send one-time codes, phone verification, and security alerts."
+              action={
+                <Button className="gap-2" onClick={() => navigate(configureUrl)}>
+                  <Settings className="size-4" />
+                  Configure
+                </Button>
+              }
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && data && isConfigured && (
+        <DetailHeaderCard
+          leading={
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <MessageSquare className="size-6" />
+            </div>
+          }
+          title={providerLabel}
+          badge={
+            <div className="flex items-center gap-2">
+              <StatusBadge status={data.status || "active"} />
+              {data.test_mode && (
+                <Badge variant="secondary" className="gap-1 border-amber-500/30 bg-amber-500/10 font-normal text-amber-600">
+                  <FlaskConical className="size-3" />
+                  Test mode
+                </Badge>
+              )}
+            </div>
+          }
+          subtitle={data.from_number || data.sender_id || "No sender configured"}
+          attributes={attributes}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() => navigate(configureUrl)}
+            >
+              <Settings className="size-4" />
+              Configure
+            </Button>
+          }
+        />
+      )}
+    </>
+  )
+
+  if (!standalone) return content
+
   return (
     <DetailsContainer>
       <div className="flex flex-col gap-6">
@@ -58,72 +130,7 @@ export default function SMSDeliveryPage() {
           title="SMS Delivery"
           description="Configure how the platform sends one-time codes and security alerts by text message."
         />
-
-        {isLoading && (
-          <Card>
-            <CardContent className="space-y-4 pt-6">
-              <Skeleton className="h-5 w-48" />
-              <div className="grid gap-4 md:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {!isLoading && notConfigured && (
-          <Card>
-            <CardContent>
-              <EmptyState
-                icon={MessageSquare}
-                title="SMS delivery is not configured"
-                description="Connect an SMS provider so the platform can send one-time codes, phone verification, and security alerts."
-                action={
-                  <Button className="gap-2" onClick={() => navigate(configureUrl)}>
-                    <Settings className="size-4" />
-                    Configure
-                  </Button>
-                }
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {!isLoading && data && isConfigured && (
-          <DetailHeaderCard
-            leading={
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <MessageSquare className="size-6" />
-              </div>
-            }
-            title={providerLabel}
-            badge={
-              <div className="flex items-center gap-2">
-                <StatusBadge status={data.status || "active"} />
-                {data.test_mode && (
-                  <Badge variant="secondary" className="gap-1 border-amber-500/30 bg-amber-500/10 font-normal text-amber-600">
-                    <FlaskConical className="size-3" />
-                    Test mode
-                  </Badge>
-                )}
-              </div>
-            }
-            subtitle={data.from_number || data.sender_id || "No sender configured"}
-            attributes={attributes}
-            actions={
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 gap-2"
-                onClick={() => navigate(configureUrl)}
-              >
-                <Settings className="size-4" />
-                Configure
-              </Button>
-            }
-          />
-        )}
+        {content}
       </div>
     </DetailsContainer>
   )

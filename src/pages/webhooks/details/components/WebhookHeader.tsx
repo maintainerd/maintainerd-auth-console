@@ -46,7 +46,7 @@ export function WebhookHeader({ webhook, webhookId }: WebhookHeaderProps) {
     try {
       await deleteWebhookMutation.mutateAsync(webhookId)
       showSuccess("Webhook deleted successfully")
-      navigate(`/webhooks`)
+      navigate(`/events?tab=webhooks`)
     } catch (error) {
       showError(error)
     }

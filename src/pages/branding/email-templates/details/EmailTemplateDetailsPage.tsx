@@ -15,7 +15,7 @@ export default function EmailTemplateDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Email Templates"
-      onBack={() => navigate(`/branding/email-templates`)}
+      onBack={() => navigate(`/branding?tab=email-templates`)}
       isLoading={isLoading}
       isError={isError || !template}
       notFoundTitle="Email template not found"

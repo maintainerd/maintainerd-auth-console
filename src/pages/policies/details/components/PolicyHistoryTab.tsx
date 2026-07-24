@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { format } from "date-fns"
-import { History } from "lucide-react"
+import { History, Eye } from "lucide-react"
+import { InformationCard } from "@/components/card"
 import { EmptyState, ListSkeleton } from "@/components/details"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { usePolicyHistory } from "@/hooks/usePolicies"
+import { safeFormat } from "@/lib/formatDate"
 import type { PolicyVersionHistory } from "@/services/api/policies/types"
 
 interface PolicyHistoryTabProps {
@@ -17,39 +18,61 @@ interface PolicyHistoryTabProps {
 }
 
 export function PolicyHistoryTab({ policyId }: PolicyHistoryTabProps) {
-  const { data, isLoading } = usePolicyHistory(policyId)
+  const { data, isLoading, isError } = usePolicyHistory(policyId)
   const [selected, setSelected] = useState<PolicyVersionHistory | null>(null)
   const versions = data?.rows ?? []
 
   return (
-    <div className="space-y-4">
-      {isLoading && <ListSkeleton />}
+    <>
+      <InformationCard
+        title="Version History"
+        description="Previous versions of this policy's document, captured on every change"
+        icon={History}
+      >
+        <div className="space-y-4">
+          {isLoading && <ListSkeleton />}
 
-      {!isLoading && versions.length === 0 && (
-        <EmptyState
-          icon={History}
-          title="No history"
-          description="No previous versions of this policy exist."
-        />
-      )}
+          {isError && (
+            <p className="py-8 text-center text-sm text-destructive">Failed to load history</p>
+          )}
 
-      {versions.map((v) => (
-        <div
-          key={v.version_number}
-          className="flex items-center justify-between rounded-lg border p-3"
-        >
-          <div className="space-y-0.5">
-            <span className="text-sm font-medium">Version {v.version_number}</span>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(v.snapshot_at), "PPp")}
-              {v.changed_by_user_id && ` — by ${v.changed_by_user_id}`}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => setSelected(v)}>
-            View
-          </Button>
+          {data && versions.length === 0 && (
+            <EmptyState
+              icon={History}
+              title="No history"
+              description="No previous versions of this policy exist."
+            />
+          )}
+
+          {versions.length > 0 && (
+            <div className="space-y-3">
+              {versions.map((v) => (
+                <div
+                  key={v.version_number}
+                  className="flex items-start justify-between gap-3 rounded-lg border p-4"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <History className="size-4" />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <span className="text-sm font-medium">Version {v.version_number}</span>
+                      <p className="text-sm text-muted-foreground">
+                        {safeFormat(v.snapshot_at, "PPpp")}
+                        {v.changed_by_user_id && ` — by ${v.changed_by_user_id}`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-2" onClick={() => setSelected(v)}>
+                    <Eye className="size-4" />
+                    View
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
+      </InformationCard>
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent className="max-w-2xl">
@@ -63,6 +86,6 @@ export function PolicyHistoryTab({ policyId }: PolicyHistoryTabProps) {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   )
 }

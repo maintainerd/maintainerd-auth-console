@@ -8,13 +8,13 @@ import type { EmailTemplate } from "@/services/api/email-templates/types"
 
 export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
   {
-    id: "name",
+    id: "Name",
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
     cell: ({ row }) => {
       const template = row.original
       return (
-        <div className="flex items-center gap-3 px-3 py-1 max-w-md">
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <Mail className="size-5" />
           </div>
@@ -27,7 +27,7 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
@@ -37,7 +37,7 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
     ),
   },
   {
-    id: "created_at",
+    id: "Created",
     accessorKey: "createdAt",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -56,6 +56,7 @@ export const emailTemplateColumns: ColumnDef<EmailTemplate>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
       <div className="px-3 py-1">

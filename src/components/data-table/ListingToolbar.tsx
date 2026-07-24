@@ -1,4 +1,5 @@
 import * as React from "react"
+import type { ReactNode } from "react"
 import type { Table } from "@tanstack/react-table"
 import { Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +23,8 @@ interface ListingToolbarProps<TRow> {
   /** Renders the primary "New …" button when provided. */
   onCreate?: () => void
   createLabel?: string
+  /** Extra action elements rendered after the column-toggle and before create. */
+  extraActions?: ReactNode
 }
 
 /**
@@ -39,6 +42,7 @@ export function ListingToolbar<TRow>({
   onFiltersChange,
   onCreate,
   createLabel = "New",
+  extraActions,
 }: ListingToolbarProps<TRow>) {
   const [isFilterOpen, setIsFilterOpen] = React.useState(false)
   const { searchInput, handleSearchChange, handleKeyDown } = useDebouncedSearch({
@@ -128,6 +132,7 @@ export function ListingToolbar<TRow>({
 
       <div className="flex flex-wrap items-center gap-2">
         <DataTableViewOptions table={table} />
+        {extraActions}
         {onCreate && (
           <Button onClick={onCreate}>
             <Plus className="mr-2 h-4 w-4" />

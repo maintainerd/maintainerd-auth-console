@@ -33,7 +33,7 @@ const KNOWN_CLAIMS = [
 export default function TokenConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/token`
+  const backTo = `/security?tab=tokens`
 
   const { data: savedConfig, isLoading, isError } = useTokenConfig()
   const updateMutation = useUpdateTokenConfig()

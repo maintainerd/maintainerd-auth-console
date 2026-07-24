@@ -98,10 +98,12 @@ export function ApiPermissionsTab({ apiId }: ApiPermissionsTabProps) {
                     destructive: true,
                     separatorBefore: actions.length > 0,
                     onSelect: () => removePermission(permission.permission_id),
+                    // Permanent deletion (not a detach) → type-to-confirm.
                     confirm: {
                       title: "Delete Permission",
                       description: `This will permanently delete the permission "${permission.name}" and remove it from all roles and policies.`,
-                      confirmText: "Delete",
+                      destructive: true,
+                      itemName: permission.name,
                     },
                   })
                 }

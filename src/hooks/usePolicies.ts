@@ -27,11 +27,12 @@ export const policyKeys = {
 /**
  * Hook to fetch policies with optional filters and pagination
  */
-export function usePolicies(params?: PolicyQueryParams) {
+export function usePolicies(params?: PolicyQueryParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: policyKeys.list(params),
     queryFn: () => fetchPolicies(params),
     placeholderData: keepPreviousData,
+    enabled: options?.enabled,
   })
 }
 

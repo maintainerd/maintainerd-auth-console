@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import type { ColumnDef, SortingState } from "@tanstack/react-table"
 import { DataTable } from "./DataTable"
@@ -33,6 +34,9 @@ interface ResourceListingProps<TRow, TParams> {
    *  (above) and pagination (below) render outside it. The page must NOT add its
    *  own encapsulating card in this mode. */
   tableInCard?: boolean
+  /** Additional action elements (e.g. Export) rendered between the column-toggle
+   *  and the create button in the toolbar. */
+  extraActions?: ReactNode
 }
 
 /**
@@ -55,6 +59,7 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
   emptyTitle = "Nothing here yet",
   emptyDescription,
   tableInCard = false,
+  extraActions,
 }: ResourceListingProps<TRow, TParams>) {
   const { table, isLoading, error, search, setSearch, filters, setFilters, activeFilters, clearFilters } =
     useServerDataTable<TRow, TParams>({
@@ -108,6 +113,7 @@ export function ResourceListing<TRow, TParams = Record<string, unknown>>({
         onFiltersChange={setFilters}
         onCreate={onCreate}
         createLabel={createLabel}
+        extraActions={extraActions}
       />
       <DataTableActiveFilters activeFilters={activeFilters} onClearAll={clearFilters} />
       {tableInCard ? (

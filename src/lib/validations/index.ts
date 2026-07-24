@@ -31,6 +31,12 @@ export {
   type ApiFormData
 } from './apiSchema'
 
+// Permission schemas
+export {
+  permissionSchema,
+  type PermissionFormData
+} from './permissionSchema'
+
 // Policy schemas
 export {
   policySchema,

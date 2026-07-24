@@ -34,7 +34,7 @@ export default function AuthEventDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Monitoring"
-      onBack={() => navigate(`/logs`)}
+      onBack={() => navigate(`/monitoring?tab=logs`)}
       isLoading={isLoading}
       isError={isError || !event}
       notFoundTitle="Event not found"

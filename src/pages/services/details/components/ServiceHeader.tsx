@@ -1,31 +1,83 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Trash2, MoreVertical, Server, CalendarDays } from "lucide-react"
-import { format } from "date-fns"
+import {
+  Archive,
+  CalendarDays,
+  Edit,
+  MoreVertical,
+  Pause,
+  Play,
+  Server,
+  Trash2,
+  XCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DeleteConfirmationDialog } from "@/components/dialog"
+import { ConfirmationDialog, DeleteConfirmationDialog } from "@/components/dialog"
 import { DetailHeaderCard, StatusBadge, type DetailAttribute } from "@/components/details"
 import { SystemBadge } from "@/components/badges"
-import { useDeleteService } from "@/hooks/useServices"
+import { useDeleteService, useUpdateServiceStatus } from "@/hooks/useServices"
 import { useToast } from "@/hooks/useToast"
-import type { ServiceResponse } from "@/services/api/services/types"
+import { safeFormat } from "@/lib/formatDate"
+import type { ServiceResponse, ServiceStatus } from "@/services/api/services/types"
 
 interface ServiceHeaderProps {
   service: ServiceResponse
   serviceId: string
 }
 
+interface StatusAction {
+  status: ServiceStatus
+  label: string
+  title: string
+  description: string
+  icon: typeof Play
+}
+
+const STATUS_ACTIONS: Record<ServiceStatus, StatusAction> = {
+  active: {
+    status: "active",
+    label: "Activate Service",
+    title: "Activate Service",
+    description: "Are you sure you want to activate this service? Its APIs and policies will be available for use.",
+    icon: Play,
+  },
+  maintenance: {
+    status: "maintenance",
+    label: "Set Maintenance",
+    title: "Set Maintenance Mode",
+    description: "Are you sure you want to put this service into maintenance mode?",
+    icon: Pause,
+  },
+  deprecated: {
+    status: "deprecated",
+    label: "Deprecate Service",
+    title: "Deprecate Service",
+    description: "Are you sure you want to mark this service as deprecated?",
+    icon: Archive,
+  },
+  inactive: {
+    status: "inactive",
+    label: "Deactivate Service",
+    title: "Deactivate Service",
+    description: "Are you sure you want to deactivate this service? Its APIs and policies will no longer be available.",
+    icon: XCircle,
+  },
+}
+
 export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const deleteServiceMutation = useDeleteService()
+  const updateStatusMutation = useUpdateServiceStatus()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [statusAction, setStatusAction] = useState<StatusAction | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -36,6 +88,24 @@ export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
       showError(error)
     }
   }
+
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    try {
+      await updateStatusMutation.mutateAsync({ serviceId, data: { status: statusAction.status } })
+      showSuccess(`Service status updated to ${statusAction.status}`)
+    } catch (error) {
+      showError(error)
+    } finally {
+      setStatusAction(null)
+    }
+  }
+
+  // Availability mirrors the backend rules: system services cannot be edited,
+  // change status, or be deleted.
+  const statusActions = service.is_system
+    ? []
+    : Object.values(STATUS_ACTIONS).filter((action) => action.status !== service.status)
 
   const attributes: DetailAttribute[] = [
     {
@@ -51,12 +121,12 @@ export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
     {
       icon: CalendarDays,
       label: "Created",
-      value: format(new Date(service.created_at), "PP"),
+      value: safeFormat(service.created_at, "PP"),
     },
     {
       icon: CalendarDays,
       label: "Last updated",
-      value: format(new Date(service.updated_at), "PP"),
+      value: safeFormat(service.updated_at, "PP"),
     },
     {
       icon: Server,
@@ -83,21 +153,21 @@ export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
         subtitle={service.description}
         attributes={attributes}
         actions={
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-2"
-              onClick={() =>
-                navigate(`/services/${serviceId}/edit`, {
-                  state: { from: `/services/${serviceId}`, backLabel: "Back to Service Details" },
-                })
-              }
-            >
-              <Edit className="size-4" />
-              Edit
-            </Button>
-            {!service.is_system && (
+          !service.is_system && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-2"
+                onClick={() =>
+                  navigate(`/services/${serviceId}/edit`, {
+                    state: { from: `/services/${serviceId}`, backLabel: "Back to Service Details" },
+                  })
+                }
+              >
+                <Edit className="size-4" />
+                Edit
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 w-9 p-0">
@@ -106,6 +176,21 @@ export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {statusActions.map((action) => (
+                    <DropdownMenuItem
+                      key={action.status}
+                      onClick={() => setStatusAction(action)}
+                      className={
+                        action.status !== "active"
+                          ? "text-destructive focus:text-destructive"
+                          : undefined
+                      }
+                    >
+                      <action.icon className="mr-2 size-4" />
+                      {action.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
                     className="text-destructive focus:text-destructive"
@@ -115,9 +200,22 @@ export function ServiceHeader({ service, serviceId }: ServiceHeaderProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-          </>
+            </>
+          )
         }
+      />
+
+      <ConfirmationDialog
+        open={!!statusAction}
+        onOpenChange={(open) => { if (!open) setStatusAction(null) }}
+        onConfirm={handleStatusChange}
+        title={statusAction?.title ?? ""}
+        description={statusAction?.description ?? ""}
+        // Everything except Activate takes the service (partly) out of use →
+        // red confirm. Activate is restorative → normal confirm.
+        variant={statusAction && statusAction.status !== "active" ? "destructive" : "default"}
+        confirmText={statusAction?.label}
+        isLoading={updateStatusMutation.isPending}
       />
 
       <DeleteConfirmationDialog

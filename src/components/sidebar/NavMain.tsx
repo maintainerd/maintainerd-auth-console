@@ -35,14 +35,20 @@ export function NavMain({ sections }: { sections: NavSection[] }) {
   const location = useLocation()
 
   // Routes are flat (the tenant lives in the host subdomain), so this just
-  // normalizes to a leading-slash absolute path.
+  // normalizes to a leading-slash absolute path while preserving query tabs.
   const buildRoute = (route: string) => (route.startsWith('/') ? route : `/${route}`)
 
-  // Active on the exact route or any of its sub-paths (e.g. /user-management is
-  // active on /user-management/users; /users is active on /users/:id).
+  // Active on the exact route or any of its sub-paths (e.g. /users is active on
+  // /users/:id). Query-string tab links require an exact pathname+search match.
   const isActive = (route: string) => {
     const r = buildRoute(route)
-    return location.pathname === r || location.pathname.startsWith(`${r}/`)
+    const [pathname, search] = r.split('?')
+
+    if (search !== undefined) {
+      return location.pathname === pathname && location.search === `?${search}`
+    }
+
+    return location.pathname === pathname || location.pathname.startsWith(`${pathname}/`)
   }
 
   const isParentActive = (item: NavItem) => {

@@ -40,7 +40,7 @@ export default function BrandingForm() {
 
   // Honour where the user came from so the back button and post-submit
   // navigation return there. Falls back to the listing.
-  const listUrl = `/branding/templates`
+  const listUrl = `/branding?tab=themes`
   const navState = location.state as { from?: string; backLabel?: string } | null
   const backTo = navState?.from ?? listUrl
   const backLabel = navState?.backLabel ?? "Back to Themes"

@@ -4,17 +4,18 @@ import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { emailTemplateColumns } from "./EmailTemplateColumns"
 import { useEmailTemplatesList } from "@/hooks/useEmailTemplates"
 
-const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: true }]
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
 const SEARCH_FIELDS = ["name", "subject"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },
 ]
 
-export function EmailTemplateListing() {
+export function EmailTemplateListing({ tableInCard }: { tableInCard?: boolean } = {}) {
   const navigate = useNavigate()
 
   return (
     <ResourceListing
+      tableInCard={tableInCard}
       columns={emailTemplateColumns}
       defaultSort={DEFAULT_SORT}
       searchFields={SEARCH_FIELDS}

@@ -1,16 +1,16 @@
-import { PageContainer, PageHeader } from "@/components/layout"
-import { Shield } from "lucide-react"
+import { PageHeader } from "@/components/layout"
 import { IpRestrictionListing } from "./components/IpRestrictionListing"
 
-export default function IpRestrictionsPage() {
+export default function IpRestrictionsPage({ standalone = true }: { standalone?: boolean }) {
+  if (!standalone) return <IpRestrictionListing tableInCard />
+
   return (
-    <PageContainer>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <PageHeader
-        icon={Shield}
         title="IP Restrictions"
         description="Manage IP allow/deny rules to control access to your authentication system."
       />
-      <IpRestrictionListing />
-    </PageContainer>
+      <IpRestrictionListing tableInCard />
+    </div>
   )
 }

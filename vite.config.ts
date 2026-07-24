@@ -51,9 +51,9 @@ export default defineConfig({
     },
     proxy: {
       // Proxy internal API requests to the internal API (port 8080) via nginx
-      // during development. nginx routes private-api.auth.maintainerd.local → auth:8080.
+      // during development. nginx routes console-api.auth.maintainerd.local → auth:8080.
       '/api': {
-        target: 'https://private-api.auth.maintainerd.local',
+        target: 'https://console-api.auth.maintainerd.local',
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
@@ -69,12 +69,12 @@ export default defineConfig({
         },
       },
       // Proxy public API requests to the public API (port 8081) via nginx during
-      // development. nginx routes public-api.auth.maintainerd.local → auth:8081.
+      // development. nginx routes identity-api.auth.maintainerd.local → auth:8081.
       // Going through this proxy keeps the OAuth bootstrap calls (console client
       // lookup, token exchange, refresh) same-origin so they avoid cross-origin
       // CORS / browser cert-trust issues — mirroring the identity app.
       '/public-api': {
-        target: 'https://public-api.auth.maintainerd.local',
+        target: 'https://identity-api.auth.maintainerd.local',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/public-api/, ''),

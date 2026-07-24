@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { FileText, Search, Plus } from "lucide-react"
+import { useState, useEffect, type FormEvent } from "react"
+import { Plus, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -9,12 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { policyKeys } from "@/hooks/usePolicies"
-import { fetchPolicies } from "@/services/api/policies"
+import { usePolicies } from "@/hooks/usePolicies"
 import { useServicePolicyMutations } from "../hooks/useServicePolicyMutations"
+import { useToast } from "@/hooks/useToast"
 
 interface PolicyAssignDialogProps {
   open: boolean
@@ -29,156 +29,203 @@ export function PolicyAssignDialog({
   serviceId,
   existingPolicyIds,
 }: PolicyAssignDialogProps) {
-  const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null)
+  const [selectedPolicies, setSelectedPolicies] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Only fetch policies when dialog is open
-  const params = {
-    page: 1,
-    limit: 100,
-    name: searchQuery || undefined,
-  }
-
-  const { data: policiesData, isLoading } = useQuery({
-    queryKey: policyKeys.list(params),
-    queryFn: () => fetchPolicies(params),
-    enabled: open,
-  })
-
+  const { showSuccess, showError } = useToast()
   const { assignPolicy } = useServicePolicyMutations(serviceId)
 
-  // Reset state when dialog closes
+  const { data: policiesData, isLoading: isLoadingPolicies } = usePolicies(
+    {
+      page: 1,
+      limit: 100,
+      sort_by: 'name',
+      sort_order: 'asc'
+    },
+    { enabled: open }
+  )
+
   useEffect(() => {
     if (!open) {
+      setSelectedPolicies([])
       setSearchQuery("")
-      setSelectedPolicyId(null)
     }
   }, [open])
 
-  const handleAssign = async () => {
-    if (!selectedPolicyId) return
-
-    await assignPolicy.mutateAsync(selectedPolicyId)
-    onOpenChange(false)
+  const handlePolicyToggle = (policyId: string) => {
+    setSelectedPolicies(prev =>
+      prev.includes(policyId)
+        ? prev.filter(id => id !== policyId)
+        : [...prev, policyId]
+    )
   }
 
-  const isAssigning = assignPolicy.isPending
+  const handleSelectAll = () => {
+    const availablePolicies = (policiesData?.rows ?? []).filter(
+      policy => !existingPolicyIds.includes(policy.policy_id)
+    )
+    const availablePolicyIds = availablePolicies.map(p => p.policy_id)
 
-  // Filter out policies that are already assigned to this service
-  const availablePolicies = (policiesData?.rows ?? []).filter(
-    (policy) => !existingPolicyIds.includes(policy.policy_id)
-  )
+    if (selectedPolicies.length === availablePolicyIds.length) {
+      setSelectedPolicies([])
+    } else {
+      setSelectedPolicies(availablePolicyIds)
+    }
+  }
+
+  const handleSubmit = async (e?: FormEvent) => {
+    e?.preventDefault()
+    if (selectedPolicies.length === 0) {
+      showError("Please select at least one policy")
+      return
+    }
+
+    try {
+      await Promise.all(
+        selectedPolicies.map(policyId => assignPolicy.mutateAsync(policyId))
+      )
+
+      showSuccess(`${selectedPolicies.length} polic${selectedPolicies.length !== 1 ? 'ies' : 'y'} assigned successfully`)
+      onOpenChange(false)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const isLoading = assignPolicy.isPending
+
+  const filteredPolicies = policiesData?.rows?.filter(policy =>
+    !existingPolicyIds.includes(policy.policy_id) &&
+    (policy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (policy.description ?? "").toLowerCase().includes(searchQuery.toLowerCase()))
+  ) ?? []
+
+  const availablePoliciesCount = policiesData?.rows?.filter(
+    policy => !existingPolicyIds.includes(policy.policy_id)
+  ).length ?? 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Assign Policy to Service
-          </DialogTitle>
+          <DialogTitle>Assign Policies to Service</DialogTitle>
           <DialogDescription>
-            Search and select a policy to assign to this service. Already assigned policies are not shown.
+            Select policies to assign to this service. Already assigned policies are not shown.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Search Input */}
-          <div className="space-y-2">
-            <Label htmlFor="policy-search">Search Policies</Label>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Select Policies</Label>
+              {availablePoliciesCount > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSelectAll}
+                  className="h-7 text-xs"
+                >
+                  {selectedPolicies.length === availablePoliciesCount
+                    ? "Deselect All"
+                    : "Select All"}
+                </Button>
+              )}
+            </div>
+
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                id="policy-search"
-                placeholder="Search by policy name..."
+                placeholder="Search policies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
-                disabled={isAssigning}
               />
             </div>
           </div>
 
-          {/* Policy List */}
-          <div className="space-y-2">
-            <Label>Available Policies</Label>
-            <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-              {isLoading && (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  Loading policies...
-                </div>
-              )}
+          <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+            {isLoadingPolicies && (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                Loading policies...
+              </div>
+            )}
 
-              {!isLoading && availablePolicies.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  {searchQuery
-                    ? "No policies found matching your search"
-                    : "All available policies are already assigned to this service"}
-                </div>
-              )}
+            {!isLoadingPolicies && filteredPolicies.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                {searchQuery
+                  ? "No policies found matching your search"
+                  : "All available policies are already assigned"}
+              </div>
+            )}
 
-              {!isLoading && availablePolicies.length > 0 && (
-                <div className="divide-y">
-                  {availablePolicies.map((policy) => (
-                    <div
-                      key={policy.policy_id}
-                      className={`p-4 cursor-pointer hover:bg-accent/50 transition-colors ${
-                        selectedPolicyId === policy.policy_id ? "bg-accent" : ""
-                      }`}
-                      onClick={() => setSelectedPolicyId(policy.policy_id)}
+            {!isLoadingPolicies && filteredPolicies.length > 0 && (
+              <div className="divide-y">
+                {filteredPolicies.map((policy) => (
+                  <div
+                    key={policy.policy_id}
+                    className="flex items-start gap-3 p-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <Checkbox
+                      id={policy.policy_id}
+                      checked={selectedPolicies.includes(policy.policy_id)}
+                      onCheckedChange={() => handlePolicyToggle(policy.policy_id)}
+                      disabled={isLoading}
+                    />
+                    <label
+                      htmlFor={policy.policy_id}
+                      className="flex-1 cursor-pointer"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium">{policy.name}</h4>
-                            {policy.is_system && (
-                              <span className="text-xs px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
-                                System
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">{policy.description}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {selectedPolicyId === policy.policy_id && (
-                            <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full" />
-                            </div>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{policy.name}</span>
+                        {policy.is_system && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
+                            System
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {policy.description}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {selectedPolicies.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {selectedPolicies.length} polic{selectedPolicies.length !== 1 ? 'ies' : 'y'} selected
+            </p>
+          )}
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isAssigning}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleAssign}
-            disabled={!selectedPolicyId || isAssigning}
-            className="gap-2"
-          >
-            {isAssigning ? (
-              "Assigning..."
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                Assign Policy
-              </>
-            )}
-          </Button>
+          <form onSubmit={handleSubmit} className="contents">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={selectedPolicies.length === 0 || isLoading}
+              className="gap-2"
+            >
+              {isLoading ? (
+                <>Assigning...</>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Assign Policies
+                </>
+              )}
+            </Button>
+          </form>
         </DialogFooter>
       </DialogContent>
     </Dialog>

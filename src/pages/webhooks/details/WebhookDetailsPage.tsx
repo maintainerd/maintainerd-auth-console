@@ -36,7 +36,7 @@ export default function WebhookDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to Webhooks"
-      onBack={() => navigate(`/webhooks`)}
+      onBack={() => navigate(`/events?tab=webhooks`)}
       isLoading={isLoading}
       isError={isError || !webhook}
       notFoundTitle="Webhook not found"

@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { Server, FileText } from "lucide-react"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailTabs } from "@/components/details/DetailTabs"
@@ -11,20 +11,34 @@ const TABS = [
   { value: "policies", label: "Policies", icon: FileText },
 ] as const
 
+type ServiceDetailsTab = typeof TABS[number]["value"]
+
+const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
+
 export default function ServiceDetailsPage() {
   const { serviceId } = useParams<{ serviceId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const activeTab = searchParams.get("tab") || "apis"
+  // Honour where the user came from (e.g. a policy's Services tab) so back
+  // returns there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/services`
+  const backLabel = navState?.backLabel ?? (backTo === `/services` ? "Back to Services" : "Back")
+
+  const requestedTab = searchParams.get("tab")
+  const activeTab: ServiceDetailsTab = TAB_VALUES.has(requestedTab || "")
+    ? requestedTab as ServiceDetailsTab
+    : "apis"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
 
   const { data: service, isLoading, isError } = useService(serviceId || "")
 
   return (
     <DetailLayout
-      backLabel="Back to Services"
-      onBack={() => navigate(`/services`)}
+      backLabel={backLabel}
+      onBack={() => navigate(backTo)}
       isLoading={isLoading}
       isError={isError || !service}
       notFoundTitle="Service not found"

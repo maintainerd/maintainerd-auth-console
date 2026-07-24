@@ -1,17 +1,16 @@
-import { PageContainer, PageHeader } from "@/components/layout"
-import { DetailsContainer } from "@/components/container"
 import { AuthEventListing } from "./components/AuthEventListing"
+import { PageHeader } from "@/components/layout"
 
-export default function LogMonitoringPage() {
+export default function LogMonitoringPage({ standalone = true }: { standalone?: boolean }) {
+  if (!standalone) return <AuthEventListing tableInCard />
+
   return (
-    <DetailsContainer>
-      <PageContainer>
-        <PageHeader
-          title="Monitoring"
-          description="Monitor authentication, authorization, and security events across your tenant. Filter by category, severity, result, or search by event type and IP."
-        />
-        <AuthEventListing />
-      </PageContainer>
-    </DetailsContainer>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+      <PageHeader
+        title="Sign-in Logs"
+        description="Monitor authentication, authorization, and security events across your tenant. Filter by category, severity, result, or search by event type and IP."
+      />
+      <AuthEventListing tableInCard />
+    </div>
   )
 }

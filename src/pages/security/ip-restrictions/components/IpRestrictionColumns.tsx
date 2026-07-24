@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Ban, CheckCircle } from "lucide-react"
+import { CheckCircle, Minus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import { IpRestrictionActions } from "./IpRestrictionActions"
@@ -11,29 +11,6 @@ export function ipRestrictionColumns(
   onEdit: (rule: IpRestrictionRule) => void,
 ): ColumnDef<IpRestrictionRule>[] {
   return [
-    {
-      id: "Type",
-      accessorKey: "type",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-      cell: ({ row }) => {
-        const rule = row.original
-        return (
-          <div className="px-3 py-1">
-            {rule.type === "allow" ? (
-              <Badge variant="default" className="flex items-center gap-1 w-fit">
-                <CheckCircle className="h-3 w-3" />
-                Allow
-              </Badge>
-            ) : (
-              <Badge variant="destructive" className="flex items-center gap-1 w-fit">
-                <Ban className="h-3 w-3" />
-                Deny
-              </Badge>
-            )}
-          </div>
-        )
-      },
-    },
     {
       id: "IP Address",
       accessorKey: "ipAddress",
@@ -51,6 +28,23 @@ export function ipRestrictionColumns(
           {row.original.description}
         </div>
       ),
+    },
+    {
+      id: "Type",
+      accessorKey: "type",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+      cell: ({ row }) => {
+        const rule = row.original
+        const isAllow = rule.type === "allow"
+        return (
+          <div className="px-3 py-1">
+            <Badge variant="secondary" className="text-xs">
+              {isAllow ? <CheckCircle className="h-3 w-3 mr-1" /> : <Minus className="h-3 w-3 mr-1" />}
+              {isAllow ? "Allow" : "Deny"}
+            </Badge>
+          </div>
+        )
+      },
     },
     {
       id: "Status",
@@ -82,6 +76,8 @@ export function ipRestrictionColumns(
     },
     {
       id: "actions",
+      enableSorting: false,
+      enableHiding: false,
       cell: ({ row }) => {
         const rule = row.original
         return (

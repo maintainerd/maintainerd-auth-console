@@ -4,7 +4,9 @@ import { ResourceListing, type FilterGroup } from "@/components/data-table"
 import { clientColumns } from "./ClientColumns"
 import { useClientsList } from "@/hooks/useClients"
 
-const DEFAULT_SORT: SortingState = [{ id: "Created", desc: true }]
+// Sort id is the API column (backend allow-list), not the display column id —
+// "Created" would be rejected by the backend sanitizer and silently fall back.
+const DEFAULT_SORT: SortingState = [{ id: "created_at", desc: false }]
 const SEARCH_FIELDS = ["name", "display_name"]
 const FILTER_GROUPS: readonly FilterGroup[] = [
   { key: "status", label: "Status", options: ["active", "inactive"] },

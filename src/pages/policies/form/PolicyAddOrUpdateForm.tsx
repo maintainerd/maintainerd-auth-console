@@ -15,9 +15,11 @@ import {
   FormSubmitButton,
   type SelectOption
 } from "@/components/form"
+import { ConfirmationDialog } from "@/components/dialog"
 import { policySchema, type PolicyFormData } from "@/lib/validations"
 import { usePolicy, useCreatePolicy, useUpdatePolicy } from "@/hooks/usePolicies"
 import { useToast } from "@/hooks/useToast"
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard"
 import { StatementField } from "./components"
 
 // Status options for the select field
@@ -26,11 +28,20 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
+// Backend snake_case field keys → form field names, for routing structured
+// server validation errors onto the offending inputs.
+const BACKEND_FIELD_MAP: Record<string, keyof PolicyFormData> = {
+  name: "name",
+  description: "description",
+  version: "version",
+  status: "status",
+}
+
 export default function PolicyAddOrUpdateForm() {
   const { policyId } = useParams<{ policyId?: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { showSuccess, showError } = useToast()
+  const { showSuccess, showError, parseError } = useToast()
 
   const isEditing = Boolean(policyId)
   const isCreating = !isEditing
@@ -51,7 +62,8 @@ export default function PolicyAddOrUpdateForm() {
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting }
+    setError,
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<PolicyFormData>({
     resolver: yupResolver(policySchema),
     defaultValues: {
@@ -69,8 +81,8 @@ export default function PolicyAddOrUpdateForm() {
         ]
       }
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit'
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   // Field array for managing statements
@@ -96,6 +108,9 @@ export default function PolicyAddOrUpdateForm() {
 
   const isLoading = createPolicyMutation.isPending || updatePolicyMutation.isPending || isSubmitting
   const existingPolicy = policyData
+
+  // Warn before discarding unsaved edits (browser close/refresh + guarded exits).
+  const { guard, isPromptOpen, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty)
 
   const onSubmit = async (data: PolicyFormData) => {
     try {
@@ -124,6 +139,34 @@ export default function PolicyAddOrUpdateForm() {
 
       navigate(backTo)
     } catch (error) {
+      // Route backend errors onto the offending field where we can: structured
+      // field errors first, otherwise keyword-match the message. Anything
+      // unmapped still shows via the toast.
+      const parsed = parseError(error)
+      let mappedToField = false
+      if (parsed.fieldErrors) {
+        for (const [field, message] of Object.entries(parsed.fieldErrors)) {
+          const formField = BACKEND_FIELD_MAP[field]
+          if (formField) {
+            setError(formField, { type: "server", message })
+            mappedToField = true
+          }
+        }
+      }
+      if (!mappedToField) {
+        const lower = parsed.message.toLowerCase()
+        // Most specific first, so "description" doesn't land on "name".
+        const keywordOrder: Array<[string, keyof PolicyFormData]> = [
+          ["description", "description"],
+          ["version", "version"],
+          ["status", "status"],
+          ["name", "name"],
+        ]
+        const hit = keywordOrder.find(([keyword]) => lower.includes(keyword))
+        if (hit) {
+          setError(hit[1], { type: "server", message: parsed.message })
+        }
+      }
       showError(error)
     }
   }
@@ -181,7 +224,7 @@ export default function PolicyAddOrUpdateForm() {
                   The policy you're looking for doesn't exist or may have been removed.
                 </p>
               </div>
-              <Button variant="outline" onClick={() => navigate(backTo)}>
+              <Button variant="outline" onClick={() => guard(() => navigate(backTo))}>
                 <ArrowLeft className="mr-2 size-4" />
                 {backLabel}
               </Button>
@@ -198,6 +241,7 @@ export default function PolicyAddOrUpdateForm() {
         <FormPageHeader
           backUrl={backTo}
           backLabel={backLabel}
+          onBack={() => guard(() => navigate(backTo))}
           title={pageTitle}
           description={
             isCreating
@@ -314,7 +358,7 @@ export default function PolicyAddOrUpdateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(backTo)}
+              onClick={() => guard(() => navigate(backTo))}
               disabled={isLoading}
             >
               Cancel
@@ -326,6 +370,17 @@ export default function PolicyAddOrUpdateForm() {
             />
           </div>
         </form>
+
+        <ConfirmationDialog
+          open={isPromptOpen}
+          onOpenChange={(open) => { if (!open) cancelLeave() }}
+          onConfirm={confirmLeave}
+          title="Discard changes?"
+          description="You have unsaved changes. If you leave now, they will be lost."
+          confirmText="Discard changes"
+          cancelText="Keep editing"
+          variant="destructive"
+        />
       </div>
     </DetailsContainer>
   )

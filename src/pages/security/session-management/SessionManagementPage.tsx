@@ -21,7 +21,7 @@ const SAME_SITE_OPTIONS = [
 export default function SessionManagementPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/session`
+  const backTo = `/security?tab=sessions`
 
   const { data: saved, isLoading } = useSessionSettings()
   const updateMutation = useUpdateSessionSettings()

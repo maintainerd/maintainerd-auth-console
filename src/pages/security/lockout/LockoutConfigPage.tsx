@@ -15,7 +15,7 @@ import { lockoutConfigSchema, type LockoutConfigFormData } from '@/lib/validatio
 export default function LockoutConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/lockout`
+  const backTo = `/security?tab=lockout`
 
   const { data: savedConfig, isLoading, isError } = useLockoutConfig()
   const updateMutation = useUpdateLockoutConfig()

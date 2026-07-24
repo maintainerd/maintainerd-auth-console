@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { Key } from "lucide-react"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DetailTabs } from "@/components/details/DetailTabs"
@@ -10,20 +10,34 @@ const TABS = [
   { value: "permissions", label: "Permissions", icon: Key },
 ] as const
 
+type ApiDetailsTab = typeof TABS[number]["value"]
+
+const TAB_VALUES = new Set<string>(TABS.map((tab) => tab.value))
+
 export default function ApiDetailsPage() {
   const { apiId } = useParams<{ apiId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const activeTab = searchParams.get("tab") || "permissions"
+  // Honour where the user came from (e.g. a service's APIs tab) so back
+  // returns there. Falls back to the listing.
+  const navState = location.state as { from?: string; backLabel?: string } | null
+  const backTo = navState?.from ?? `/apis`
+  const backLabel = navState?.backLabel ?? (backTo === `/apis` ? "Back to APIs" : "Back")
+
+  const requestedTab = searchParams.get("tab")
+  const activeTab: ApiDetailsTab = TAB_VALUES.has(requestedTab || "")
+    ? requestedTab as ApiDetailsTab
+    : "permissions"
   const handleTabChange = (tab: string) => setSearchParams({ tab })
 
   const { data: api, isLoading, isError } = useApi(apiId || "")
 
   return (
     <DetailLayout
-      backLabel="Back to APIs"
-      onBack={() => navigate(`/apis`)}
+      backLabel={backLabel}
+      onBack={() => navigate(backTo)}
       isLoading={isLoading}
       isError={isError || !api}
       notFoundTitle="API not found"

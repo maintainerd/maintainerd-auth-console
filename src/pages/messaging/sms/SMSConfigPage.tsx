@@ -56,7 +56,7 @@ export default function SMSConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
   const queryClient = useQueryClient()
-  const backTo = `/messaging/sms`
+  const backTo = `/messaging?tab=sms`
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sms-config"],

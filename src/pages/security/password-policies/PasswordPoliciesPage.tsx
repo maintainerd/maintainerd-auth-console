@@ -26,7 +26,7 @@ const HASH_OPTIONS = [
 export default function PasswordPoliciesFormPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/password`
+  const backTo = `/security?tab=password`
 
   const { data: savedPolicies, isLoading, isError } = usePasswordPolicies()
   const updateMutation = useUpdatePasswordPolicies()

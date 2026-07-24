@@ -53,7 +53,7 @@ type MfaConfigFormData = yup.InferType<typeof mfaConfigSchema>
 export default function MfaConfigPage() {
   const navigate = useNavigate()
   const { showSuccess, showError } = useToast()
-  const backTo = `/security/mfa`
+  const backTo = `/security?tab=mfa`
 
   const { data: savedConfig, isLoading, isError } = useMfaConfig()
   const updateMutation = useUpdateMfaConfig()

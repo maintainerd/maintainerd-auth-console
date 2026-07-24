@@ -20,7 +20,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   resend: "Resend",
 }
 
-export default function EmailDeliveryPage() {
+export default function EmailDeliveryPage({ standalone = true }: { standalone?: boolean }) {
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
@@ -56,6 +56,78 @@ export default function EmailDeliveryPage() {
       ]
     : []
 
+  const content = (
+    <>
+      {isLoading && (
+        <Card>
+          <CardContent className="space-y-4 pt-6">
+            <Skeleton className="h-5 w-48" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && notConfigured && (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={Mail}
+              title="Email delivery is not configured"
+              description="Connect an email provider so the platform can send verification, password reset, and notification emails."
+              action={
+                <Button className="gap-2" onClick={() => navigate(configureUrl)}>
+                  <Settings className="size-4" />
+                  Configure
+                </Button>
+              }
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && data && isConfigured && (
+        <DetailHeaderCard
+          leading={
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Mail className="size-6" />
+            </div>
+          }
+          title={providerLabel}
+          badge={
+            <div className="flex items-center gap-2">
+              <StatusBadge status={data.status || "active"} />
+              {data.test_mode && (
+                <Badge variant="secondary" className="gap-1 border-amber-500/30 bg-amber-500/10 font-normal text-amber-600">
+                  <FlaskConical className="size-3" />
+                  Test mode
+                </Badge>
+              )}
+            </div>
+          }
+          subtitle={data.from_address}
+          attributes={attributes}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() => navigate(configureUrl)}
+            >
+              <Settings className="size-4" />
+              Configure
+            </Button>
+          }
+        />
+      )}
+    </>
+  )
+
+  if (!standalone) return content
+
   return (
     <DetailsContainer>
       <div className="flex flex-col gap-6">
@@ -63,72 +135,7 @@ export default function EmailDeliveryPage() {
           title="Email Delivery"
           description="Configure how the platform sends verification, security, and notification emails."
         />
-
-        {isLoading && (
-          <Card>
-            <CardContent className="space-y-4 pt-6">
-              <Skeleton className="h-5 w-48" />
-              <div className="grid gap-4 md:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {!isLoading && notConfigured && (
-          <Card>
-            <CardContent>
-              <EmptyState
-                icon={Mail}
-                title="Email delivery is not configured"
-                description="Connect an email provider so the platform can send verification, password reset, and notification emails."
-                action={
-                  <Button className="gap-2" onClick={() => navigate(configureUrl)}>
-                    <Settings className="size-4" />
-                    Configure
-                  </Button>
-                }
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {!isLoading && data && isConfigured && (
-          <DetailHeaderCard
-            leading={
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Mail className="size-6" />
-              </div>
-            }
-            title={providerLabel}
-            badge={
-              <div className="flex items-center gap-2">
-                <StatusBadge status={data.status || "active"} />
-                {data.test_mode && (
-                  <Badge variant="secondary" className="gap-1 border-amber-500/30 bg-amber-500/10 font-normal text-amber-600">
-                    <FlaskConical className="size-3" />
-                    Test mode
-                  </Badge>
-                )}
-              </div>
-            }
-            subtitle={data.from_address}
-            attributes={attributes}
-            actions={
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 gap-2"
-                onClick={() => navigate(configureUrl)}
-              >
-                <Settings className="size-4" />
-                Configure
-              </Button>
-            }
-          />
-        )}
+        {content}
       </div>
     </DetailsContainer>
   )

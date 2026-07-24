@@ -14,7 +14,7 @@ export default function SmsTemplateDetailsPage() {
   return (
     <DetailLayout
       backLabel="Back to SMS Templates"
-      onBack={() => navigate(`/branding/sms-templates`)}
+      onBack={() => navigate(`/branding?tab=sms-templates`)}
       isLoading={isLoading}
       isError={isError || !template}
       notFoundTitle="SMS template not found"

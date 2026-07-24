@@ -15,21 +15,20 @@ export function BrandingActions({ branding }: BrandingActionsProps) {
   const activateMutation = useActivateBranding()
   const deleteMutation = useDeleteBranding()
 
-  const base = `/branding/templates`
-
   const items: RowActionItem[] = [
     {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`${base}/${branding.branding_id}`),
+      onSelect: () => navigate(`/branding/templates/${branding.branding_id}`),
     },
     {
       key: "edit",
       label: "Edit Branding",
       icon: Edit,
-      onSelect: () => navigate(`${base}/${branding.branding_id}/edit`),
+      onSelect: () => navigate(`/branding/templates/${branding.branding_id}/edit`),
     },
+    // System themes can be edited and activated but never deleted.
     ...(!branding.is_active
       ? [
           {
@@ -46,13 +45,12 @@ export function BrandingActions({ branding }: BrandingActionsProps) {
             },
             confirm: {
               title: "Set as Active Branding",
-              description: `Make "${branding.name}" the active branding? It becomes the loaded style and the current active template is deactivated.`,
+              description: `Make "${branding.name}" the active branding? The current active template will be deactivated.`,
               confirmText: "Set as Active",
             },
           } satisfies RowActionItem,
         ]
       : []),
-    // System themes can be edited and activated but never deleted.
     ...(!branding.is_system
       ? [
           {
@@ -72,7 +70,7 @@ export function BrandingActions({ branding }: BrandingActionsProps) {
             confirm: {
               title: "Delete Branding",
               description:
-                "This action cannot be undone. This will permanently delete the branding template.",
+                "This will permanently delete this branding template. This action cannot be undone.",
               destructive: true,
               itemName: branding.name,
             },

@@ -24,49 +24,60 @@ export function PolicyActions({ policy }: PolicyActionsProps) {
     }
   }
 
+  // Availability mirrors the backend rules: system policies cannot be edited,
+  // change status, or be deleted.
   const isActive = policy.status === "active"
-  const listingState = { from: `/policies`, backLabel: "Back to Policies" }
+  const canMutate = !policy.is_system
+
   const items: RowActionItem[] = [
     {
       key: "view",
       label: "View Details",
       icon: Eye,
-      onSelect: () => navigate(`/policies/${policy.policy_id}`, { state: listingState }),
+      onSelect: () => navigate(`/policies/${policy.policy_id}`),
     },
-    {
-      key: "edit",
-      label: "Edit Policy",
-      icon: Edit,
-      onSelect: () => navigate(`/policies/${policy.policy_id}/edit`, { state: listingState }),
-    },
-    ...(isActive
+    ...(canMutate
       ? [
           {
-            key: "deactivate",
-            label: "Deactivate Policy",
-            icon: Pause,
-            onSelect: () => changeStatus("inactive"),
-            confirm: {
-              title: "Deactivate Policy",
-              description: "Are you sure you want to deactivate this policy?",
-              confirmText: "Deactivate",
-            },
+            key: "edit",
+            label: "Edit Policy",
+            icon: Edit,
+            onSelect: () => navigate(`/policies/${policy.policy_id}/edit`),
           } satisfies RowActionItem,
         ]
-      : [
-          {
-            key: "activate",
-            label: "Activate Policy",
-            icon: Play,
-            onSelect: () => changeStatus("active"),
-            confirm: {
-              title: "Activate Policy",
-              description: "Are you sure you want to activate this policy?",
-              confirmText: "Activate",
-            },
-          } satisfies RowActionItem,
-        ]),
-    ...(!policy.is_system
+      : []),
+    ...(canMutate
+      ? isActive
+        ? [
+            {
+              key: "deactivate",
+              label: "Deactivate Policy",
+              icon: Pause,
+              destructive: true,
+              onSelect: () => changeStatus("inactive"),
+              confirm: {
+                title: "Deactivate Policy",
+                description:
+                  "Are you sure you want to deactivate this policy? Services using it will no longer be governed by its statements.",
+                confirmText: "Deactivate",
+              },
+            } satisfies RowActionItem,
+          ]
+        : [
+            {
+              key: "activate",
+              label: "Activate Policy",
+              icon: Play,
+              onSelect: () => changeStatus("active"),
+              confirm: {
+                title: "Activate Policy",
+                description: "Are you sure you want to activate this policy?",
+                confirmText: "Activate",
+              },
+            } satisfies RowActionItem,
+          ]
+      : []),
+    ...(canMutate
       ? [
           {
             key: "delete",

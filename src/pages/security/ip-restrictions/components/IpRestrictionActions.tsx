@@ -72,11 +72,14 @@ export function IpRestrictionActions({ rule, onEdit }: IpRestrictionActionsProps
         key: `status-${action.status}`,
         label: action.label,
         icon: action.icon,
+        // Deactivate takes the rule out of enforcement → destructive (red
+        // confirm). Activate is restorative → default.
+        destructive: action.status !== "active",
         onSelect: () => changeStatus(action.status),
         confirm: {
           title: action.title,
           description: action.description,
-          confirmText: "Confirm",
+          confirmText: action.label,
         },
       }),
     ),

@@ -8,13 +8,13 @@ import type { Service } from "@/services/api/services/types"
 
 export const serviceColumns: ColumnDef<Service>[] = [
   {
-    id: "display_name",
+    id: "Service",
     accessorKey: "display_name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Service" />,
     cell: ({ row }) => {
       const service = row.original
       return (
-        <div className="flex max-w-sm items-center gap-3 px-3 py-1">
+        <div className="flex items-center gap-3 px-3 py-1 max-w-xs">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <Server className="size-5" />
           </div>
@@ -23,15 +23,14 @@ export const serviceColumns: ColumnDef<Service>[] = [
               <span className="truncate font-medium">{service.display_name}</span>
               <SystemBadge isSystem={service.is_system} />
             </div>
-            <span className="truncate text-sm text-muted-foreground">{service.description}</span>
-            <span className="truncate font-mono text-xs text-muted-foreground">{service.name}</span>
+            <span className="truncate text-sm text-muted-foreground">{service.name}</span>
           </div>
         </div>
       )
     },
   },
   {
-    id: "status",
+    id: "Status",
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
@@ -41,7 +40,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
     ),
   },
   {
-    id: "version",
+    id: "Version",
     accessorKey: "version",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Version" />,
     cell: ({ row }) => (
@@ -51,7 +50,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
     ),
   },
   {
-    id: "api_count",
+    id: "APIs",
     accessorKey: "api_count",
     header: ({ column }) => <DataTableColumnHeader column={column} title="APIs" />,
     cell: ({ row }) => (
@@ -62,7 +61,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
     ),
   },
   {
-    id: "policy_count",
+    id: "Policies",
     accessorKey: "policy_count",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Policies" />,
     cell: ({ row }) => (
@@ -73,7 +72,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
     ),
   },
   {
-    id: "created_at",
+    id: "Created",
     accessorKey: "created_at",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
@@ -92,6 +91,7 @@ export const serviceColumns: ColumnDef<Service>[] = [
   },
   {
     id: "actions",
+    enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
       <div className="px-3 py-1">
